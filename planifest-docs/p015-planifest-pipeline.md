@@ -9,7 +9,7 @@
 
 ---
 
-> The pipeline an agent follows to take an Initiative Brief through to a production-ready, documented, tested pull request. This document is the reference description of the pipeline phases. The pipeline is delivered as a set of Agent Skills (see [FD-022](p003-planifest-functional-decisions.md#fd-022--planifest-is-delivered-as-agent-skills)) — the orchestrator skill (`planifest/skills/orchestrator/SKILL.md`) is the entry point.
+> The pipeline an agent follows to take an Initiative Brief through to a production-ready, documented, tested pull request. This document is the reference description of the pipeline phases. The pipeline is delivered as a set of Agent Skills (see [FD-022](p003-planifest-functional-decisions.md#fd-022--planifest-is-delivered-as-agent-skills)) — the orchestrator skill (`planifest-framework/skills/orchestrator/SKILL.md`) is the entry point.
 
 ---
 
@@ -452,7 +452,7 @@ The hard limits are:
 
 ## Artifact Templates
 
-Use the templates in `planifest/templates/` for every artifact you produce. The templates define the structure, the required sections, and the expected content. Do not invent your own structure — follow the template.
+Use the templates in `planifest-framework/templates/` for every artifact you produce. The templates define the structure, the required sections, and the expected content. Do not invent your own structure — follow the template.
 
 ---
 

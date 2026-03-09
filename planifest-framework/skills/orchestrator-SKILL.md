@@ -73,7 +73,7 @@ Planifest describes three layers of every initiative. Each must be covered.
 1. Problem statement and user stories — if these are unclear, nothing downstream is derivable
 2. Acceptance criteria — these become the test cases; vagueness here propagates everywhere
 3. **Initiative decomposition** — is this initiative small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big initiatives into features and phases before proceeding.
-4. Stack declaration — the codegen-agent cannot begin without this. Draw the human's attention to the [Backend Stack Evaluation](../../docs/p013-planifest-backend-stack-evaluation.md) — not all stacks are equal for agent-generated code. For the frontend, draw attention to the [Frontend Stack Evaluation](../../docs/p016-planifest-frontend-stack-evaluation.md).
+4. Stack declaration — the codegen-agent cannot begin without this. Draw the human's attention to the [Backend Stack Evaluation](../../planifest-docs/p013-planifest-backend-stack-evaluation.md) — not all stacks are equal for agent-generated code. For the frontend, draw attention to the [Frontend Stack Evaluation](../../planifest-docs/p016-planifest-frontend-stack-evaluation.md).
 4. Scope boundaries — what's out is as important as what's in
 5. Non-functional requirements — performance, availability, scalability, security
 6. Component design and data ownership — these inform the architecture
@@ -273,10 +273,10 @@ You do not need to re-run Phase 0 coaching for a change — the specification al
 
 ## References
 
-- [Functional Decisions](../../docs/p003-planifest-functional-decisions.md) — the canonical decisions that define what Planifest is
-- [Default Rules — FD-007](../../docs/p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) — the full rules table
-- [Artifact Types — FD-019](../../docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned) — what must be produced
-- [Three Layers — FD-002](../../docs/p003-planifest-functional-decisions.md#fd-002--planifest-covers-three-layers-of-every-initiative) — Product, Architecture, Engineering
+- [Functional Decisions](../../planifest-docs/p003-planifest-functional-decisions.md) — the canonical decisions that define what Planifest is
+- [Default Rules — FD-007](../../planifest-docs/p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) — the full rules table
+- [Artifact Types — FD-019](../../planifest-docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned) — what must be produced
+- [Three Layers — FD-002](../../planifest-docs/p003-planifest-functional-decisions.md#fd-002--planifest-covers-three-layers-of-every-initiative) — Product, Architecture, Engineering
 
 **Templates** (agents should follow these for all output artifacts):
 - [Initiative Brief](../templates/initiative-brief.template.md) — human input
@@ -289,4 +289,4 @@ You do not need to re-run Phase 0 coaching for a change — the specification al
 - [Component Manifest](../templates/component-manifest.template.json) — codegen-agent output ([guide](../templates/component-manifest-guide.md))
 - [Pipeline Run](../templates/pipeline-run.template.md) — written at end of every run
 
-**Phase skills:** `planifest/skills/spec-agent/`, `planifest/skills/adr-agent/`, etc.
+**Phase skills:** `planifest-framework/skills/spec-agent/`, `planifest-framework/skills/adr-agent/`, etc.
