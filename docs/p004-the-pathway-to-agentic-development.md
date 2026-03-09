@@ -9,6 +9,7 @@
 | 3 | Deduplicated default rules table — now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
 | 4 | Added Planifest name etymology; updated Specification Before Development with orchestrator coaching concept and Planifest confirmation gate | 07 MAR 2026 | Martin Mayer (via agent) |
 | 5 | Updated Stack Configuration section with Backend Stack Evaluation (p013) reference and polyglot guidance | 07 MAR 2026 | Martin Mayer (via agent) |
+| 6 | Updated Stack Configuration section with Frontend Stack Evaluation (p016) reference | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -155,6 +156,8 @@ All artifacts — Design Spec, ADRs, Security Report, Quirks, Recommendations, D
 Planifest does not default a stack. Per FD-015, stack is a requirement — declared explicitly at system or initiative level, traceable to an ADR, never assumed by the pipeline. Agents implement against whatever is declared; any deviation requires a justification.
 
 Not all stacks are equal for agent-generated code. The [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) scores 13 backend frameworks against agent-specific criteria — compile-time error detection, error feedback clarity, first-pass success rate, self-correction iteration cost — and finds significant differences. Go achieves the highest first-pass success rate. Rust offers the strongest compile-time guarantees but at higher iteration cost. Node.js/TypeScript has the broadest SDK coverage and highest LLM fluency. A polyglot architecture — different stacks for different components — is a legitimate choice when each selection is justified by the component's requirements and recorded in an ADR.
+
+The same applies to frontend choices. The [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) scores 10 frontend frameworks and finds that React 19 + Vite + TypeScript, paired with a constrained design system (Tailwind CSS + shadcn/ui), achieves the highest agent success rates — 70–80% functional, 55–65% visual on first pass. Frontend correctness has two dimensions: functional and visual. The evaluation recommends specifying the component library and state management pattern explicitly to constrain agent output quality.
 
 The Planifest pilot uses a specific confirmed stack — React, Fastify, PostgreSQL, Pulumi, GCP Cloud Run. That is a decision for the pilot initiative, not a Planifest default. See [Pilot App](p011-planifest-pilot-app.md) for the full pilot stack specification.
 
