@@ -171,7 +171,7 @@
 
 **Size:** S
 
-**Summary:** The agent prompts in [p008](p008-planifest-agent-prompt-library.md) are submitted to the Claude API as `system` messages when the orchestrator service runs the pipeline. Each prompt is parameterised with `{{placeholder}}` values filled by the orchestrator before the API call.
+**Summary:** The agent prompts in [p008](roadmap/p008-planifest-agent-prompt-library.md) are submitted to an LLM API as `system` messages when the orchestrator service runs the pipeline. Each prompt is parameterised with `{{placeholder}}` values filled by the orchestrator before the API call.
 
 **What it would add:** Machine-executed pipeline — each agent phase is an API call, not a human-triggered session. Prompts are stable, versioned artifacts that can be tested and tuned independently.
 

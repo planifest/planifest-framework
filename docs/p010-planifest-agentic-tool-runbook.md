@@ -60,7 +60,7 @@ For changes to existing initiatives, the orchestrator invokes the change-agent s
 
 ## 3. Claude Code
 
-Claude Code is the primary supported local runtime. It loads the orchestrator skill via `planifest/adapters/claude-code/CLAUDE.md`, which points it at the skill set.
+Claude Code is one of the supported local runtimes. It loads the orchestrator skill via `planifest/adapters/claude-code/CLAUDE.md`, which points it at the skill set.
 
 ### Setup
 
