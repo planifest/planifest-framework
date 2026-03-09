@@ -1,10 +1,15 @@
 # Cursor - tool configuration
 # https://docs.cursor.com
+#
+# Skills:    .cursor/skills/{name}/SKILL.md       (auto-discovered)
+# Workflows: embedded in .cursor/rules/*.mdc      (Cursor uses rules, not separate workflows)
+# Boot file: .cursor/rules/planifest.mdc
 
 @{
-    SkillsDir   = '.cursor\skills'
-    BootFile    = '.cursor\rules\planifest.mdc'
-    BootContent = @(
+    SkillsDir    = '.cursor\skills'
+    WorkflowsDir = ''
+    BootFile     = '.cursor\rules\planifest.mdc'
+    BootContent  = @(
         '---'
         'description: Planifest framework for agentic development'
         'globs: ["**/*"]'
@@ -12,11 +17,18 @@
         ''
         'This project uses the Planifest framework. Load the orchestrator skill for any initiative or change.'
         ''
-        'Key paths:'
-        '  planifest-framework/README.md    - framework overview and getting started'
-        '  plan/                            - initiative specifications'
-        '  src/                             - component code'
-        '  planifest-framework/templates/   - artifact templates'
-        '  planifest-framework/standards/   - code quality standards'
+        '## Workflows'
+        ''
+        '- **Initiative Pipeline**: Load the orchestrator skill. Provide an initiative brief at plan/{initiative-id}/initiative-brief.md'
+        '- **Change Pipeline**: Load the orchestrator skill. Provide initiative ID, component ID, and change request.'
+        '- **Retrofit**: Load the orchestrator skill with retrofit adoption mode.'
+        ''
+        '## Key paths'
+        ''
+        '- planifest-framework/README.md    - framework overview and getting started'
+        '- plan/                            - initiative specifications'
+        '- src/                             - component code'
+        '- planifest-framework/templates/   - artifact templates'
+        '- planifest-framework/standards/   - code quality standards'
     ) -join "`n"
 }

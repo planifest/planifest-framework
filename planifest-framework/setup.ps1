@@ -25,6 +25,7 @@ $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
 $SkillsSrc = Join-Path $ScriptDir 'skills'
+$WorkflowsSrc = Join-Path $ScriptDir 'workflows'
 $SetupDir = Join-Path $ScriptDir 'setup'
 
 $ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot')
@@ -90,6 +91,17 @@ function Write-PlanifestBootFile {
     }
 }
 
+function Copy-PlanifestWorkflow {
+    param($WorkflowFile, $TargetDir)
+
+    $name = [System.IO.Path]::GetFileNameWithoutExtension($WorkflowFile)
+    $destFile = Join-Path $TargetDir "$name.md"
+
+    New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
+    Copy-Item -Path $WorkflowFile -Destination $destFile -Force
+    Write-Host "  + workflows/$name.md"
+}
+
 function Invoke-PlanifestSetup {
     param($ToolName)
 
@@ -117,6 +129,14 @@ function Invoke-PlanifestSetup {
     Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'templates'
     Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'standards'
     Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'schemas'
+
+    # Copy workflows (if tool defines a workflow dir)
+    if ($toolConfig.WorkflowsDir -and (Test-Path $WorkflowsSrc)) {
+        $workflowsDir = Join-Path $ProjectRoot $toolConfig.WorkflowsDir
+        Get-ChildItem -Path $WorkflowsSrc -Filter '*.md' | ForEach-Object {
+            Copy-PlanifestWorkflow -WorkflowFile $_.FullName -TargetDir $workflowsDir
+        }
+    }
 
     # Create boot file (if tool defines one)
     if ($toolConfig.BootFile) {
