@@ -9,7 +9,7 @@
 
 ---
 
-> How to run the Planifest pipeline using each supported agentic development tool. v1.0 delivers the pipeline as Agent Skills — the orchestrator skill (`planifest/skills/orchestrator/SKILL.md`) is the entry point. Tool-specific adapters in `planifest/adapters/` load the skills via each tool's native compliance mechanism. MCP server infrastructure described in earlier versions of this document is a future roadmap item — see [RC-001](p014-planifest-roadmap.md) through [RC-004](p014-planifest-roadmap.md).
+> How to run the Planifest pipeline using each supported agentic development tool. v1.0 delivers the pipeline as Agent Skills — the orchestrator skill (`planifest-framework/skills/orchestrator/SKILL.md`) is the entry point. Tool-specific adapters in `planifest-framework/adapters/` load the skills via each tool's native compliance mechanism. MCP server infrastructure described in earlier versions of this document is a future roadmap item — see [RC-001](p014-planifest-roadmap.md) through [RC-004](p014-planifest-roadmap.md).
 
 *Related: [Master Plan](p001-planifest-master-plan.md) | [Roadmap](p014-planifest-roadmap.md)*
 
@@ -31,7 +31,7 @@
 
 ## 1. The Orchestrator Skill — the shared source of truth
 
-`planifest/skills/orchestrator/SKILL.md` is the entry point for all Planifest work, regardless of which agentic tool is used. It defines the coaching conversation, the pipeline phases, their sequencing, and the hard limits. Every tool loads this skill (or its tool-specific adapter) and follows it. The runtime differs; the steps do not.
+`planifest-framework/skills/orchestrator/SKILL.md` is the entry point for all Planifest work, regardless of which agentic tool is used. It defines the coaching conversation, the pipeline phases, their sequencing, and the hard limits. Every tool loads this skill (or its tool-specific adapter) and follows it. The runtime differs; the steps do not.
 
 The orchestrator skill:
 - Assesses the Initiative Brief against what a complete Planifest specification requires
@@ -52,7 +52,7 @@ For changes to existing initiatives, the orchestrator invokes the change-agent s
 | Runs full pipeline | Yes — loads orchestrator skill, executes phases | Yes — with adapter + skills | Yes — pipeline-native | Partial — prompt-driven per phase |
 | Domain Knowledge Store | Reads `docs/` folder directly | Reads `docs/` folder directly | Reads `docs/` folder directly | Reads `docs/` folder via workspace indexing |
 | PR creation | Manual push + pipeline-run.md | Manual push + pipeline-run.md | Native | Via CLI or extension |
-| Rules file | `planifest/adapters/claude-code/CLAUDE.md` | `planifest/adapters/cursor/.cursorrules` | Antigravity config | `planifest/adapters/copilot/copilot-instructions.md` |
+| Rules file | `planifest-framework/adapters/claude-code/CLAUDE.md` | `planifest-framework/adapters/cursor/.cursorrules` | Antigravity config | `planifest-framework/adapters/copilot/copilot-instructions.md` |
 | Context management | Manual chunking per session | Per-file context, references by path | Managed by Antigravity | Limited — per-file or workspace |
 | Hard limits enforced | Prompt-level + PR gate | Prompt-level + PR gate | Prompt-level + PR gate | Prompt-level + PR gate |
 
@@ -60,7 +60,7 @@ For changes to existing initiatives, the orchestrator invokes the change-agent s
 
 ## 3. Claude Code
 
-Claude Code is one of the supported local runtimes. It loads the orchestrator skill via `planifest/adapters/claude-code/CLAUDE.md`, which points it at the skill set.
+Claude Code is one of the supported local runtimes. It loads the orchestrator skill via `planifest-framework/adapters/claude-code/CLAUDE.md`, which points it at the skill set.
 
 ### Setup
 
@@ -71,7 +71,7 @@ The adapter file is loaded automatically when Claude Code opens the project root
 Paste this instruction into Claude Code:
 
 ```
-Load the Planifest orchestrator skill at planifest/skills/orchestrator/SKILL.md and execute the Initiative Pipeline.
+Load the Planifest orchestrator skill at planifest-framework/skills/orchestrator/SKILL.md and execute the Initiative Pipeline.
 
 Initiative brief: initiatives/{{initiative_id}}/initiative-brief.md
 Initiative ID: {{initiative_id}}
@@ -83,7 +83,7 @@ The orchestrator will assess the brief, coach you through any gaps, produce the 
 ### Running the change pipeline
 
 ```
-Load the Planifest orchestrator skill at planifest/skills/orchestrator/SKILL.md and execute the Change Pipeline.
+Load the Planifest orchestrator skill at planifest-framework/skills/orchestrator/SKILL.md and execute the Change Pipeline.
 
 Initiative ID: {{initiative_id}}
 Component ID: {{component_id}}
@@ -124,14 +124,14 @@ git push origin initiative/{{initiative_id}}
 
 ## 4. Cursor
 
-Cursor loads the Planifest framework via `planifest/adapters/cursor/.cursorrules`, which points it at the orchestrator skill and encodes the hard limits.
+Cursor loads the Planifest framework via `planifest-framework/adapters/cursor/.cursorrules`, which points it at the orchestrator skill and encodes the hard limits.
 
 ### Setup
 
 Copy or symlink the adapter file to the monorepo root:
 
 ```bash
-cp planifest/adapters/cursor/.cursorrules .cursorrules
+cp planifest-framework/adapters/cursor/.cursorrules .cursorrules
 ```
 
 Cursor loads `.cursorrules` automatically. No MCP servers are required for v1.0.
@@ -148,7 +148,7 @@ Antigravity is a pipeline-native agentic tool — it is designed to run multi-st
 
 ### Setup
 
-Configure Antigravity to point at the monorepo root. The adapter at `planifest/adapters/antigravity/planifest.yaml` maps the skill set to Antigravity's workflow format.
+Configure Antigravity to point at the monorepo root. The adapter at `planifest-framework/adapters/antigravity/planifest.yaml` maps the skill set to Antigravity's workflow format.
 
 *Antigravity configuration detail to be completed as the integration is built.*
 
@@ -171,7 +171,7 @@ GitHub Copilot has more limited agent capabilities than the other tools in this 
 Copy or symlink the adapter file:
 
 ```bash
-cp planifest/adapters/copilot/copilot-instructions.md .github/copilot-instructions.md
+cp planifest-framework/adapters/copilot/copilot-instructions.md .github/copilot-instructions.md
 ```
 
 ### Running the pipeline

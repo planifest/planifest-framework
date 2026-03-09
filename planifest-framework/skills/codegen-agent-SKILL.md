@@ -65,8 +65,8 @@ Full implementation at `initiatives/{initiative-id}/`:
 - The OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it — do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
-- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../docs/p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
-- For frontend stacks, the [Frontend Stack Evaluation](../../docs/p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
+- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../planifest-docs/p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
+- For frontend stacks, the [Frontend Stack Evaluation](../../planifest-docs/p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
 **Domain language:**
 - Use the domain glossary terms throughout — in code, comments, file names, variable names.

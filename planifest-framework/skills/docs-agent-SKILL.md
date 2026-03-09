@@ -114,4 +114,4 @@ If a capability skill exists for document generation formats needed by the initi
 
 ---
 
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md) | [FD-019 — Artifact Types](../../docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned)*
+*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md) | [FD-019 — Artifact Types](../../planifest-docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned)*

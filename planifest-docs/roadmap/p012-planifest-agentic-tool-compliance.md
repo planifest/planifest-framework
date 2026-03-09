@@ -60,14 +60,14 @@ The mechanism by which these requirements are communicated and enforced differs 
 
 ## 2. Compliance Mechanisms by Tool
 
-Each tool has a native mechanism through which it receives standing instructions. Planifest uses each tool's native mechanism via adapters in `planifest/adapters/` — it does not try to override or work around tool-specific behaviour.
+Each tool has a native mechanism through which it receives standing instructions. Planifest uses each tool's native mechanism via adapters in `planifest-framework/adapters/` — it does not try to override or work around tool-specific behaviour.
 
 | Tool | Adapter location | Native compliance mechanism | Hard limit enforcement |
 |---|---|---|---|
-| Claude Code | `planifest/adapters/claude-code/CLAUDE.md` | System prompt loaded at session start | Prompt-level via skill + PR gate |
-| Cursor | `planifest/adapters/cursor/.cursorrules` | Per-repo rules file | Prompt-level via skill + PR gate |
-| Antigravity | `planifest/adapters/antigravity/planifest.yaml` | Workflow config + system prompt | Prompt-level via skill + PR gate |
-| GitHub Copilot | `planifest/adapters/copilot/copilot-instructions.md` | Instructions file | Prompt-level via instructions + PR gate |
+| Claude Code | `planifest-framework/adapters/claude-code/CLAUDE.md` | System prompt loaded at session start | Prompt-level via skill + PR gate |
+| Cursor | `planifest-framework/adapters/cursor/.cursorrules` | Per-repo rules file | Prompt-level via skill + PR gate |
+| Antigravity | `planifest-framework/adapters/antigravity/planifest.yaml` | Workflow config + system prompt | Prompt-level via skill + PR gate |
+| GitHub Copilot | `planifest-framework/adapters/copilot/copilot-instructions.md` | Instructions file | Prompt-level via instructions + PR gate |
 
 In v1.0, all tools use the same enforcement model: the Agent Skills encode the hard limits, the adapter loads them via the tool's native mechanism, and the PR gate is the human backstop. When MCP servers are built (roadmap items RC-001 through RC-004), tools with MCP support will additionally enforce hard limits at the tool level — the MCP server will refuse non-compliant writes.
 

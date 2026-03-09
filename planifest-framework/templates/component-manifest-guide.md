@@ -2,7 +2,7 @@
 
 > This is the canonical template for `component.json` — the manifest file that describes a built component. Agents write it after building; agents and humans read it before changing anything.
 
-*Related: [Pilot App](../../docs/p011-planifest-pilot-app.md) | [Shared Schema Definitions](../schemas/shared.schema.json)*
+*Related: [Pilot App](../../planifest-docs/p011-planifest-pilot-app.md) | [Shared Schema Definitions](../schemas/shared.schema.json)*
 
 ---
 
