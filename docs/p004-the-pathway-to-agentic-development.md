@@ -321,7 +321,7 @@ A single orchestrator service (TypeScript, containerised) that:
 
 - Watches for new Initiative Briefs (via webhook, file watcher, or queue trigger)
 - Runs the agent pipeline as a **state machine**: Discovery → Spec → ADR → Codegen → Validate → Security → PR → Docs
-- Each agent is a function that calls the Claude API with a carefully tuned system prompt and accumulated context
+- Each agent is a function that calls an LLM API with a carefully tuned system prompt and accumulated context
 - State is persisted between steps (so if codegen fails and retries, it has the error context)
 - The whole pipeline is **idempotent** — re-running with the same Initiative Brief produces the same output
 

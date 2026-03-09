@@ -33,7 +33,7 @@
 - [10. Monorepo Structure](#10-monorepo-structure)
 - [11. Documentation Sync](#11-documentation-sync)
 - [12. Build Sequence](#12-build-sequence)
-- [Local Dev — Claude Code Execution Mode](p010-planifest-agentic-tool-runbook.md)
+- [Local Dev — Agentic Tool Execution Mode](p010-planifest-agentic-tool-runbook.md)
 - [MCP Design — Tool Server Architecture](roadmap/p005-planifest-mcp-architecture.md) *(roadmap)*
 - [Functional Decisions](p003-planifest-functional-decisions.md)
 - [The Pathway to Agentic Development](p004-the-pathway-to-agentic-development.md)
@@ -105,7 +105,7 @@ flowchart TD
     style DKS fill:#cce5ff,stroke:#0066cc
 ```
 
-> Planifest runs in two modes: any **CI/CD platform** (GitHub Actions, GitLab CI, Bitbucket Pipelines, CircleCI, etc.) using the Claude API, and **Claude Code** locally on a dev machine. See [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) and [MCP Design](roadmap/p005-planifest-mcp-architecture.md) *(roadmap)*.
+> Planifest runs in two modes: any **CI/CD platform** (GitHub Actions, GitLab CI, Bitbucket Pipelines, CircleCI, etc.) using an LLM API, and any **agentic coding tool** (Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, etc.) locally on a dev machine. See [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md).
 
 ---
 
