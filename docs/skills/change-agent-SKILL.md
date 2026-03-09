@@ -30,11 +30,12 @@
 
 Before changing anything, read:
 
-1. `docs/design-spec.md` — understand the full specification
-2. `docs/system/component-registry.md` — understand what components exist
-3. `docs/system/dependency-graph.md` — understand how they relate
-4. `docs/components/{affected-component}/` — read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
-5. `docs/domain-glossary.md` — confirm you are using the correct terms
+1. `component.json` — understand the component's purpose, scope, contract, data ownership, stack, and current risk level. See [Component Manifest Guide](../templates/component-manifest-guide.md)
+2. `docs/design-spec.md` — understand the full specification
+3. `docs/system/component-registry.md` — understand what components exist
+4. `docs/system/dependency-graph.md` — understand how they relate
+5. `docs/components/{affected-component}/` — read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
+6. `docs/domain-glossary.md` — confirm you are using the correct terms
 
 Identify the blast radius — which other components depend on the ones you're changing.
 
@@ -69,6 +70,7 @@ Run CI checks scoped to the blast radius of the change. Self-correct up to 5 tim
 
 Update every artifact affected by the change:
 
+- `component.json` — update `contract`, `risk`, `quality`, `data`, and `metadata` sections if any changed. Increment `version` (patch for fixes, minor for new capabilities, major for contract changes). Update `metadata.updatedAt`.
 - Component purpose, interface contract, dependencies, risk, scope, quirks — if any changed
 - System dependency graph — if component relationships changed
 - Component registry — if a component was added, removed, or its summary changed

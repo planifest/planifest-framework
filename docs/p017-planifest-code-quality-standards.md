@@ -390,9 +390,9 @@ Every function that crosses a trust boundary — HTTP endpoints, message handler
 
 The type system is the first line of defence. If the types are wrong, the compiler catches it before tests do, and tests catch it before production does.
 
-### 6.2 — Validate at the edge, trust internally
+### 6.2 — Parse, don't validate (Validate at the edge, trust internally)
 
-Validate all external input at the point it enters the system — the HTTP handler, the message consumer, the CLI parser. Once validated and typed, the internal layers trust the types.
+Validate all external input at the point it enters the system — the HTTP handler, the message consumer, the CLI parser. Once parsed and typed, the internal layers trust the types.
 
 ```
 // Edge — validate and parse

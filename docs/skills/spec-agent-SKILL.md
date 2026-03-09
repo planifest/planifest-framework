@@ -31,6 +31,7 @@ Write each artifact to `initiatives/{initiative-id}/docs/` as you complete it. D
 |---|---|---|
 | Design Specification | `design-spec.md` | Functional and non-functional requirements |
 | OpenAPI Specification | `openapi-spec.yaml` | Language-agnostic API contract — OpenAPI 3.1 |
+| Component Manifest | `component.json` | Draft manifest — purpose, scope, risk seeded from the brief. Follow the [Component Manifest Template](../templates/component-manifest.template.json) and its [guide](../templates/component-manifest-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
 | Scope | `scope.md` | In / out / deferred — all three stated explicitly |
 | Risk Register | `risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
 | Domain Glossary | `domain-glossary.md` | Ubiquitous language for this initiative — agents and humans use these terms |
@@ -67,6 +68,11 @@ Write each artifact to `initiatives/{initiative-id}/docs/` as you complete it. D
 **Risk register:**
 - Every risk has a category (technical, operational, security, compliance), likelihood (low, medium, high), and impact (low, medium, high).
 - Do not produce generic risks. Every entry must be specific to this initiative.
+
+**Component manifest:**
+- Populate the `purpose`, `scope`, `risk`, and `contract` sections of `component.json` based on the specification you produce. The `stack` section is pre-seeded — do not modify it.
+- `purpose.notResponsibleFor` is mandatory. Derive exclusions from the scope boundaries.
+- Leave `contract.consumedBy` empty — it is unknown at specification time.
 
 **Assumptions:**
 - You may make documented assumptions for genuinely minor gaps. Record them in the risk register with likelihood: medium.
