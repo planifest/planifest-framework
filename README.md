@@ -46,65 +46,21 @@ repo/
 
 ## Getting Started
 
-### 1. Set up your agentic tool
+See **[getting-started.md](planifest-framework/getting-started.md)** for step-by-step setup instructions.
 
-Run the setup script for your tool — this copies skills into the directory your tool expects:
+**Quick start:**
 
-**macOS / Linux:**
 ```bash
-./planifest-framework/setup.sh claude-code      # → .claude/skills/
-./planifest-framework/setup.sh cursor           # → .cursor/skills/
-./planifest-framework/setup.sh codex            # → .agents/skills/
-./planifest-framework/setup.sh antigravity      # → .gemini/skills/
-./planifest-framework/setup.sh copilot          # → .github/skills/
-./planifest-framework/setup.sh all              # → all of the above
+# macOS/Linux
+./planifest-framework/setup.sh <tool>
+
+# Windows
+.\planifest-framework\setup.ps1 <tool>
 ```
 
-**Windows (PowerShell):**
-```powershell
-.\planifest-framework\setup.ps1 claude-code     # → .claude\skills\
-.\planifest-framework\setup.ps1 cursor          # → .cursor\skills\
-.\planifest-framework\setup.ps1 codex           # → .agents\skills\
-.\planifest-framework\setup.ps1 antigravity     # → .gemini\skills\
-.\planifest-framework\setup.ps1 copilot         # → .github\skills\
-.\planifest-framework\setup.ps1 all             # → all of the above
-```
+Where `<tool>` is `claude-code`, `cursor`, `codex`, `antigravity`, `copilot`, or `all`.
 
-The script adds YAML frontmatter, copies supporting files, and creates boot files. See [tool-setup-reference.md](planifest-framework/tool-setup-reference.md) for details on each tool.
-
-**Re-run this script after updating any framework files.**
-
-### 2. Start an initiative
-
-1. Create `plan/` and `src/` directories (if they don't exist)
-2. Write your first Initiative Brief using the [template](planifest-framework/templates/initiative-brief.template.md)
-3. Open your agentic tool — the orchestrator skill will be auto-discovered
-4. Tell it:
-
-```
-Execute the Planifest Initiative Pipeline.
-Initiative brief: plan/{initiative-id}/initiative-brief.md
-Initiative ID: {initiative-id}
-```
-
-The orchestrator will assess your brief, coach you through any gaps, and then build it.
-
-### 3. Retrofit an existing project
-
-1. Copy `planifest-framework/` into your repo
-2. Run the setup script for your tool
-3. Add a `component.json` to each existing component in `src/`
-4. Tell the orchestrator to use **retrofit** adoption mode
-
-### 4. Make changes
-
-```
-Execute the Planifest Change Pipeline.
-Initiative ID: {initiative-id}
-Component ID: {component-id}
-Change request: {description}
-```
-```
+The setup script copies skills into the directory your tool auto-discovers, adds YAML frontmatter, and creates a boot file. See [tool-setup-reference.md](planifest-framework/tool-setup-reference.md) for details on each tool.
 
 ---
 
