@@ -7,6 +7,7 @@
 | 1 | Initial document | 02 MAR 2026 | Martin Mayer |
 | 2 | Added serial write queue, credential security model, sole-writer principle; expanded tool set to full DKS interface | 05 MAR 2026 | Martin Mayer |
 | 3 | Added future-state status marker — v1.0 operates without MCP services; this document describes the target architecture for RC-001 through RC-004 on the roadmap | 07 MAR 2026 | Martin Mayer (via agent) |
+| 4 | Removed TypeScript assumptions — MCP server implementation language is a stack decision, not an architectural one. Schemas defined in JSON Schema (see p007) | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -90,7 +91,7 @@ flowchart TD
     style MCP fill:#fff3cd,stroke:#ffc107
 ```
 
-Each MCP server is a standalone TypeScript service implementing the MCP specification. Agents call them as tools during reasoning. In a CI/CD platform run, servers run as sidecar containers in the pipeline job. In Claude Code locally, servers run as local processes — Claude Code's native MCP support connects to them automatically via the `.claude/mcp-config.json` file.
+Each MCP server is a standalone service implementing the MCP specification. The implementation language is a stack decision — MCP SDKs exist for TypeScript, Python, Go, Rust, and others. Agents call them as tools during reasoning. In a CI/CD platform run, servers run as sidecar containers in the pipeline job. In Claude Code locally, servers run as local processes — Claude Code's native MCP support connects to them automatically via the `.claude/mcp-config.json` file.
 
 ---
 
@@ -187,37 +188,9 @@ Wraps the Nx project graph API for dependency awareness beyond what the registry
 
 ## 4. Tool Definitions
 
-MCP tools are defined in TypeScript using the MCP SDK. Example for `get_component_context`:
+MCP tools are defined using the MCP SDK for the chosen implementation language. Tool input and output schemas are defined in JSON Schema (see [Domain Knowledge Service Reference](p007-planifest-domain-knowledge-service-reference.md) for all schemas). Tool descriptions are written for the agent, not the developer — they explain *when* to use the tool, not just what it does.
 
-```typescript
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { z } from 'zod'
-
-const server = new McpServer({ name: 'domain-knowledge-server', version: '1.0.0' })
-
-server.tool(
-  'get_component_context',
-  'Returns the manifest for a component plus all direct dependents and dependencies',
-  { id: z.string().describe('Component ID (kebab-case)') },
-  async ({ id }) => {
-    const component = await registry.get(id)
-    const dependsOn = await Promise.all(
-      component.dependsOn.map(d => registry.get(d.id))
-    )
-    const consumedBy = await Promise.all(
-      component.consumedBy.map(c => registry.get(c.id))
-    )
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({ component, dependsOn, consumedBy }, null, 2)
-      }]
-    }
-  }
-)
-```
-
-All tool inputs are validated with Zod. Tool descriptions are written for the agent, not the developer — they explain *when* to use the tool, not just what it does.
+All tool inputs must be validated against their JSON Schema before processing. All tool responses must conform to their response schema.
 
 ---
 
@@ -287,30 +260,32 @@ flowchart TD
 
 **`.claude/mcp-config.json`** (committed to repo, used by Claude Code locally):
 
+The `command` and `args` fields depend on the implementation language chosen for the MCP servers. The structure below shows the pattern — replace the command with whatever starts your server (e.g. `go run`, `python`, `npx tsx`, etc.).
+
 ```json
 {
   "mcpServers": {
     "registry": {
-      "command": "npx",
-      "args": ["tsx", "apps/domain-knowledge-mcp/src/index.ts"],
+      "command": "{{start-command}}",
+      "args": ["apps/domain-knowledge-mcp/"],
       "env": { "REGISTRY_URL": "http://localhost:3000" }
     },
     "filesystem": {
-      "command": "npx",
-      "args": ["tsx", "apps/filesystem-mcp/src/index.ts"],
+      "command": "{{start-command}}",
+      "args": ["apps/filesystem-mcp/"],
       "env": { "MONOREPO_ROOT": "." }
     },
     "ci": {
-      "command": "npx",
-      "args": ["tsx", "apps/ci-mcp/src/index.ts"]
+      "command": "{{start-command}}",
+      "args": ["apps/ci-mcp/"]
     },
-    "github": {
-      "command": "npx",
-      "args": ["tsx", "apps/vcs-mcp/src/index.ts"]
+    "vcs": {
+      "command": "{{start-command}}",
+      "args": ["apps/vcs-mcp/"]
     },
     "docs": {
-      "command": "npx",
-      "args": ["tsx", "apps/docs-mcp/src/index.ts"],
+      "command": "{{start-command}}",
+      "args": ["apps/docs-mcp/"],
       "env": { "DOCS_PROVIDER": "obsidian", "DOCS_ROOT": "./docs/obsidian-vault" }
     }
   }
@@ -347,15 +322,17 @@ In the non-MCP path, credentials are managed by the OS (macOS Keychain, Windows 
 
 ## 8. Implementation Notes
 
-**SDK:** Use `@modelcontextprotocol/sdk` (the official TypeScript SDK). Each MCP server is a small TypeScript app in `apps/[name]-mcp/`.
+**SDK:** Use the official MCP SDK for the chosen implementation language. MCP SDKs are available for TypeScript, Python, Go, Rust, and others. The choice of language is a stack decision evaluated the same way as any other technology choice (see [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md)).
 
 **Transport:** Use `stdio` transport for local Claude Code (the default for Claude Code MCP). Use HTTP/SSE transport for CI/CD platform sidecar containers.
+
+**Schemas:** All tool input and output schemas are defined in JSON Schema in the [Domain Knowledge Service Reference](p007-planifest-domain-knowledge-service-reference.md). Regardless of implementation language, all servers must validate against these schemas.
 
 **Scoping:** The filesystem-server enforces path scoping — it will not read or write outside the monorepo root, and within a pipeline run it is further scoped to the current component's directory. This prevents agents from accidentally modifying other components.
 
 **Error handling:** All tool responses include a `success` field. Agents are instructed in their system prompts to check this and handle failures explicitly rather than assuming success.
 
-**Monorepo structure update:** Each MCP server lives in `apps/[name]-mcp/`:
+**Monorepo structure:** Each MCP server lives in `apps/[name]-mcp/`:
 
 ```
 apps/
@@ -363,7 +340,7 @@ apps/
 ├── domain-knowledge-mcp/      # MCP server wrapping registry
 ├── filesystem-mcp/    # MCP server for file operations
 ├── ci-mcp/            # MCP server for CI execution
-├── vcs-mcp/        # MCP server for GitHub operations
+├── vcs-mcp/           # MCP server for VCS operations
 ├── docs-mcp/          # MCP server for documentation sync (Obsidian, Notion, Confluence, Markdown)
 └── nx-mcp/            # MCP server wrapping Nx
 ```

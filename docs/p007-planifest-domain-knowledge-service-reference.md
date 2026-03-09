@@ -7,6 +7,7 @@
 | 1 | Initial Document | 05 MAR 2026 | Martin Mayer |
 | 2 | Deduplicated default rules table — now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
 | 3 | Added future-state status marker; fixed wikilinks to standard markdown | 07 MAR 2026 | Martin Mayer (via agent) |
+| 4 | Replaced all TypeScript interfaces with JSON Schema definitions — Planifest schemas are language-neutral | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -26,125 +27,269 @@ The service is a thin query layer over the document store. It does not make deci
 
 ## Document Store Schema
 
-Every document in the store conforms to a standard envelope. The content varies by document type; the envelope is always the same.
+Every document in the store conforms to a standard envelope. The content varies by document type; the envelope is always the same. All schemas are defined in JSON Schema — they are language-neutral and can be validated by any runtime.
 
-```typescript
-interface DomainDocument {
-  id: string                    // e.g. "initiative:auth-service:design-spec"
-  type: DocumentType
-  scope: DocumentScope
-  initiative: string            // initiative identifier
-  component?: string            // component identifier, if scoped to one
-  version: string               // semver
-  createdAt: string             // ISO 8601
-  updatedAt: string             // ISO 8601
-  author: "human" | "agent"
-  status: "draft" | "active" | "superseded" | "archived"
-  content: DocumentContent      // typed by DocumentType
-  risk: RiskSummary
-  scope_boundaries: ScopeBoundaries
-  quirks: Quirk[]
+```json
+{
+  "$id": "domain-document",
+  "type": "object",
+  "required": ["id", "type", "scope", "initiative", "version", "createdAt", "updatedAt", "author", "status", "content", "risk", "scope_boundaries"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique document identifier, e.g. 'initiative:auth-service:design-spec'"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "initiative-brief", "design-spec", "openapi-spec", "adr",
+        "security-report", "risk-register", "scope", "quirks",
+        "recommendations", "operational-model", "slo-definitions",
+        "cost-model", "domain-glossary", "component-purpose",
+        "interface-contract", "dependency-map", "test-coverage",
+        "tech-debt", "component-registry", "dependency-graph"
+      ]
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["initiative", "component", "system"]
+    },
+    "initiative": {
+      "type": "string",
+      "description": "Initiative identifier"
+    },
+    "component": {
+      "type": "string",
+      "description": "Component identifier, if scoped to one"
+    },
+    "version": {
+      "type": "string",
+      "description": "Semver version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author": {
+      "type": "string",
+      "enum": ["human", "agent"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "superseded", "archived"]
+    },
+    "content": {
+      "description": "Document content — shape varies by document type"
+    },
+    "risk": { "$ref": "#/$defs/risk-summary" },
+    "scope_boundaries": { "$ref": "#/$defs/scope-boundaries" },
+    "quirks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/quirk" }
+    }
+  }
 }
-
-type DocumentScope = "initiative" | "component" | "system"
-
-type DocumentType =
-  | "initiative-brief"
-  | "design-spec"
-  | "openapi-spec"
-  | "adr"
-  | "security-report"
-  | "risk-register"
-  | "scope"
-  | "quirks"
-  | "recommendations"
-  | "operational-model"
-  | "slo-definitions"
-  | "cost-model"
-  | "domain-glossary"
-  | "component-purpose"
-  | "interface-contract"
-  | "dependency-map"
-  | "test-coverage"
-  | "tech-debt"
-  | "component-registry"
-  | "dependency-graph"
 ```
 
-### Cross-cutting Types
+### Cross-cutting Definitions
 
 These appear in every document regardless of type:
 
-```typescript
-interface RiskSummary {
-  level: "low" | "medium" | "high" | "critical"
-  items: RiskItem[]
-}
-
-interface RiskItem {
-  id: string
-  category: "technical" | "operational" | "security" | "compliance"
-  description: string
-  likelihood: "low" | "medium" | "high"
-  impact: "low" | "medium" | "high"
-  mitigation?: string
-  status: "open" | "mitigated" | "accepted"
-}
-
-interface ScopeBoundaries {
-  in: string[]
-  out: string[]
-  deferred: string[]
-}
-
-interface Quirk {
-  id: string
-  description: string
-  workaround?: string
-  raisedBy: "human" | "agent"
-  raisedAt: string
-  status: "open" | "resolved" | "accepted"
+```json
+{
+  "$defs": {
+    "risk-summary": {
+      "type": "object",
+      "required": ["level", "items"],
+      "properties": {
+        "level": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/risk-item" }
+        }
+      }
+    },
+    "risk-item": {
+      "type": "object",
+      "required": ["id", "category", "description", "likelihood", "impact", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "category": {
+          "type": "string",
+          "enum": ["technical", "operational", "security", "compliance"]
+        },
+        "description": { "type": "string" },
+        "likelihood": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "impact": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "mitigation": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["open", "mitigated", "accepted"]
+        }
+      }
+    },
+    "scope-boundaries": {
+      "type": "object",
+      "required": ["in", "out", "deferred"],
+      "properties": {
+        "in": { "type": "array", "items": { "type": "string" } },
+        "out": { "type": "array", "items": { "type": "string" } },
+        "deferred": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "quirk": {
+      "type": "object",
+      "required": ["id", "description", "raisedBy", "raisedAt", "status"],
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "workaround": { "type": "string" },
+        "raisedBy": {
+          "type": "string",
+          "enum": ["human", "agent"]
+        },
+        "raisedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["open", "resolved", "accepted"]
+        }
+      }
+    }
+  }
 }
 ```
 
-### Key Document Content Types
+### Key Document Content Schemas
 
-```typescript
-interface ComponentPurpose {
-  summary: string               // one-liner: what this component exists to do
-  systemContext: string         // where it sits in the wider system
-  type: "microservice" | "microfrontend" | "component-pack"
-  domain: string                // the domain it belongs to
-  responsibilities: string[]
-  notResponsibleFor: string[]   // explicit exclusions — equally important
-}
-
-interface InterfaceContract {
-  inputs: ContractEndpoint[]
-  outputs: ContractEndpoint[]
-  schema: string                // reference to OpenAPI spec or Zod schema path
-  consumedBy: string[]          // component identifiers
-  consumes: string[]            // component identifiers
-  breakingChangePolicy: string
-}
-
-interface ADRContent {
-  context: string
-  decision: string
-  status: "proposed" | "accepted" | "deprecated" | "superseded"
-  consequences: string[]
-  supersedes?: string           // ADR id
-  supersededBy?: string         // ADR id
-}
-
-interface ComponentRegistryEntry {
-  id: string
-  name: string
-  type: "microservice" | "microfrontend" | "component-pack"
-  summary: string               // one-liner
-  initiative: string
-  status: "planned" | "active" | "deprecated"
-  risk: RiskSummary["level"]
+```json
+{
+  "$defs": {
+    "component-purpose": {
+      "type": "object",
+      "required": ["summary", "systemContext", "type", "domain", "responsibilities", "notResponsibleFor"],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "description": "One-liner: what this component exists to do"
+        },
+        "systemContext": {
+          "type": "string",
+          "description": "Where it sits in the wider system"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["microservice", "microfrontend", "component-pack"]
+        },
+        "domain": {
+          "type": "string",
+          "description": "The domain it belongs to"
+        },
+        "responsibilities": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "notResponsibleFor": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Explicit exclusions — equally important as responsibilities"
+        }
+      }
+    },
+    "interface-contract": {
+      "type": "object",
+      "required": ["inputs", "outputs", "schema", "consumedBy", "consumes", "breakingChangePolicy"],
+      "properties": {
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/contract-endpoint" }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/contract-endpoint" }
+        },
+        "schema": {
+          "type": "string",
+          "description": "Reference to OpenAPI spec or Zod schema path"
+        },
+        "consumedBy": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Component identifiers"
+        },
+        "consumes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Component identifiers"
+        },
+        "breakingChangePolicy": { "type": "string" }
+      }
+    },
+    "adr-content": {
+      "type": "object",
+      "required": ["context", "decision", "status", "consequences"],
+      "properties": {
+        "context": { "type": "string" },
+        "decision": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["proposed", "accepted", "deprecated", "superseded"]
+        },
+        "consequences": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "supersedes": {
+          "type": "string",
+          "description": "ADR id this supersedes"
+        },
+        "supersededBy": {
+          "type": "string",
+          "description": "ADR id that superseded this"
+        }
+      }
+    },
+    "component-registry-entry": {
+      "type": "object",
+      "required": ["id", "name", "type", "summary", "initiative", "status", "risk"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["microservice", "microfrontend", "component-pack"]
+        },
+        "summary": {
+          "type": "string",
+          "description": "One-liner"
+        },
+        "initiative": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "active", "deprecated"]
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["low", "medium", "high", "critical"]
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -154,23 +299,40 @@ interface ComponentRegistryEntry {
 
 Documents are versioned. Updates create new versions rather than overwriting. History is never destroyed — only superseded. This mirrors how the git `docs/` fallback works naturally, and the MCP service versioning model follows the same principle.
 
-```typescript
-interface DocumentVersion {
-  version: string               // semver
-  createdAt: string             // ISO 8601
-  author: "human" | "agent"
-  changeSummary: string
-  previousVersion?: string      // version this supersedes
+```json
+{
+  "$id": "document-version",
+  "type": "object",
+  "required": ["version", "createdAt", "author", "changeSummary"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Semver version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "author": {
+      "type": "string",
+      "enum": ["human", "agent"]
+    },
+    "changeSummary": { "type": "string" },
+    "previousVersion": {
+      "type": "string",
+      "description": "Version this supersedes"
+    }
+  }
 }
 ```
 
-The `status` field on `DomainDocument` reflects the current state of a given version: `draft`, `active`, `superseded`, or `archived`. Querying the store always returns the `active` version unless a specific version is requested.
+The `status` field on the document envelope reflects the current state of a given version: `draft`, `active`, `superseded`, or `archived`. Querying the store always returns the `active` version unless a specific version is requested.
 
 ---
 
 ## MCP Tools
 
-The service exposes the following tools to agents.
+The service exposes the following tools to agents. Request and response shapes are defined in JSON Schema. Any MCP-compliant server — regardless of implementation language — must conform to these schemas.
 
 ---
 
@@ -178,44 +340,87 @@ The service exposes the following tools to agents.
 
 The primary tool. Ask a natural language question about the domain; receive a structured, scoped answer with source references.
 
-```typescript
-// Request
-interface DomainQueryRequest {
-  question: string              // natural language
-  scope?: {
-    initiative?: string
-    component?: string
-    documentTypes?: DocumentType[]
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["question"],
+  "properties": {
+    "question": {
+      "type": "string",
+      "description": "Natural language question"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "initiative": { "type": "string" },
+        "component": { "type": "string" },
+        "documentTypes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "maxResults": {
+      "type": "integer",
+      "default": 5
+    }
   }
-  maxResults?: number           // default: 5
 }
+```
 
-// Response
-interface DomainQueryResponse {
-  answer: string                // synthesised answer in plain language
-  confidence: "high" | "medium" | "low"
-  sources: DocumentReference[]
-  relatedQuestions?: string[]   // suggested follow-up queries
-}
-
-interface DocumentReference {
-  id: string
-  type: DocumentType
-  excerpt: string               // the relevant passage
-  path: string                  // git docs path as fallback
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["answer", "confidence", "sources"],
+  "properties": {
+    "answer": {
+      "type": "string",
+      "description": "Synthesised answer in plain language"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": ["high", "medium", "low"]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "type", "excerpt", "path"],
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "excerpt": {
+            "type": "string",
+            "description": "The relevant passage"
+          },
+          "path": {
+            "type": "string",
+            "description": "Git docs path as fallback"
+          }
+        }
+      }
+    },
+    "relatedQuestions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Suggested follow-up queries"
+    }
+  }
 }
 ```
 
 **Example:**
 
 ```json
-// Request
 {
   "question": "What components handle authentication?",
   "scope": { "initiative": "platform-v2" }
 }
+```
 
-// Response
+```json
 {
   "answer": "Authentication is handled by the auth-service microservice. It is the sole component responsible for token issuance and validation. The api-gateway consumes it for all inbound requests. No other component performs auth logic — this is an explicit scope boundary in the auth-service design spec.",
   "confidence": "high",
@@ -246,23 +451,46 @@ interface DocumentReference {
 
 Retrieve the full domain record for a specific component.
 
-```typescript
-// Request
-interface GetComponentRequest {
-  componentId: string
-  include?: DocumentType[]      // default: all
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["componentId"],
+  "properties": {
+    "componentId": { "type": "string" },
+    "include": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Document types to include. Default: all."
+    }
+  }
 }
+```
 
-// Response
-interface GetComponentResponse {
-  component: ComponentRegistryEntry
-  purpose: ComponentPurpose
-  contract: InterfaceContract
-  risk: RiskSummary
-  scope: ScopeBoundaries
-  quirks: Quirk[]
-  adrs: ADRContent[]
-  techDebt: string[]
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["component", "purpose", "contract", "risk", "scope", "quirks", "adrs", "techDebt"],
+  "properties": {
+    "component": { "$ref": "#/$defs/component-registry-entry" },
+    "purpose": { "$ref": "#/$defs/component-purpose" },
+    "contract": { "$ref": "#/$defs/interface-contract" },
+    "risk": { "$ref": "#/$defs/risk-summary" },
+    "scope": { "$ref": "#/$defs/scope-boundaries" },
+    "quirks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/quirk" }
+    },
+    "adrs": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/adr-content" }
+    },
+    "techDebt": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
 }
 ```
 
@@ -272,25 +500,55 @@ interface GetComponentResponse {
 
 Return the dependency graph for an initiative or a named component, to a specified depth.
 
-```typescript
-// Request
-interface GetDependencyGraphRequest {
-  initiative: string
-  rootComponent?: string        // if omitted, returns full initiative graph
-  depth?: number                // default: 2
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "rootComponent": {
+      "type": "string",
+      "description": "If omitted, returns full initiative graph"
+    },
+    "depth": {
+      "type": "integer",
+      "default": 2
+    }
+  }
 }
+```
 
-// Response
-interface GetDependencyGraphResponse {
-  nodes: ComponentRegistryEntry[]
-  edges: DependencyEdge[]
-}
-
-interface DependencyEdge {
-  from: string                  // component id
-  to: string                    // component id
-  type: "consumes" | "produces" | "publishes" | "subscribes"
-  contract: string              // interface contract id
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["nodes", "edges"],
+  "properties": {
+    "nodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/component-registry-entry" }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "type", "contract"],
+        "properties": {
+          "from": { "type": "string", "description": "Component id" },
+          "to": { "type": "string", "description": "Component id" },
+          "type": {
+            "type": "string",
+            "enum": ["consumes", "produces", "publishes", "subscribes"]
+          },
+          "contract": {
+            "type": "string",
+            "description": "Interface contract id"
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -300,23 +558,52 @@ interface DependencyEdge {
 
 List ADRs across an initiative or component, optionally filtered by status.
 
-```typescript
-// Request
-interface ListADRsRequest {
-  initiative: string
-  component?: string
-  status?: ADRContent["status"][]
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "component": { "type": "string" },
+    "status": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["proposed", "accepted", "deprecated", "superseded"]
+      }
+    }
+  }
 }
+```
 
-// Response
-interface ListADRsResponse {
-  adrs: Array<{
-    id: string
-    title: string
-    status: ADRContent["status"]
-    decision: string            // one-line summary
-    path: string
-  }>
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["adrs"],
+  "properties": {
+    "adrs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "status", "decision", "path"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["proposed", "accepted", "deprecated", "superseded"]
+          },
+          "decision": {
+            "type": "string",
+            "description": "One-line summary"
+          },
+          "path": { "type": "string" }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -326,19 +613,38 @@ interface ListADRsResponse {
 
 Surface all risk items for an initiative or component, optionally filtered by level or status.
 
-```typescript
-// Request
-interface GetRiskRequest {
-  initiative: string
-  component?: string
-  level?: RiskItem["level"][]
-  status?: RiskItem["status"][]
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "component": { "type": "string" },
+    "level": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["low", "medium", "high"] }
+    },
+    "status": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["open", "mitigated", "accepted"] }
+    }
+  }
 }
+```
 
-// Response
-interface GetRiskResponse {
-  summary: RiskSummary
-  items: RiskItem[]
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["summary", "items"],
+  "properties": {
+    "summary": { "$ref": "#/$defs/risk-summary" },
+    "items": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/risk-item" }
+    }
+  }
 }
 ```
 
@@ -348,17 +654,33 @@ interface GetRiskResponse {
 
 Retrieve all known quirks for a scope, optionally filtered by status.
 
-```typescript
-// Request
-interface GetQuirksRequest {
-  initiative: string
-  component?: string
-  status?: Quirk["status"][]
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "component": { "type": "string" },
+    "status": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["open", "resolved", "accepted"] }
+    }
+  }
 }
+```
 
-// Response
-interface GetQuirksResponse {
-  quirks: Quirk[]
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["quirks"],
+  "properties": {
+    "quirks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/quirk" }
+    }
+  }
 }
 ```
 
@@ -368,23 +690,45 @@ interface GetQuirksResponse {
 
 Allows an agent to raise a quirk, risk item, or tech debt entry — not just humans.
 
-```typescript
-// Request
-interface RaiseIssueRequest {
-  initiative: string
-  component?: string
-  type: "quirk" | "risk" | "tech-debt"
-  description: string
-  severity?: "low" | "medium" | "high"
-  suggestedMitigation?: string
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative", "type", "description"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "component": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["quirk", "risk", "tech-debt"]
+    },
+    "description": { "type": "string" },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "suggestedMitigation": { "type": "string" }
+  }
 }
+```
 
-// Response
-interface RaiseIssueResponse {
-  id: string
-  status: "logged"
-  path: string                  // where it was written in the doc store
-  requiresHumanReview: boolean  // true if severity is high or critical
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["id", "status", "path", "requiresHumanReview"],
+  "properties": {
+    "id": { "type": "string" },
+    "status": { "const": "logged" },
+    "path": {
+      "type": "string",
+      "description": "Where it was written in the doc store"
+    },
+    "requiresHumanReview": {
+      "type": "boolean",
+      "description": "True if severity is high or critical"
+    }
+  }
 }
 ```
 
@@ -394,23 +738,48 @@ interface RaiseIssueResponse {
 
 Retrieve the domain glossary for an initiative — the ubiquitous language agents must use when generating code, docs, and specs.
 
-```typescript
-// Request
-interface GetGlossaryRequest {
-  initiative: string
-  term?: string                 // lookup a specific term
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "term": {
+      "type": "string",
+      "description": "Lookup a specific term"
+    }
+  }
 }
+```
 
-// Response
-interface GetGlossaryResponse {
-  terms: GlossaryEntry[]
-}
-
-interface GlossaryEntry {
-  term: string
-  definition: string
-  aliases?: string[]
-  usedIn: string[]              // component ids where this term appears
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["terms"],
+  "properties": {
+    "terms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["term", "definition", "usedIn"],
+        "properties": {
+          "term": { "type": "string" },
+          "definition": { "type": "string" },
+          "aliases": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "usedIn": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Component ids where this term appears"
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -420,7 +789,7 @@ interface GlossaryEntry {
 
 The service is symmetric — agents write to the domain knowledge store using the same service they query. Every write produces both a structured record and a markdown file at the corresponding git `docs/` path. The two are always kept in sync.
 
-Agent writes are always flagged with `author: "agent"`. Human reviewers can filter by this to audit what the pipeline has produced.
+Agent writes are always flagged with `"author": "agent"`. Human reviewers can filter by this to audit what the pipeline has produced.
 
 ---
 
@@ -428,23 +797,33 @@ Agent writes are always flagged with `author: "agent"`. Human reviewers can filt
 
 Create a new document in the store. Validates against the document schema before accepting.
 
-```typescript
-// Request
-interface CreateDocumentRequest {
-  type: DocumentType
-  scope: DocumentScope
-  initiative: string
-  component?: string
-  content: DocumentContent
-  changeSummary: string
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["type", "scope", "initiative", "content", "changeSummary"],
+  "properties": {
+    "type": { "type": "string", "description": "Document type" },
+    "scope": { "type": "string", "enum": ["initiative", "component", "system"] },
+    "initiative": { "type": "string" },
+    "component": { "type": "string" },
+    "content": { "description": "Document content — validated against the schema for the specified type" },
+    "changeSummary": { "type": "string" }
+  }
 }
+```
 
-// Response
-interface CreateDocumentResponse {
-  id: string
-  version: string
-  path: string                  // git docs path
-  requiresHumanReview: boolean
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["id", "version", "path", "requiresHumanReview"],
+  "properties": {
+    "id": { "type": "string" },
+    "version": { "type": "string" },
+    "path": { "type": "string", "description": "Git docs path" },
+    "requiresHumanReview": { "type": "boolean" }
+  }
 }
 ```
 
@@ -454,21 +833,31 @@ interface CreateDocumentResponse {
 
 Update an existing document. Creates a new version; the previous version is retained with status `superseded`.
 
-```typescript
-// Request
-interface UpdateDocumentRequest {
-  id: string
-  content: Partial<DocumentContent>
-  changeSummary: string
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["id", "content", "changeSummary"],
+  "properties": {
+    "id": { "type": "string" },
+    "content": { "description": "Partial content update" },
+    "changeSummary": { "type": "string" }
+  }
 }
+```
 
-// Response
-interface UpdateDocumentResponse {
-  id: string
-  previousVersion: string
-  newVersion: string
-  path: string
-  requiresHumanReview: boolean
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["id", "previousVersion", "newVersion", "path", "requiresHumanReview"],
+  "properties": {
+    "id": { "type": "string" },
+    "previousVersion": { "type": "string" },
+    "newVersion": { "type": "string" },
+    "path": { "type": "string" },
+    "requiresHumanReview": { "type": "boolean" }
+  }
 }
 ```
 
@@ -478,48 +867,35 @@ interface UpdateDocumentResponse {
 
 Supersede an existing ADR with a new one. Links the old and new ADRs bidirectionally. The old ADR status is set to `superseded`; its history is retained.
 
-```typescript
-// Request
-interface SupersedeADRRequest {
-  supersededId: string          // ADR being replaced
-  newAdr: ADRContent
-  rationale: string             // why the decision changed
-  initiative: string
-  component?: string
-}
-
-// Response
-interface SupersedeADRResponse {
-  supersededId: string
-  newId: string
-  path: string
-  requiresHumanReview: boolean  // always true — ADR changes are significant
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["supersededId", "newAdr", "rationale", "initiative"],
+  "properties": {
+    "supersededId": { "type": "string", "description": "ADR being replaced" },
+    "newAdr": { "$ref": "#/$defs/adr-content" },
+    "rationale": { "type": "string", "description": "Why the decision changed" },
+    "initiative": { "type": "string" },
+    "component": { "type": "string" }
+  }
 }
 ```
 
----
-
-### `raise_issue`
-
-Allows an agent to raise a quirk, risk item, or tech debt entry — not just humans.
-
-```typescript
-// Request
-interface RaiseIssueRequest {
-  initiative: string
-  component?: string
-  type: "quirk" | "risk" | "tech-debt"
-  description: string
-  severity?: "low" | "medium" | "high"
-  suggestedMitigation?: string
-}
-
-// Response
-interface RaiseIssueResponse {
-  id: string
-  status: "logged"
-  path: string
-  requiresHumanReview: boolean  // true if severity is high or critical
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["supersededId", "newId", "path", "requiresHumanReview"],
+  "properties": {
+    "supersededId": { "type": "string" },
+    "newId": { "type": "string" },
+    "path": { "type": "string" },
+    "requiresHumanReview": {
+      "const": true,
+      "description": "Always true — ADR changes are significant"
+    }
+  }
 }
 ```
 
@@ -531,26 +907,43 @@ Allows an agent to propose an improvement to the system, a component, or the dom
 
 This default is overridable per initiative.
 
-```typescript
-// Request
-interface RaiseImprovementRequest {
-  initiative: string
-  component?: string
-  title: string
-  description: string
-  rationale: string             // why this would be better
-  effort: "low" | "medium" | "high"
-  impact: "low" | "medium" | "high"
-  suggestedApproach?: string
-  relatedDocuments?: string[]   // document ids
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["initiative", "title", "description", "rationale", "effort", "impact"],
+  "properties": {
+    "initiative": { "type": "string" },
+    "component": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "rationale": { "type": "string", "description": "Why this would be better" },
+    "effort": { "type": "string", "enum": ["low", "medium", "high"] },
+    "impact": { "type": "string", "enum": ["low", "medium", "high"] },
+    "suggestedApproach": { "type": "string" },
+    "relatedDocuments": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Document ids"
+    }
+  }
 }
+```
 
-// Response
-interface RaiseImprovementResponse {
-  id: string
-  status: "logged"
-  path: string
-  requiresHumanReview: true     // always by default
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["id", "status", "path", "requiresHumanReview"],
+  "properties": {
+    "id": { "type": "string" },
+    "status": { "const": "logged" },
+    "path": { "type": "string" },
+    "requiresHumanReview": {
+      "const": true,
+      "description": "Always true by default"
+    }
+  }
 }
 ```
 
@@ -564,56 +957,117 @@ Data is treated differently to code throughout Planifest. A component can be reb
 
 Retrieve the canonical data contract for a component — the authoritative schema definition that the component owns.
 
-```typescript
-// Request
-interface GetDataContractRequest {
-  componentId: string
-  initiative: string
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["componentId", "initiative"],
+  "properties": {
+    "componentId": { "type": "string" },
+    "initiative": { "type": "string" }
+  }
 }
+```
 
-// Response
-interface GetDataContractResponse {
-  componentId: string
-  owner: string                 // component that owns this data — always one
-  schema: DataSchema
-  invariants: string[]          // rules the data must always satisfy
-  migrations: MigrationSummary[]
-}
-
-interface DataSchema {
-  tables: TableDefinition[]
-  version: string
-  path: string                  // path to full schema file
-}
-
-interface TableDefinition {
-  name: string
-  columns: ColumnDefinition[]
-  indexes: string[]
-  relationships: TableRelationship[]
-}
-
-interface ColumnDefinition {
-  name: string
-  type: string
-  nullable: boolean
-  default?: string
-  constraints: string[]
-}
-
-interface TableRelationship {
-  type: "one-to-one" | "one-to-many" | "many-to-many"
-  targetTable: string
-  foreignKey: string
-}
-
-interface MigrationSummary {
-  id: string
-  version: string
-  description: string
-  appliedAt?: string            // undefined if pending
-  status: "pending" | "applied" | "rolled-back"
-  destructive: boolean          // true if drops, renames, or type changes are involved
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["componentId", "owner", "schema", "invariants", "migrations"],
+  "properties": {
+    "componentId": { "type": "string" },
+    "owner": {
+      "type": "string",
+      "description": "Component that owns this data — always one"
+    },
+    "schema": {
+      "type": "object",
+      "required": ["tables", "version", "path"],
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "columns", "indexes", "relationships"],
+            "properties": {
+              "name": { "type": "string" },
+              "columns": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "type", "nullable", "constraints"],
+                  "properties": {
+                    "name": { "type": "string" },
+                    "type": { "type": "string" },
+                    "nullable": { "type": "boolean" },
+                    "default": { "type": "string" },
+                    "constraints": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              },
+              "indexes": {
+                "type": "array",
+                "items": { "type": "string" }
+              },
+              "relationships": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["type", "targetTable", "foreignKey"],
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["one-to-one", "one-to-many", "many-to-many"]
+                    },
+                    "targetTable": { "type": "string" },
+                    "foreignKey": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "version": { "type": "string" },
+        "path": {
+          "type": "string",
+          "description": "Path to full schema file"
+        }
+      }
+    },
+    "invariants": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Rules the data must always satisfy"
+    },
+    "migrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "version", "description", "status", "destructive"],
+        "properties": {
+          "id": { "type": "string" },
+          "version": { "type": "string" },
+          "description": { "type": "string" },
+          "appliedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Undefined if pending"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "applied", "rolled-back"]
+          },
+          "destructive": {
+            "type": "boolean",
+            "description": "True if drops, renames, or type changes are involved"
+          }
+        }
+      }
+    }
+  }
 }
 ```
 
@@ -623,19 +1077,32 @@ interface MigrationSummary {
 
 Return the full migration history for a component's data contract.
 
-```typescript
-// Request
-interface GetMigrationHistoryRequest {
-  componentId: string
-  initiative: string
-  status?: MigrationSummary["status"][]
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["componentId", "initiative"],
+  "properties": {
+    "componentId": { "type": "string" },
+    "initiative": { "type": "string" },
+    "status": {
+      "type": "array",
+      "items": { "type": "string", "enum": ["pending", "applied", "rolled-back"] }
+    }
+  }
 }
+```
 
-// Response
-interface GetMigrationHistoryResponse {
-  componentId: string
-  migrations: MigrationSummary[]
-  currentSchemaVersion: string
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["componentId", "migrations", "currentSchemaVersion"],
+  "properties": {
+    "componentId": { "type": "string" },
+    "migrations": { "type": "array", "items": { "$ref": "#migration-summary" } },
+    "currentSchemaVersion": { "type": "string" }
+  }
 }
 ```
 
@@ -645,33 +1112,62 @@ interface GetMigrationHistoryResponse {
 
 An agent proposes a schema migration before any schema change is applied. The migration plan is written to the doc store and flagged for human review. No schema change is applied until the migration is approved.
 
-```typescript
-// Request
-interface ProposeMigrationRequest {
-  componentId: string
-  initiative: string
-  description: string
-  changes: SchemaChange[]
-  rationale: string
-  rollbackPlan: string
+**Request:**
+```json
+{
+  "type": "object",
+  "required": ["componentId", "initiative", "description", "changes", "rationale", "rollbackPlan"],
+  "properties": {
+    "componentId": { "type": "string" },
+    "initiative": { "type": "string" },
+    "description": { "type": "string" },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "target", "detail", "destructive"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "add-column", "add-table", "add-index",
+              "modify-column", "rename-column", "rename-table",
+              "drop-column", "drop-table"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "description": "Table or column name"
+          },
+          "detail": { "type": "string" },
+          "destructive": { "type": "boolean" }
+        }
+      }
+    },
+    "rationale": { "type": "string" },
+    "rollbackPlan": { "type": "string" }
+  }
 }
+```
 
-interface SchemaChange {
-  type: "add-column" | "add-table" | "add-index"
-       | "modify-column" | "rename-column" | "rename-table"
-       | "drop-column" | "drop-table"
-  target: string                // table or column name
-  detail: string
-  destructive: boolean
-}
-
-// Response
-interface ProposeMigrationResponse {
-  id: string
-  status: "proposed"
-  path: string
-  requiresHumanReview: true     // always — no exceptions
-  hardLimit: boolean            // true if destructive operations are present
+**Response:**
+```json
+{
+  "type": "object",
+  "required": ["id", "status", "path", "requiresHumanReview", "hardLimit"],
+  "properties": {
+    "id": { "type": "string" },
+    "status": { "const": "proposed" },
+    "path": { "type": "string" },
+    "requiresHumanReview": {
+      "const": true,
+      "description": "Always — no exceptions"
+    },
+    "hardLimit": {
+      "type": "boolean",
+      "description": "True if destructive operations are present"
+    }
+  }
 }
 ```
 
@@ -797,6 +1293,10 @@ The non-MCP path is appropriate for:
 - Local development
 - Smaller teams with simpler workflows
 - Environments where running an additional service is not desirable
+
+---
+
+## Default Rules
 
 These rules govern how the service and the agents using it behave. See [FD-007 — Default rules](p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) for the full default rules table. Rules marked **overridable** can be changed per initiative. Rules marked **hard limit** cannot — the consequences of getting them wrong are irreversible.
 
