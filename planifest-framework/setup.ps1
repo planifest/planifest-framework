@@ -77,7 +77,7 @@ $Tools = @{
 $BootFiles = @{
     'claude-code' = @{
         Path    = 'CLAUDE.md'
-        Content = "# Planifest`n`nThis project uses the Planifest framework for agentic development.`n`nTo start a new initiative:`n  Load the orchestrator skill and execute the Initiative Pipeline.`n`nTo make a change:`n  Load the orchestrator skill and execute the Change Pipeline.`n`nKey paths:`n  plan/                            - initiative specifications`n  src/                             - component code`n  planifest-framework/templates/   - artifact templates`n  planifest-framework/standards/   - code quality standards"
+        Content = "# Planifest`n`nThis project uses the Planifest framework for agentic development.`n`nTo start a new initiative:`n  Load the orchestrator skill and execute the Initiative Pipeline.`n`nTo make a change:`n  Load the orchestrator skill and execute the Change Pipeline.`n`nKey paths:`n  planifest-framework/README.md    - framework overview and getting started`n  plan/                            - initiative specifications`n  src/                             - component code`n  planifest-framework/templates/   - artifact templates`n  planifest-framework/standards/   - code quality standards"
     }
     'cursor'      = @{
         Path    = '.cursor\rules\planifest.mdc'

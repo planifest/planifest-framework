@@ -127,6 +127,7 @@ To make a change:
   Load the orchestrator skill and execute the Change Pipeline.
 
 Key paths:
+  planifest-framework/README.md    — framework overview and getting started
   plan/                            — initiative specifications
   src/                             — component code
   planifest-framework/templates/   — artifact templates
