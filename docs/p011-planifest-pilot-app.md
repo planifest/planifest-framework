@@ -8,6 +8,7 @@
 | 2 | Updated to reflect specification framework framing; updated monorepo structure to full artifact taxonomy; added adoption mode; added domain-knowledge-mcp to services | 05 MAR 2026 | Martin Mayer |
 | 3 | Updated monorepo structure for v1.0 skills-based delivery; removed MCP server apps; added planifest.md per initiative | 07 MAR 2026 | Martin Mayer (via agent) |
 | 4 | Added Backend Stack Evaluation (p013) context to backend choice — pilot decision, not a Planifest default | 07 MAR 2026 | Martin Mayer (via agent) |
+| 5 | Added Frontend Stack Evaluation (p016) context to frontend choice; upgraded target to React 19 + shadcn/ui per p016 recommendations | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -33,7 +34,7 @@
 | Decision | Status |
 |---|---|
 | Application purpose | ⏳ TBC |
-| Frontend stack | ✅ React + TypeScript |
+| Frontend stack | ✅ React 19 + TypeScript + shadcn/ui |
 | Backend stack | ✅ Node.js + TypeScript |
 | CI/CD platform | ✅ GitHub Actions |
 | Source control | ✅ GitHub |
@@ -50,7 +51,9 @@
 ## 2. Confirmed Technical Decisions
 
 ### Frontend
-React 18+ with TypeScript, Vite, and TailwindCSS. Served as a containerised static build via Cloud Run — no CDN required at pilot scale, but the container approach makes it straightforward to add one later.
+React 19 with TypeScript, Vite, Tailwind CSS, and shadcn/ui. Served as a containerised static build via Cloud Run — no CDN required at pilot scale, but the container approach makes it straightforward to add one later.
+
+This is a pilot decision, not a Planifest default. The [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) assessed 10 frontend frameworks for agent-generated code and found React 19 + Vite + TypeScript the clear leader — 70–80% first-pass functional success rate, the deepest agent skills ecosystem, and the broadest component library coverage. The evaluation recommends specifying shadcn/ui as the component library, TanStack Query + Zustand for state management, and React Hook Form + Zod for form handling — these constrain the codegen-agent's output and reduce visual inconsistency.
 
 ### Backend
 Node.js with Fastify and TypeScript. Fastify's native JSON Schema validation pairs cleanly with the OpenAPI-first approach Planifest uses — the spec defines the contract, Fastify validates against it at runtime. Shared types via Zod schemas in a `packages/shared` workspace.
@@ -279,7 +282,7 @@ The `component.json` for the pilot will be pre-seeded with the confirmed technic
   "initiative_mode": "greenfield",
   "status": "in-progress",
   "stack": {
-    "frontend": "react+typescript+vite+tailwind",
+    "frontend": "react19+typescript+vite+tailwind+shadcn-ui",
     "backend": "fastify+typescript",
     "database": "postgresql",
     "orm": "drizzle",

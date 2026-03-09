@@ -9,6 +9,7 @@
 | 3 | Added FQ-007 — should Planifest agents be packaged as Agent Skills | 05 MAR 2026 | Planifest Agent (instructed by Martin Mayer) |
 | 4 | Added FD-021 (Planifest as plan and manifest), FD-022 (delivered as Agent Skills); resolved FQ-007; updated FD-003 with coaching loop and Planifest confirmation gate; updated FD-004 with orchestrator reference | 07 MAR 2026 | Martin Mayer (via agent) |
 | 5 | Updated FD-015 with reference to Backend Stack Evaluation (p013) and agent-suitability guidance for stack selection | 07 MAR 2026 | Martin Mayer (via agent) |
+| 6 | Updated FD-015 with reference to Frontend Stack Evaluation (p016) for frontend stack selection guidance | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -202,6 +203,8 @@ The git repository is the default — artifacts land alongside the code, no addi
 Stack decisions are always traceable. Every choice has an ADR. Every override has a justification. Nothing is implicit.
 
 When coaching a human through stack selection, the orchestrator should draw attention to the research in [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md). Not all stacks are equal for agent-generated code — the evaluation scores 13 backend frameworks against agent-specific criteria: compile-time error detection, error feedback clarity, concurrency safety, first-pass success rate, and self-correction iteration cost. The human decides, but they should decide with this evidence.
+
+The same principle applies to frontend stack selection. The [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) scores 10 frontend frameworks against agent-specific criteria including LLM training corpus coverage, component model clarity, styling integration, and visual acceptability. React 19 + Vite + TypeScript achieves the highest first-pass success rate (70–80% functional, 55–65% visual). The evaluation also recommends specifying the component library (shadcn/ui), state management (TanStack Query + Zustand), and form handling (React Hook Form + Zod) to constrain agent output and reduce iteration.
 
 Key findings from the evaluation:
 - **Agent iteration speed varies dramatically by language.** Go achieves 70–80% first-pass compilation; Rust achieves 45%. Both produce correct code — but at very different iteration costs.

@@ -9,6 +9,7 @@
 | 3 | Added Anthropic published skills reference section; renumbered sections 9–11 | 05 MAR 2026 | Planifest Agent (instructed by Martin Mayer) |
 | 4 | Added status marker — prompts are reference material for Agent Skills; v1.0 delivers the pipeline as skills, not API system prompts (see FD-022, RC-007) | 07 MAR 2026 | Martin Mayer (via agent) |
 | 5 | Replaced hardcoded stack values in prompt templates with {{stack_declaration}} placeholder; added p013 reference | 07 MAR 2026 | Martin Mayer (via agent) |
+| 6 | Added Frontend Stack Evaluation (p016) reference alongside p013 in stack selection note | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -116,7 +117,7 @@ Cloud provider: {{cloud_provider}} (gcp | aws | azure)
 Stack: {{stack_declaration}}
 ```
 
-> **Note:** Stack is never defaulted. The `{{stack_declaration}}` placeholder is filled from the confirmed Planifest. See [FD-015](p003-planifest-functional-decisions.md#fd-015--stack-is-a-requirement-not-a-default) and [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) for guidance on stack selection for agent-generated code.
+> **Note:** Stack is never defaulted. The `{{stack_declaration}}` placeholder is filled from the confirmed Planifest. See [FD-015](p003-planifest-functional-decisions.md#fd-015--stack-is-a-requirement-not-a-default), [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md), and [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) for guidance on stack selection for agent-generated code.
 
 ---
 
