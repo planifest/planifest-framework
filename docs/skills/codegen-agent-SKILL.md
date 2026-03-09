@@ -17,6 +17,7 @@
 
 ## Input
 
+- Component Manifest at `initiatives/{initiative-id}/component.json` — read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
 - Design Specification at `initiatives/{initiative-id}/docs/design-spec.md`
 - OpenAPI Specification at `initiatives/{initiative-id}/docs/openapi-spec.yaml`
 - ADRs at `initiatives/{initiative-id}/docs/adr/`
@@ -98,9 +99,18 @@ Full implementation at `initiatives/{initiative-id}/`:
 - IaC must be parameterised — no hardcoded environment values.
 - Dockerfiles must be multi-stage if the stack uses containers.
 
+**Component manifest — complete after build:**
+- After the implementation is built, update `component.json` to reflect what was actually implemented.
+- Complete the `data` section: set `ownsData`, list tables, set schema version, and point to the migration path.
+- Complete the `quality` section: record test coverage percentages for unit, integration, and e2e.
+- Complete the `pipeline` section: set `templateVersion` and `domainKnowledgePath`.
+- Update `metadata.updatedAt` and `metadata.lastModifiedBy`.
+- Increment `version` to `0.1.0` on first build.
+- See the [Component Manifest Template](../templates/component-manifest.template.json) for the full schema.
+
 **Quirks and tech debt:**
-- If something doesn't fit cleanly, write it to `docs/quirks.md`. Do not silently work around it.
-- If you discover tech debt, write it to `docs/components/{component-id}/tech-debt.md`.
+- If something doesn't fit cleanly, write it to `docs/quirks.md` and add it to the `quality.quirks` array in `component.json`. Do not silently work around it.
+- If you discover tech debt, write it to `docs/components/{component-id}/tech-debt.md` and add it to the `quality.techDebt` array in `component.json`.
 
 ---
 
