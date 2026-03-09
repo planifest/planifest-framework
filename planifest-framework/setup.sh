@@ -6,10 +6,16 @@ set -euo pipefail
 # Usage:  ./planifest-framework/setup.sh <tool>
 #
 # Tools:  claude-code | cursor | codex | antigravity | copilot | all
+#
+# Each tool's specific config lives in setup/<tool>.sh
+# This script handles shared logic only.
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKILLS_SRC="$SCRIPT_DIR/skills"
+SETUP_DIR="$SCRIPT_DIR/setup"
+
+VALID_TOOLS="claude-code cursor codex antigravity copilot"
 
 # --- Skill metadata ---
 
@@ -35,17 +41,7 @@ declare -A SKILL_DESCS=(
   [docs-agent]="Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6."
 )
 
-# --- Tool definitions ---
-
-declare -A TOOL_SKILLS_DIR=(
-  [claude-code]=".claude/skills"
-  [cursor]=".cursor/skills"
-  [codex]=".agents/skills"
-  [antigravity]=".gemini/skills"
-  [copilot]=".github/skills"
-)
-
-# --- Functions ---
+# --- Shared functions ---
 
 copy_skill() {
   local skill_key="$1"
@@ -56,7 +52,6 @@ copy_skill() {
 
   mkdir -p "$dest_dir"
 
-  # Add YAML frontmatter + original content
   {
     echo "---"
     echo "name: ${SKILL_NAMES[$skill_key]}"
@@ -66,7 +61,7 @@ copy_skill() {
     cat "$src_file"
   } > "$dest_file"
 
-  echo "  ✓ $skill_key/SKILL.md"
+  echo "  + $skill_key/SKILL.md"
 }
 
 copy_support() {
@@ -78,7 +73,7 @@ copy_support() {
   if [ -d "$src" ]; then
     mkdir -p "$dest"
     cp -r "$src"/* "$dest/"
-    echo "  ✓ _planifest-$dir_name/"
+    echo "  + _planifest-$dir_name/"
   fi
 }
 
@@ -89,19 +84,29 @@ write_boot_file() {
   mkdir -p "$(dirname "$path")"
   if [ ! -f "$path" ]; then
     echo "$content" > "$path"
-    echo "  ✓ $(basename "$path") (created)"
+    echo "  + $(basename "$path") (created)"
   else
-    echo "  ⊘ $(basename "$path") (already exists, skipped)"
+    echo "  - $(basename "$path") (already exists, skipped)"
   fi
 }
 
 setup_tool() {
   local tool="$1"
-  local skills_dir="$PROJECT_ROOT/${TOOL_SKILLS_DIR[$tool]}"
+  local tool_config="$SETUP_DIR/${tool}.sh"
+
+  if [ ! -f "$tool_config" ]; then
+    echo "Error: no config file at setup/${tool}.sh"
+    exit 1
+  fi
+
+  # Load tool-specific config
+  source "$tool_config"
+
+  local skills_dir="$PROJECT_ROOT/$TOOL_SKILLS_DIR"
 
   echo ""
-  echo "▸ Setting up $tool"
-  echo "  Skills directory: ${TOOL_SKILLS_DIR[$tool]}/"
+  echo "  Setting up $tool"
+  echo "  Skills directory: $TOOL_SKILLS_DIR/"
 
   # Copy skills
   for skill_key in "${!SKILL_NAMES[@]}"; do
@@ -113,46 +118,10 @@ setup_tool() {
   copy_support "$skills_dir" "standards"
   copy_support "$skills_dir" "schemas"
 
-  # Create boot files
-  case "$tool" in
-    claude-code)
-      write_boot_file "$PROJECT_ROOT/CLAUDE.md" "# Planifest
-
-This project uses the Planifest framework for agentic development.
-
-To start a new initiative:
-  Load the orchestrator skill and execute the Initiative Pipeline.
-
-To make a change:
-  Load the orchestrator skill and execute the Change Pipeline.
-
-Key paths:
-  planifest-framework/README.md    — framework overview and getting started
-  plan/                            — initiative specifications
-  src/                             — component code
-  planifest-framework/templates/   — artifact templates
-  planifest-framework/standards/   — code quality standards"
-      ;;
-    cursor)
-      write_boot_file "$PROJECT_ROOT/.cursor/rules/planifest.mdc" "---
-description: Planifest framework for agentic development
-globs: [\"**/*\"]
----
-
-This project uses the Planifest framework. Load the orchestrator skill for any initiative or change."
-      ;;
-    codex)
-      write_boot_file "$PROJECT_ROOT/AGENTS.md" "# Planifest
-
-This project uses the Planifest framework for agentic development.
-Load the orchestrator skill for any initiative or change."
-      ;;
-    copilot)
-      write_boot_file "$PROJECT_ROOT/.github/copilot-instructions.md" "# Planifest
-
-This project uses the Planifest framework. Load the orchestrator skill for any initiative or change."
-      ;;
-  esac
+  # Create boot file (if tool defines one)
+  if [ -n "$TOOL_BOOT_FILE" ]; then
+    write_boot_file "$PROJECT_ROOT/$TOOL_BOOT_FILE" "$TOOL_BOOT_CONTENT"
+  fi
 
   echo "  Done."
 }
@@ -163,19 +132,18 @@ TOOL="${1:-}"
 
 if [ -z "$TOOL" ]; then
   echo ""
-  echo "Planifest Setup — Configure skills for your agentic coding tool."
+  echo "Planifest Setup"
   echo ""
   echo "Usage: ./planifest-framework/setup.sh <tool>"
   echo ""
   echo "Tools:"
-  echo "  claude-code    → .claude/skills/ + CLAUDE.md"
-  echo "  cursor         → .cursor/skills/ + .cursor/rules/planifest.mdc"
-  echo "  codex          → .agents/skills/ + AGENTS.md"
-  echo "  antigravity    → .gemini/skills/"
-  echo "  copilot        → .github/skills/ + copilot-instructions.md"
-  echo "  all            → all of the above"
+  for t in $VALID_TOOLS; do
+    echo "  $t"
+  done
+  echo "  all"
   echo ""
   echo "Run from the repository root."
+  echo "Each tool's config: planifest-framework/setup/<tool>.sh"
   exit 0
 fi
 
@@ -183,18 +151,18 @@ echo "Planifest Setup"
 echo "════════════════════════════════════════"
 
 if [ "$TOOL" = "all" ]; then
-  for t in "${!TOOL_SKILLS_DIR[@]}"; do
+  for t in $VALID_TOOLS; do
     setup_tool "$t"
   done
-elif [ -n "${TOOL_SKILLS_DIR[$TOOL]+x}" ]; then
+elif echo "$VALID_TOOLS" | grep -qw "$TOOL"; then
   setup_tool "$TOOL"
 else
   echo "Unknown tool: $TOOL"
-  echo "Valid tools: ${!TOOL_SKILLS_DIR[*]}, all"
+  echo "Valid tools: $VALID_TOOLS, all"
   exit 1
 fi
 
 echo ""
-echo "✓ Setup complete."
+echo "Setup complete."
 echo "  Source of truth: planifest-framework/"
 echo "  Re-run after updating framework files."

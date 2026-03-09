@@ -3,8 +3,9 @@
     Planifest Setup - Configures skills for your agentic coding tool.
 
 .DESCRIPTION
-    Copies Planifest skills into the directory structure each coding tool expects,
-    adds YAML frontmatter, copies supporting files, and creates boot files.
+    Copies Planifest skills into the directory structure each coding tool expects.
+    Each tool's specific config lives in setup/<tool>.ps1.
+    This script handles shared logic only.
 
 .PARAMETER Tool
     The agentic tool to configure: claude-code, cursor, codex, antigravity, copilot, or all.
@@ -24,78 +25,26 @@ $ErrorActionPreference = 'Stop'
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $ProjectRoot = Split-Path -Parent $ScriptDir
 $SkillsSrc = Join-Path $ScriptDir 'skills'
+$SetupDir = Join-Path $ScriptDir 'setup'
+
+$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot')
 
 # --- Skill metadata ---
 
 $Skills = @{
-    'orchestrator'   = @{
-        Name = 'planifest-orchestrator'
-        Desc = 'Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs.'
-    }
-    'spec-agent'     = @{
-        Name = 'planifest-spec-agent'
-        Desc = 'Produces specification artifacts (design spec, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during Phase 1.'
-    }
-    'adr-agent'      = @{
-        Name = 'planifest-adr-agent'
-        Desc = 'Produces Architecture Decision Records for each significant decision in the specification. Invoked by the orchestrator during Phase 2.'
-    }
-    'codegen-agent'  = @{
-        Name = 'planifest-codegen-agent'
-        Desc = 'Generates the full implementation from the specification artifacts. Invoked during Phase 3.'
-    }
-    'validate-agent' = @{
-        Name = 'planifest-validate-agent'
-        Desc = 'Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.'
-    }
-    'security-agent' = @{
-        Name = 'planifest-security-agent'
-        Desc = 'Performs a security review of the implementation, producing a security report. Invoked during Phase 5.'
-    }
-    'change-agent'   = @{
-        Name = 'planifest-change-agent'
-        Desc = 'Handles modifications to existing initiatives. Loads domain context, implements the minimum change, validates, and updates documentation.'
-    }
-    'docs-agent'     = @{
-        Name = 'planifest-docs-agent'
-        Desc = 'Produces per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.'
-    }
+    'orchestrator'   = @{ Name = 'planifest-orchestrator'; Desc = 'Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs.' }
+    'spec-agent'     = @{ Name = 'planifest-spec-agent'; Desc = 'Produces specification artifacts (design spec, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during Phase 1.' }
+    'adr-agent'      = @{ Name = 'planifest-adr-agent'; Desc = 'Produces Architecture Decision Records for each significant decision in the specification. Invoked by the orchestrator during Phase 2.' }
+    'codegen-agent'  = @{ Name = 'planifest-codegen-agent'; Desc = 'Generates the full implementation from the specification artifacts. Invoked during Phase 3.' }
+    'validate-agent' = @{ Name = 'planifest-validate-agent'; Desc = 'Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.' }
+    'security-agent' = @{ Name = 'planifest-security-agent'; Desc = 'Performs a security review of the implementation, producing a security report. Invoked during Phase 5.' }
+    'change-agent'   = @{ Name = 'planifest-change-agent'; Desc = 'Handles modifications to existing initiatives. Loads domain context, implements the minimum change, validates, and updates documentation.' }
+    'docs-agent'     = @{ Name = 'planifest-docs-agent'; Desc = 'Produces per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.' }
 }
 
-# --- Tool definitions ---
+# --- Shared functions ---
 
-$Tools = @{
-    'claude-code' = @{ SkillsDir = '.claude\skills' }
-    'cursor'      = @{ SkillsDir = '.cursor\skills' }
-    'codex'       = @{ SkillsDir = '.agents\skills' }
-    'antigravity' = @{ SkillsDir = '.gemini\skills' }
-    'copilot'     = @{ SkillsDir = '.github\skills' }
-}
-
-# --- Boot file content ---
-
-$BootFiles = @{
-    'claude-code' = @{
-        Path    = 'CLAUDE.md'
-        Content = "# Planifest`n`nThis project uses the Planifest framework for agentic development.`n`nTo start a new initiative:`n  Load the orchestrator skill and execute the Initiative Pipeline.`n`nTo make a change:`n  Load the orchestrator skill and execute the Change Pipeline.`n`nKey paths:`n  planifest-framework/README.md    - framework overview and getting started`n  plan/                            - initiative specifications`n  src/                             - component code`n  planifest-framework/templates/   - artifact templates`n  planifest-framework/standards/   - code quality standards"
-    }
-    'cursor'      = @{
-        Path    = '.cursor\rules\planifest.mdc'
-        Content = "---`ndescription: Planifest framework for agentic development`nglobs: [""**/*""]`n---`n`nThis project uses the Planifest framework. Load the orchestrator skill for any initiative or change."
-    }
-    'codex'       = @{
-        Path    = 'AGENTS.md'
-        Content = "# Planifest`n`nThis project uses the Planifest framework for agentic development.`nLoad the orchestrator skill for any initiative or change."
-    }
-    'copilot'     = @{
-        Path    = '.github\copilot-instructions.md'
-        Content = "# Planifest`n`nThis project uses the Planifest framework.`nLoad the orchestrator skill for any initiative or change."
-    }
-}
-
-# --- Functions ---
-
-function Copy-Skill {
+function Copy-PlanifestSkill {
     param($SkillKey, $TargetDir)
 
     $srcFile = Join-Path $SkillsSrc "$SkillKey-SKILL.md"
@@ -106,15 +55,13 @@ function Copy-Skill {
 
     $meta = $Skills[$SkillKey]
     $frontmatter = "---`nname: $($meta.Name)`ndescription: $($meta.Desc)`n---`n`n"
-
     $content = Get-Content $srcFile -Raw
-    $output = $frontmatter + $content
-    Set-Content -Path $destFile -Value $output -NoNewline -Encoding UTF8
+    Set-Content -Path $destFile -Value ($frontmatter + $content) -NoNewline -Encoding UTF8
 
     Write-Host "  + $SkillKey/SKILL.md"
 }
 
-function Copy-Support {
+function Copy-PlanifestSupport {
     param($TargetDir, $DirName)
 
     $src = Join-Path $ScriptDir $DirName
@@ -127,7 +74,7 @@ function Copy-Support {
     }
 }
 
-function Write-BootFile {
+function Write-PlanifestBootFile {
     param($RelPath, $Content)
 
     $fullPath = Join-Path $ProjectRoot $RelPath
@@ -143,10 +90,18 @@ function Write-BootFile {
     }
 }
 
-function Setup-Tool {
+function Invoke-PlanifestSetup {
     param($ToolName)
 
-    $toolConfig = $Tools[$ToolName]
+    $toolConfigPath = Join-Path $SetupDir "$ToolName.ps1"
+    if (-not (Test-Path $toolConfigPath)) {
+        Write-Host "Error: no config file at setup/$ToolName.ps1"
+        exit 1
+    }
+
+    # Load tool-specific config
+    $toolConfig = & $toolConfigPath
+
     $skillsDir = Join-Path $ProjectRoot $toolConfig.SkillsDir
 
     Write-Host ""
@@ -155,18 +110,17 @@ function Setup-Tool {
 
     # Copy skills
     foreach ($key in $Skills.Keys) {
-        Copy-Skill -SkillKey $key -TargetDir $skillsDir
+        Copy-PlanifestSkill -SkillKey $key -TargetDir $skillsDir
     }
 
     # Copy supporting files
-    Copy-Support -TargetDir $skillsDir -DirName 'templates'
-    Copy-Support -TargetDir $skillsDir -DirName 'standards'
-    Copy-Support -TargetDir $skillsDir -DirName 'schemas'
+    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'templates'
+    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'standards'
+    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'schemas'
 
-    # Create boot file
-    if ($BootFiles.ContainsKey($ToolName)) {
-        $boot = $BootFiles[$ToolName]
-        Write-BootFile -RelPath $boot.Path -Content $boot.Content
+    # Create boot file (if tool defines one)
+    if ($toolConfig.BootFile) {
+        Write-PlanifestBootFile -RelPath $toolConfig.BootFile -Content $toolConfig.BootContent
     }
 
     Write-Host "  Done."
@@ -181,14 +135,13 @@ if (-not $Tool) {
     Write-Host "Usage: .\planifest-framework\setup.ps1 [tool]"
     Write-Host ""
     Write-Host "Tools:"
-    Write-Host "  claude-code    .claude\skills\ + CLAUDE.md"
-    Write-Host "  cursor         .cursor\skills\ + .cursor\rules\planifest.mdc"
-    Write-Host "  codex          .agents\skills\ + AGENTS.md"
-    Write-Host "  antigravity    .gemini\skills\"
-    Write-Host "  copilot        .github\skills\ + copilot-instructions.md"
-    Write-Host "  all            all of the above"
+    foreach ($t in $ValidTools) {
+        Write-Host "  $t"
+    }
+    Write-Host "  all"
     Write-Host ""
     Write-Host "Run from the repository root."
+    Write-Host "Each tool's config: planifest-framework\setup\[tool].ps1"
     exit 0
 }
 
@@ -198,16 +151,16 @@ Write-Host ("=" * 40)
 $ToolLower = $Tool.ToLower()
 
 if ($ToolLower -eq 'all') {
-    foreach ($t in $Tools.Keys) {
-        Setup-Tool -ToolName $t
+    foreach ($t in $ValidTools) {
+        Invoke-PlanifestSetup -ToolName $t
     }
 }
-elseif ($Tools.ContainsKey($ToolLower)) {
-    Setup-Tool -ToolName $ToolLower
+elseif ($ValidTools -contains $ToolLower) {
+    Invoke-PlanifestSetup -ToolName $ToolLower
 }
 else {
     Write-Host "Unknown tool: $Tool"
-    Write-Host "Valid tools: $($Tools.Keys -join ', '), all"
+    Write-Host "Valid tools: $($ValidTools -join ', '), all"
     exit 1
 }
 
