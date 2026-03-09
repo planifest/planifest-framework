@@ -156,6 +156,7 @@ AGENTS.md
 | Item | Detail |
 |------|--------|
 | **Skill discovery** | `.github/skills/{name}/SKILL.md` |
+| **Workflow discovery** | `.github/workflows/{name}.md` (natural language workflows) |
 | **Boot file** | `.github/copilot-instructions.md` |
 | **Personal skills** | `~/.copilot/skills/` |
 | **Frontmatter** | `name` + `description` + optional `license` |
@@ -171,6 +172,10 @@ AGENTS.md
 │   ├── _planifest-templates/
 │   ├── _planifest-standards/
 │   └── _planifest-schemas/
+├── workflows/
+│   ├── initiative-pipeline.md
+│   ├── change-pipeline.md
+│   └── retrofit.md
 └── copilot-instructions.md
 ```
 
