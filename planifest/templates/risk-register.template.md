@@ -1,6 +1,8 @@
 # Risk Register — {{initiative-name}}
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md) (updated by any agent that identifies a new risk)
+**Tool:** {{agentic-tool-name}}
+**Model:** {{model-name-and-version}}
 **Initiative:** {{initiative-id}}
 **Version:** {{semver}}
 **Overall Risk Level:** low | medium | high | critical
