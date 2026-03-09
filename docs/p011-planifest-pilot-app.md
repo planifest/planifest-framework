@@ -14,7 +14,7 @@
 
 > The first initiative built and maintained by Planifest, using Planifest. Purpose TBC — this document covers the confirmed technical decisions and will be updated when the product scope is defined.
 
-*Related: [Master Plan](p001-planifest-master-plan.md) | [Product Concept](p002-planifest-product-concept.md) | [MCP Design](p005-planifest-mcp-architecture.md)*
+*Related: [Master Plan](p001-planifest-master-plan.md) | [Product Concept](p002-planifest-product-concept.md) | [Roadmap](p014-planifest-roadmap.md)*
 
 ---
 

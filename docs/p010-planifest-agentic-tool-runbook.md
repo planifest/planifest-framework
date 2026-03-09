@@ -11,7 +11,7 @@
 
 > How to run the Planifest pipeline using each supported agentic development tool. v1.0 delivers the pipeline as Agent Skills — the orchestrator skill (`planifest/skills/orchestrator/SKILL.md`) is the entry point. Tool-specific adapters in `planifest/adapters/` load the skills via each tool's native compliance mechanism. MCP server infrastructure described in earlier versions of this document is a future roadmap item — see [RC-001](p014-planifest-roadmap.md) through [RC-004](p014-planifest-roadmap.md).
 
-*Related: [Master Plan](p001-planifest-master-plan.md) | [MCP Architecture](p005-planifest-mcp-architecture.md) | [Agent Prompt Library](p008-planifest-agent-prompt-library.md) | [Pipeline Template Reference](p009-planifest-pipeline-template-reference.md) | [Agentic Tool Compliance](p012-planifest-agentic-tool-compliance.md)*
+*Related: [Master Plan](p001-planifest-master-plan.md) | [Roadmap](p014-planifest-roadmap.md)*
 
 ---
 
@@ -182,16 +182,16 @@ With Copilot, the pipeline phases are run manually — prompt Copilot for each p
 
 ## 7. Hard Limits — all tools
 
-These apply regardless of which tool is used. MCP-connected tools (Claude Code, Cursor, Antigravity) enforce them at the tool level. For Copilot, they are enforced via the instructions file and human review at the PR gate.
+These apply regardless of which tool is used. In v1.0, enforcement is via the Agent Skills (prompt-level constraints) and human review at the PR gate. When MCP servers are built (see [Roadmap](p014-planifest-roadmap.md)), tools with MCP support will additionally enforce these at the infrastructure level.
 
-| Hard Limit | Enforcement — MCP tools | Enforcement — Copilot |
-|---|---|---|
-| Spec must be complete before codegen | `domain_knowledge` write blocked until spec active | Instructions file + human gate |
-| No direct schema modification | `propose_migration` required — write blocked otherwise | Instructions file + PR review |
-| Destructive schema ops require human approval | `propose_migration` flags `hardLimit: true` | Instructions file + PR review |
-| Data contract owned by one component | `domain-knowledge-mcp` enforces at write time | Instructions file + PR review |
-| Code and docs committed atomically | Serial write queue in `domain-knowledge-mcp` | Human review at PR gate |
-| Credentials never in agent context | Credentials held by MCP servers, not passed to agents | Credentials never pasted into prompts |
+| Hard Limit | v1.0 Enforcement |
+|---|---|
+| Spec must be complete before codegen | Agent skill instruction + human gate |
+| No direct schema modification | Agent writes migration proposal + stops. Human reviews at PR gate |
+| Destructive schema ops require human approval | Agent writes migration proposal flagged as destructive + stops |
+| Data contract owned by one component | Agent checks data contract before writing. Human verifies at PR gate |
+| Code and docs committed atomically | Agent skill instruction. Human verifies at PR gate |
+| Credentials never in agent context | Credentials managed by OS / CI — never in prompts or files |
 
 ---
 

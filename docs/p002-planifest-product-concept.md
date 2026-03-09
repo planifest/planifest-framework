@@ -116,4 +116,4 @@ It is a specification framework for teams that already know how to build softwar
 
 ---
 
-*Related: [Master Plan](p001-planifest-master-plan.md) | [MCP Design](p005-planifest-mcp-architecture.md)*
+*Related: [Master Plan](p001-planifest-master-plan.md) | [Roadmap](p014-planifest-roadmap.md)*

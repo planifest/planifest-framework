@@ -5,6 +5,7 @@
 | Version | Change Description | Date | Changed By |
 |---|---|---|---|
 | 1 | Initial document — created roadmap with first deferred item | 07 MAR 2026 | Martin Mayer |
+| 2 | Updated doc references — future-state docs moved to docs/roadmap/; removed TypeScript assumption from RC-002 | 09 MAR 2026 | Martin Mayer (via agent) |
 | 2 | Added RC-001 through RC-007 as Under Consideration — service infrastructure deferred from v1.0; added RC-009 and RC-010 as Candidate items; RC-008 (Agent Skills) promoted to v1.0 scope | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
@@ -70,7 +71,7 @@
 
 **Trigger to revisit:** When the pilot initiative's `docs/` folder exceeds what an agent can navigate efficiently in a single session, or when a second concurrent initiative is started.
 
-**Existing design work:** [p005 — MCP Architecture](p005-planifest-mcp-architecture.md), [p006 — Domain Knowledge Service Interface](p006-planifest-domain-knowledge-service-interface.md), [p007 — Domain Knowledge Service Reference](p007-planifest-domain-knowledge-service-reference.md).
+**Existing design work:** [p005 — MCP Architecture](roadmap/p005-planifest-mcp-architecture.md), [p006 — Domain Knowledge Service Interface](roadmap/p006-planifest-domain-knowledge-service-interface.md), [p007 — Domain Knowledge Service Reference](roadmap/p007-planifest-domain-knowledge-service-reference.md).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -80,7 +81,7 @@
 
 **Size:** L
 
-**Summary:** A containerised TypeScript service that watches for new Initiative Briefs, runs the pipeline as a state machine (Discovery → Spec → ADR → Codegen → Validate → Security → PR → Docs), persists state between steps, and handles retries with full error context.
+**Summary:** A service that watches for new Initiative Briefs, runs the pipeline as a state machine (Discovery → Spec → ADR → Codegen → Validate → Security → PR → Docs), persists state between steps, and handles retries with full error context. The implementation language is a stack decision.
 
 **What it would add:** Fully automated pipeline execution without human-triggered sessions. Idempotent re-runs. State persistence across failures. The pipeline runs in CI without anyone opening an agent tool.
 
@@ -88,7 +89,7 @@
 
 **Trigger to revisit:** When the pipeline has been run successfully multiple times and the team wants CI-triggered execution rather than human-triggered sessions.
 
-**Existing design work:** [p001 §7 — Agent Orchestration Layer](p001-planifest-master-plan.md#7-agent-orchestration-layer), [p009 — Pipeline Template Reference](p009-planifest-pipeline-template-reference.md).
+**Existing design work:** [p001 §7 — Agent Orchestration Layer](p001-planifest-master-plan.md#7-agent-orchestration-layer), [p009 — Pipeline Template Reference](roadmap/p009-planifest-pipeline-template-reference.md).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -106,7 +107,7 @@
 
 **Trigger to revisit:** When multiple agents operate concurrently on the same repository, or when the team wants structural enforcement of atomic commits rather than process enforcement.
 
-**Existing design work:** [p007 §Git Write Model](p007-planifest-domain-knowledge-service-reference.md#git-write-model), [p005 §7 — Write Model & Security](p005-planifest-mcp-architecture.md#7-write-model--security).
+**Existing design work:** [p007 §Git Write Model](roadmap/p007-planifest-domain-knowledge-service-reference.md#git-write-model), [p005 §7 — Write Model & Security](roadmap/p005-planifest-mcp-architecture.md#7-write-model--security).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -124,7 +125,7 @@
 
 **Trigger to revisit:** When agent scope violations become a recurring problem at the PR gate, or when the team needs platform-agnostic VCS operations (switching from GitHub to GitLab, for example).
 
-**Existing design work:** [p005 §3 — MCP Servers in This Pipeline](p005-planifest-mcp-architecture.md#3-mcp-servers-in-this-pipeline).
+**Existing design work:** [p005 §3 — MCP Servers in This Pipeline](roadmap/p005-planifest-mcp-architecture.md#3-mcp-servers-in-this-pipeline).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -142,7 +143,7 @@
 
 **Trigger to revisit:** When a team adopting Planifest has a hard requirement for Notion or Confluence as their primary documentation system.
 
-**Existing design work:** [p001 §11 — Documentation Sync](p001-planifest-master-plan.md#11-documentation-sync), [p005 §3 — docs-server](p005-planifest-mcp-architecture.md#3-mcp-servers-in-this-pipeline).
+**Existing design work:** [p001 §11 — Documentation Sync](p001-planifest-master-plan.md#11-documentation-sync), [p005 §3 — docs-server](roadmap/p005-planifest-mcp-architecture.md#3-mcp-servers-in-this-pipeline).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -160,7 +161,7 @@
 
 **Trigger to revisit:** When more than a handful of initiatives exist and maintaining CI config manually across them becomes a burden.
 
-**Existing design work:** [p009 §6 — Template Stamping](p009-planifest-pipeline-template-reference.md#6-template-stamping).
+**Existing design work:** [p009 §6 — Template Stamping](roadmap/p009-planifest-pipeline-template-reference.md#6-template-stamping).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -178,7 +179,7 @@
 
 **Trigger to revisit:** When RC-002 (Orchestrator Service) is built.
 
-**Existing design work:** [p008 — Agent Prompt Library](p008-planifest-agent-prompt-library.md).
+**Existing design work:** [p008 — Agent Prompt Library](roadmap/p008-planifest-agent-prompt-library.md).
 
 **Origin:** v1.0 complexity review, 07 MAR 2026.
 
@@ -192,7 +193,7 @@
 
 **Summary:** Track retry counts per agent, self-correct patterns, spec gap frequency, brief quality metrics, and which components fail most. This data becomes a product analytics layer for engineering quality — showing which briefs are consistently underspecified, which agents need prompt tuning, and where the framework creates the most friction.
 
-**Origin:** Mentioned in [p002 — Product Concept](p002-planifest-product-concept.md) and [p008 §10 — Tuning Notes](p008-planifest-agent-prompt-library.md#10-tuning-notes). Not yet evaluated as a standalone capability.
+**Origin:** Mentioned in [p002 — Product Concept](p002-planifest-product-concept.md) and [p008 §10 — Tuning Notes](roadmap/p008-planifest-agent-prompt-library.md#10-tuning-notes). Not yet evaluated as a standalone capability.
 
 ---
 
