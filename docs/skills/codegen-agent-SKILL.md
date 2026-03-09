@@ -23,6 +23,7 @@
 - Planifest at `initiatives/{initiative-id}/planifest.md` (for stack declaration)
 - Domain Glossary at `initiatives/{initiative-id}/docs/domain-glossary.md`
 - Data Contracts at `initiatives/{initiative-id}/docs/components/{id}/data-contract.md` (if they exist)
+- Code Quality Standards at [p017-planifest-code-quality-standards.md](../../p017-planifest-code-quality-standards.md)
 
 ---
 
@@ -77,6 +78,13 @@ Full implementation at `initiatives/{initiative-id}/`:
 **Write incrementally:**
 - Scaffold first, then implement routes/handlers, then tests, then IaC.
 - Write to disk after each stage. Do not accumulate the entire implementation in memory.
+
+**Code quality:**
+- Follow the standards in [Code Quality Standards](../../p017-planifest-code-quality-standards.md). These are non-negotiable.
+- Organise by feature, not by type. Group related logic, types, tests, and validation together.
+- Keep functions short and single-purpose. Keep components focused. Keep modules small enough to regenerate entirely.
+- Read existing code patterns before generating new code. Match the conventions already established in the codebase.
+- Every module should pass the review test: a senior engineer should approve this in a PR review.
 
 **Shared types:**
 - All types shared between frontend and backend must be defined once in the shared package and imported by both. Never duplicate type definitions.

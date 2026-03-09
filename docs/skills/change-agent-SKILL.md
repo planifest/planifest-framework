@@ -101,7 +101,7 @@ Blast radius: {list of components in the dependency chain}
 
 ## Capability Skills
 
-If a relevant capability skill exists for the technology being modified (e.g. `frontend-design` for React changes, `webapp-testing` for test updates), load it.
+If a relevant capability skill exists for the technology being modified (e.g. `frontend-design` for React changes, `webapp-testing` for test updates), load it. For all code changes, follow the standards in [Code Quality Standards](../../p017-planifest-code-quality-standards.md) — match existing patterns, keep modules small, and ensure every change would pass a senior engineer's PR review.
 
 ---
 
