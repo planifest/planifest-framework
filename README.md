@@ -6,6 +6,8 @@ Planifest gives AI agents the structure they need to build software that a senio
 
 The framework is LLM-agnostic and tool-agnostic. It works with any model (Claude, GPT, Gemini, etc.) and any agentic coding tool (Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, etc.).
 
+Planifest fully supports the [Agent Skills specification](https://agentskills.io/specification) and is designed for use with any tool that implements it.
+
 ---
 
 ## How It Works
