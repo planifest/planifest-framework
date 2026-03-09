@@ -13,6 +13,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SKILLS_SRC="$SCRIPT_DIR/skills"
+WORKFLOWS_SRC="$SCRIPT_DIR/workflows"
 SETUP_DIR="$SCRIPT_DIR/setup"
 
 VALID_TOOLS="claude-code cursor codex antigravity copilot"
@@ -90,6 +91,18 @@ write_boot_file() {
   fi
 }
 
+copy_workflow() {
+  local workflow_file="$1"
+  local target_dir="$2"
+  local name
+  name="$(basename "$workflow_file" .md)"
+  local dest_file="$target_dir/${name}.md"
+
+  mkdir -p "$target_dir"
+  cp "$workflow_file" "$dest_file"
+  echo "  + workflows/${name}.md"
+}
+
 setup_tool() {
   local tool="$1"
   local tool_config="$SETUP_DIR/${tool}.sh"
@@ -117,6 +130,14 @@ setup_tool() {
   copy_support "$skills_dir" "templates"
   copy_support "$skills_dir" "standards"
   copy_support "$skills_dir" "schemas"
+
+  # Copy workflows (if tool defines a workflow dir)
+  if [ -n "${TOOL_WORKFLOWS_DIR:-}" ] && [ -d "$WORKFLOWS_SRC" ]; then
+    local workflows_dir="$PROJECT_ROOT/$TOOL_WORKFLOWS_DIR"
+    for wf in "$WORKFLOWS_SRC"/*.md; do
+      [ -f "$wf" ] && copy_workflow "$wf" "$workflows_dir"
+    done
+  fi
 
   # Create boot file (if tool defines one)
   if [ -n "$TOOL_BOOT_FILE" ]; then
