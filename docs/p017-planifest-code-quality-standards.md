@@ -870,7 +870,7 @@ logger.info(`Created order ${order.id} for user ${user.id} with total ${order.to
 - No `SELECT *` — select only the columns you need
 - Every query that touches production data has an index strategy
 - N+1 queries are a defect. If you're querying inside a loop, you're doing it wrong
-- Transactions are used for operations that must be atomic — not as a default
+- **Default to explicit transactions for all write operations.** A single SQL statement is already atomic — the database wraps it in an implicit transaction. The reason to use explicit transactions even for single writes is defensive: agent-generated code evolves incrementally, and a function that starts as a single `INSERT` often gains a second write in a later change. If the convention is "always wrap writes in a transaction," the second write is already protected. If the convention is "add a transaction when you need one," the agent must recognise the new atomicity requirement — and it may not. Multi-statement mutations within a single logical operation **must** be transactional; this is non-negotiable. The overhead of an explicit transaction around a single write on a modern database (PostgreSQL MVCC, etc.) is negligible. The overhead of a transaction drawn too wide — spanning slow operations, external API calls, or user-facing waits — is real and causes lock contention. Keep transaction boundaries tight: wrap the writes, not the entire request lifecycle. If a specific operation demonstrably suffers from transaction overhead at scale, record the exception in an ADR
 - Connection pooling is configured, not assumed
 
 ---
