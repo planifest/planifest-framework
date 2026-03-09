@@ -5,6 +5,7 @@
 | Version | Change Description | Date | Changed By |
 |---|---|---|---|
 | 1 | Initial document — comprehensive evaluation of 13 backend stacks for agent-generated code | 05 MAR 2026 | Martin Mayer (via agent) |
+| 2 | Fixed heading prefix; corrected Implications section — Planifest does not specify a stack, the pilot does; added FD-015 reference and orchestrator coaching guidance | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -1966,18 +1967,18 @@ Go (default) + Node/TS (integrations) + Rust (security-critical) + Python (data)
 
 ## Implications for Planifest
 
-The current Planifest architecture specifies TypeScript/Node.js + Fastify for the backend. This is a **defensible choice** for the following reasons:
+Planifest does not specify a stack — stack is a requirement declared per initiative, not a framework default (see [FD-015](p003-planifest-functional-decisions.md#fd-015--stack-is-a-requirement-not-a-default)). The Planifest pilot uses TypeScript/Node.js + Fastify for the backend. This is a **defensible choice** for the pilot for the following reasons:
 
 1. **Single-language stack** (TS everywhere) eliminates context-switching for the codegen-agent
 2. **Maximum SDK coverage** for integration-heavy services
 3. **Shared Zod schemas** between frontend and backend enforce contracts
 4. **LLM fluency** in TypeScript is the highest of any language
 
-However, Planifest should consider:
+However, future initiatives should consider the findings of this evaluation when declaring their stack:
 
-1. **Adopting Go for infrastructure/gateway services** where deployment efficiency and correctness matter more than SDK coverage
-2. **Adopting Rust for security-critical services** (auth, payment processing) where compile-time guarantees justify the iteration cost
-3. **Enforcing strict TypeScript** (`strict: true`, `noUncheckedIndexedAccess`, ban `any` via ESLint) to mitigate the type system's weaknesses
-4. **Adding `neverthrow` or similar** Result-type libraries to the codegen template, forcing agents to handle errors explicitly rather than relying on exceptions
+1. **Go for core domain services** where deployment efficiency, error clarity, and first-pass success rate matter more than SDK coverage
+2. **Rust for security-critical services** (auth, payment processing) where compile-time guarantees justify the higher iteration cost
+3. **Polyglot architectures** where different components have genuinely different requirements — each choice justified by an ADR
+4. **If using TypeScript, enforce strict mode** (`strict: true`, `noUncheckedIndexedAccess`, ban `any` via ESLint) and consider `neverthrow` or similar Result-type libraries to mitigate the type system's weaknesses
 
-The single-language advantage is real for a v1 pipeline. The polyglot recommendation becomes relevant as Planifest matures and the agent orchestration layer can manage multiple codegen templates.
+The orchestrator agent should draw human attention to this document during the stack coaching conversation. The human decides — but with the evidence.

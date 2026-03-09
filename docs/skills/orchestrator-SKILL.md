@@ -72,7 +72,7 @@ Planifest describes three layers of every initiative. Each must be covered.
 
 1. Problem statement and user stories — if these are unclear, nothing downstream is derivable
 2. Acceptance criteria — these become the test cases; vagueness here propagates everywhere
-3. Stack declaration — the codegen-agent cannot begin without this
+3. Stack declaration — the codegen-agent cannot begin without this. Draw the human's attention to the [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) — not all stacks are equal for agent-generated code. The evaluation covers 13 frameworks scored on agent-specific criteria (first-pass success rate, error feedback clarity, self-correction cost). Different components may warrant different stacks — that's legitimate if each choice has an ADR. The human decides, but they should decide with the evidence.
 4. Scope boundaries — what's out is as important as what's in
 5. Non-functional requirements — performance, availability, scalability, security
 6. Component design and data ownership — these inform the architecture
@@ -85,6 +85,7 @@ Planifest describes three layers of every initiative. Each must be covered.
 - "Standard security" → "What authentication strategy? JWT, session-based, OAuth2? What authorisation model? RBAC, ABAC, simple role check? What data sensitivity — PII, financial, public?"
 - "We'll figure out the database later" → "The codegen-agent needs a database choice to produce the data layer, ORM configuration, and migration strategy. If you want to defer this, I'll record it as deferred in the scope document, but no data-owning component can be built until this is resolved."
 - "Just use best practices" → "Best practices for what context? I need the specific constraints — expected concurrent users, data volume, compliance requirements — to make a recommendation. Without them, any choice I make is a guess."
+- "Use TypeScript for everything" → "That's a valid choice for single-language simplicity and SDK coverage. But have you considered the trade-offs? The Backend Stack Evaluation shows Go has a 70–80% first-pass compilation rate vs TypeScript's 65–75%, and Rust offers compile-time safety guarantees that TypeScript cannot. If any component is security-critical or performance-critical, a polyglot approach may be worth the operational complexity. What are the requirements driving your stack choice?"
 
 **When the human defers a decision:** That is legitimate. Record it in the scope document as explicitly deferred, note what cannot be built until it's resolved, and move on. Deferred is not the same as missing — deferred is a conscious decision.
 

@@ -8,6 +8,7 @@
 | 2 | Updated all prompts to use domain-knowledge-server tools; added spec hard-gate; corrected human gate language; added data contract and migration awareness; added domain glossary requirement | 05 MAR 2026 | Martin Mayer |
 | 3 | Added Anthropic published skills reference section; renumbered sections 9–11 | 05 MAR 2026 | Planifest Agent (instructed by Martin Mayer) |
 | 4 | Added status marker — prompts are reference material for Agent Skills; v1.0 delivers the pipeline as skills, not API system prompts (see FD-022, RC-007) | 07 MAR 2026 | Martin Mayer (via agent) |
+| 5 | Replaced hardcoded stack values in prompt templates with {{stack_declaration}} placeholder; added p013 reference | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -112,8 +113,10 @@ Execute the spec-agent for a new initiative.
 Brief path: initiatives/{{component_id}}/initiative-brief.md
 Component ID: {{component_id}}
 Cloud provider: {{cloud_provider}} (gcp | aws | azure)
-Stack: React 18 + Vite + TailwindCSS / Fastify / PostgreSQL + Drizzle / Pulumi
+Stack: {{stack_declaration}}
 ```
+
+> **Note:** Stack is never defaulted. The `{{stack_declaration}}` placeholder is filled from the confirmed Planifest. See [FD-015](p003-planifest-functional-decisions.md#fd-015--stack-is-a-requirement-not-a-default) and [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) for guidance on stack selection for agent-generated code.
 
 ---
 
@@ -165,11 +168,7 @@ Design Specification:
 {{design_spec_content}}
 
 Stack constraints (already decided — do not write ADRs for these):
-- Fastify for backend
-- React 18 + Vite for frontend
-- PostgreSQL via Drizzle ORM
-- Pulumi for IaC
-- Zod for shared schemas
+{{stack_declaration}}
 ```
 
 ---

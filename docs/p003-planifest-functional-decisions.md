@@ -8,6 +8,7 @@
 | 2 | Corrected FD-003 — Initiative Brief is the initiating input, not the only point of human intervention | 05 MAR 2026 | Martin Mayer |
 | 3 | Added FQ-007 — should Planifest agents be packaged as Agent Skills | 05 MAR 2026 | Planifest Agent (instructed by Martin Mayer) |
 | 4 | Added FD-021 (Planifest as plan and manifest), FD-022 (delivered as Agent Skills); resolved FQ-007; updated FD-003 with coaching loop and Planifest confirmation gate; updated FD-004 with orchestrator reference | 07 MAR 2026 | Martin Mayer (via agent) |
+| 5 | Updated FD-015 with reference to Backend Stack Evaluation (p013) and agent-suitability guidance for stack selection | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -200,7 +201,14 @@ The git repository is the default — artifacts land alongside the code, no addi
 
 Stack decisions are always traceable. Every choice has an ADR. Every override has a justification. Nothing is implicit.
 
-**Rationale:** Defaulting a stack is the same as defaulting requirements — it is presumptuous and undermines the spec-driven principle. Stack is a decision that belongs to the initiative or system, not to the pipeline.
+When coaching a human through stack selection, the orchestrator should draw attention to the research in [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md). Not all stacks are equal for agent-generated code — the evaluation scores 13 backend frameworks against agent-specific criteria: compile-time error detection, error feedback clarity, concurrency safety, first-pass success rate, and self-correction iteration cost. The human decides, but they should decide with this evidence.
+
+Key findings from the evaluation:
+- **Agent iteration speed varies dramatically by language.** Go achieves 70–80% first-pass compilation; Rust achieves 45%. Both produce correct code — but at very different iteration costs.
+- **A polyglot architecture is legitimate.** Different components have different requirements. An integration-heavy service benefits from Node.js/TypeScript SDK coverage. A security-critical service benefits from Rust's compile-time guarantees. A data pipeline benefits from Python's ecosystem. The stack can vary by component — each choice requires an ADR.
+- **The pilot stack (Node.js/TypeScript + Fastify) is a defensible choice** for single-language simplicity, SDK coverage, and LLM fluency — but it is a pilot decision, not a Planifest default.
+
+**Rationale:** Defaulting a stack is the same as defaulting requirements — it is presumptuous and undermines the spec-driven principle. Stack is a decision that belongs to the initiative or system, not to the pipeline. Agents generate code in whatever stack is declared — the quality of that code depends on the match between the stack and the initiative's requirements.
 
 ---
 
