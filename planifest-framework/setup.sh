@@ -48,7 +48,7 @@ copy_skill() {
   local skill_key="$1"
   local target_dir="$2"
   local src_file="$SKILLS_SRC/${skill_key}-SKILL.md"
-  local dest_dir="$target_dir/$skill_key"
+  local dest_dir="$target_dir/${SKILL_NAMES[$skill_key]}"
   local dest_file="$dest_dir/SKILL.md"
 
   mkdir -p "$dest_dir"
@@ -62,7 +62,7 @@ copy_skill() {
     cat "$src_file"
   } > "$dest_file"
 
-  echo "  + $skill_key/SKILL.md"
+  echo "  + ${SKILL_NAMES[$skill_key]}/SKILL.md"
 }
 
 copy_support() {
