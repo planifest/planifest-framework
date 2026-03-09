@@ -63,6 +63,7 @@ Full implementation at `initiatives/{initiative-id}/`:
 - The OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it — do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
+- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
 
 **Domain language:**
 - Use the domain glossary terms throughout — in code, comments, file names, variable names.

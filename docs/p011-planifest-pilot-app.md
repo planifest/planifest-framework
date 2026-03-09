@@ -7,6 +7,7 @@
 | 1 | Initial document | 02 MAR 2026 | Martin Mayer |
 | 2 | Updated to reflect specification framework framing; updated monorepo structure to full artifact taxonomy; added adoption mode; added domain-knowledge-mcp to services | 05 MAR 2026 | Martin Mayer |
 | 3 | Updated monorepo structure for v1.0 skills-based delivery; removed MCP server apps; added planifest.md per initiative | 07 MAR 2026 | Martin Mayer (via agent) |
+| 4 | Added Backend Stack Evaluation (p013) context to backend choice — pilot decision, not a Planifest default | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
@@ -53,6 +54,8 @@ React 18+ with TypeScript, Vite, and TailwindCSS. Served as a containerised stat
 
 ### Backend
 Node.js with Fastify and TypeScript. Fastify's native JSON Schema validation pairs cleanly with the OpenAPI-first approach Planifest uses — the spec defines the contract, Fastify validates against it at runtime. Shared types via Zod schemas in a `packages/shared` workspace.
+
+This is a pilot decision, not a Planifest default. The [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) assessed 13 frameworks for agent-generated code and found Node.js/TypeScript + Fastify defensible for single-language simplicity, SDK coverage (~95%), and LLM fluency — but noted trade-offs in error handling discipline and type system soundness. For future initiatives, especially those with security-critical or high-performance components, the evaluation recommends considering Go (highest first-pass success rate) or Rust (strongest compile-time guarantees).
 
 ### Database
 PostgreSQL via Cloud SQL. Drizzle ORM for type-safe queries — no raw SQL, schema migrations tracked in the repo.
