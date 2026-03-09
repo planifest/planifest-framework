@@ -1,1 +1,1 @@
-# planifest-docs
+# planifest
