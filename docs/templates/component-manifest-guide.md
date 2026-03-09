@@ -2,7 +2,7 @@
 
 > This is the canonical template for `component.json` — the manifest file that describes a built component. Agents write it after building; agents and humans read it before changing anything.
 
-*Related: [Domain Knowledge Service Reference](../p007-planifest-domain-knowledge-service-reference.md) | [Pipeline Template Reference](../p009-planifest-pipeline-template-reference.md) | [Pilot App](../p011-planifest-pilot-app.md)*
+*Related: [Pilot App](../p011-planifest-pilot-app.md) | [Shared Schema Definitions](../schemas/shared.schema.json)*
 
 ---
 

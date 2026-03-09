@@ -34,7 +34,7 @@
 - [11. Documentation Sync](#11-documentation-sync)
 - [12. Build Sequence](#12-build-sequence)
 - [Local Dev — Claude Code Execution Mode](p010-planifest-agentic-tool-runbook.md)
-- [MCP Design — Tool Server Architecture](p005-planifest-mcp-architecture.md)
+- [MCP Design — Tool Server Architecture](roadmap/p005-planifest-mcp-architecture.md) *(roadmap)*
 - [Functional Decisions](p003-planifest-functional-decisions.md)
 - [The Pathway to Agentic Development](p004-the-pathway-to-agentic-development.md)
 
@@ -105,7 +105,7 @@ flowchart TD
     style DKS fill:#cce5ff,stroke:#0066cc
 ```
 
-> Planifest runs in two modes: any **CI/CD platform** (GitHub Actions, GitLab CI, Bitbucket Pipelines, CircleCI, etc.) using the Claude API, and **Claude Code** locally on a dev machine. See [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) and [MCP Design](p005-planifest-mcp-architecture.md).
+> Planifest runs in two modes: any **CI/CD platform** (GitHub Actions, GitLab CI, Bitbucket Pipelines, CircleCI, etc.) using the Claude API, and **Claude Code** locally on a dev machine. See [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) and [MCP Design](roadmap/p005-planifest-mcp-architecture.md) *(roadmap)*.
 
 ---
 
@@ -151,7 +151,7 @@ Before building any component, an agent must at minimum:
 
 Every document is versioned. Updates create new versions rather than overwriting. History is never destroyed — only superseded. Documents carry `author: "human" | "agent"` — agent-authored documents are always flagged distinctly.
 
-See [MCP Design](p005-planifest-mcp-architecture.md), [MCP Domain Service Spec](p007-planifest-domain-knowledge-service-reference.md), and [MCP Interface Spec](p006-planifest-domain-knowledge-service-interface.md) for the full tool interface and conformance requirements.
+See [MCP Design](roadmap/p005-planifest-mcp-architecture.md), [MCP Domain Service Spec](roadmap/p007-planifest-domain-knowledge-service-reference.md), and [MCP Interface Spec](roadmap/p006-planifest-domain-knowledge-service-interface.md) for the full tool interface and conformance requirements *(roadmap)*.
 
 ---
 
@@ -567,4 +567,4 @@ flowchart LR
 
 *This document is the living Planifest architecture reference. As the system evolves, agents update it.*
 
-*Related: [Functional Decisions](p003-planifest-functional-decisions.md) | [The Pathway to Agentic Development](p004-the-pathway-to-agentic-development.md) | [MCP Design](p005-planifest-mcp-architecture.md) | [MCP Domain Service Spec](p007-planifest-domain-knowledge-service-reference.md) | [MCP Interface Spec](p006-planifest-domain-knowledge-service-interface.md) | [Agent Prompt Library](p008-planifest-agent-prompt-library.md) | [Pipeline Template Reference](p009-planifest-pipeline-template-reference.md) | [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) | [Pilot App](p011-planifest-pilot-app.md) | [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) | [Roadmap](p014-planifest-roadmap.md) | [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) | [Code Quality Standards](p017-planifest-code-quality-standards.md)*
+*Related: [Functional Decisions](p003-planifest-functional-decisions.md) | [The Pathway to Agentic Development](p004-the-pathway-to-agentic-development.md) | [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) | [Pilot App](p011-planifest-pilot-app.md) | [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) | [Roadmap](p014-planifest-roadmap.md) | [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) | [Code Quality Standards](p017-planifest-code-quality-standards.md)*
