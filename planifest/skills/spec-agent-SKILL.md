@@ -86,4 +86,4 @@ When the Planifest indicates `adoption_mode: retrofit`, read the existing codeba
 
 ---
 
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md) | [FD-019 — Artifact Types](../../p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned)*
+*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md) | [FD-019 — Artifact Types](../../docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned)*

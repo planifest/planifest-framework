@@ -24,7 +24,7 @@
 - Planifest at `initiatives/{initiative-id}/planifest.md` (for stack declaration)
 - Domain Glossary at `initiatives/{initiative-id}/docs/domain-glossary.md`
 - Data Contracts at `initiatives/{initiative-id}/docs/components/{id}/data-contract.md` (if they exist)
-- Code Quality Standards at [p017-planifest-code-quality-standards.md](../../p017-planifest-code-quality-standards.md)
+- Code Quality Standards at [code-quality-standards.md](../standards/code-quality-standards.md)
 
 ---
 
@@ -65,8 +65,8 @@ Full implementation at `initiatives/{initiative-id}/`:
 - The OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it — do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
-- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
-- For frontend stacks, the [Frontend Stack Evaluation](../../p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
+- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../docs/p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
+- For frontend stacks, the [Frontend Stack Evaluation](../../docs/p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
 **Domain language:**
 - Use the domain glossary terms throughout — in code, comments, file names, variable names.
@@ -81,7 +81,7 @@ Full implementation at `initiatives/{initiative-id}/`:
 - Write to disk after each stage. Do not accumulate the entire implementation in memory.
 
 **Code quality:**
-- Follow the standards in [Code Quality Standards](../../p017-planifest-code-quality-standards.md). These are non-negotiable.
+- Follow the standards in [Code Quality Standards](../standards/code-quality-standards.md). These are non-negotiable.
 - Organise by feature, not by type. Group related logic, types, tests, and validation together.
 - Keep functions short and single-purpose. Keep components focused. Keep modules small enough to regenerate entirely.
 - Read existing code patterns before generating new code. Match the conventions already established in the codebase.
