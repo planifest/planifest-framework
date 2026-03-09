@@ -72,7 +72,8 @@ Planifest describes three layers of every initiative. Each must be covered.
 
 1. Problem statement and user stories — if these are unclear, nothing downstream is derivable
 2. Acceptance criteria — these become the test cases; vagueness here propagates everywhere
-3. Stack declaration — the codegen-agent cannot begin without this. Draw the human's attention to the [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) — not all stacks are equal for agent-generated code. The evaluation covers 13 frameworks scored on agent-specific criteria (first-pass success rate, error feedback clarity, self-correction cost). Different components may warrant different stacks — that's legitimate if each choice has an ADR. The human decides, but they should decide with the evidence. For the frontend, draw attention to the [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) — it scores 10 frameworks on agent-specific criteria including training corpus coverage, component model clarity, and visual acceptability. The evaluation recommends specifying not just the framework (React) but also the component library (shadcn/ui), state management pattern (TanStack Query + Zustand), and form handling (React Hook Form + Zod) — these constrain the agent's design vocabulary and significantly reduce iteration.
+3. **Initiative decomposition** — is this initiative small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big initiatives into features and phases before proceeding.
+4. Stack declaration — the codegen-agent cannot begin without this. Draw the human's attention to the [Backend Stack Evaluation](../../docs/p013-planifest-backend-stack-evaluation.md) — not all stacks are equal for agent-generated code. For the frontend, draw attention to the [Frontend Stack Evaluation](../../docs/p016-planifest-frontend-stack-evaluation.md).
 4. Scope boundaries — what's out is as important as what's in
 5. Non-functional requirements — performance, availability, scalability, security
 6. Component design and data ownership — these inform the architecture
@@ -90,6 +91,30 @@ Planifest describes three layers of every initiative. Each must be covered.
 **When the human defers a decision:** That is legitimate. Record it in the scope document as explicitly deferred, note what cannot be built until it's resolved, and move on. Deferred is not the same as missing — deferred is a conscious decision.
 
 **When the brief is already complete:** Confirm it. Walk through each layer, confirm you have what you need, and proceed. Don't coach for the sake of coaching.
+
+### Decomposition
+
+Big initiatives create big context. Big context means the agent misses detail, hallucinates, or hits token limits. The antidote is decomposition.
+
+**Features** — break the initiative into discrete features. Each feature should be small enough that an agent can implement it in a single session:
+- One API resource (endpoints + data model + validation + tests + docs)
+- One UI screen (layout + state + data fetching + tests)
+- One integration (adapter + contract + error handling + tests)
+
+**Rule of thumb:** If a feature has more than 3 user stories, it's too big. Split it.
+
+**Phases** — if the initiative has more than 5-6 features, group them into phases. Each phase is a separate pipeline run:
+- Phase 1 features are built first, producing component manifests and specs
+- Phase 2's pipeline run reads Phase 1's manifests for context but doesn't need to hold Phase 1's code in memory
+- This is how Planifest scales beyond single-session context limits
+
+Coach the human through this. If the brief describes something bigger than "a few features", ask:
+
+- "This initiative has {{n}} features. I recommend grouping them into phases so each pipeline run stays focused. Which features need to ship first?"
+- "Feature X reads like it has several sub-features. Can we split it? A feature should be implementable in one agent session."
+- "These features have a dependency: Y needs Z to exist first. I'll put Z in Phase 1 and Y in Phase 2."
+
+The [Initiative Brief Template](../templates/initiative-brief.template.md) guides the human through this before they reach you.
 
 ### What you produce at the end of Phase 0
 
@@ -248,9 +273,20 @@ You do not need to re-run Phase 0 coaching for a change — the specification al
 
 ## References
 
-- [Functional Decisions](p003-planifest-functional-decisions.md) — the canonical decisions that define what Planifest is
-- [Default Rules — FD-007](p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) — the full rules table
-- [Artifact Types — FD-019](p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned) — what must be produced
-- [Three Layers — FD-002](p003-planifest-functional-decisions.md#fd-002--planifest-covers-three-layers-of-every-initiative) — Product, Architecture, Engineering
-- Artifact templates: `planifest/templates/`
-- Phase skills: `planifest/skills/spec-agent/`, `planifest/skills/adr-agent/`, etc.
+- [Functional Decisions](../../docs/p003-planifest-functional-decisions.md) — the canonical decisions that define what Planifest is
+- [Default Rules — FD-007](../../docs/p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) — the full rules table
+- [Artifact Types — FD-019](../../docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned) — what must be produced
+- [Three Layers — FD-002](../../docs/p003-planifest-functional-decisions.md#fd-002--planifest-covers-three-layers-of-every-initiative) — Product, Architecture, Engineering
+
+**Templates** (agents should follow these for all output artifacts):
+- [Initiative Brief](../templates/initiative-brief.template.md) — human input
+- [Design Specification](../templates/design-spec.template.md) — spec-agent output
+- [ADR](../templates/adr.template.md) — adr-agent output
+- [Scope](../templates/scope.template.md) — spec-agent output
+- [Risk Register](../templates/risk-register.template.md) — spec-agent output, updated by any agent
+- [Domain Glossary](../templates/domain-glossary.template.md) — spec-agent output, updated by any agent
+- [Data Contract](../templates/data-contract.template.md) — codegen-agent output
+- [Component Manifest](../templates/component-manifest.template.json) — codegen-agent output ([guide](../templates/component-manifest-guide.md))
+- [Pipeline Run](../templates/pipeline-run.template.md) — written at end of every run
+
+**Phase skills:** `planifest/skills/spec-agent/`, `planifest/skills/adr-agent/`, etc.
