@@ -1,6 +1,8 @@
 # Data Contract — {{component-name}}
 
 **Skill:** [codegen-agent](../skills/codegen-agent-SKILL.md) (updated via migration proposals)
+**Tool:** {{agentic-tool-name}}
+**Model:** {{model-name-and-version}}
 **Component:** {{component-id}}
 **Initiative:** {{initiative-id}}
 **Owner:** {{component-id}} (data is always owned by exactly one component)

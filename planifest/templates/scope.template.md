@@ -1,6 +1,8 @@
 # Scope — {{initiative-name}}
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
+**Tool:** {{agentic-tool-name}}
+**Model:** {{model-name-and-version}}
 **Initiative:** {{initiative-id}}
 **Phase:** {{phase-number}} (if phased)
 **Version:** {{semver}}

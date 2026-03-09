@@ -1,6 +1,8 @@
 # ADR-{{NNN}} — {{title}}
 
 **Skill:** [adr-agent](../skills/adr-agent-SKILL.md)
+**Tool:** {{agentic-tool-name}}
+**Model:** {{model-name-and-version}}
 **Initiative:** {{initiative-id}}
 **Component:** {{component-id}} (if scoped to one)
 **Status:** proposed | accepted | deprecated | superseded

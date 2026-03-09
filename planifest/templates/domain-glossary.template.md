@@ -1,6 +1,8 @@
 # Domain Glossary — {{initiative-name}}
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md) (updated by any agent that introduces a new domain term)
+**Tool:** {{agentic-tool-name}}
+**Model:** {{model-name-and-version}}
 **Initiative:** {{initiative-id}}
 **Version:** {{semver}}
 

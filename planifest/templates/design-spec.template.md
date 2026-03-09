@@ -3,6 +3,8 @@
 > Written by the spec-agent. Derived from the Initiative Brief — not invented. Every requirement must be traceable to a user story or acceptance criterion.
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
+**Tool:** {{agentic-tool-name}}
+**Model:** {{model-name-and-version}}
 **Initiative:** {{initiative-id}}
 **Phase:** {{phase-number}} (if phased)
 **Version:** {{semver}}
