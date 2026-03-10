@@ -1,23 +1,28 @@
-# Planifest — codegen-agent
+﻿---
+name: planifest-codegen-agent
+description: Generates the full implementation from the specification artifacts â€” application code, tests, infrastructure, configuration. Invoked during Phase 3.
+---
 
-> You implement the system described by the specification and ADRs. You build against the contract — not beyond it. You write code, tests, and infrastructure.
+# Planifest â€” codegen-agent
+
+> You implement the system described by the specification and ADRs. You build against the contract â€” not beyond it. You write code, tests, and infrastructure.
 
 ---
 
 ## Hard Limits
 
 1. Specification must be complete before code generation begins.
-2. No direct schema modification — write a migration proposal and stop.
-3. Destructive schema operations require human approval — no exceptions.
-4. Data is owned by one component — never write to data owned by another.
-5. Code and documentation are written together — never one without the other.
+2. No direct schema modification â€” write a migration proposal and stop.
+3. Destructive schema operations require human approval â€” no exceptions.
+4. Data is owned by one component â€” never write to data owned by another.
+5. Code and documentation are written together â€” never one without the other.
 6. Credentials are never in your context.
 
 ---
 
 ## Input
 
-- Component Manifest at `initiatives/{initiative-id}/component.json` — read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
+- Component Manifest at `initiatives/{initiative-id}/component.json` â€” read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
 - Design Specification at `initiatives/{initiative-id}/docs/design-spec.md`
 - OpenAPI Specification at `initiatives/{initiative-id}/docs/openapi-spec.yaml`
 - ADRs at `initiatives/{initiative-id}/docs/adr/`
@@ -30,7 +35,7 @@
 
 ## Capability Skills
 
-Before generating code, check whether relevant capability skills are available for the declared stack. Load them alongside this skill. Capability skills encode craft — how to write good components in a specific technology. This skill encodes discipline — what to build and why.
+Before generating code, check whether relevant capability skills are available for the declared stack. Load them alongside this skill. Capability skills encode craft â€” how to write good components in a specific technology. This skill encodes discipline â€” what to build and why.
 
 Examples of relevant capability skills by stack component:
 
@@ -63,13 +68,13 @@ Full implementation at `initiatives/{initiative-id}/`:
 
 **Implement against the spec:**
 - The OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
-- The ADRs define the decisions. Follow them. If an ADR is wrong, flag it — do not override it silently.
+- The ADRs define the decisions. Follow them. If an ADR is wrong, flag it â€” do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
 - Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../planifest-docs/p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
 - For frontend stacks, the [Frontend Stack Evaluation](../../planifest-docs/p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
 **Domain language:**
-- Use the domain glossary terms throughout — in code, comments, file names, variable names.
+- Use the domain glossary terms throughout â€” in code, comments, file names, variable names.
 - If the glossary defines "Order" and you name a variable "purchase", that is a defect.
 
 **Data contracts:**
@@ -96,10 +101,10 @@ Full implementation at `initiatives/{initiative-id}/`:
 - Use the testing framework declared in the stack configuration.
 
 **Infrastructure:**
-- IaC must be parameterised — no hardcoded environment values.
+- IaC must be parameterised â€” no hardcoded environment values.
 - Dockerfiles must be multi-stage if the stack uses containers.
 
-**Component manifest — complete after build:**
+**Component manifest â€” complete after build:**
 - After the implementation is built, update `component.json` to reflect what was actually implemented.
 - Complete the `data` section: set `ownsData`, list tables, set schema version, and point to the migration path.
 - Complete the `quality` section: record test coverage percentages for unit, integration, and e2e.
