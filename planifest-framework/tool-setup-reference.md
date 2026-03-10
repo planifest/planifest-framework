@@ -4,6 +4,12 @@
 
 ---
 
+## Agent Skills Specification
+
+Planifest fully supports the [Agent Skills specification](https://agentskills.io/specification). Each skill is deployed as a directory whose name matches the `name` field in YAML frontmatter — the requirement the spec mandates. The framework is designed for tools that implement the Agent Skills standard: skills are discoverable, frontmatter-driven, and portable across any compliant tool.
+
+---
+
 ## Scripts
 
 Two setup scripts are provided — use whichever matches your OS:
@@ -47,8 +53,14 @@ For each tool, the script:
 ```
 .claude/
 ├── skills/
-│   ├── orchestrator/SKILL.md
-│   ├── ... (all 8 skills)
+│   ├── planifest-orchestrator/SKILL.md
+│   ├── planifest-spec-agent/SKILL.md
+│   ├── planifest-adr-agent/SKILL.md
+│   ├── planifest-codegen-agent/SKILL.md
+│   ├── planifest-validate-agent/SKILL.md
+│   ├── planifest-security-agent/SKILL.md
+│   ├── planifest-change-agent/SKILL.md
+│   ├── planifest-docs-agent/SKILL.md
 │   ├── _planifest-templates/
 │   ├── _planifest-standards/
 │   └── _planifest-schemas/
@@ -78,7 +90,8 @@ CLAUDE.md
 ```
 .cursor/
 ├── skills/
-│   ├── orchestrator/SKILL.md
+│   ├── planifest-orchestrator/SKILL.md
+│   ├── planifest-spec-agent/SKILL.md
 │   ├── ... (all 8 skills)
 │   ├── _planifest-templates/
 │   ├── _planifest-standards/
@@ -106,7 +119,8 @@ CLAUDE.md
 ```
 .agents/
 ├── skills/
-│   ├── orchestrator/SKILL.md
+│   ├── planifest-orchestrator/SKILL.md
+│   ├── planifest-spec-agent/SKILL.md
 │   ├── ... (all 8 skills)
 │   ├── _planifest-templates/
 │   ├── _planifest-standards/
@@ -137,7 +151,8 @@ AGENTS.md
 ```
 .gemini/
 └── skills/
-    ├── orchestrator/SKILL.md
+    ├── planifest-orchestrator/SKILL.md
+    ├── planifest-spec-agent/SKILL.md
     ├── ... (all 8 skills)
     ├── _planifest-templates/
     ├── _planifest-standards/
@@ -167,7 +182,8 @@ AGENTS.md
 ```
 .github/
 ├── skills/
-│   ├── orchestrator/SKILL.md
+│   ├── planifest-orchestrator/SKILL.md
+│   ├── planifest-spec-agent/SKILL.md
 │   ├── ... (all 8 skills)
 │   ├── _planifest-templates/
 │   ├── _planifest-standards/

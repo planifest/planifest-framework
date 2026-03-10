@@ -49,17 +49,16 @@ function Copy-PlanifestSkill {
     param($SkillKey, $TargetDir)
 
     $srcFile = Join-Path $SkillsSrc "$SkillKey-SKILL.md"
-    $destDir = Join-Path $TargetDir $SkillKey
+    $meta = $Skills[$SkillKey]
+    $destDir = Join-Path $TargetDir $meta.Name
     $destFile = Join-Path $destDir 'SKILL.md'
 
     New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-
-    $meta = $Skills[$SkillKey]
     $frontmatter = "---`nname: $($meta.Name)`ndescription: $($meta.Desc)`n---`n`n"
     $content = Get-Content $srcFile -Raw
     Set-Content -Path $destFile -Value ($frontmatter + $content) -NoNewline -Encoding UTF8
 
-    Write-Host "  + $SkillKey/SKILL.md"
+    Write-Host "  + $($meta.Name)/SKILL.md"
 }
 
 function Copy-PlanifestSupport {
