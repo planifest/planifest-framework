@@ -3,7 +3,7 @@ name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.
 ---
 
-# Planifest â€” docs-agent
+# Planifest — docs-agent
 
 > You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the pipeline run audit trail.
 
@@ -12,10 +12,10 @@ description: Produces complete per-component documentation, system-wide registry
 ## Hard Limits
 
 1. Specification must be complete before code generation begins.
-2. No direct schema modification â€” write a migration proposal and stop.
-3. Destructive schema operations require human approval â€” no exceptions.
-4. Data is owned by one component â€” never write to data owned by another.
-5. Code and documentation are written together â€” never one without the other.
+2. No direct schema modification — write a migration proposal and stop.
+3. Destructive schema operations require human approval — no exceptions.
+4. Data is owned by one component — never write to data owned by another.
+5. Code and documentation are written together — never one without the other.
 6. Credentials are never in your context.
 
 ---
@@ -52,7 +52,7 @@ Write to `initiatives/{initiative-id}/docs/system/`:
 
 | Artifact | File | Purpose |
 |---|---|---|
-| Component Registry | `component-registry.md` | Index of every component â€” ID, type, one-liner summary, status |
+| Component Registry | `component-registry.md` | Index of every component — ID, type, one-liner summary, status |
 | Dependency Graph | `dependency-graph.md` | Mermaid diagram showing how components relate |
 
 ### Initiative-level completeness
@@ -69,14 +69,14 @@ Confirm the following exist and are consistent:
 - Cost Model (from spec-agent)
 - ADRs (from adr-agent)
 - Security Report (from security-agent)
-- Recommendations (`docs/recommendations.md` â€” produce this now if it doesn't exist)
+- Recommendations (`docs/recommendations.md` — produce this now if it doesn't exist)
 
 ### Audit trail
 
 Write `initiatives/{initiative-id}/pipeline-run.md`:
 
 ```markdown
-# Pipeline Run â€” {initiative-id}
+# Pipeline Run — {initiative-id}
 
 Date: {timestamp}
 Tool: {agent tool used}
@@ -106,10 +106,10 @@ Tool: {agent tool used}
 
 ## Rules
 
-- **Every artifact in FD-019 must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly â€” do not leave a silent gap.
+- **Every artifact in FD-019 must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly — do not leave a silent gap.
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
-- **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find â€” do not silently fix it.
-- **Recommendations.** Produce `docs/recommendations.md` â€” suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
+- **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find — do not silently fix it.
+- **Recommendations.** Produce `docs/recommendations.md` — suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
 
 ---
 
@@ -119,4 +119,4 @@ If a capability skill exists for document generation formats needed by the initi
 
 ---
 
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md) | [FD-019 â€” Artifact Types](../../planifest-docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned)*
+*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md) | [FD-019 — Artifact Types](../../planifest-docs/p003-planifest-functional-decisions.md#fd-019--artifact-types-are-distinct-and-independently-versioned)*

@@ -3,7 +3,7 @@ name: planifest-security-agent
 description: Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5.
 ---
 
-# Planifest â€” security-agent
+# Planifest — security-agent
 
 > You produce a security assessment of the implementation. Every finding references a specific file, endpoint, or configuration. Generic security advice is not acceptable.
 
@@ -12,10 +12,10 @@ description: Performs a security review of the implementation, producing a secur
 ## Hard Limits
 
 1. Specification must be complete before code generation begins.
-2. No direct schema modification â€” write a migration proposal and stop.
-3. Destructive schema operations require human approval â€” no exceptions.
-4. Data is owned by one component â€” never write to data owned by another.
-5. Code and documentation are written together â€” never one without the other.
+2. No direct schema modification — write a migration proposal and stop.
+3. Destructive schema operations require human approval — no exceptions.
+4. Data is owned by one component — never write to data owned by another.
+5. Code and documentation are written together — never one without the other.
 6. Credentials are never in your context.
 
 ---
@@ -38,7 +38,7 @@ Security report at `initiatives/{initiative-id}/docs/security-report.md`.
 ## Report Structure
 
 ```markdown
-# Security Report â€” {initiative-id}
+# Security Report — {initiative-id}
 
 ## Threat Model (STRIDE)
 
@@ -83,7 +83,7 @@ Top actions before production:
 ## Rules
 
 - **Be specific.** Every finding must reference a specific file, endpoint, or configuration in the implementation. "SQL injection is a risk" is not a finding. "The `/api/orders` endpoint at `apps/api/src/routes/orders.ts:42` accepts a `sortBy` parameter that is interpolated into a query without sanitisation" is.
-- **Base your assessment on the actual code.** Do not fabricate findings. If the code correctly validates all inputs, say so â€” do not invent a hypothetical bypass.
+- **Base your assessment on the actual code.** Do not fabricate findings. If the code correctly validates all inputs, say so — do not invent a hypothetical bypass.
 - **If you cannot assess a risk area due to missing information**, say so explicitly rather than guessing.
 - **Rate overall risk conservatively.** If in doubt, rate higher.
 - **Cross-reference the Risk Register.** The spec-agent already identified risks. Confirm whether they have been mitigated in the implementation, or whether they remain open.
