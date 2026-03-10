@@ -289,4 +289,4 @@ You do not need to re-run Phase 0 coaching for a change — the specification al
 - [Component Manifest](../templates/component-manifest.template.json) — codegen-agent output ([guide](../templates/component-manifest-guide.md))
 - [Pipeline Run](../templates/pipeline-run.template.md) — written at end of every run
 
-**Phase skills:** `planifest-framework/skills/spec-agent/`, `planifest-framework/skills/adr-agent/`, etc.
+**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-change-agent`, `planifest-docs-agent`
