@@ -30,47 +30,51 @@ $SetupDir = Join-Path $ScriptDir 'setup'
 
 $ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot')
 
-# --- Skill metadata ---
-
-$Skills = @{
-    'orchestrator'   = @{ Name = 'planifest-orchestrator'; Desc = 'Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs.' }
-    'spec-agent'     = @{ Name = 'planifest-spec-agent'; Desc = 'Produces specification artifacts (design spec, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during Phase 1.' }
-    'adr-agent'      = @{ Name = 'planifest-adr-agent'; Desc = 'Produces Architecture Decision Records for each significant decision in the specification. Invoked by the orchestrator during Phase 2.' }
-    'codegen-agent'  = @{ Name = 'planifest-codegen-agent'; Desc = 'Generates the full implementation from the specification artifacts. Invoked during Phase 3.' }
-    'validate-agent' = @{ Name = 'planifest-validate-agent'; Desc = 'Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.' }
-    'security-agent' = @{ Name = 'planifest-security-agent'; Desc = 'Performs a security review of the implementation, producing a security report. Invoked during Phase 5.' }
-    'change-agent'   = @{ Name = 'planifest-change-agent'; Desc = 'Handles modifications to existing initiatives. Loads domain context, implements the minimum change, validates, and updates documentation.' }
-    'docs-agent'     = @{ Name = 'planifest-docs-agent'; Desc = 'Produces per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.' }
-}
-
 # --- Shared functions ---
 
-function Copy-PlanifestSkill {
-    param($SkillKey, $TargetDir)
+function Copy-PlanifestSkills {
+    param($TargetDir)
 
-    $srcFile = Join-Path $SkillsSrc "$SkillKey-SKILL.md"
-    $meta = $Skills[$SkillKey]
-    $destDir = Join-Path $TargetDir $meta.Name
-    $destFile = Join-Path $destDir 'SKILL.md'
+    Get-ChildItem -Path $SkillsSrc -Directory | ForEach-Object {
+        $skillName = $_.Name
+        $srcDir = $_.FullName
+        $destDir = Join-Path $TargetDir $skillName
+        
+        $srcSkillMd = Join-Path $srcDir "SKILL.md"
+        if (Test-Path $srcSkillMd) {
+            New-Item -ItemType Directory -Path $destDir -Force | Out-Null
+            Copy-Item -Path $srcSkillMd -Destination $destDir -Force
+            Write-Host "  + $skillName/SKILL.md"
+            
+            foreach ($optDir in @('scripts', 'assets', 'references')) {
+                $srcOptDir = Join-Path $srcDir $optDir
+                if (Test-Path $srcOptDir) {
+                    Copy-Item -Path $srcOptDir -Destination $destDir -Recurse -Force
+                }
+            }
 
-    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-    $frontmatter = "---`nname: $($meta.Name)`ndescription: $($meta.Desc)`n---`n`n"
-    $content = Get-Content $srcFile -Raw
-    Set-Content -Path $destFile -Value ($frontmatter + $content) -NoNewline -Encoding UTF8
+            # Bundle shared resources directly into the skill
+            $templatesSrc = Join-Path $ScriptDir "templates"
+            if (Test-Path $templatesSrc) {
+                $destTemplates = Join-Path $destDir "assets\templates"
+                New-Item -ItemType Directory -Path $destTemplates -Force | Out-Null
+                Copy-Item -Path "$templatesSrc\*" -Destination $destTemplates -Recurse -Force
+            }
 
-    Write-Host "  + $($meta.Name)/SKILL.md"
-}
+            $schemasSrc = Join-Path $ScriptDir "schemas"
+            if (Test-Path $schemasSrc) {
+                $destSchemas = Join-Path $destDir "assets\schemas"
+                New-Item -ItemType Directory -Path $destSchemas -Force | Out-Null
+                Copy-Item -Path "$schemasSrc\*" -Destination $destSchemas -Recurse -Force
+            }
 
-function Copy-PlanifestSupport {
-    param($TargetDir, $DirName)
-
-    $src = Join-Path $ScriptDir $DirName
-    $dest = Join-Path $TargetDir "_planifest-$DirName"
-
-    if (Test-Path $src) {
-        New-Item -ItemType Directory -Path $dest -Force | Out-Null
-        Copy-Item -Path "$src\*" -Destination $dest -Recurse -Force
-        Write-Host "  + _planifest-$DirName/"
+            $standardsSrc = Join-Path $ScriptDir "standards"
+            if (Test-Path $standardsSrc) {
+                $destRefs = Join-Path $destDir "references"
+                New-Item -ItemType Directory -Path $destRefs -Force | Out-Null
+                Copy-Item -Path "$standardsSrc\*" -Destination $destRefs -Recurse -Force
+            }
+        }
     }
 }
 
@@ -119,15 +123,8 @@ function Invoke-PlanifestSetup {
     Write-Host "  Setting up $ToolName"
     Write-Host "  Skills directory: $($toolConfig.SkillsDir)/"
 
-    # Copy skills
-    foreach ($key in $Skills.Keys) {
-        Copy-PlanifestSkill -SkillKey $key -TargetDir $skillsDir
-    }
-
-    # Copy supporting files
-    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'templates'
-    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'standards'
-    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'schemas'
+    # Copy skills (now automatically bundles supporting files)
+    Copy-PlanifestSkills -TargetDir $skillsDir
 
     # Copy workflows (if tool defines a workflow dir)
     if ($toolConfig.WorkflowsDir -and (Test-Path $WorkflowsSrc)) {
