@@ -36,24 +36,24 @@ copy_skills() {
       for opt_dir in scripts assets references; do
         if [ -d "$skill_dir/$opt_dir" ]; then
           cp -r "$skill_dir/$opt_dir" "$dest_dir/"
-          echo "  + $skill_name/$opt_dir/"
         fi
       done
+      
+      # Bundle shared resources directly into the skill
+      if [ -d "$SCRIPT_DIR/templates" ]; then
+        mkdir -p "$dest_dir/assets/templates"
+        cp -r "$SCRIPT_DIR/templates"/* "$dest_dir/assets/templates/"
+      fi
+      if [ -d "$SCRIPT_DIR/schemas" ]; then
+        mkdir -p "$dest_dir/assets/schemas"
+        cp -r "$SCRIPT_DIR/schemas"/* "$dest_dir/assets/schemas/"
+      fi
+      if [ -d "$SCRIPT_DIR/standards" ]; then
+        mkdir -p "$dest_dir/references"
+        cp -r "$SCRIPT_DIR/standards"/* "$dest_dir/references/"
+      fi
     fi
   done
-}
-
-copy_support() {
-  local target_dir="$1"
-  local dir_name="$2"
-  local src="$SCRIPT_DIR/$dir_name"
-  local dest="$target_dir/_planifest-$dir_name"
-
-  if [ -d "$src" ]; then
-    mkdir -p "$dest"
-    cp -r "$src"/* "$dest/"
-    echo "  + _planifest-$dir_name/"
-  fi
 }
 
 write_boot_file() {
@@ -99,13 +99,8 @@ setup_tool() {
   echo "  Setting up $tool"
   echo "  Skills directory: $TOOL_SKILLS_DIR/"
 
-  # Copy skills
+  # Copy skills (now automatically bundles supporting files)
   copy_skills "$skills_dir"
-
-  # Copy supporting files
-  copy_support "$skills_dir" "templates"
-  copy_support "$skills_dir" "standards"
-  copy_support "$skills_dir" "schemas"
 
   # Copy workflows (if tool defines a workflow dir)
   if [ -n "${TOOL_WORKFLOWS_DIR:-}" ] && [ -d "$WORKFLOWS_SRC" ]; then

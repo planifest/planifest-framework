@@ -50,23 +50,31 @@ function Copy-PlanifestSkills {
                 $srcOptDir = Join-Path $srcDir $optDir
                 if (Test-Path $srcOptDir) {
                     Copy-Item -Path $srcOptDir -Destination $destDir -Recurse -Force
-                    Write-Host "  + $skillName/$optDir/"
                 }
             }
+
+            # Bundle shared resources directly into the skill
+            $templatesSrc = Join-Path $ScriptDir "templates"
+            if (Test-Path $templatesSrc) {
+                $destTemplates = Join-Path $destDir "assets\templates"
+                New-Item -ItemType Directory -Path $destTemplates -Force | Out-Null
+                Copy-Item -Path "$templatesSrc\*" -Destination $destTemplates -Recurse -Force
+            }
+
+            $schemasSrc = Join-Path $ScriptDir "schemas"
+            if (Test-Path $schemasSrc) {
+                $destSchemas = Join-Path $destDir "assets\schemas"
+                New-Item -ItemType Directory -Path $destSchemas -Force | Out-Null
+                Copy-Item -Path "$schemasSrc\*" -Destination $destSchemas -Recurse -Force
+            }
+
+            $standardsSrc = Join-Path $ScriptDir "standards"
+            if (Test-Path $standardsSrc) {
+                $destRefs = Join-Path $destDir "references"
+                New-Item -ItemType Directory -Path $destRefs -Force | Out-Null
+                Copy-Item -Path "$standardsSrc\*" -Destination $destRefs -Recurse -Force
+            }
         }
-    }
-}
-
-function Copy-PlanifestSupport {
-    param($TargetDir, $DirName)
-
-    $src = Join-Path $ScriptDir $DirName
-    $dest = Join-Path $TargetDir "_planifest-$DirName"
-
-    if (Test-Path $src) {
-        New-Item -ItemType Directory -Path $dest -Force | Out-Null
-        Copy-Item -Path "$src\*" -Destination $dest -Recurse -Force
-        Write-Host "  + _planifest-$DirName/"
     }
 }
 
@@ -115,13 +123,8 @@ function Invoke-PlanifestSetup {
     Write-Host "  Setting up $ToolName"
     Write-Host "  Skills directory: $($toolConfig.SkillsDir)/"
 
-    # Copy skills
+    # Copy skills (now automatically bundles supporting files)
     Copy-PlanifestSkills -TargetDir $skillsDir
-
-    # Copy supporting files
-    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'templates'
-    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'standards'
-    Copy-PlanifestSupport -TargetDir $skillsDir -DirName 'schemas'
 
     # Copy workflows (if tool defines a workflow dir)
     if ($toolConfig.WorkflowsDir -and (Test-Path $WorkflowsSrc)) {
