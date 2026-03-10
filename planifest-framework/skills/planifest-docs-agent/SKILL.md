@@ -1,3 +1,8 @@
+﻿---
+name: planifest-docs-agent
+description: Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.
+---
+
 # Planifest — docs-agent
 
 > You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the pipeline run audit trail.
