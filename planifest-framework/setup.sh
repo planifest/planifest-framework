@@ -18,51 +18,29 @@ SETUP_DIR="$SCRIPT_DIR/setup"
 
 VALID_TOOLS="claude-code cursor codex antigravity copilot"
 
-# --- Skill metadata ---
-
-declare -A SKILL_NAMES=(
-  [orchestrator]="planifest-orchestrator"
-  [spec-agent]="planifest-spec-agent"
-  [adr-agent]="planifest-adr-agent"
-  [codegen-agent]="planifest-codegen-agent"
-  [validate-agent]="planifest-validate-agent"
-  [security-agent]="planifest-security-agent"
-  [change-agent]="planifest-change-agent"
-  [docs-agent]="planifest-docs-agent"
-)
-
-declare -A SKILL_DESCS=(
-  [orchestrator]="Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs."
-  [spec-agent]="Produces specification artifacts (design spec, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during Phase 1."
-  [adr-agent]="Produces Architecture Decision Records for each significant decision in the specification. Invoked by the orchestrator during Phase 2."
-  [codegen-agent]="Generates the full implementation from the specification artifacts — application code, tests, infrastructure, configuration. Invoked during Phase 3."
-  [validate-agent]="Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4."
-  [security-agent]="Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5."
-  [change-agent]="Handles modifications to existing initiatives — loads domain context, implements the minimum change, validates, and updates documentation."
-  [docs-agent]="Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6."
-)
-
 # --- Shared functions ---
 
-copy_skill() {
-  local skill_key="$1"
-  local target_dir="$2"
-  local src_file="$SKILLS_SRC/${skill_key}-SKILL.md"
-  local dest_dir="$target_dir/${SKILL_NAMES[$skill_key]}"
-  local dest_file="$dest_dir/SKILL.md"
+copy_skills() {
+  local target_dir="$1"
 
-  mkdir -p "$dest_dir"
-
-  {
-    echo "---"
-    echo "name: ${SKILL_NAMES[$skill_key]}"
-    echo "description: ${SKILL_DESCS[$skill_key]}"
-    echo "---"
-    echo ""
-    cat "$src_file"
-  } > "$dest_file"
-
-  echo "  + ${SKILL_NAMES[$skill_key]}/SKILL.md"
+  for skill_dir in "$SKILLS_SRC"/*; do
+    if [ -d "$skill_dir" ] && [ -f "$skill_dir/SKILL.md" ]; then
+      local skill_name
+      skill_name="$(basename "$skill_dir")"
+      local dest_dir="$target_dir/$skill_name"
+      
+      mkdir -p "$dest_dir"
+      cp "$skill_dir/SKILL.md" "$dest_dir/SKILL.md"
+      echo "  + $skill_name/SKILL.md"
+      
+      for opt_dir in scripts assets references; do
+        if [ -d "$skill_dir/$opt_dir" ]; then
+          cp -r "$skill_dir/$opt_dir" "$dest_dir/"
+          echo "  + $skill_name/$opt_dir/"
+        fi
+      done
+    fi
+  done
 }
 
 copy_support() {
@@ -122,9 +100,7 @@ setup_tool() {
   echo "  Skills directory: $TOOL_SKILLS_DIR/"
 
   # Copy skills
-  for skill_key in "${!SKILL_NAMES[@]}"; do
-    copy_skill "$skill_key" "$skills_dir"
-  done
+  copy_skills "$skills_dir"
 
   # Copy supporting files
   copy_support "$skills_dir" "templates"
