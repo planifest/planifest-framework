@@ -2,7 +2,7 @@
 
 **A specification framework for agentic development.**
 
-Planifest gives AI agents the structure they need to build software that a senior engineer would approve. It treats the human as the Product Owner and Technical Architect. The agent is the Tech Lead — highly capable, but operating within constraints the human sets.
+Planifest gives AI agents the structure they need to build software that a senior engineer would approve. It treats the human as the Product Owner and Technical Architect. The agent is the Tech Lead: highly capable, but operating within constraints the human sets.
 
 The framework is LLM-agnostic and tool-agnostic. It works with any model (Claude, GPT, Gemini, etc.) and any agentic coding tool (Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, etc.).
 
