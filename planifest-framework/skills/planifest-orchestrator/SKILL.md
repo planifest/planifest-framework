@@ -209,7 +209,7 @@ Invoke the **codegen-agent** skill.
 
 **What it produces:** Full implementation at `initiatives/{initiative-id}/` — application code, shared types, tests, IaC, Dockerfiles
 
-**Gate:** Confirm the implementation exists and the file structure matches what the spec describes.
+**Gate:** Confirm the implementation exists and the file structure matches what the spec describes. If the codegen-agent halted due to an Escalation (Stop-and-Ask) protocol because of an architectural blocker, review the blocker with the human before updating the plan or proceeding.
 
 ---
 

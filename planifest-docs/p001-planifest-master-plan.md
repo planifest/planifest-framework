@@ -10,6 +10,7 @@
 | 4 | Added Roadmap (p014) to related links | 07 MAR 2026 | Martin Mayer |
 | 5 | Deduplicated default rules table — now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
 | 6 | Added Planifest name etymology; replaced monorepo structure with v1.0 skills-based layout; replaced docs sync with v1.0 git-native framing | 07 MAR 2026 | Martin Mayer (via agent) |
+| 7 | Added Strategic Intent vs Stochastic Execution (p017) to related links | 11 MAR 2026 | Martin Mayer |
 
 ---
 
@@ -567,4 +568,4 @@ flowchart LR
 
 *This document is the living Planifest architecture reference. As the system evolves, agents update it.*
 
-*Related: [Functional Decisions](p003-planifest-functional-decisions.md) | [The Pathway to Agentic Development](p004-the-pathway-to-agentic-development.md) | [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) | [Pilot App](p011-planifest-pilot-app.md) | [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) | [Roadmap](p014-planifest-roadmap.md) | [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) | [Code Quality Standards](../planifest-framework/standards/code-quality-standards.md)*
+*Related: [Functional Decisions](p003-planifest-functional-decisions.md) | [The Pathway to Agentic Development](p004-the-pathway-to-agentic-development.md) | [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) | [Pilot App](p011-planifest-pilot-app.md) | [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) | [Roadmap](p014-planifest-roadmap.md) | [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) | [Strategic Intent vs Stochastic Execution](p017-research-report-strategic-intent-vs-stochastic-execution.md) | [Code Quality Standards](../planifest-framework/standards/code-quality-standards.md)*

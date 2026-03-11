@@ -10,6 +10,7 @@
 | 4 | Added Planifest name etymology; updated Specification Before Development with orchestrator coaching concept and Planifest confirmation gate | 07 MAR 2026 | Martin Mayer (via agent) |
 | 5 | Updated Stack Configuration section with Backend Stack Evaluation (p013) reference and polyglot guidance | 07 MAR 2026 | Martin Mayer (via agent) |
 | 6 | Updated Stack Configuration section with Frontend Stack Evaluation (p016) reference | 09 MAR 2026 | Martin Mayer (via agent) |
+| 7 | Added Research Report: Strategic Intent vs Stochastic Execution (p017) reference | 11 MAR 2026 | Martin Mayer |
 
 ---
 
@@ -354,4 +355,4 @@ A single orchestrator service (TypeScript, containerised) that:
 - [ ] What is the rollback strategy when a migration is applied and something goes wrong post-deploy?
 ---
 
-*Part of the Planifest project. See also: [Master Plan](p001-planifest-master-plan.md) | [Functional Decisions](p003-planifest-functional-decisions.md)*
+*Part of the Planifest project. See also: [Master Plan](p001-planifest-master-plan.md) | [Functional Decisions](p003-planifest-functional-decisions.md) | [Strategic Intent vs Stochastic Execution](p017-research-report-strategic-intent-vs-stochastic-execution.md)*

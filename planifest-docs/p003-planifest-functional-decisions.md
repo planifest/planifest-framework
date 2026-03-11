@@ -10,6 +10,7 @@
 | 4 | Added FD-021 (Planifest as plan and manifest), FD-022 (delivered as Agent Skills); resolved FQ-007; updated FD-003 with coaching loop and Planifest confirmation gate; updated FD-004 with orchestrator reference | 07 MAR 2026 | Martin Mayer (via agent) |
 | 5 | Updated FD-015 with reference to Backend Stack Evaluation (p013) and agent-suitability guidance for stack selection | 07 MAR 2026 | Martin Mayer (via agent) |
 | 6 | Updated FD-015 with reference to Frontend Stack Evaluation (p016) for frontend stack selection guidance | 09 MAR 2026 | Martin Mayer (via agent) |
+| 7 | Updated FD-021 with reference to Strategic Intent vs Stochastic Execution (p017) | 11 MAR 2026 | Martin Mayer |
 
 ---
 
@@ -318,7 +319,7 @@ The guiding principle: **one reason to change, easy to rebuild rather than modif
 
 The Planifest records: the problem, the adoption mode, the confirmed product layer (user stories, acceptance criteria, constraints), the architecture layer (NFRs, security, cost), the engineering layer (stack, components, data ownership, deployment), the scope boundaries (in, out, deferred), and the risks and dependencies.
 
-**Rationale:** You cannot plan what to build without recording what you're building against. The Planifest is the contract between human and agent — the hard gate before development begins.
+**Rationale:** You cannot plan what to build without recording what you're building against. The Planifest is the contract between human and agent — the hard gate before development begins. See [Strategic Intent vs Stochastic Execution](p017-research-report-strategic-intent-vs-stochastic-execution.md) for the technical evaluation of this sequential intent-mapping logic.
 
 ---
 
