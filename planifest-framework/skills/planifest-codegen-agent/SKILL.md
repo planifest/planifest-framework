@@ -73,6 +73,11 @@ Full implementation at `initiatives/{initiative-id}/`:
 - Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../planifest-docs/p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
 - For frontend stacks, the [Frontend Stack Evaluation](../../planifest-docs/p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
+**Deviation & Escalation Protocol:**
+- Software engineering is inherently discovery-driven. If a fundamental architectural blocker is identified that makes the pre-set specification flawed, you are empowered to manage it. You have two choices:
+  1. **Documented Deviation:** Proceed with an alternative path. Ensure the specific deviation and its justification are explicitly flagged in the final component manifest and `docs/quirks.md`.
+  2. **Escalation (Stop-and-Ask):** Pause the build immediately if continuing would be wasteful or deviate too far from the original intent. Request a human review of the Plan and the encountered blocker before proceeding.
+
 **Domain language:**
 - Use the domain glossary terms throughout — in code, comments, file names, variable names.
 - If the glossary defines "Order" and you name a variable "purchase", that is a defect.

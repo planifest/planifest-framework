@@ -934,4 +934,4 @@ The final test for code quality is the review test. Before shipping, every file 
 
 ---
 
-*Related: [Master Plan](p001-planifest-master-plan.md) | [Functional Decisions](p003-planifest-functional-decisions.md) | [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) | [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) | [Pipeline](p015-planifest-pipeline.md)*
+*Related: [Master Plan](p001-planifest-master-plan.md) | [Functional Decisions](p003-planifest-functional-decisions.md) | [Backend Stack Evaluation](p013-planifest-backend-stack-evaluation.md) | [Frontend Stack Evaluation](p016-planifest-frontend-stack-evaluation.md) | [Strategic Intent vs Stochastic Execution](p017-research-report-strategic-intent-vs-stochastic-execution.md) | [Pipeline](p015-planifest-pipeline.md)*
