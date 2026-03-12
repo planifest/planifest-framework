@@ -1,18 +1,18 @@
-# Planifest — Domain Knowledge Service Interface
+# Planifest - Domain Knowledge Service Interface
 
 ## Version Log
 
 | Version | Change Description | Date | Changed By |
 |---|---|---|---|
 | 1 | Initial Document | 05 MAR 2026 | Martin Mayer |
-| 2 | Deduplicated default rules table — now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
-| 3 | Added future-state status marker — v1.0 operates with git docs/ path; this interface specification applies when RC-001 is implemented | 07 MAR 2026 | Martin Mayer (via agent) |
+| 2 | Deduplicated default rules table - now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
+| 3 | Added future-state status marker - v1.0 operates with git docs/ path; this interface specification applies when RC-001 is implemented | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
-> **Status: Future architecture.** This document defines the interface for the Domain Knowledge Service MCP server (roadmap item [RC-001](p014-planifest-roadmap.md)). v1.0 operates with the git `docs/` path — agents read and write artifacts directly as markdown files. The interface defined here becomes relevant when the Domain Knowledge Store is implemented as a queryable service.
+> **Status: Future architecture.** This document defines the interface for the Domain Knowledge Service MCP server (roadmap item [RC-001](p014-planifest-roadmap.md)). v1.0 operates with the git `docs/` path - agents read and write artifacts directly as markdown files. The interface defined here becomes relevant when the Domain Knowledge Store is implemented as a queryable service.
 
-> The public interface specification for the Planifest Domain Knowledge Service. This document defines the contracts a conforming implementation must honour. Implementation details — storage backend, queue mechanism, git provider, branching strategy — are left to the implementer.
+> The public interface specification for the Planifest Domain Knowledge Service. This document defines the contracts a conforming implementation must honour. Implementation details - storage backend, queue mechanism, git provider, branching strategy - are left to the implementer.
 
 ---
 
@@ -20,7 +20,7 @@
 
 Planifest is a specification framework for agentic development. The Domain Knowledge Service is the component of that framework responsible for storing, versioning, and serving the domain knowledge agents require to build with purpose and humans require to verify what was built.
 
-This specification defines the interface any conforming implementation must expose. The [Planifest reference implementation](p007-planifest-domain-knowledge-service-reference.md) is one implementation — opinionated, git-backed, and built for the Planifest stack. Teams may implement the interface differently against their own infrastructure: different storage backends, queue systems, git providers, or document stores.
+This specification defines the interface any conforming implementation must expose. The [Planifest reference implementation](p007-planifest-domain-knowledge-service-reference.md) is one implementation - opinionated, git-backed, and built for the Planifest stack. Teams may implement the interface differently against their own infrastructure: different storage backends, queue systems, git providers, or document stores.
 
 ---
 
@@ -30,10 +30,10 @@ A conforming implementation must:
 
 - Expose all tools defined in this specification with the exact request and response schemas described
 - Support all document types defined in the Document Envelope
-- Implement the Default Rules model — all rules must be supported and overridable per initiative, except hard limits which must not be overridable
-- Persist documents with versioning — updates create new versions, history is never destroyed
+- Implement the Default Rules model - all rules must be supported and overridable per initiative, except hard limits which must not be overridable
+- Persist documents with versioning - updates create new versions, history is never destroyed
 - Flag agent-authored documents distinctly from human-authored documents
-- Ensure code and docs are always written atomically — never one without the other
+- Ensure code and docs are always written atomically - never one without the other
 - Provide a non-MCP path where agents interact with the underlying store directly using locally-held credentials that are never exposed to the agent
 
 ---
@@ -430,15 +430,15 @@ A conforming implementation must support all default rules defined in [FD-007](p
 
 ## Non-MCP Path
 
-A conforming implementation must also support a non-MCP path where agents interact with the underlying store directly — writing code and docs without the service intermediary. This path suits smaller teams, single initiatives, or environments where running an additional service is not desirable.
+A conforming implementation must also support a non-MCP path where agents interact with the underlying store directly - writing code and docs without the service intermediary. This path suits smaller teams, single initiatives, or environments where running an additional service is not desirable.
 
 Both paths must produce the same document structure and honour the same default rules. The choice is operational, not architectural.
 
 In this mode:
 - The agent writes directly using locally-held credentials
 - Credentials are managed natively by the OS (macOS Keychain, Windows Credential Manager, Linux git credential store) or injected as masked environment variables in CI
-- Credentials are never present in the agent's context — the agent is given a capability, not a credential
-- The same atomicity requirement applies — code and docs are always written together
+- Credentials are never present in the agent's context - the agent is given a capability, not a credential
+- The same atomicity requirement applies - code and docs are always written together
 
 ---
 

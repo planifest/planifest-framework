@@ -1,6 +1,6 @@
 {
     "$id": "shared",
-    "$comment": "Planifest shared definitions — reusable types referenced by all other schemas.",
+    "$comment": "Planifest shared definitions - reusable types referenced by all other schemas.",
     "$defs": {
         "risk-summary": {
             "type": "object",
@@ -190,7 +190,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Explicit exclusions — equally important"
+                    "description": "Explicit exclusions - equally important"
                 }
             }
         },

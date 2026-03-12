@@ -1,6 +1,6 @@
-# Design Specification — {{initiative-name}}
+# Design Specification - {{initiative-name}}
 
-> Written by the spec-agent. Derived from the Initiative Brief — not invented. Every requirement must be traceable to a user story or acceptance criterion.
+> Written by the spec-agent. Derived from the Initiative Brief - not invented. Every requirement must be traceable to a user story or acceptance criterion.
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
 **Tool:** {{agentic-tool-name}}
@@ -81,7 +81,7 @@ Assumptions made during specification. Each is a risk item with likelihood: medi
 
 ## Open Questions
 
-Material gaps that could not be resolved from the brief. Reported to the orchestrator — not filled in by assumption.
+Material gaps that could not be resolved from the brief. Reported to the orchestrator - not filled in by assumption.
 
 | ID | Question | Blocking |
 |----|----------|----------|

@@ -1,4 +1,4 @@
-# Risk Register — {{initiative-name}}
+# Risk Register - {{initiative-name}}
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md) (updated by any agent that identifies a new risk)
 **Tool:** {{agentic-tool-name}}

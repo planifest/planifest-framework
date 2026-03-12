@@ -15,17 +15,18 @@
 
 ### 1. Add the framework
 
-Copy the `planifest-framework/` folder into your repository root. This is the only thing you need — it contains the skills, templates, standards, and setup scripts.
+Copy the `planifest-framework/` folder into your repository root. This is the only thing you need - it contains the skills, templates, standards, and setup scripts.
 
 ### 2. Create the project structure
 
 ```
-mkdir plan src
+mkdir plan src docs
 ```
 
-These are the two working directories:
-- `plan/` — initiative specifications, design specs, ADRs, scope documents
-- `src/` — component code, each component in its own subfolder
+These are the three working directories:
+- `plan/` - initiatives: briefs, design specs, ADRs, user stories, scope documents
+- `src/` - components: code, tests, manifests, and component-level docs
+- `docs/` - repo-wide state: component registry, dependency graph, system context
 
 See [initiative-structure.md](../plan/initiative-structure.md) for the full layout.
 
@@ -71,9 +72,9 @@ Initiative brief: plan/my-initiative/initiative-brief.md
 
 The orchestrator will:
 1. Assess your brief against the three layers (Product, Architecture, Engineering)
-2. Coach you through any gaps — one question at a time
-3. Produce the validated Planifest
-4. Execute the pipeline: Spec → ADRs → Code → Validate → Security → Docs
+2. Coach you through any gaps - one question at a time
+3. Produce the validated Planifest at `plan/my-initiative/planifest.md`
+4. Execute the pipeline: Spec -> ADRs -> Code -> Validate -> Security -> Docs
 
 ---
 
@@ -81,8 +82,9 @@ The orchestrator will:
 
 1. Copy `planifest-framework/` into your repo root
 2. Run the setup script for your tool
-3. Add a `component.json` manifest to each existing component in `src/` — use the [component manifest template](templates/component-manifest.template.json) and [guide](templates/component-manifest-guide.md)
-4. Tell the orchestrator to use **retrofit** adoption mode:
+3. Create `docs/` if it doesn't exist
+4. Add a `component.json` manifest to each existing component in `src/` - use the [component manifest template](templates/component-manifest.template.json) and [guide](templates/component-manifest-guide.md)
+5. Tell the orchestrator to use **retrofit** adoption mode:
 
 ```
 Execute the Planifest Initiative Pipeline in retrofit mode.
@@ -104,7 +106,7 @@ Component ID: auth-service
 Change request: Add refresh token rotation
 ```
 
-The change-agent handles it — no need to re-run the full pipeline.
+The change-agent handles it - no need to re-run the full pipeline.
 
 ---
 
@@ -125,10 +127,11 @@ The setup script overwrites the generated copies. The source of truth is always 
 
 | Path | Commit? | Why |
 |------|:-------:|-----|
-| `planifest-framework/` | ✅ | Source of truth — shared with team |
+| `planifest-framework/` | ✅ | Source of truth - shared with team |
 | `plan/` | ✅ | Initiative specs, ADRs, scope docs |
-| `src/` | ✅ | Component code |
-| `.claude/`, `.cursor/`, `.agents/`, `.gemini/`, `.github/skills/` | Optional | Generated copies — can be `.gitignore`d and regenerated |
-| `CLAUDE.md`, `AGENTS.md` | Optional | Boot files — tool-specific |
+| `src/` | ✅ | Component code and manifests |
+| `docs/` | ✅ | Repo-wide registry and dependency graph |
+| `.claude/`, `.cursor/`, `.agents/`, `.gemini/`, `.github/skills/` | Optional | Generated copies - can be `.gitignore`d and regenerated |
+| `CLAUDE.md`, `AGENTS.md` | Optional | Boot files - tool-specific |
 
 If your team all uses the same tool, commit the generated files. If different team members use different tools, `.gitignore` them and let each person run the setup script.

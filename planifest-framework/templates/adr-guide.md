@@ -1,4 +1,4 @@
-# ADR — Guide
+# ADR - Guide
 
 > How the adr-agent writes Architecture Decision Records, and how to read them.
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-An ADR captures a single architectural decision — the context that demanded it, the decision itself, the alternatives considered, and the consequences. ADRs are the institutional memory of WHY the system is shaped the way it is. Without them, the next agent (or human) making a change has no idea why the current design was chosen, and may undo a deliberate trade-off.
+An ADR captures a single architectural decision - the context that demanded it, the decision itself, the alternatives considered, and the consequences. ADRs are the institutional memory of WHY the system is shaped the way it is. Without them, the next agent (or human) making a change has no idea why the current design was chosen, and may undo a deliberate trade-off.
 
 ---
 
@@ -52,7 +52,7 @@ At least 2 alternatives for every ADR. For each: pros, cons, and why it was reje
 
 ### Consequences
 
-What follows from this decision — both positive and negative. Be honest about the trade-offs.
+What follows from this decision - both positive and negative. Be honest about the trade-offs.
 
 ---
 

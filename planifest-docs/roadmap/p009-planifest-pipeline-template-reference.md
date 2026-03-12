@@ -1,4 +1,4 @@
-# Planifest — Pipeline Template Reference
+# Planifest - Pipeline Template Reference
 
 ## Version Log
 
@@ -6,13 +6,13 @@
 |---|---|---|---|
 | 1 | Initial document | 02 MAR 2026 | Martin Mayer |
 | 2 | Added spec hard-gate job; added migration check phase; corrected human gate language | 05 MAR 2026 | Martin Mayer |
-| 3 | Added future-state status marker — v1.0 uses standard CI (lint, typecheck, test, build); MCP sidecar and template stamping infrastructure are roadmap items RC-004 and RC-006 | 07 MAR 2026 | Martin Mayer (via agent) |
+| 3 | Added future-state status marker - v1.0 uses standard CI (lint, typecheck, test, build); MCP sidecar and template stamping infrastructure are roadmap items RC-004 and RC-006 | 07 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
-> **Status: Future architecture.** This document describes CI/CD pipeline templates that start MCP servers as sidecars and invoke agents via the Claude API. v1.0 does not use MCP sidecars or template stamping — the team writes standard CI config (lint, typecheck, test, build) and the agent executes pipeline phases locally via Agent Skills. The templates here become relevant when the Orchestrator Service ([RC-002](p014-planifest-roadmap.md)), MCP Server Suite ([RC-004](p014-planifest-roadmap.md)), and CI Pipeline Template Stamping ([RC-006](p014-planifest-roadmap.md)) are implemented.
+> **Status: Future architecture.** This document describes CI/CD pipeline templates that start MCP servers as sidecars and invoke agents via the Claude API. v1.0 does not use MCP sidecars or template stamping - the team writes standard CI config (lint, typecheck, test, build) and the agent executes pipeline phases locally via Agent Skills. The templates here become relevant when the Orchestrator Service ([RC-002](p014-planifest-roadmap.md)), MCP Server Suite ([RC-004](p014-planifest-roadmap.md)), and CI Pipeline Template Stamping ([RC-006](p014-planifest-roadmap.md)) are implemented.
 
-> Planifest's pipeline templates are CI/CD platform-agnostic in logic. The examples here use GitHub Actions YAML as the reference implementation — the same phases apply to GitLab CI, Bitbucket Pipelines, CircleCI, Jenkins, and any other platform that supports job sequencing and artifact passing. Adapting to a different platform means translating the job structure, not changing the agent logic.
+> Planifest's pipeline templates are CI/CD platform-agnostic in logic. The examples here use GitHub Actions YAML as the reference implementation - the same phases apply to GitLab CI, Bitbucket Pipelines, CircleCI, Jenkins, and any other platform that supports job sequencing and artifact passing. Adapting to a different platform means translating the job structure, not changing the agent logic.
 
 *Related: [Master Plan](p001-planifest-master-plan.md) | [Agent Prompt Library](p008-planifest-agent-prompt-library.md) | [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) | [MCP Design](p005-planifest-mcp-architecture.md)*
 
@@ -21,8 +21,8 @@
 ## Table of Contents
 
 - [1. Overview](#1-overview)
-- [2. Initiative Pipeline — Reference Implementation (GitHub Actions)](#2-initiative-pipeline-reference-implementation-github-actions)
-- [3. Change Pipeline — Reference Implementation (GitHub Actions)](#3-change-pipeline-reference-implementation-github-actions)
+- [2. Initiative Pipeline - Reference Implementation (GitHub Actions)](#2-initiative-pipeline-reference-implementation-github-actions)
+- [3. Change Pipeline - Reference Implementation (GitHub Actions)](#3-change-pipeline-reference-implementation-github-actions)
 - [4. Shared Reusable Workflows](#4-shared-reusable-workflows)
 - [5. Secrets & Environment Variables](#5-secrets-environment-variables)
 - [6. Template Stamping](#6-template-stamping)
@@ -52,12 +52,12 @@ The templates are maintained in `apps/orchestrator/templates/`. When a template 
 
 ---
 
-## 2. Initiative Pipeline — Reference Implementation (GitHub Actions)
+## 2. Initiative Pipeline - Reference Implementation (GitHub Actions)
 
-This is the GitHub Actions reference implementation. The same phases apply on any CI platform — adapt the job syntax for your platform while keeping the phase order and MCP server startup pattern identical.
+This is the GitHub Actions reference implementation. The same phases apply on any CI platform - adapt the job syntax for your platform while keeping the phase order and MCP server startup pattern identical.
 
 ```yaml
-name: Initiative Pipeline — {{component_id}}
+name: Initiative Pipeline - {{component_id}}
 
 on:
   workflow_dispatch:
@@ -69,7 +69,7 @@ on:
         description: Component identifier (kebab-case)
         required: true
       cloud_provider:
-        description: Target cloud provider — gcp, aws, or azure
+        description: Target cloud provider - gcp, aws, or azure
         required: true
         default: gcp
 
@@ -105,11 +105,11 @@ jobs:
           git config user.email "pipeline@internal"
           git checkout -b initiative/${{ inputs.component_id }}
           echo "${{ steps.spec.outputs.design_spec }}" | base64 -d \
-            > initiatives/${{ inputs.component_id }}/docs/design-spec.md
+            > plan/${{ inputs.component_id }}/docs/design-spec.md
           echo "${{ steps.spec.outputs.openapi }}" | base64 -d \
-            > initiatives/${{ inputs.component_id }}/docs/openapi.yaml
+            > plan/${{ inputs.component_id }}/docs/openapi.yaml
           echo "${{ steps.spec.outputs.component_json }}" | base64 -d \
-            > initiatives/${{ inputs.component_id }}/component.json
+            > src/${{ inputs.component_id }}/component.json
           git add . && git commit -m "feat({{component_id}}): add design spec and openapi"
           git push origin initiative/${{ inputs.component_id }}
 
@@ -137,7 +137,7 @@ jobs:
         run: |
           echo "${{ steps.adrs.outputs.adrs }}" | base64 -d \
             | node .github/scripts/write-adrs.js \
-                --output initiatives/${{ inputs.component_id }}/docs/adr/
+                --output plan/${{ inputs.component_id }}/docs/adr/
           git add . && git commit -m "feat({{component_id}}): add ADRs"
           git push origin initiative/${{ inputs.component_id }}
 
@@ -191,16 +191,16 @@ jobs:
         run: npm ci
 
       - name: Self-correct loop
-        # Retry up to 5 times within this job — no external state needed
+        # Retry up to 5 times within this job - no external state needed
         run: |
           MAX_RETRIES=5
           RETRY=0
-          until npm run ci:full --workspace=initiatives/${{ inputs.component_id }} || \
+          until npm run ci:full --workspace=src/${{ inputs.component_id }} || \
                 [ $RETRY -ge $MAX_RETRIES ]; do
             RETRY=$((RETRY + 1))
-            echo "CI failed — retry $RETRY of $MAX_RETRIES"
+            echo "CI failed - retry $RETRY of $MAX_RETRIES"
             ERROR_OUTPUT=$(npm run ci:full \
-              --workspace=initiatives/${{ inputs.component_id }} 2>&1 || true)
+              --workspace=src/${{ inputs.component_id }} 2>&1 || true)
 
             # Call codegen-agent with error context
             node .github/scripts/self-correct.js \
@@ -213,7 +213,7 @@ jobs:
           done
 
           if [ $RETRY -ge $MAX_RETRIES ]; then
-            echo "Max retries exceeded — pipeline halted"
+            echo "Max retries exceeded - pipeline halted"
             exit 1
           fi
 
@@ -238,7 +238,7 @@ jobs:
 
       - name: Commit security report
         run: |
-          git add initiatives/${{ inputs.component_id }}/docs/security-report.md
+          git add plan/${{ inputs.component_id }}/docs/security-report.md
           git commit -m "docs({{component_id}}): add security report"
           git push origin initiative/${{ inputs.component_id }}
 
@@ -263,7 +263,7 @@ jobs:
       - name: Create GitHub PR
         run: |
           gh pr create \
-            --title "feat: ${{ inputs.component_id }} — generated by initiative pipeline" \
+            --title "feat: ${{ inputs.component_id }} - generated by initiative pipeline" \
             --body "${{ steps.pr.outputs.description }}" \
             --base main \
             --head initiative/${{ inputs.component_id }}
@@ -281,17 +281,17 @@ jobs:
         run: |
           curl -X POST ${{ secrets.REGISTRY_URL }}/components \
             -H "Content-Type: application/json" \
-            -d @initiatives/${{ inputs.component_id }}/component.json
+            -d @src/${{ inputs.component_id }}/component.json
 ```
 
 ---
 
-## 3. Change Pipeline — Reference Implementation (GitHub Actions)
+## 3. Change Pipeline - Reference Implementation (GitHub Actions)
 
-Reference implementation for the change pipeline in GitHub Actions. The phase logic — context loading, targeted codegen, validate loop, ADR check, security, ship — is identical on all platforms.
+Reference implementation for the change pipeline in GitHub Actions. The phase logic - context loading, targeted codegen, validate loop, ADR check, security, ship - is identical on all platforms.
 
 ```yaml
-name: Change Pipeline — {{component_id}}
+name: Change Pipeline - {{component_id}}
 
 on:
   issues:
@@ -376,12 +376,12 @@ jobs:
           MAX_RETRIES=5
           RETRY=0
           until npm run ci:scoped \
-                  --workspace=initiatives/{{component_id}} \
+                  --workspace=src/{{component_id}} \
                   --blast-radius='${{ needs.context.outputs.blast_radius }}' || \
                 [ $RETRY -ge $MAX_RETRIES ]; do
             RETRY=$((RETRY + 1))
             ERROR_OUTPUT=$(npm run ci:scoped \
-              --workspace=initiatives/{{component_id}} 2>&1 || true)
+              --workspace=src/{{component_id}} 2>&1 || true)
             node .github/scripts/self-correct.js \
               --component {{component_id}} \
               --error "$ERROR_OUTPUT" \
@@ -450,7 +450,7 @@ jobs:
         run: |
           gh pr create \
             --title "fix({{component_id}}): ${{ inputs.change_brief }}" \
-            --body "Automated change — see component docs for context." \
+            --body "Automated change - see component docs for context." \
             --base main \
             --head change/{{component_id}}/${{ github.run_id }}
         env:
@@ -461,14 +461,14 @@ jobs:
           node .github/scripts/update-docs.js --component {{component_id}}
           curl -X PATCH ${{ secrets.REGISTRY_URL }}/components/{{component_id}} \
             -H "Content-Type: application/json" \
-            -d @initiatives/{{component_id}}/component.json
+            -d @src/{{component_id}}/component.json
 ```
 
 ---
 
 ## 4. Shared Reusable Workflows
 
-Both pipelines use a shared composite action for agent invocation, defined once in `.github/actions/run-agent/action.yml`. With MCP, the action starts the MCP server sidecars before invoking the agent — the agent then calls tools directly rather than receiving pre-assembled context.
+Both pipelines use a shared composite action for agent invocation, defined once in `.github/actions/run-agent/action.yml`. With MCP, the action starts the MCP server sidecars before invoking the agent - the agent then calls tools directly rather than receiving pre-assembled context.
 
 ```yaml
 name: Run Agent
@@ -479,7 +479,7 @@ inputs:
     description: Agent name (spec-agent, adr-agent, codegen-agent, etc.)
     required: true
   goal:
-    description: The goal for this agent — what it should accomplish
+    description: The goal for this agent - what it should accomplish
     required: true
   component_id:
     required: true
@@ -493,7 +493,7 @@ runs:
       shell: bash
       run: |
         # Start each MCP server as a background sidecar
-        npx tsx apps/domain-knowledge-mcp/src/index.ts &  # sole writer — domain knowledge + git
+        npx tsx apps/domain-knowledge-mcp/src/index.ts &  # sole writer - domain knowledge + git
         npx tsx apps/filesystem-mcp/src/index.ts &
         npx tsx apps/ci-mcp/src/index.ts &
         npx tsx apps/vcs-mcp/src/index.ts &
@@ -511,7 +511,7 @@ runs:
           --api-key ${{ inputs.anthropic_api_key }}
 ```
 
-The `invoke-agent.js` script loads the system prompt for the agent, sends the goal as the user message, and enables the MCP tool set. The agent calls tools as needed during reasoning — no context pre-assembly by the orchestrator.
+The `invoke-agent.js` script loads the system prompt for the agent, sends the goal as the user message, and enables the MCP tool set. The agent calls tools as needed during reasoning - no context pre-assembly by the orchestrator.
 
 ---
 
@@ -527,9 +527,9 @@ The `invoke-agent.js` script loads the system prompt for the agent, sends the go
 
 No secrets are hardcoded in templates or committed to the repo. The MCP servers read their configuration from environment variables. The Pulumi stacks read cloud credentials from environment variables injected at deploy time.
 
-The `SCM_TOKEN` name is a Planifest convention — the underlying value is your platform's native token (`GITHUB_TOKEN`, `GITLAB_TOKEN`, `BITBUCKET_TOKEN`, etc.). The `vcs-mcp` server abstracts the platform difference.
+The `SCM_TOKEN` name is a Planifest convention - the underlying value is your platform's native token (`GITHUB_TOKEN`, `GITLAB_TOKEN`, `BITBUCKET_TOKEN`, etc.). The `vcs-mcp` server abstracts the platform difference.
 
-In local Claude Code mode, these values are set in the local `.env` file and referenced by `.claude/mcp-config.json`. See [mcp-design — 6. Local vs CI Behaviour](p005-planifest-mcp-architecture.md#6-local-vs-ci-behaviour) for the config format.
+In local Claude Code mode, these values are set in the local `.env` file and referenced by `.claude/mcp-config.json`. See [mcp-design - 6. Local vs CI Behaviour](p005-planifest-mcp-architecture.md#6-local-vs-ci-behaviour) for the config format.
 
 ---
 
@@ -550,7 +550,7 @@ function stampTemplate(
 }
 ```
 
-The stamped files are committed to `initiatives/{{component_id}}/ci/` as part of the scaffold commit, regardless of platform. For GitHub Actions, they are additionally symlinked or copied to `.github/workflows/` as required by the platform. From that point they are owned by the component and evolve independently of the template — except when a template migration is applied.
+The stamped files are committed to `src/{{component_id}}/ci/` as part of the scaffold commit, regardless of platform. For GitHub Actions, they are additionally symlinked or copied to `.github/workflows/` as required by the platform. From that point they are owned by the component and evolve independently of the template - except when a template migration is applied.
 
 **Template migration:** When `templateVersion` is incremented in the master template, a migration script (`apps/orchestrator/src/migrate-templates.ts`) re-stamps all components that are behind the current version, opens a PR per component, and updates `pipeline.templateVersion` in `component.json`.
 
@@ -558,7 +558,7 @@ The stamped files are committed to `initiatives/{{component_id}}/ci/` as part of
 
 ## 7. Local Execution Mode
 
-When running locally via Claude Code, the GitHub Actions workflow structure is not used. Instead, Claude Code reads `.claude/pipeline-manifest.md` and executes each phase directly. The workflow YAML files are still stamped for each component — they are needed when the branch is pushed and CI runs on GitHub. But locally, Claude Code bypasses them entirely.
+When running locally via Claude Code, the GitHub Actions workflow structure is not used. Instead, Claude Code reads `.claude/pipeline-manifest.md` and executes each phase directly. The workflow YAML files are still stamped for each component - they are needed when the branch is pushed and CI runs on GitHub. But locally, Claude Code bypasses them entirely.
 
 ```mermaid
 flowchart LR
@@ -600,6 +600,6 @@ The key differences in the workflow templates when targeting local execution:
 
 **Registry URL:** Defaults to `http://localhost:3000` when `REGISTRY_URL` is not set. The local registry instance must be running before Claude Code executes any pipeline phase that requires context loading.
 
-**PR/MR creation:** The `ship` job checks for the `CI` environment variable (set automatically by most CI platforms). If absent, it skips the `vcs-mcp create_pr` call and writes `pipeline-run.md` instead. The pipeline-run.md content is formatted identically to what the pr-agent would put in a PR description — so it can be passed to your platform's CLI when pushing from local.
+**PR/MR creation:** The `ship` job checks for the `CI` environment variable (set automatically by most CI platforms). If absent, it skips the `vcs-mcp create_pr` call and writes `pipeline-run.md` instead. The pipeline-run.md content is formatted identically to what the pr-agent would put in a PR description - so it can be passed to your platform's CLI when pushing from local.
 
 See [Agentic Tool Runbook](p010-planifest-agentic-tool-runbook.md) for the full step-by-step local execution guide.

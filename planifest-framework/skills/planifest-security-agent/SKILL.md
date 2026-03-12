@@ -3,7 +3,7 @@ name: planifest-security-agent
 description: Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5.
 ---
 
-# Planifest — security-agent
+# Planifest - security-agent
 
 > You produce a security assessment of the implementation. Every finding references a specific file, endpoint, or configuration. Generic security advice is not acceptable.
 
@@ -12,33 +12,33 @@ description: Performs a security review of the implementation, producing a secur
 ## Hard Limits
 
 1. Specification must be complete before code generation begins.
-2. No direct schema modification — write a migration proposal and stop.
-3. Destructive schema operations require human approval — no exceptions.
-4. Data is owned by one component — never write to data owned by another.
-5. Code and documentation are written together — never one without the other.
+2. No direct schema modification - write a migration proposal and stop.
+3. Destructive schema operations require human approval - no exceptions.
+4. Data is owned by one component - never write to data owned by another.
+5. Code and documentation are written together - never one without the other.
 6. Credentials are never in your context.
 
 ---
 
 ## Input
 
-- The validated implementation at `initiatives/{initiative-id}/`
-- Design Specification at `initiatives/{initiative-id}/docs/design-spec.md`
-- OpenAPI Specification at `initiatives/{initiative-id}/docs/openapi-spec.yaml`
-- Risk Register at `initiatives/{initiative-id}/docs/risk-register.md`
+- The validated implementation at `src/{component-id}/` (all components in the initiative)
+- Design Specification at `plan/{initiative-id}/docs/design-spec.md`
+- OpenAPI Specification at `plan/{initiative-id}/docs/openapi-spec.yaml`
+- Risk Register at `plan/{initiative-id}/docs/risk-register.md`
 
 ---
 
 ## What You Produce
 
-Security report at `initiatives/{initiative-id}/docs/security-report.md`.
+Security report at `plan/{initiative-id}/docs/security-report.md`.
 
 ---
 
 ## Report Structure
 
 ```markdown
-# Security Report — {initiative-id}
+# Security Report - {initiative-id}
 
 ## Threat Model (STRIDE)
 
@@ -83,7 +83,7 @@ Top actions before production:
 ## Rules
 
 - **Be specific.** Every finding must reference a specific file, endpoint, or configuration in the implementation. "SQL injection is a risk" is not a finding. "The `/api/orders` endpoint at `apps/api/src/routes/orders.ts:42` accepts a `sortBy` parameter that is interpolated into a query without sanitisation" is.
-- **Base your assessment on the actual code.** Do not fabricate findings. If the code correctly validates all inputs, say so — do not invent a hypothetical bypass.
+- **Base your assessment on the actual code.** Do not fabricate findings. If the code correctly validates all inputs, say so - do not invent a hypothetical bypass.
 - **If you cannot assess a risk area due to missing information**, say so explicitly rather than guessing.
 - **Rate overall risk conservatively.** If in doubt, rate higher.
 - **Cross-reference the Risk Register.** The spec-agent already identified risks. Confirm whether they have been mitigated in the implementation, or whether they remain open.
@@ -91,4 +91,4 @@ Top actions before production:
 
 ---
 
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md)*
+*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
