@@ -1,4 +1,4 @@
-# Data Contract — {{component-name}}
+# Data Contract - {{component-name}}
 
 **Skill:** [codegen-agent](../skills/codegen-agent-SKILL.md) (updated via migration proposals)
 **Tool:** {{agentic-tool-name}}
@@ -9,7 +9,7 @@
 **Schema Version:** {{semver}}
 **Version:** {{semver}}
 
-> This is the authoritative schema definition for this component's data. Any schema change requires a migration proposal — never modify the schema directly.
+> This is the authoritative schema definition for this component's data. Any schema change requires a migration proposal - never modify the schema directly.
 
 ---
 

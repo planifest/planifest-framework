@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Planifest Setup — Configures skills for your agentic coding tool.
+# Planifest Setup - Configures skills for your agentic coding tool.
 #
 # Usage:  ./planifest-framework/setup.sh <tool>
 #

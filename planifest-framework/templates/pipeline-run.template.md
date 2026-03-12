@@ -1,6 +1,6 @@
-# Pipeline Run — {{initiative-id}}
+# Pipeline Run - {{initiative-id}}
 
-**Skill:** [docs-agent](../skills/docs-agent-SKILL.md) (or whichever agent completes the final phase)
+**Skill:** [docs-agent](../skills/planifest-docs-agent/SKILL.md) (or whichever agent completes the final phase)
 **Date:** {{ISO-8601}}
 **Tool:** {{agentic-tool-name}} (local)
 **Model:** {{model-name-and-version, e.g. claude-sonnet-4-20250514, gpt-4.1, gemini-2.5-pro}}
@@ -21,19 +21,19 @@
 
 ## Self-Correct Log
 
-{{what failed and how it was fixed — each attempt with the error and the fix}}
+{{what failed and how it was fixed - each attempt with the error and the fix}}
 
 ---
 
 ## Quirks
 
-{{anything unusual noticed during the run — written to docs/quirks.md and component.json}}
+{{anything unusual noticed during the run - written to docs/quirks.md and component.json}}
 
 ---
 
 ## Recommended Improvements
 
-{{what should be reviewed before the PR — these are not blockers, but flagged for human attention}}
+{{what should be reviewed before the PR - these are not blockers, but flagged for human attention}}
 
 ---
 
