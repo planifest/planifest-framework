@@ -1,19 +1,19 @@
-# Planifest — Domain Knowledge Service Reference Implementation
+# Planifest - Domain Knowledge Service Reference Implementation
 
 ## Version Log
 
 | Version | Change Description | Date | Changed By |
 |---|---|---|---|
 | 1 | Initial Document | 05 MAR 2026 | Martin Mayer |
-| 2 | Deduplicated default rules table — now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
+| 2 | Deduplicated default rules table - now references canonical table in p003 FD-007 | 07 MAR 2026 | Martin Mayer (via agent) |
 | 3 | Added future-state status marker; fixed wikilinks to standard markdown | 07 MAR 2026 | Martin Mayer (via agent) |
-| 4 | Replaced all TypeScript interfaces with JSON Schema definitions — Planifest schemas are language-neutral | 09 MAR 2026 | Martin Mayer (via agent) |
+| 4 | Replaced all TypeScript interfaces with JSON Schema definitions - Planifest schemas are language-neutral | 09 MAR 2026 | Martin Mayer (via agent) |
 
 ---
 
-> **Status: Future architecture.** This document describes the reference implementation of the Domain Knowledge Service MCP server (roadmap items [RC-001](p014-planifest-roadmap.md) and [RC-003](p014-planifest-roadmap.md)). v1.0 operates with the git `docs/` path — agents read and write artifacts directly. The git write model, branching strategy, and serial queue described here become relevant when the service is implemented.
+> **Status: Future architecture.** This document describes the reference implementation of the Domain Knowledge Service MCP server (roadmap items [RC-001](p014-planifest-roadmap.md) and [RC-003](p014-planifest-roadmap.md)). v1.0 operates with the git `docs/` path - agents read and write artifacts directly. The git write model, branching strategy, and serial queue described here become relevant when the service is implemented.
 
-> The Planifest reference implementation of the MCP Domain Knowledge Service. This document describes how Planifest's own specification framework implements the interface — git-backed, serial queue, listener pattern. For the implementation-agnostic interface contract, see [Domain Knowledge Service Interface](p006-planifest-domain-knowledge-service-interface.md).
+> The Planifest reference implementation of the MCP Domain Knowledge Service. This document describes how Planifest's own specification framework implements the interface - git-backed, serial queue, listener pattern. For the implementation-agnostic interface contract, see [Domain Knowledge Service Interface](p006-planifest-domain-knowledge-service-interface.md).
 
 ---
 
@@ -21,13 +21,13 @@
 
 The MCP Domain Knowledge Service gives agents a structured, queryable view of everything Planifest knows about a system. Rather than loading entire documents into context, agents ask targeted questions and receive scoped, purposeful responses.
 
-The service is a thin query layer over the document store. It does not make decisions — it surfaces knowledge. The agent decides what to do with it.
+The service is a thin query layer over the document store. It does not make decisions - it surfaces knowledge. The agent decides what to do with it.
 
 ---
 
 ## Document Store Schema
 
-Every document in the store conforms to a standard envelope. The content varies by document type; the envelope is always the same. All schemas are defined in JSON Schema — they are language-neutral and can be validated by any runtime.
+Every document in the store conforms to a standard envelope. The content varies by document type; the envelope is always the same. All schemas are defined in JSON Schema - they are language-neutral and can be validated by any runtime.
 
 ```json
 {
@@ -83,7 +83,7 @@ Every document in the store conforms to a standard envelope. The content varies 
       "enum": ["draft", "active", "superseded", "archived"]
     },
     "content": {
-      "description": "Document content — shape varies by document type"
+      "description": "Document content - shape varies by document type"
     },
     "risk": { "$ref": "#/$defs/risk-summary" },
     "scope_boundaries": { "$ref": "#/$defs/scope-boundaries" },
@@ -207,7 +207,7 @@ These appear in every document regardless of type:
         "notResponsibleFor": {
           "type": "array",
           "items": { "type": "string" },
-          "description": "Explicit exclusions — equally important as responsibilities"
+          "description": "Explicit exclusions - equally important as responsibilities"
         }
       }
     },
@@ -297,7 +297,7 @@ These appear in every document regardless of type:
 
 ## Document Versioning
 
-Documents are versioned. Updates create new versions rather than overwriting. History is never destroyed — only superseded. This mirrors how the git `docs/` fallback works naturally, and the MCP service versioning model follows the same principle.
+Documents are versioned. Updates create new versions rather than overwriting. History is never destroyed - only superseded. This mirrors how the git `docs/` fallback works naturally, and the MCP service versioning model follows the same principle.
 
 ```json
 {
@@ -332,7 +332,7 @@ The `status` field on the document envelope reflects the current state of a give
 
 ## MCP Tools
 
-The service exposes the following tools to agents. Request and response shapes are defined in JSON Schema. Any MCP-compliant server — regardless of implementation language — must conform to these schemas.
+The service exposes the following tools to agents. Request and response shapes are defined in JSON Schema. Any MCP-compliant server - regardless of implementation language - must conform to these schemas.
 
 ---
 
@@ -422,7 +422,7 @@ The primary tool. Ask a natural language question about the domain; receive a st
 
 ```json
 {
-  "answer": "Authentication is handled by the auth-service microservice. It is the sole component responsible for token issuance and validation. The api-gateway consumes it for all inbound requests. No other component performs auth logic — this is an explicit scope boundary in the auth-service design spec.",
+  "answer": "Authentication is handled by the auth-service microservice. It is the sole component responsible for token issuance and validation. The api-gateway consumes it for all inbound requests. No other component performs auth logic - this is an explicit scope boundary in the auth-service design spec.",
   "confidence": "high",
   "sources": [
     {
@@ -688,7 +688,7 @@ Retrieve all known quirks for a scope, optionally filtered by status.
 
 ### `raise_issue`
 
-Allows an agent to raise a quirk, risk item, or tech debt entry — not just humans.
+Allows an agent to raise a quirk, risk item, or tech debt entry - not just humans.
 
 **Request:**
 ```json
@@ -736,7 +736,7 @@ Allows an agent to raise a quirk, risk item, or tech debt entry — not just hum
 
 ### `get_glossary`
 
-Retrieve the domain glossary for an initiative — the ubiquitous language agents must use when generating code, docs, and specs.
+Retrieve the domain glossary for an initiative - the ubiquitous language agents must use when generating code, docs, and specs.
 
 **Request:**
 ```json
@@ -787,7 +787,7 @@ Retrieve the domain glossary for an initiative — the ubiquitous language agent
 
 ## Write Tools
 
-The service is symmetric — agents write to the domain knowledge store using the same service they query. Every write produces both a structured record and a markdown file at the corresponding git `docs/` path. The two are always kept in sync.
+The service is symmetric - agents write to the domain knowledge store using the same service they query. Every write produces both a structured record and a markdown file at the corresponding git `docs/` path. The two are always kept in sync.
 
 Agent writes are always flagged with `"author": "agent"`. Human reviewers can filter by this to audit what the pipeline has produced.
 
@@ -807,7 +807,7 @@ Create a new document in the store. Validates against the document schema before
     "scope": { "type": "string", "enum": ["initiative", "component", "system"] },
     "initiative": { "type": "string" },
     "component": { "type": "string" },
-    "content": { "description": "Document content — validated against the schema for the specified type" },
+    "content": { "description": "Document content - validated against the schema for the specified type" },
     "changeSummary": { "type": "string" }
   }
 }
@@ -893,7 +893,7 @@ Supersede an existing ADR with a new one. Links the old and new ADRs bidirection
     "path": { "type": "string" },
     "requiresHumanReview": {
       "const": true,
-      "description": "Always true — ADR changes are significant"
+      "description": "Always true - ADR changes are significant"
     }
   }
 }
@@ -903,7 +903,7 @@ Supersede an existing ADR with a new one. Links the old and new ADRs bidirection
 
 ### `raise_improvement`
 
-Allows an agent to propose an improvement to the system, a component, or the domain model itself. By default, improvements always require human review — they change intent, and only a human can decide whether an improvement becomes an Initiative Brief.
+Allows an agent to propose an improvement to the system, a component, or the domain model itself. By default, improvements always require human review - they change intent, and only a human can decide whether an improvement becomes an Initiative Brief.
 
 This default is overridable per initiative.
 
@@ -951,11 +951,11 @@ This default is overridable per initiative.
 
 ## Database Tools
 
-Data is treated differently to code throughout Planifest. A component can be rebuilt freely within its boundary — but the data it owns cannot. Schema changes require explicit migration plans, and certain operations are hard limits regardless of configuration.
+Data is treated differently to code throughout Planifest. A component can be rebuilt freely within its boundary - but the data it owns cannot. Schema changes require explicit migration plans, and certain operations are hard limits regardless of configuration.
 
 ### `get_data_contract`
 
-Retrieve the canonical data contract for a component — the authoritative schema definition that the component owns.
+Retrieve the canonical data contract for a component - the authoritative schema definition that the component owns.
 
 **Request:**
 ```json
@@ -978,7 +978,7 @@ Retrieve the canonical data contract for a component — the authoritative schem
     "componentId": { "type": "string" },
     "owner": {
       "type": "string",
-      "description": "Component that owns this data — always one"
+      "description": "Component that owns this data - always one"
     },
     "schema": {
       "type": "object",
@@ -1161,7 +1161,7 @@ An agent proposes a schema migration before any schema change is applied. The mi
     "path": { "type": "string" },
     "requiresHumanReview": {
       "const": true,
-      "description": "Always — no exceptions"
+      "description": "Always - no exceptions"
     },
     "hardLimit": {
       "type": "boolean",
@@ -1177,14 +1177,14 @@ An agent proposes a schema migration before any schema change is applied. The mi
 
 **Agents should query before generating.** Before building a component, the agent should at minimum:
 
-1. `get_component` — understand what already exists in the vicinity
-2. `domain_query` — confirm there is no existing component with overlapping responsibility
-3. `get_risk` — understand what risk has already been identified for this domain
-4. `get_glossary` — confirm it is using the correct ubiquitous language
+1. `get_component` - understand what already exists in the vicinity
+2. `domain_query` - confirm there is no existing component with overlapping responsibility
+3. `get_risk` - understand what risk has already been identified for this domain
+4. `get_glossary` - confirm it is using the correct ubiquitous language
 
 **Queries should be scoped.** Unscoped queries return noisier results. Always pass `initiative` at minimum; pass `component` when working within a known boundary.
 
-**Confidence matters.** A `low` confidence response means the domain knowledge store does not have a reliable answer. The agent should flag this rather than infer — and may raise an issue via `raise_issue` to surface the gap.
+**Confidence matters.** A `low` confidence response means the domain knowledge store does not have a reliable answer. The agent should flag this rather than infer - and may raise an issue via `raise_issue` to surface the gap.
 
 ---
 
@@ -1230,11 +1230,11 @@ docs/
 
 ## Git Write Model
 
-The MCP service is the sole writer to the git monorepo — for both code and docs. Agents never write to git directly. All writes are posted to the MCP service and queued for processing.
+The MCP service is the sole writer to the git monorepo - for both code and docs. Agents never write to git directly. All writes are posted to the MCP service and queued for processing.
 
 ### Queue and Listener
 
-When an agent posts an update, it is placed on a write queue. A listener processes the queue and triggers a function to commit and push the change. The queue is processed serially — one write at a time, in order. This eliminates merge conflicts by design.
+When an agent posts an update, it is placed on a write queue. A listener processes the queue and triggers a function to commit and push the change. The queue is processed serially - one write at a time, in order. This eliminates merge conflicts by design.
 
 ### Branching Strategy
 
@@ -1247,11 +1247,11 @@ flowchart TD
     B -->|PR when complete| A
 ```
 
-- **`main`** — the stable trunk. Agents never write here directly. Only merged into via PR.
-- **`initiative/{name}`** — one branch per initiative, taken from main. One initiative is worked on at a time.
-- **`change/{description}`** — each individual change is made on a branch off the initiative branch. One change at a time. Merged back into the initiative branch when complete.
+- **`main`** - the stable trunk. Agents never write here directly. Only merged into via PR.
+- **`initiative/{name}`** - one branch per initiative, taken from main. One initiative is worked on at a time.
+- **`change/{description}`** - each individual change is made on a branch off the initiative branch. One change at a time. Merged back into the initiative branch when complete.
 
-Initiative branches pull from main regularly to stay current. This is a precaution — in normal operation there should be nothing to pull in, because the MCP service is the only writer.
+Initiative branches pull from main regularly to stay current. This is a precaution - in normal operation there should be nothing to pull in, because the MCP service is the only writer.
 
 ### Atomic Commits
 
@@ -1277,17 +1277,17 @@ For teams not running the MCP service, agents interact with git directly using t
 
 Credentials are never passed to or through the agent. The agent invokes git as a local process; the OS handles authentication natively:
 
-- **macOS** — Keychain
-- **Windows** — Windows Credential Manager
-- **Linux** — git credential store or libsecret
+- **macOS** - Keychain
+- **Windows** - Windows Credential Manager
+- **Linux** - git credential store or libsecret
 
 In CI environments (GitHub Actions, GitLab CI etc.), credentials are injected as masked environment variables consumed by the git process directly. They are never present in the agent's context.
 
-The agent is given a capability — "you can commit to git" — not a credential. It cannot share, leak, or expose authentication details regardless of how it is prompted, because they are not available to it.
+The agent is given a capability - "you can commit to git" - not a credential. It cannot share, leak, or expose authentication details regardless of how it is prompted, because they are not available to it.
 
 ### Behaviour
 
-The same branching strategy and serial discipline applies as in the MCP path — one initiative branch, one change branch at a time, code and docs committed atomically. The difference is that the queue and listener are not present — the agent commits directly in sequence as part of its pipeline execution.
+The same branching strategy and serial discipline applies as in the MCP path - one initiative branch, one change branch at a time, code and docs committed atomically. The difference is that the queue and listener are not present - the agent commits directly in sequence as part of its pipeline execution.
 
 The non-MCP path is appropriate for:
 - Local development
@@ -1298,7 +1298,7 @@ The non-MCP path is appropriate for:
 
 ## Default Rules
 
-These rules govern how the service and the agents using it behave. See [FD-007 — Default rules](p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) for the full default rules table. Rules marked **overridable** can be changed per initiative. Rules marked **hard limit** cannot — the consequences of getting them wrong are irreversible.
+These rules govern how the service and the agents using it behave. See [FD-007 - Default rules](p003-planifest-functional-decisions.md#fd-007--default-rules-are-conservative-autonomy-is-earned-progressively) for the full default rules table. Rules marked **overridable** can be changed per initiative. Rules marked **hard limit** cannot - the consequences of getting them wrong are irreversible.
 
 ---
 

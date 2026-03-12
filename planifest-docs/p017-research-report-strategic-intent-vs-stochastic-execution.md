@@ -1,4 +1,13 @@
 # Research Report: Strategic Intent vs. Stochastic Execution
+
+## Version Log
+
+| Version | Change Description | Date | Changed By |
+|---------|---------------------|------|-------------|
+| 1 | Initial Research Document | 11 MAR 2026 | Martin Mayer |
+
+---
+
 **Date:** March 11, 2026  
 **Subject:** Critical Analysis of Sequential Intent-Mapping in Agentic Workflows  
 **Status:** Technical Evaluation of "Plan-to-Manifest" Logic  
@@ -16,7 +25,7 @@ Without a pre-execution "Plan" to serve as a deterministic anchor, agents defaul
 A "Plan" in this context is not a traditional project management tool, but a **high-density constraints set**. 
 
 * **The Problem with "AI-First" Research:** When an agent researches a codebase before a human provides an anchor, it adopts the "legacy perspective" of the existing code. It becomes an echo chamber of existing technical debt.
-* **The Strategic Necessity:** The human must provide the "intentional state"—the quirky, non-obvious, or future-facing requirements that do not yet exist in the codebase. This "Plan" forces the LLM’s attention mechanism to prioritize human-defined variables over the "most likely" code patterns found in the wild.
+* **The Strategic Necessity:** The human must provide the "intentional state"-the quirky, non-obvious, or future-facing requirements that do not yet exist in the codebase. This "Plan" forces the LLM's attention mechanism to prioritize human-defined variables over the "most likely" code patterns found in the wild.
 
 ---
 
@@ -32,7 +41,7 @@ The "Manifest" is the machine-readable and human-readable artifact of an autonom
 ## 4. Critical Technical Challenges and Mitigations
 
 ### A. Problem: Context Inflation & Attention Decay
-High-density Plans increase the "Token Tax." Even with 2M+ token context windows, models suffer from **Attention Decay**. If a Plan is too detailed, it competes for the model’s limited attention during the "Deep Research" phase, leading the agent to ignore non-negotiable constraints in favor of discovered code patterns.
+High-density Plans increase the "Token Tax." Even with 2M+ token context windows, models suffer from **Attention Decay**. If a Plan is too detailed, it competes for the model's limited attention during the "Deep Research" phase, leading the agent to ignore non-negotiable constraints in favor of discovered code patterns.
 
 * **Mitigation: Selective Application** The framework should not be used as a blanket solution for all development tasks. It is applied specifically when the complexity or novelty of the problem warrants high-context anchoring. For routine or standard tasks, leaner iterative prompts are utilized to preserve the context window and reduce compute costs.
 
@@ -66,7 +75,7 @@ The Plan-to-Manifest concept is a **Risk Mitigation Strategy**, not a panacea.
 As models evolve throughout 2026 and beyond, the framework is expected to shift from a high-density "Plan" toward a more fluid "Intent" model. This evolution will be driven by improvements in model reasoning and the commoditization of architectural patterns.
 
 ### A. The Transition to Intent-Inference
-Future iterations of **Claude** and **Codex** are likely to become significantly better at inferring "Tacit Knowledge"—the unspoken requirements that humans currently have to "brain dump" into a Plan.
+Future iterations of **Claude** and **Codex** are likely to become significantly better at inferring "Tacit Knowledge"-the unspoken requirements that humans currently have to "brain dump" into a Plan.
 * **The Shift:** Instead of a full-scale architectural Plan, the human provides a high-level **Intent Anchor**. The agent then uses "Simulated Stakeholder Reasoning" to hypothesize the missing requirements, verifying them against the codebase before generating the Manifest.
 * **The Result:** This reduces the **Token Tax** by moving the heavy lifting of requirements-gathering from the prompt into the agent's internal reasoning loop.
 
@@ -82,7 +91,7 @@ The most significant evolution will be the use of the **Manifest as a feedback l
 ### D. Adaptive Framework Calibration
 To meet these evolutions, the framework must become **Adaptive**. The level of human "Anchoring" will be inversely proportional to the agent's "Intent-Certainty" score. 
 * **High-Certainty Tasks:** The agent proceeds with a minimal Intent Anchor and a standard Manifest.
-* **Low-Certainty/Novel Tasks:** The system automatically triggers a request for a "Classic Plan" (Brain Dump), ensuring that human quirkiness is preserved where the AI’s statistical "Average" is most likely to fail.
+* **Low-Certainty/Novel Tasks:** The system automatically triggers a request for a "Classic Plan" (Brain Dump), ensuring that human quirkiness is preserved where the AI's statistical "Average" is most likely to fail.
 * 
 
 The ultimate value of this concept in 2026 lies in its ability to provide **Human Oversight at Scale**. It allows one engineer to monitor ten autonomous builds by reviewing the outcome and outputs rather than writing code.

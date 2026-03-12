@@ -1,6 +1,6 @@
 {
     "$id": "domain-document",
-    "$comment": "Planifest Domain Document envelope — every document in the knowledge store conforms to this shape. Content varies by document type; the envelope is always the same.",
+    "$comment": "Planifest Domain Document envelope - every document in the knowledge store conforms to this shape. Content varies by document type; the envelope is always the same.",
     "type": "object",
     "required": [
         "id",
@@ -89,7 +89,7 @@
             ]
         },
         "content": {
-            "description": "Document content — shape varies by document type"
+            "description": "Document content - shape varies by document type"
         },
         "risk": {
             "$ref": "shared.schema.json#/$defs/risk-summary"

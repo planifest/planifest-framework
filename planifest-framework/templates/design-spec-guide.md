@@ -1,4 +1,4 @@
-# Design Specification — Guide
+# Design Specification - Guide
 
 > How the spec-agent produces a design specification, and how to read one.
 
@@ -8,13 +8,13 @@
 
 ## Purpose
 
-The Design Specification translates the Initiative Brief into **specific, testable requirements**. It is the contract between what the human asked for and what the codegen-agent will build. Every requirement traces back to a user story or acceptance criterion — if it doesn't trace, it shouldn't exist.
+The Design Specification translates the Initiative Brief into **specific, testable requirements**. It is the contract between what the human asked for and what the codegen-agent will build. Every requirement traces back to a user story or acceptance criterion - if it doesn't trace, it shouldn't exist.
 
 ---
 
 ## Who Writes It
 
-The **spec-agent** produces this document during Phase 1 of the pipeline. It reads the confirmed Planifest and the original Initiative Brief as input. It does not invent requirements — it derives them.
+The **spec-agent** produces this document during Phase 1 of the pipeline. It reads the confirmed Planifest and the original Initiative Brief as input. It does not invent requirements - it derives them.
 
 ---
 
@@ -31,9 +31,9 @@ The **spec-agent** produces this document during Phase 1 of the pipeline. It rea
 ### Functional Requirements
 
 Each requirement must be:
-- **Specific** — one behaviour, not a category
-- **Testable** — you can write a test case from the requirement alone
-- **Traceable** — sourced from a user story or acceptance criterion in the brief
+- **Specific** - one behaviour, not a category
+- **Testable** - you can write a test case from the requirement alone
+- **Traceable** - sourced from a user story or acceptance criterion in the brief
 
 | ❌ Bad | ✅ Good |
 |--------|---------|
@@ -42,11 +42,11 @@ Each requirement must be:
 
 ### Non-Functional Requirements
 
-Same rule — measurable targets only. These are derived from the NFR section of the Initiative Brief, not invented.
+Same rule - measurable targets only. These are derived from the NFR section of the Initiative Brief, not invented.
 
 ### API Summary
 
-A quick-reference table. The full contract is in `openapi-spec.yaml` — this table is for humans scanning the spec.
+A quick-reference table. The full contract is in `openapi-spec.yaml` - this table is for humans scanning the spec.
 
 ### Data Model Summary
 
@@ -54,7 +54,7 @@ Entities, their owner components, and relationships. This feeds into the data co
 
 ### Open Questions
 
-Material gaps the spec-agent couldn't resolve from the brief. These are **not** filled by assumption — they're reported to the orchestrator, which surfaces them to the human.
+Material gaps the spec-agent couldn't resolve from the brief. These are **not** filled by assumption - they're reported to the orchestrator, which surfaces them to the human.
 
 ---
 
@@ -70,9 +70,9 @@ Material gaps the spec-agent couldn't resolve from the brief. These are **not** 
 ## How It Connects
 
 ```
-Initiative Brief → Design Spec → ADRs → Code
-                → OpenAPI Spec ↗        ↗
-                → Data Model ──→ Data Contract
+Initiative Brief -> Design Spec -> ADRs -> Code
+                -> OpenAPI Spec ↗        ↗
+                -> Data Model ──-> Data Contract
 ```
 
 The design spec is the central artifact. ADRs explain HOW to implement the requirements. The codegen-agent reads both.

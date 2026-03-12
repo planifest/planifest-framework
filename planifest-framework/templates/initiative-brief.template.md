@@ -1,4 +1,4 @@
-# Initiative Brief — {{initiative-name}}
+# Initiative Brief - {{initiative-name}}
 
 > Written by a human. This is the input document that kicks off the Planifest pipeline. The orchestrator reads this and coaches you through any gaps before passing it to the spec-agent.
 
@@ -8,7 +8,7 @@
 
 What problem does this initiative solve? Who benefits and how?
 
-> Write 2-3 sentences. Be specific. "Improve performance" is not a goal — "Reduce checkout latency from 3s to under 500ms because 40% of users abandon at payment" is.
+> Write 2-3 sentences. Be specific. "Improve performance" is not a goal - "Reduce checkout latency from 3s to under 500ms because 40% of users abandon at payment" is.
 
 {{business-goal}}
 
@@ -16,7 +16,7 @@ What problem does this initiative solve? Who benefits and how?
 
 ## Features
 
-Break the initiative into discrete features. Each feature should be small enough that an agent can implement it within a single session (roughly: one API endpoint with its data model, validation, tests, and docs — or one UI screen with its state management and tests).
+Break the initiative into discrete features. Each feature should be small enough that an agent can implement it within a single session (roughly: one API endpoint with its data model, validation, tests, and docs - or one UI screen with its state management and tests).
 
 > **Rule of thumb:** If a feature has more than 3 user stories, it's too big. Split it further. Big initiatives should have many small features, not a few large ones.
 
@@ -43,7 +43,7 @@ If the initiative has more than 5-6 features, split it into phases. Each phase b
 
 ## Target Architecture
 
-What architectural decisions have you already made? The agent implements within these constraints — it does not choose the architecture.
+What architectural decisions have you already made? The agent implements within these constraints - it does not choose the architecture.
 
 ### Components
 
@@ -59,7 +59,7 @@ Which components own which data? Each data store is owned by exactly one compone
 
 | Data Store | Owner Component | Shared With |
 |------------|----------------|-------------|
-| {{store}} | {{component}} | {{consumers — read only}} |
+| {{store}} | {{component}} | {{consumers - read only}} |
 
 ### Integration Points
 
@@ -73,7 +73,7 @@ How do components communicate?
 
 ## Stack
 
-What technology stack has been decided? The agent builds with this — it does not choose a different stack.
+What technology stack has been decided? The agent builds with this - it does not choose a different stack.
 
 > If you haven't decided yet, leave this section empty. The orchestrator will ask you to fill it before the pipeline proceeds.
 
@@ -101,7 +101,7 @@ What is explicitly in scope, out of scope, and deferred?
 - {{what this initiative will deliver}}
 
 ### Out of Scope
-- {{what this initiative will NOT deliver — be explicit}}
+- {{what this initiative will NOT deliver - be explicit}}
 
 ### Deferred
 - {{what might be delivered later but not now}}
@@ -111,7 +111,7 @@ What is explicitly in scope, out of scope, and deferred?
 
 ## Non-Functional Requirements
 
-Specific, measurable targets. If you don't have a target, leave it blank — the spec-agent will ask.
+Specific, measurable targets. If you don't have a target, leave it blank - the spec-agent will ask.
 
 | NFR | Target | Measurement |
 |-----|--------|-------------|
@@ -127,10 +127,10 @@ Specific, measurable targets. If you don't have a target, leave it blank — the
 Anything the agents need to know that doesn't fit elsewhere.
 
 ### Constraints
-- {{hard constraints — regulatory, contractual, technical}}
+- {{hard constraints - regulatory, contractual, technical}}
 
 ### Assumptions
-- {{assumptions you've made — agents will flag if these conflict with the spec}}
+- {{assumptions you've made - agents will flag if these conflict with the spec}}
 
 ---
 
