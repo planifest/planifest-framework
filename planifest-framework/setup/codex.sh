@@ -1,4 +1,4 @@
-# OpenAI Codex — tool configuration
+# OpenAI Codex - tool configuration
 # https://openai.com/codex
 #
 # Skills:    .agents/skills/{name}/SKILL.md       (auto-discovered)
@@ -22,8 +22,8 @@ Load the orchestrator skill for any initiative or change.
 - retrofit: Onboard an existing codebase
 
 Key paths:
-  planifest-framework/README.md    — framework overview and getting started
-  plan/                            — initiative specifications
-  src/                             — component code
-  planifest-framework/templates/   — artifact templates
-  planifest-framework/standards/   — code quality standards"
+  planifest-framework/README.md    - framework overview and getting started
+  plan/                            - initiative specifications
+  src/                             - component code
+  planifest-framework/templates/   - artifact templates
+  planifest-framework/standards/   - code quality standards"

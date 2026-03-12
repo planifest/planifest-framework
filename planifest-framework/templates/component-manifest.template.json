@@ -1,5 +1,5 @@
 {
-    "$comment": "Planifest Component Manifest — written by agents after build, read by agents before change. See p007 for the full Domain Knowledge Service schema.",
+    "$comment": "Planifest Component Manifest - written by agents after build, read by agents before change. See p007 for the full Domain Knowledge Service schema.",
     "id": "{{component-id}}",
     "name": "{{Human-Readable Name}}",
     "initiative": "{{initiative-id}}",
@@ -15,8 +15,8 @@
             "Second thing this component is responsible for"
         ],
         "notResponsibleFor": [
-            "Explicit exclusion — what this component must NOT do",
-            "Another exclusion — equally important as responsibilities"
+            "Explicit exclusion - what this component must NOT do",
+            "Another exclusion - equally important as responsibilities"
         ]
     },
     "stack": {
@@ -56,10 +56,10 @@
     },
     "data": {
         "ownsData": true,
-        "dataContract": "docs/data-contract.md",
+        "dataContract": "src/{{component-id}}/docs/data-contract.md",
         "tables": [],
         "schemaVersion": "0.0.0",
-        "migrationPath": "docs/migrations/"
+        "migrationPath": "src/{{component-id}}/docs/migrations/"
     },
     "risk": {
         "level": "low | medium | high | critical",
@@ -88,7 +88,7 @@
     "pipeline": {
         "templateVersion": "1.0.0",
         "initiativeMode": "greenfield | retrofit | agent-interface",
-        "domainKnowledgePath": "initiatives/{{component-id}}/docs"
+        "domainKnowledgePath": "plan/{{initiative-id}}/docs"
     },
     "metadata": {
         "createdAt": "{{ISO-8601}}",

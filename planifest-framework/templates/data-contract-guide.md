@@ -1,4 +1,4 @@
-# Data Contract — Guide
+# Data Contract - Guide
 
 > How the codegen-agent defines schema ownership and how migration proposals work.
 
@@ -8,13 +8,13 @@
 
 ## Purpose
 
-The Data Contract is the authoritative schema definition for a component's data. It defines which tables exist, what columns they have, what invariants must hold, and who owns the data. It is the single source of truth — the database schema is derived from this document, not the other way around.
+The Data Contract is the authoritative schema definition for a component's data. It defines which tables exist, what columns they have, what invariants must hold, and who owns the data. It is the single source of truth - the database schema is derived from this document, not the other way around.
 
 ---
 
 ## Who Writes It
 
-The **codegen-agent** creates it during Phase 3 when building data-owning components. It's updated exclusively through **migration proposals** — never by directly editing the schema.
+The **codegen-agent** creates it during Phase 3 when building data-owning components. It's updated exclusively through **migration proposals** - never by directly editing the schema.
 
 ---
 
@@ -34,11 +34,11 @@ The `Owner` field in the data contract header must match the `id` in the compone
 
 ### Tables
 
-Each table gets a full column listing with types, nullability, defaults, and constraints. Be precise — the migration tooling reads this.
+Each table gets a full column listing with types, nullability, defaults, and constraints. Be precise - the migration tooling reads this.
 
-**Indexes** — list every index. Don't rely on the ORM to "figure it out". Explicit indexes are reproducible.
+**Indexes** - list every index. Don't rely on the ORM to "figure it out". Explicit indexes are reproducible.
 
-**Relationships** — type (one-to-many, many-to-many), target table, and foreign key. This feeds into the OpenAPI schema and the component's integration points.
+**Relationships** - type (one-to-many, many-to-many), target table, and foreign key. This feeds into the OpenAPI schema and the component's integration points.
 
 ### Invariants
 
@@ -61,14 +61,14 @@ Every schema change is recorded here. The migration proposal process:
 4. The human reviews and approves (or rejects)
 5. If approved, the agent applies the migration and updates the data contract
 
-**Destructive operations** (drop column, drop table, rename) additionally require explicit human approval — this is a hard limit.
+**Destructive operations** (drop column, drop table, rename) additionally require explicit human approval - this is a hard limit.
 
 ---
 
 ## Common Mistakes
 
 1. **Direct schema edits.** Never modify the data contract directly during codegen. Always go through a migration proposal.
-2. **Missing invariants.** If the data has rules (uniqueness, referential integrity, value ranges), they must be here — not just in application code.
+2. **Missing invariants.** If the data has rules (uniqueness, referential integrity, value ranges), they must be here - not just in application code.
 3. **Shared ownership.** If two components "need" to own the same data, the architecture is wrong. One owns it; the other consumes it via API.
 4. **No migration history.** Every change, no matter how small, gets a migration entry. This is the audit trail for schema evolution.
 

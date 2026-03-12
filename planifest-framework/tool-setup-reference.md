@@ -6,20 +6,20 @@
 
 ## Agent Skills Specification
 
-Planifest fully supports the [Agent Skills specification](https://agentskills.io/specification). Each skill is deployed as a directory whose name matches the `name` field in YAML frontmatter — the requirement the spec mandates. The framework is designed for tools that implement the Agent Skills standard: skills are discoverable, frontmatter-driven, and portable across any compliant tool.
+Planifest fully supports the [Agent Skills specification](https://agentskills.io/specification). Each skill is deployed as a directory whose name matches the `name` field in YAML frontmatter - the requirement the spec mandates. The framework is designed for tools that implement the Agent Skills standard: skills are discoverable, frontmatter-driven, and portable across any compliant tool.
 
 ---
 
 ## Scripts
 
-Two setup scripts are provided — use whichever matches your OS:
+Two setup scripts are provided - use whichever matches your OS:
 
 | OS | Script | Interpreter |
 |----|--------|-------------|
 | macOS / Linux | `setup.sh` | Bash (pre-installed) |
 | Windows | `setup.ps1` | PowerShell (pre-installed) |
 
-**Zero dependencies.** Both scripts use only built-in OS capabilities — no Node.js, Python, or anything else required.
+**Zero dependencies.** Both scripts use only built-in OS capabilities - no Node.js, Python, or anything else required.
 
 ---
 
@@ -46,7 +46,7 @@ For each tool, the script:
 | **Boot file** | `CLAUDE.md` (project root) |
 | **Personal skills** | `~/.claude/skills/` |
 | **Frontmatter** | `name` + `description` required |
-| **Progressive disclosure** | Yes — reads frontmatter first, loads body on demand |
+| **Progressive disclosure** | Yes - reads frontmatter first, loads body on demand |
 | **Setup command** | `./planifest-framework/setup.sh claude-code` or `.\planifest-framework\setup.ps1 claude-code` |
 
 **Creates:**
@@ -140,7 +140,7 @@ AGENTS.md
 |------|--------|
 | **Skill discovery** | `.gemini/skills/{name}/SKILL.md` or `.agent/skills/{name}/SKILL.md` |
 | **Workflow discovery** | `.agent/workflows/{name}.md` (becomes `/name` slash command) |
-| **Boot file** | None needed — uses skill discovery directly |
+| **Boot file** | None needed - uses skill discovery directly |
 | **Personal skills** | `~/.gemini/antigravity/skills/` |
 | **Frontmatter** | `name` + `description` required |
 | **Progressive disclosure** | Yes |
@@ -202,9 +202,9 @@ AGENTS.md
 All five tools share these conventions:
 - Skills are folders containing a `SKILL.md` file
 - `SKILL.md` must have YAML frontmatter with `name` and `description`
-- Tools use **progressive disclosure** — they read frontmatter first, then load the full body on demand
+- Tools use **progressive disclosure** - they read frontmatter first, then load the full body on demand
 - Personal/global skills in `~/.<tool>/skills/` override project skills
-- No tool supports custom scan paths — only their hardcoded directories
+- No tool supports custom scan paths - only their hardcoded directories
 
 ---
 
@@ -223,4 +223,4 @@ All five tools share these conventions:
 
 ---
 
-*Source of truth: `planifest-framework/` — the generated files are copies.*
+*Source of truth: `planifest-framework/` - the generated files are copies.*
