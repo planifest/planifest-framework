@@ -101,7 +101,7 @@ How you know the initiative is done. These become the orchestrator's exit criter
 
 ## What Happens Next
 
-1. You write the brief and save it to `plan/initiative-brief.md`
+1. You write the brief and save it to `plan/current/initiative-brief.md`
 2. You tell the orchestrator to load it
 3. The orchestrator assesses it against the three layers (Product, Architecture, Engineering) and coaches you through any gaps - one question at a time
 4. Once complete, the orchestrator produces the Planifest (the validated plan) and begins the pipeline

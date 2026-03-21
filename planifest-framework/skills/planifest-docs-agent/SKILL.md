@@ -24,7 +24,7 @@ description: Produces complete per-component documentation, system-wide registry
 
 - All artifacts produced by prior phases at `plan/`
 - The implementation at `src/{component-id}/` (all components in the initiative)
-- The Planifest at `plan/planifest.md`
+- The Planifest at `plan/current/planifest.md`
 
 ---
 
@@ -67,9 +67,9 @@ Confirm the following exist at `plan/` and are consistent:
 - Operational Model (from spec-agent)
 - SLO Definitions (from spec-agent)
 - Cost Model (from spec-agent)
-- ADRs at `plan/adr/` (from adr-agent)
+- ADRs at `plan/current/adr/` (from adr-agent)
 - Security Report (from security-agent)
-- Recommendations (`plan/recommendations.md` - produce this now if it doesn't exist)
+- Recommendations (`plan/current/recommendations.md` - produce this now if it doesn't exist)
 
 ### Audit trail
 
@@ -109,7 +109,7 @@ Tool: {agent tool used}
 - **Every artifact must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly - do not leave a silent gap.
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
 - **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find - do not silently fix it.
-- **Recommendations.** Produce `plan/recommendations.md` - suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
+- **Recommendations.** Produce `plan/current/recommendations.md` - suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
 
 ---
 
