@@ -19,14 +19,16 @@ This project uses the Planifest framework. Load the orchestrator skill for any i
 
 ## Workflows
 
-- **Initiative Pipeline**: Load the orchestrator skill. Provide an initiative brief at plan/{initiative-id}/initiative-brief.md
+- **Initiative Pipeline**: Load the orchestrator skill. Provide an initiative brief at plan/initiative-brief.md
 - **Change Pipeline**: Load the orchestrator skill. Provide initiative ID, component ID, and change request.
 - **Retrofit**: Load the orchestrator skill with retrofit adoption mode.
 
 ## Key paths
 
 - planifest-framework/README.md    - framework overview and getting started
-- plan/                            - initiative specifications
+- plan/                            - current initiative specifications
+  plan/changelog/                  - change audit logs
+  docs/                            - living repository documentation
 - src/                             - component code
 - planifest-framework/templates/   - artifact templates
 - planifest-framework/standards/   - code quality standards'

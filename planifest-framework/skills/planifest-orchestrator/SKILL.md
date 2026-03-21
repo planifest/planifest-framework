@@ -1,4 +1,4 @@
-﻿---
+---
 name: planifest-orchestrator
 description: Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs.
 ---
@@ -125,7 +125,7 @@ The [Initiative Brief Template](../templates/initiative-brief.template.md) guide
 
 The **Planifest** - the plan for what will be built and the manifest of what it builds against. This is the contract between you and the human before you begin building.
 
-Write this to `plan/{initiative-id}/planifest.md`:
+Write this to `plan/planifest.md`:
 
 ```markdown
 # Planifest - {initiative-id}
@@ -179,7 +179,7 @@ Invoke the **spec-agent** skill.
 
 **Input:** The confirmed Planifest + the original Initiative Brief
 
-**What it produces:** Design Specification, OpenAPI Specification, Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model - all written to `plan/{initiative-id}/docs/`
+**What it produces:** Design Specification, OpenAPI Specification, Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model - all written to `plan/`
 
 **Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
 
@@ -191,7 +191,7 @@ Invoke the **adr-agent** skill.
 
 **Input:** Design Specification, OpenAPI Specification (from Phase 1)
 
-**What it produces:** ADRs for every significant decision, written to `plan/{initiative-id}/docs/adr/`
+**What it produces:** ADRs for every significant decision, written to `plan/adr/`
 
 **Gate:** Confirm an ADR exists for every significant decision - stack choice, database selection, auth strategy, deployment topology, component boundaries. If a decision was made but not recorded, invoke the adr-agent for the missing ADR.
 
@@ -231,7 +231,7 @@ Invoke the **security-agent** skill.
 
 **Input:** The validated implementation from Phase 4
 
-**What it produces:** Security report at `plan/{initiative-id}/docs/security-report.md`
+**What it produces:** Security report at `plan/security-report.md`
 
 **Gate:** Report is produced with specific findings. Critical and high findings are flagged for human attention at the PR gate.
 
@@ -243,9 +243,10 @@ Invoke the **docs-agent** skill.
 
 **Input:** All artifacts from all phases
 
-**What it produces:** Complete per-component documentation, system-wide component registry and dependency graph, recommendations, pipeline-run.md
+**What it produces:** Living repository documentation at `docs/` (component registry, dependency graph), a changelog entry log (`plan/changelog/{initiative-id}-{YYYY-MM-DD}.md`), and recommendations.
 
-**Gate:** Every artifact defined in FD-019 has been produced. `pipeline-run.md` accounts for every phase. The initiative is ready for human review.
+**Gate:** Every living artifact has been produced and no historical change logs reside in `docs/`. The active plan is complete and ready for human review.
+**Post-Review Action:** Once the human reviews and accepts the change, you must move the active plan (brief, spec, ADRs) from the `plan/` root into the historical initiative tracking directory `plan/`.
 
 ---
 

@@ -35,7 +35,7 @@ Each requirement must be:
 - **Testable** - you can write a test case from the requirement alone
 - **Traceable** - sourced from a user story or acceptance criterion in the brief
 
-| ❌ Bad | ✅ Good |
+| âŒ Bad | âœ… Good |
 |--------|---------|
 | "The system should handle authentication" | "FR-001: The system shall accept a POST to /api/v1/auth/login with email and password, returning a JWT access token (15min TTL) and refresh token (7d TTL)" |
 | "Users can manage their profile" | "FR-003: The system shall accept a PATCH to /api/v1/users/:id with partial profile fields, returning the updated user object" |
@@ -71,8 +71,8 @@ Material gaps the spec-agent couldn't resolve from the brief. These are **not** 
 
 ```
 Initiative Brief -> Design Spec -> ADRs -> Code
-                -> OpenAPI Spec ↗        ↗
-                -> Data Model ──-> Data Contract
+                -> OpenAPI Spec â†—        â†—
+                -> Data Model â”€â”€-> Data Contract
 ```
 
 The design spec is the central artifact. ADRs explain HOW to implement the requirements. The codegen-agent reads both.
@@ -81,9 +81,9 @@ The design spec is the central artifact. ADRs explain HOW to implement the requi
 
 ## File Location
 
-`plan/{initiative-id}/design-spec.md`
+`plan/design-spec.md`
 
-If phased: `plan/{initiative-id}/design-spec-phase-{n}.md`
+If phased: `plan/design-spec-phase-{n}.md`
 
 ---
 
