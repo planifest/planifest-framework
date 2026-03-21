@@ -1,4 +1,4 @@
-﻿---
+---
 name: planifest-codegen-agent
 description: Generates the full implementation from the specification artifacts - application code, tests, infrastructure, configuration. Invoked during Phase 3.
 ---
@@ -23,11 +23,11 @@ description: Generates the full implementation from the specification artifacts 
 ## Input
 
 - Component Manifest at `src/{component-id}/component.json` - read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
-- Design Specification at `plan/{initiative-id}/docs/design-spec.md`
-- OpenAPI Specification at `plan/{initiative-id}/docs/openapi-spec.yaml`
-- ADRs at `plan/{initiative-id}/docs/adr/`
-- Planifest at `plan/{initiative-id}/planifest.md` (for stack declaration)
-- Domain Glossary at `plan/{initiative-id}/docs/domain-glossary.md`
+- Design Specification at `plan/design-spec.md`
+- OpenAPI Specification at `plan/openapi-spec.yaml`
+- ADRs at `plan/adr/`
+- Planifest at `plan/planifest.md` (for stack declaration)
+- Domain Glossary at `plan/domain-glossary.md`
 - Data Contracts at `src/{component-id}/docs/data-contract.md` (if they exist)
 - Code Quality Standards at [code-quality-standards.md](../standards/code-quality-standards.md)
 

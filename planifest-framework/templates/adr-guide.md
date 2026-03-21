@@ -46,7 +46,7 @@ State what was decided and why. Be specific enough that someone reading this in 
 
 At least 2 alternatives for every ADR. For each: pros, cons, and why it was rejected. This is the evidence that the decision was deliberate.
 
-| ❌ Bad | ✅ Good |
+| âŒ Bad | âœ… Good |
 |--------|---------|
 | "We considered MySQL but chose PostgreSQL" | "MySQL: lower operational overhead (+), limited JSON support for our use case (-), no native row-level security (-). Rejected because the data contract requires JSONB columns and row-level access policies." |
 
@@ -75,7 +75,7 @@ Sequential, never renumbered. `ADR-001`, `ADR-002`, etc. Gaps are acceptable (if
 
 ## File Location
 
-`plan/{initiative-id}/adr/ADR-{NNN}-{kebab-case-title}.md`
+`plan/adr/ADR-{NNN}-{kebab-case-title}.md`
 
 ---
 

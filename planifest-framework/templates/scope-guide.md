@@ -58,9 +58,9 @@ This turns deferred items into tracked risks.
 
 ## File Location
 
-`plan/{initiative-id}/scope.md`
+`plan/scope.md`
 
-If phased: `plan/{initiative-id}/scope-phase-{n}.md`
+If phased: `plan/scope-phase-{n}.md`
 
 ---
 

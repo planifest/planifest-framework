@@ -1,4 +1,4 @@
-﻿---
+---
 name: planifest-change-agent
 description: Handles modifications to existing initiatives - loads domain context, implements the minimum change, validates, and updates documentation.
 ---
@@ -24,7 +24,7 @@ description: Handles modifications to existing initiatives - loads domain contex
 
 - Change request (from the human, via the orchestrator)
 - Initiative ID and affected component ID(s)
-- Existing artifacts at `plan/{initiative-id}/docs/`
+- Existing artifacts at `plan/`
 - Existing implementation at `src/{component-id}/` (all affected components)
 
 ---
@@ -36,11 +36,11 @@ description: Handles modifications to existing initiatives - loads domain contex
 Before changing anything, read:
 
 1. `src/{component-id}/component.json` - understand the component's purpose, scope, contract, data ownership, stack, and current risk level. See [Component Manifest Guide](../templates/component-manifest-guide.md)
-2. `plan/{initiative-id}/docs/design-spec.md` - understand the full specification
+2. `plan/design-spec.md` - understand the full specification
 3. `docs/component-registry.md` - understand what components exist
 4. `docs/dependency-graph.md` - understand how they relate
 5. `src/{affected-component}/docs/` - read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
-6. `plan/{initiative-id}/docs/domain-glossary.md` - confirm you are using the correct terms
+6. `plan/domain-glossary.md` - confirm you are using the correct terms
 
 Identify the blast radius - which other components depend on the ones you're changing.
 
@@ -68,7 +68,7 @@ Run CI checks scoped to the blast radius of the change. Self-correct up to 5 tim
 
 ### Phase 4 - ADR & Migration Check
 
-- If the change modified an interface contract -> write a new ADR at `plan/{initiative-id}/docs/adr/ADR-{NNN}-{title}.md` recording what changed, why, and the consequences for consumers.
+- If the change modified an interface contract -> write a new ADR at `plan/adr/ADR-{NNN}-{title}.md` recording what changed, why, and the consequences for consumers.
 - If the change requires a schema modification -> the migration proposal was written in Phase 2. Confirm it is present and flagged for human review.
 
 ### Phase 5 - Update Documentation
@@ -79,17 +79,17 @@ Update every artifact affected by the change:
 - `src/{component-id}/docs/` - purpose, interface contract, dependencies, risk, scope, quirks files - if any changed
 - `docs/dependency-graph.md` - if component relationships changed
 - `docs/component-registry.md` - if a component was added, removed, or its summary changed
-- `plan/{initiative-id}/docs/risk-register.md` - if new risks were introduced
-- `plan/{initiative-id}/docs/domain-glossary.md` - if new terms were introduced
+- `plan/risk-register.md` - if new risks were introduced
+- `plan/domain-glossary.md` - if new terms were introduced
 - ADRs - written in Phase 4 if needed
 
-Write `plan/{initiative-id}/pipeline-run.md` as the audit trail for this change.
+Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md` as the audit trail for this change.
 
 ---
 
 ## Output Header
 
-Before writing any code, produce this summary and write it to `plan/{initiative-id}/docs/change-summary.md`:
+Before writing any code, produce this summary and write it to `plan/change-summary.md`:
 
 ```markdown
 # Change Summary

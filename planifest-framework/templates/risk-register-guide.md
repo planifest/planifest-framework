@@ -27,7 +27,7 @@ A good risk entry is:
 - **Actionable** - has a mitigation plan, not just a description
 - **Assessed** - likelihood and impact rated, not left blank
 
-| ❌ Bad | ✅ Good |
+| âŒ Bad | âœ… Good |
 |--------|---------|
 | "Security risk" | "R-003: The auth-service stores refresh tokens in a PostgreSQL table without encryption at rest. Likelihood: medium. Impact: high. Mitigation: enable TDE on the token table and rotate tokens on every use." |
 | "Performance might be an issue" | "R-005: The search endpoint joins 4 tables without a covering index. Likelihood: high at >1000 records. Impact: medium (latency > SLO). Mitigation: add composite index on (tenant_id, created_at, status)." |
@@ -65,7 +65,7 @@ The **Overall Risk Level** in the header is the highest individual risk level in
 
 ## File Location
 
-`plan/{initiative-id}/risk-register.md`
+`plan/risk-register.md`
 
 ---
 

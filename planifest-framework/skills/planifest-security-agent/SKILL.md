@@ -1,4 +1,4 @@
-﻿---
+---
 name: planifest-security-agent
 description: Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5.
 ---
@@ -23,15 +23,15 @@ description: Performs a security review of the implementation, producing a secur
 ## Input
 
 - The validated implementation at `src/{component-id}/` (all components in the initiative)
-- Design Specification at `plan/{initiative-id}/docs/design-spec.md`
-- OpenAPI Specification at `plan/{initiative-id}/docs/openapi-spec.yaml`
-- Risk Register at `plan/{initiative-id}/docs/risk-register.md`
+- Design Specification at `plan/design-spec.md`
+- OpenAPI Specification at `plan/openapi-spec.yaml`
+- Risk Register at `plan/risk-register.md`
 
 ---
 
 ## What You Produce
 
-Security report at `plan/{initiative-id}/docs/security-report.md`.
+Security report at `plan/security-report.md`.
 
 ---
 

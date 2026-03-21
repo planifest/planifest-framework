@@ -1,4 +1,4 @@
-﻿---
+---
 name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.
 ---
@@ -22,9 +22,9 @@ description: Produces complete per-component documentation, system-wide registry
 
 ## Input
 
-- All artifacts produced by prior phases at `plan/{initiative-id}/docs/`
+- All artifacts produced by prior phases at `plan/`
 - The implementation at `src/{component-id}/` (all components in the initiative)
-- The Planifest at `plan/{initiative-id}/planifest.md`
+- The Planifest at `plan/planifest.md`
 
 ---
 
@@ -57,7 +57,7 @@ Write to `docs/` at the repository root:
 
 ### Initiative-level completeness
 
-Confirm the following exist at `plan/{initiative-id}/docs/` and are consistent:
+Confirm the following exist at `plan/` and are consistent:
 
 - Design Specification (from spec-agent)
 - OpenAPI Specification (from spec-agent)
@@ -67,13 +67,13 @@ Confirm the following exist at `plan/{initiative-id}/docs/` and are consistent:
 - Operational Model (from spec-agent)
 - SLO Definitions (from spec-agent)
 - Cost Model (from spec-agent)
-- ADRs at `plan/{initiative-id}/docs/adr/` (from adr-agent)
+- ADRs at `plan/adr/` (from adr-agent)
 - Security Report (from security-agent)
-- Recommendations (`plan/{initiative-id}/docs/recommendations.md` - produce this now if it doesn't exist)
+- Recommendations (`plan/recommendations.md` - produce this now if it doesn't exist)
 
 ### Audit trail
 
-Write `plan/{initiative-id}/pipeline-run.md`:
+Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md`:
 
 ```markdown
 # Pipeline Run - {initiative-id}
@@ -109,7 +109,7 @@ Tool: {agent tool used}
 - **Every artifact must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly - do not leave a silent gap.
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
 - **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find - do not silently fix it.
-- **Recommendations.** Produce `plan/{initiative-id}/docs/recommendations.md` - suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
+- **Recommendations.** Produce `plan/recommendations.md` - suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
 
 ---
 
