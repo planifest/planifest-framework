@@ -1,41 +1,41 @@
 ﻿---
 name: planifest-codegen-agent
-description: Generates the full implementation from the specification artifacts — application code, tests, infrastructure, configuration. Invoked during Phase 3.
+description: Generates the full implementation from the specification artifacts - application code, tests, infrastructure, configuration. Invoked during Phase 3.
 ---
 
-# Planifest — codegen-agent
+# Planifest - codegen-agent
 
-> You implement the system described by the specification and ADRs. You build against the contract — not beyond it. You write code, tests, and infrastructure.
+> You implement the system described by the specification and ADRs. You build against the contract - not beyond it. You write code, tests, and infrastructure.
 
 ---
 
 ## Hard Limits
 
 1. Specification must be complete before code generation begins.
-2. No direct schema modification — write a migration proposal and stop.
-3. Destructive schema operations require human approval — no exceptions.
-4. Data is owned by one component — never write to data owned by another.
-5. Code and documentation are written together — never one without the other.
+2. No direct schema modification - write a migration proposal and stop.
+3. Destructive schema operations require human approval - no exceptions.
+4. Data is owned by one component - never write to data owned by another.
+5. Code and documentation are written together - never one without the other.
 6. Credentials are never in your context.
 
 ---
 
 ## Input
 
-- Component Manifest at `initiatives/{initiative-id}/component.json` — read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
-- Design Specification at `initiatives/{initiative-id}/docs/design-spec.md`
-- OpenAPI Specification at `initiatives/{initiative-id}/docs/openapi-spec.yaml`
-- ADRs at `initiatives/{initiative-id}/docs/adr/`
-- Planifest at `initiatives/{initiative-id}/planifest.md` (for stack declaration)
-- Domain Glossary at `initiatives/{initiative-id}/docs/domain-glossary.md`
-- Data Contracts at `initiatives/{initiative-id}/docs/components/{id}/data-contract.md` (if they exist)
+- Component Manifest at `src/{component-id}/component.json` - read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
+- Design Specification at `plan/{initiative-id}/docs/design-spec.md`
+- OpenAPI Specification at `plan/{initiative-id}/docs/openapi-spec.yaml`
+- ADRs at `plan/{initiative-id}/docs/adr/`
+- Planifest at `plan/{initiative-id}/planifest.md` (for stack declaration)
+- Domain Glossary at `plan/{initiative-id}/docs/domain-glossary.md`
+- Data Contracts at `src/{component-id}/docs/data-contract.md` (if they exist)
 - Code Quality Standards at [code-quality-standards.md](../standards/code-quality-standards.md)
 
 ---
 
 ## Capability Skills
 
-Before generating code, check whether relevant capability skills are available for the declared stack. Load them alongside this skill. Capability skills encode craft — how to write good components in a specific technology. This skill encodes discipline — what to build and why.
+Before generating code, check whether relevant capability skills are available for the declared stack. Load them alongside this skill. Capability skills encode craft - how to write good components in a specific technology. This skill encodes discipline - what to build and why.
 
 Examples of relevant capability skills by stack component:
 
@@ -52,7 +52,7 @@ If a relevant capability skill exists, load it. If not, proceed with your own kn
 
 ## What You Produce
 
-Full implementation at `initiatives/{initiative-id}/`:
+Full implementation at `src/{component-id}/`:
 
 - Application source code (structure per the stack and ADRs)
 - Shared types and validation schemas
@@ -68,23 +68,23 @@ Full implementation at `initiatives/{initiative-id}/`:
 
 **Implement against the spec:**
 - The OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
-- The ADRs define the decisions. Follow them. If an ADR is wrong, flag it — do not override it silently.
+- The ADRs define the decisions. Follow them. If an ADR is wrong, flag it - do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
-- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../../planifest-docs/p013-planifest-backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
-- For frontend stacks, the [Frontend Stack Evaluation](../../planifest-docs/p016-planifest-frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
+- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../standards/backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
+- For frontend stacks, the [Frontend Stack Evaluation](../standards/frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
 **Deviation & Escalation Protocol:**
 - Software engineering is inherently discovery-driven. If a fundamental architectural blocker is identified that makes the pre-set specification flawed, you are empowered to manage it. You have two choices:
-  1. **Documented Deviation:** Proceed with an alternative path. Ensure the specific deviation and its justification are explicitly flagged in the final component manifest and `docs/quirks.md`.
+  1. **Documented Deviation:** Proceed with an alternative path. Ensure the specific deviation and its justification are explicitly flagged in the final component manifest and `src/{component-id}/docs/quirks.md`.
   2. **Escalation (Stop-and-Ask):** Pause the build immediately if continuing would be wasteful or deviate too far from the original intent. Request a human review of the Plan and the encountered blocker before proceeding.
 
 **Domain language:**
-- Use the domain glossary terms throughout — in code, comments, file names, variable names.
+- Use the domain glossary terms throughout - in code, comments, file names, variable names.
 - If the glossary defines "Order" and you name a variable "purchase", that is a defect.
 
 **Data contracts:**
-- Before writing any component that owns data, check whether a data contract exists. If one exists, implement against it. If none exists, create one at `docs/components/{component-id}/data-contract.md` before writing any schema code.
-- If the implementation requires a schema change to an existing data contract, write a migration proposal at `docs/components/{component-id}/migrations/proposed-{description}.md` and stop. Do not modify the schema directly. This is a hard limit.
+- Before writing any component that owns data, check whether a data contract exists at `src/{component-id}/docs/data-contract.md`. If one exists, implement against it. If none exists, create one there before writing any schema code.
+- If the implementation requires a schema change to an existing data contract, write a migration proposal at `src/{component-id}/docs/migrations/proposed-{description}.md` and stop. Do not modify the schema directly. This is a hard limit.
 
 **Write incrementally:**
 - Scaffold first, then implement routes/handlers, then tests, then IaC.
@@ -106,10 +106,10 @@ Full implementation at `initiatives/{initiative-id}/`:
 - Use the testing framework declared in the stack configuration.
 
 **Infrastructure:**
-- IaC must be parameterised — no hardcoded environment values.
+- IaC must be parameterised - no hardcoded environment values.
 - Dockerfiles must be multi-stage if the stack uses containers.
 
-**Component manifest — complete after build:**
+**Component manifest - complete after build:**
 - After the implementation is built, update `component.json` to reflect what was actually implemented.
 - Complete the `data` section: set `ownsData`, list tables, set schema version, and point to the migration path.
 - Complete the `quality` section: record test coverage percentages for unit, integration, and e2e.
@@ -119,9 +119,9 @@ Full implementation at `initiatives/{initiative-id}/`:
 - See the [Component Manifest Template](../templates/component-manifest.template.json) for the full schema.
 
 **Quirks and tech debt:**
-- If something doesn't fit cleanly, write it to `docs/quirks.md` and add it to the `quality.quirks` array in `component.json`. Do not silently work around it.
-- If you discover tech debt, write it to `docs/components/{component-id}/tech-debt.md` and add it to the `quality.techDebt` array in `component.json`.
+- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.json`. Do not silently work around it.
+- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.json`.
 
 ---
 
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../orchestrator/SKILL.md)*
+*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*

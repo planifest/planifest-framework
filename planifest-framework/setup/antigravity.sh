@@ -1,4 +1,4 @@
-# Google Antigravity — tool configuration
+# Google Antigravity - tool configuration
 # https://antigravity.google
 #
 # Skills:    .gemini/skills/{name}/SKILL.md       (auto-discovered)

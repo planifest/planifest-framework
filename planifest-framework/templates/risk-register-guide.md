@@ -1,4 +1,4 @@
-# Risk Register — Guide
+# Risk Register - Guide
 
 > How risks are identified, assessed, and tracked throughout an initiative.
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-The Risk Register is a living document. The spec-agent seeds it during Phase 1. Any agent that identifies a new risk during any phase adds to it. It tracks specific, actionable risks — not generic hand-wringing.
+The Risk Register is a living document. The spec-agent seeds it during Phase 1. Any agent that identifies a new risk during any phase adds to it. It tracks specific, actionable risks - not generic hand-wringing.
 
 ---
 
@@ -23,9 +23,9 @@ The Risk Register is a living document. The spec-agent seeds it during Phase 1. 
 ## What Makes a Good Risk
 
 A good risk entry is:
-- **Specific to this initiative** — not generic ("data loss is bad")
-- **Actionable** — has a mitigation plan, not just a description
-- **Assessed** — likelihood and impact rated, not left blank
+- **Specific to this initiative** - not generic ("data loss is bad")
+- **Actionable** - has a mitigation plan, not just a description
+- **Assessed** - likelihood and impact rated, not left blank
 
 | ❌ Bad | ✅ Good |
 |--------|---------|
@@ -36,7 +36,7 @@ A good risk entry is:
 
 ## Assumptions as Risks
 
-Assumptions from the Design Specification are automatically logged as risk items with `likelihood: medium`. This ensures they're tracked — if an assumption turns out to be wrong, the risk register already has an entry.
+Assumptions from the Design Specification are automatically logged as risk items with `likelihood: medium`. This ensures they're tracked - if an assumption turns out to be wrong, the risk register already has an entry.
 
 ---
 
@@ -47,7 +47,7 @@ Assumptions from the Design Specification are automatically logged as risk items
 | **low** | Unlikely and/or low impact. Monitor only. |
 | **medium** | Possible and material. Mitigation plan required. |
 | **high** | Likely or high-impact. Mitigation must be implemented before ship. |
-| **critical** | Near-certain or catastrophic. Blocks the pipeline — escalate to human. |
+| **critical** | Near-certain or catastrophic. Blocks the pipeline - escalate to human. |
 
 The **Overall Risk Level** in the header is the highest individual risk level in the register.
 
