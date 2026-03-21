@@ -9,7 +9,7 @@ Execute the Planifest change pipeline for modifications to an existing initiativ
 
 ## Prerequisites
 
-- An existing initiative with a confirmed Planifest at `plan/planifest.md`
+- An existing initiative with a confirmed Planifest at `plan/current/planifest.md`
 - The component(s) affected by the change exist in `src/{component-id}/`
 
 ## Input
@@ -36,4 +36,4 @@ Provide all three:
 4. **Review** - the change-agent produces a summary of what changed and why via a change log entry at `plan/changelog/`.
 5. **Phase 7 - Human Review and Filing** (Post-Review Action)
    - The human reviews the changes and the active plan.
-   - Upon acceptance, the active plan (brief, spec, ADRs) is moved from `plan/` to `plan/{initiative-id}/` for historical tracking.
+   - Upon acceptance, the active plan (brief, spec, ADRs) is moved from `plan/current/` to `plan/{initiative-id}/` for historical tracking.

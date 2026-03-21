@@ -247,17 +247,17 @@ src/
 ## How the Three Folders Connect
 
 ```
-plan/planifest.md
+plan/current/planifest.md
     â””â”€â”€ lists component IDs â†’ src/{component-id}/component.json
                                     â””â”€â”€ references initiative â†’ plan/
 
-plan/design-spec.md
+plan/current/design-spec.md
     â””â”€â”€ functional requirements â†’ implemented in â†’ src/{component-id}/src/
 
-plan/adr/ADR-001-*.md
+plan/current/adr/ADR-001-*.md
     â””â”€â”€ decisions â†’ followed by â†’ src/{component-id}/src/
 
-plan/openapi-spec.yaml
+plan/current/openapi-spec.yaml
     â””â”€â”€ API contract â†’ implemented in â†’ src/{component-id}/src/
 ```
 

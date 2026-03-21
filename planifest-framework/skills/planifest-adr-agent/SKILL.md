@@ -22,15 +22,15 @@ description: Produces Architecture Decision Records for each significant decisio
 
 ## Input
 
-- Design Specification at `plan/design-spec.md`
-- OpenAPI Specification at `plan/openapi-spec.yaml`
-- Planifest at `plan/planifest.md` (for stack declaration)
+- Design Specification at `plan/current/design-spec.md`
+- OpenAPI Specification at `plan/current/openapi-spec.yaml`
+- Planifest at `plan/current/planifest.md` (for stack declaration)
 
 ---
 
 ## What You Produce
 
-One ADR per significant decision, written to `plan/adr/ADR-{NNN}-{title}.md`.
+One ADR per significant decision, written to `plan/current/adr/ADR-{NNN}-{title}.md`.
 
 ---
 

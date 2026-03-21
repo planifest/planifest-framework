@@ -125,7 +125,7 @@ The [Initiative Brief Template](../templates/initiative-brief.template.md) guide
 
 The **Planifest** - the plan for what will be built and the manifest of what it builds against. This is the contract between you and the human before you begin building.
 
-Write this to `plan/planifest.md`:
+Write this to `plan/current/planifest.md`:
 
 ```markdown
 # Planifest - {initiative-id}
@@ -191,7 +191,7 @@ Invoke the **adr-agent** skill.
 
 **Input:** Design Specification, OpenAPI Specification (from Phase 1)
 
-**What it produces:** ADRs for every significant decision, written to `plan/adr/`
+**What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
 
 **Gate:** Confirm an ADR exists for every significant decision - stack choice, database selection, auth strategy, deployment topology, component boundaries. If a decision was made but not recorded, invoke the adr-agent for the missing ADR.
 
@@ -231,7 +231,7 @@ Invoke the **security-agent** skill.
 
 **Input:** The validated implementation from Phase 4
 
-**What it produces:** Security report at `plan/security-report.md`
+**What it produces:** Security report at `plan/current/security-report.md`
 
 **Gate:** Report is produced with specific findings. Critical and high findings are flagged for human attention at the PR gate.
 
@@ -246,7 +246,7 @@ Invoke the **docs-agent** skill.
 **What it produces:** Living repository documentation at `docs/` (component registry, dependency graph), a changelog entry log (`plan/changelog/{initiative-id}-{YYYY-MM-DD}.md`), and recommendations.
 
 **Gate:** Every living artifact has been produced and no historical change logs reside in `docs/`. The active plan is complete and ready for human review.
-**Post-Review Action:** Once the human reviews and accepts the change, you must move the active plan (brief, spec, ADRs) from the `plan/` root into the historical initiative tracking directory `plan/`.
+**Post-Review Action:** Once the human reviews and accepts the change, you must move the active plan (brief, spec, ADRs) from the `plan/current/` root into the historical initiative tracking directory `plan/`.
 
 ---
 
