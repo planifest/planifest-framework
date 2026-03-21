@@ -75,7 +75,7 @@ Sequential, never renumbered. `ADR-001`, `ADR-002`, etc. Gaps are acceptable (if
 
 ## File Location
 
-`plan/adr/ADR-{NNN}-{kebab-case-title}.md`
+`plan/current/adr/ADR-{NNN}-{kebab-case-title}.md`
 
 ---
 

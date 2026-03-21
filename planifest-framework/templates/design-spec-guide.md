@@ -81,7 +81,7 @@ The design spec is the central artifact. ADRs explain HOW to implement the requi
 
 ## File Location
 
-`plan/design-spec.md`
+`plan/current/design-spec.md`
 
 If phased: `plan/design-spec-phase-{n}.md`
 

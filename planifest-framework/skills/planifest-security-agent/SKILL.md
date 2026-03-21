@@ -23,15 +23,15 @@ description: Performs a security review of the implementation, producing a secur
 ## Input
 
 - The validated implementation at `src/{component-id}/` (all components in the initiative)
-- Design Specification at `plan/design-spec.md`
-- OpenAPI Specification at `plan/openapi-spec.yaml`
-- Risk Register at `plan/risk-register.md`
+- Design Specification at `plan/current/design-spec.md`
+- OpenAPI Specification at `plan/current/openapi-spec.yaml`
+- Risk Register at `plan/current/risk-register.md`
 
 ---
 
 ## What You Produce
 
-Security report at `plan/security-report.md`.
+Security report at `plan/current/security-report.md`.
 
 ---
 

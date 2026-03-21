@@ -22,8 +22,8 @@ description: Produces specification artifacts (design spec, OpenAPI spec, scope,
 
 ## Input
 
-- Confirmed Planifest at `plan/planifest.md`
-- Initiative Brief at `plan/initiative-brief.md`
+- Confirmed Planifest at `plan/current/planifest.md`
+- Initiative Brief at `plan/current/initiative-brief.md`
 - Existing Domain Knowledge Store at `plan/` (if retrofit or change)
 
 ---
@@ -34,15 +34,15 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 | Artifact | Path | Purpose |
 |---|---|---|
-| Design Specification | `plan/design-spec.md` | Functional and non-functional requirements |
-| OpenAPI Specification | `plan/openapi-spec.yaml` | Language-agnostic API contract - OpenAPI 3.1 |
+| Design Specification | `plan/current/design-spec.md` | Functional and non-functional requirements |
+| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract - OpenAPI 3.1 |
 | Component Manifest | `src/{component-id}/component.json` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Manifest Template](../templates/component-manifest.template.json) and its [guide](../templates/component-manifest-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
-| Scope | `plan/scope.md` | In / out / deferred - all three stated explicitly |
-| Risk Register | `plan/risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
-| Domain Glossary | `plan/domain-glossary.md` | Ubiquitous language for this initiative - agents and humans use these terms |
-| Operational Model | `plan/operational-model.md` | Runbook triggers, on-call expectations, alerting thresholds |
-| SLO Definitions | `plan/slo-definitions.md` | Error budgets, SLIs/SLOs |
-| Cost Model | `plan/cost-model.md` | Compute, storage, egress, third-party cost estimates |
+| Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
+| Risk Register | `plan/current/risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
+| Domain Glossary | `plan/current/domain-glossary.md` | Ubiquitous language for this initiative - agents and humans use these terms |
+| Operational Model | `plan/current/operational-model.md` | Runbook triggers, on-call expectations, alerting thresholds |
+| SLO Definitions | `plan/current/slo-definitions.md` | Error budgets, SLIs/SLOs |
+| Cost Model | `plan/current/cost-model.md` | Compute, storage, egress, third-party cost estimates |
 
 ---
 
