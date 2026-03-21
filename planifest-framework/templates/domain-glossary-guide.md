@@ -67,7 +67,7 @@ Track which components use each term. This helps the change-agent understand rip
 
 ## File Location
 
-`plan/{initiative-id}/domain-glossary.md`
+`plan/domain-glossary.md`
 
 ---
 

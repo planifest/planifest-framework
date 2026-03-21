@@ -20,13 +20,15 @@ Copy the `planifest-framework/` folder into your repository root. This is the on
 ### 2. Create the project structure
 
 ```
-mkdir plan src docs
+mkdir plan plan/changelog src docs
 ```
 
-These are the three working directories:
-- `plan/` - initiatives: briefs, design specs, ADRs, user stories, scope documents
-- `src/` - components: code, tests, manifests, and component-level docs
-- `docs/` - repo-wide state: component registry, dependency graph, system context
+These are the core working directories:
+- `plan/` - The current change being planned (briefs, specs, planifest).
+  - `plan/<initiative-id>/` - Historical changes filed here after human review and acceptance.
+  - `plan/changelog/` - A log of all changes; each change is a separate file (`[initiative-id]-[YYYY-MM-DD].md`).
+- `src/` - Component source code, tests, and component manifests (`component.json`).
+- `docs/` - Living repository documentation (always current, no change records). Includes component registry and dependency graph.
 
 See [initiative-structure.md](../plan/initiative-structure.md) for the full layout.
 
@@ -56,7 +58,7 @@ See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expect
 
 Use the template:
 ```
-cp planifest-framework/templates/initiative-brief.template.md plan/my-initiative/initiative-brief.md
+cp planifest-framework/templates/initiative-brief.template.md plan/initiative-brief.md
 ```
 
 Fill it in. The [initiative brief guide](templates/initiative-brief-guide.md) walks you through each section.
@@ -67,13 +69,13 @@ Open your agentic tool. The orchestrator skill is now auto-discovered. Tell it:
 
 ```
 Execute the Planifest Initiative Pipeline.
-Initiative brief: plan/my-initiative/initiative-brief.md
+Initiative brief: plan/initiative-brief.md
 ```
 
 The orchestrator will:
 1. Assess your brief against the three layers (Product, Architecture, Engineering)
 2. Coach you through any gaps - one question at a time
-3. Produce the validated Planifest at `plan/my-initiative/planifest.md`
+3. Produce the validated Planifest at `plan/planifest.md`
 4. Execute the pipeline: Spec -> ADRs -> Code -> Validate -> Security -> Docs
 
 ---
@@ -88,7 +90,7 @@ The orchestrator will:
 
 ```
 Execute the Planifest Initiative Pipeline in retrofit mode.
-Initiative brief: plan/my-initiative/initiative-brief.md
+Initiative brief: plan/initiative-brief.md
 ```
 
 The orchestrator will read your codebase, infer the existing architecture, and reconcile the brief against reality.
