@@ -1,4 +1,4 @@
-# Domain Glossary — {{initiative-name}}
+# Domain Glossary - {{initiative-name}}
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md) (updated by any agent that introduces a new domain term)
 **Tool:** {{agentic-tool-name}}
@@ -6,7 +6,7 @@
 **Initiative:** {{initiative-id}}
 **Version:** {{semver}}
 
-> The ubiquitous language for this initiative. Agents and humans use these terms — in code, comments, file names, variable names, and documentation. If the glossary says "Order", the code says `Order` — not "Purchase" or "Transaction". Never invent new terms without adding them here.
+> The ubiquitous language for this initiative. Agents and humans use these terms - in code, comments, file names, variable names, and documentation. If the glossary says "Order", the code says `Order` - not "Purchase" or "Transaction". Never invent new terms without adding them here.
 
 ---
 

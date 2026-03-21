@@ -1,4 +1,4 @@
-# Domain Glossary — Guide
+# Domain Glossary - Guide
 
 > How to maintain the ubiquitous language that keeps agents and humans aligned.
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-The Domain Glossary defines the ubiquitous language for an initiative. Every term has one meaning. Agents and humans use these terms — in code, comments, file names, variable names, and documentation. If the glossary says "Order", the code says `Order` — not "Purchase", "Transaction", or "Booking".
+The Domain Glossary defines the ubiquitous language for an initiative. Every term has one meaning. Agents and humans use these terms - in code, comments, file names, variable names, and documentation. If the glossary says "Order", the code says `Order` - not "Purchase", "Transaction", or "Booking".
 
 This is not optional. Domain confusion is one of the most common sources of bugs in agent-generated code. An agent that calls the same concept by three different names will produce inconsistent APIs, mismatched types, and confusing docs.
 
@@ -53,7 +53,7 @@ The agent should use the **Term**, never the alias. If existing code uses an ali
 
 ## The Used In Column
 
-Track which components use each term. This helps the change-agent understand ripple effects — if "Order" changes meaning, every component that uses it needs updating.
+Track which components use each term. This helps the change-agent understand ripple effects - if "Order" changes meaning, every component that uses it needs updating.
 
 ---
 

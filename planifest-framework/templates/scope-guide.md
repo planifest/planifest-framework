@@ -1,4 +1,4 @@
-# Scope — Guide
+# Scope - Guide
 
 > How to write the scope document that keeps agents within boundaries.
 
@@ -8,7 +8,7 @@
 
 ## Purpose
 
-The Scope document is the boundary fence. It tells the agent what to build, what NOT to build, and what's been deliberately pushed to later. Without it, agents drift — they add features not asked for, miss features that were, or build deferred items prematurely.
+The Scope document is the boundary fence. It tells the agent what to build, what NOT to build, and what's been deliberately pushed to later. Without it, agents drift - they add features not asked for, miss features that were, or build deferred items prematurely.
 
 All three sections must be present. If nothing is deferred, state "Nothing deferred."
 
@@ -24,25 +24,25 @@ The **spec-agent** produces this during Phase 1, derived from the Initiative Bri
 
 ### In Scope
 
-What this initiative or phase **will** deliver. Be specific — "authentication" is vague; "JWT-based auth with refresh tokens, scoped to the auth-service component" is clear.
+What this initiative or phase **will** deliver. Be specific - "authentication" is vague; "JWT-based auth with refresh tokens, scoped to the auth-service component" is clear.
 
 Each item should be traceable to a feature in the Initiative Brief.
 
 ### Out of Scope
 
-What this initiative **will NOT** deliver. This is equally important as In Scope — arguably more so, because it prevents the agent from building things you didn't ask for.
+What this initiative **will NOT** deliver. This is equally important as In Scope - arguably more so, because it prevents the agent from building things you didn't ask for.
 
 Good "Out of Scope" items are things someone might reasonably expect to be included but aren't:
-- "Email notifications — notifications are a separate initiative"
-- "Admin dashboard — API-only in this phase"
-- "Multi-tenancy — single-tenant deployment only"
+- "Email notifications - notifications are a separate initiative"
+- "Admin dashboard - API-only in this phase"
+- "Multi-tenancy - single-tenant deployment only"
 
 ### Deferred
 
 What might be delivered later but not now. The critical addition: note what is **blocked** until each deferred item is resolved.
 
-- "Database migration tooling — deferred to Phase 2. Blocked: no automated rollback until this ships."
-- "Rate limiting — deferred. Blocked: the API is unprotected against abuse until this ships."
+- "Database migration tooling - deferred to Phase 2. Blocked: no automated rollback until this ships."
+- "Rate limiting - deferred. Blocked: the API is unprotected against abuse until this ships."
 
 This turns deferred items into tracked risks.
 

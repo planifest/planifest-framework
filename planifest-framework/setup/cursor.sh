@@ -1,4 +1,4 @@
-# Cursor — tool configuration
+# Cursor - tool configuration
 # https://docs.cursor.com
 #
 # Skills:    .cursor/skills/{name}/SKILL.md       (auto-discovered)
@@ -25,8 +25,8 @@ This project uses the Planifest framework. Load the orchestrator skill for any i
 
 ## Key paths
 
-- planifest-framework/README.md    — framework overview and getting started
-- plan/                            — initiative specifications
-- src/                             — component code
-- planifest-framework/templates/   — artifact templates
-- planifest-framework/standards/   — code quality standards'
+- planifest-framework/README.md    - framework overview and getting started
+- plan/                            - initiative specifications
+- src/                             - component code
+- planifest-framework/templates/   - artifact templates
+- planifest-framework/standards/   - code quality standards'

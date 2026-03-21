@@ -1,4 +1,4 @@
-# Claude Code — tool configuration
+# Claude Code - tool configuration
 # https://docs.anthropic.com/en/docs/claude-code
 #
 # Skills:    .claude/skills/{name}/SKILL.md      (auto-discovered)
@@ -26,8 +26,8 @@ To retrofit an existing codebase:
   Use the /retrofit command.
 
 Key paths:
-  planifest-framework/README.md    — framework overview and getting started
-  plan/                            — initiative specifications
-  src/                             — component code
-  planifest-framework/templates/   — artifact templates
-  planifest-framework/standards/   — code quality standards"
+  planifest-framework/README.md    - framework overview and getting started
+  plan/                            - initiative specifications
+  src/                             - component code
+  planifest-framework/templates/   - artifact templates
+  planifest-framework/standards/   - code quality standards"

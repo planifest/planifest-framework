@@ -1,4 +1,4 @@
-# ADR-{{NNN}} — {{title}}
+# ADR-{{NNN}} - {{title}}
 
 **Skill:** [adr-agent](../skills/adr-agent-SKILL.md)
 **Tool:** {{agentic-tool-name}}
@@ -37,7 +37,7 @@ What was decided and why?
 
 ## Consequences
 
-What follows from this decision — both positive and negative?
+What follows from this decision - both positive and negative?
 
 - {{consequence-1}}
 - {{consequence-2}}

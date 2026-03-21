@@ -1,4 +1,4 @@
-# Scope — {{initiative-name}}
+# Scope - {{initiative-name}}
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
 **Tool:** {{agentic-tool-name}}
@@ -14,14 +14,14 @@
 ## In Scope
 
 - {{what this initiative / phase will deliver}}
-- {{be specific — "authentication" is vague; "JWT-based auth with refresh tokens, scoped to the auth-service component" is clear}}
+- {{be specific - "authentication" is vague; "JWT-based auth with refresh tokens, scoped to the auth-service component" is clear}}
 
 ---
 
 ## Out of Scope
 
 - {{what this initiative will NOT deliver}}
-- {{equally important as in-scope — prevents agents from building beyond the boundary}}
+- {{equally important as in-scope - prevents agents from building beyond the boundary}}
 
 ---
 
