@@ -58,7 +58,7 @@ See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expect
 
 Use the template:
 ```
-cp planifest-framework/templates/initiative-brief.template.md plan/initiative-brief.md
+cp planifest-framework/templates/initiative-brief.template.md plan/current/initiative-brief.md
 ```
 
 Fill it in. The [initiative brief guide](templates/initiative-brief-guide.md) walks you through each section.
@@ -69,13 +69,13 @@ Open your agentic tool. The orchestrator skill is now auto-discovered. Tell it:
 
 ```
 Execute the Planifest Initiative Pipeline.
-Initiative brief: plan/initiative-brief.md
+Initiative brief: plan/current/initiative-brief.md
 ```
 
 The orchestrator will:
 1. Assess your brief against the three layers (Product, Architecture, Engineering)
 2. Coach you through any gaps - one question at a time
-3. Produce the validated Planifest at `plan/planifest.md`
+3. Produce the validated Planifest at `plan/current/planifest.md`
 4. Execute the pipeline: Spec -> ADRs -> Code -> Validate -> Security -> Docs
 
 ---
@@ -90,7 +90,7 @@ The orchestrator will:
 
 ```
 Execute the Planifest Initiative Pipeline in retrofit mode.
-Initiative brief: plan/initiative-brief.md
+Initiative brief: plan/current/initiative-brief.md
 ```
 
 The orchestrator will read your codebase, infer the existing architecture, and reconcile the brief against reality.

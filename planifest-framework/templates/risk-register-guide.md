@@ -65,7 +65,7 @@ The **Overall Risk Level** in the header is the highest individual risk level in
 
 ## File Location
 
-`plan/risk-register.md`
+`plan/current/risk-register.md`
 
 ---
 

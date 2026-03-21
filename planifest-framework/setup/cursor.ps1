@@ -19,7 +19,7 @@
         ''
         '## Workflows'
         ''
-        '- **Initiative Pipeline**: Load the orchestrator skill. Provide an initiative brief at plan/initiative-brief.md'
+        '- **Initiative Pipeline**: Load the orchestrator skill. Provide an initiative brief at plan/current/initiative-brief.md'
         '- **Change Pipeline**: Load the orchestrator skill. Provide initiative ID, component ID, and change request.'
         '- **Retrofit**: Load the orchestrator skill with retrofit adoption mode.'
         ''
