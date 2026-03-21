@@ -27,7 +27,9 @@ To retrofit an existing codebase:
 
 Key paths:
   planifest-framework/README.md    - framework overview and getting started
-  plan/                            - initiative specifications
+  plan/                            - current initiative specifications
+  plan/changelog/                  - change audit logs
+  docs/                            - living repository documentation
   src/                             - component code
   planifest-framework/templates/   - artifact templates
   planifest-framework/standards/   - code quality standards"

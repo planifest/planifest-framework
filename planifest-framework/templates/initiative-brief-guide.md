@@ -28,7 +28,7 @@ You are the Product Owner and Technical Architect. This brief is where you exerc
 
 Write 2-3 sentences. Be specific about the problem, who has it, and how you'll know it's solved.
 
-| ❌ Bad | ✅ Good |
+| âŒ Bad | âœ… Good |
 |--------|---------|
 | "Improve performance" | "Reduce checkout latency from 3s to under 500ms - 40% of users abandon at payment" |
 | "Add user management" | "Enable self-service account creation so customer support stops onboarding 200 users/week manually" |
@@ -101,7 +101,7 @@ How you know the initiative is done. These become the orchestrator's exit criter
 
 ## What Happens Next
 
-1. You write the brief and save it to `plan/{initiative-id}/initiative-brief.md`
+1. You write the brief and save it to `plan/initiative-brief.md`
 2. You tell the orchestrator to load it
 3. The orchestrator assesses it against the three layers (Product, Architecture, Engineering) and coaches you through any gaps - one question at a time
 4. Once complete, the orchestrator produces the Planifest (the validated plan) and begins the pipeline

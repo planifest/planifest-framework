@@ -61,9 +61,9 @@ When reviewing a PR that was produced by Planifest:
 
 ## File Location
 
-`plan/{initiative-id}/pipeline-run.md`
+`plan/changelog/{initiative-id}-<YYYY-MM-DD>.md`
 
-If phased: `plan/{initiative-id}/pipeline-run-phase-{n}.md`
+If phased: `plan/pipeline-run-phase-{n}.md`
 
 ---
 
