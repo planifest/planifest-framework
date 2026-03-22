@@ -110,13 +110,13 @@ The `planifest-docs/` folder contains human documentation — architecture notes
 
 | Document | Purpose |
 |----------|---------|
-| [Master Plan](planifest-docs/p001-planifest-master-plan.md) | Architecture overview |
-| [Product Concept](planifest-docs/p002-planifest-product-concept.md) | Vision and commercial model |
-| [Functional Decisions](planifest-docs/p003-planifest-functional-decisions.md) | Decision log with rationale |
-| [Pathway to Agentic Development](planifest-docs/p004-the-pathway-to-agentic-development.md) | Philosophical foundation |
-| [Agentic Tool Runbook](planifest-docs/p010-planifest-agentic-tool-runbook.md) | Per-tool setup guides |
-| [Pipeline](planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
-| [Roadmap](planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
+| [Master Plan](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p001-planifest-master-plan.md) | Architecture overview |
+| [Product Concept](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p002-planifest-product-concept.md) | Vision and commercial model |
+| [Functional Decisions](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p003-planifest-functional-decisions.md) | Decision log with rationale |
+| [Pathway to Agentic Development](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p004-the-pathway-to-agentic-development.md) | Philosophical foundation |
+| [Agentic Tool Runbook](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p010-planifest-agentic-tool-runbook.md) | Per-tool setup guides |
+| [Pipeline](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
+| [Roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
 
 ---
 
