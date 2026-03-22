@@ -110,16 +110,30 @@ The `planifest-docs/` folder contains human documentation — architecture notes
 
 | Document | Purpose |
 |----------|---------|
-| [Master Plan](planifest-docs/p001-planifest-master-plan.md) | Architecture overview |
-| [Product Concept](planifest-docs/p002-planifest-product-concept.md) | Vision and commercial model |
-| [Functional Decisions](planifest-docs/p003-planifest-functional-decisions.md) | Decision log with rationale |
-| [Pathway to Agentic Development](planifest-docs/p004-the-pathway-to-agentic-development.md) | Philosophical foundation |
-| [Agentic Tool Runbook](planifest-docs/p010-planifest-agentic-tool-runbook.md) | Per-tool setup guides |
-| [Pipeline](planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
-| [Roadmap](planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
+| [Master Plan](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p001-planifest-master-plan.md) | Architecture overview |
+| [Product Concept](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p002-planifest-product-concept.md) | Vision and commercial model |
+| [Functional Decisions](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p003-planifest-functional-decisions.md) | Decision log with rationale |
+| [Pathway to Agentic Development](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p004-the-pathway-to-agentic-development.md) | Philosophical foundation |
+| [Agentic Tool Runbook](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p010-planifest-agentic-tool-runbook.md) | Per-tool setup guides |
+| [Pipeline](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
+| [Roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
 
 ---
 
 ## License
 
-TBC
+[Apache License Version 2.0](LICENSE.txt)
+
+### Why we chose the Apache 2.0 License
+
+We want the Planifest community to build with total confidence. While we considered the MIT license for its simplicity, we chose Apache 2.0 because it offers superior long-term protection for our users and contributors:
+
+- **Explicit Patent Rights:** Unlike other permissive licenses, Apache 2.0 grants you an explicit license to any patents covered by the software. This means you can use, modify, and distribute Planifest without worrying about "hidden" patent claims.
+
+- **Contributor Protection:** It ensures that every contribution made to the framework comes with the same patent grants. This prevents "patent trolling" within the ecosystem and keeps the code free for everyone, forever.
+
+- **Community Safety (The "Retaliation" Clause):** The license includes a defense mechanism: if anyone sues a Planifest user over patent infringement related to this software, they automatically lose their own license to use it. This keeps the community collaborative and legally "polite."
+
+- **Commercial Friendly:** It remains a permissive, open-source license. You are free to use Planifest for commercial projects, ship it in proprietary products, and build your business on it with zero royalties.
+
+**TL;DR:** We chose Apache 2.0 so you can focus on building great things, knowing the legal foundation of your framework is rock-solid and community-first.
