@@ -122,4 +122,4 @@ The `planifest-docs/` folder contains human documentation — architecture notes
 
 ## License
 
-TBC
+[Apache License Version 2.0](LICENSE.txt)
