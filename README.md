@@ -118,6 +118,7 @@ The `planifest-docs/` folder contains human documentation — architecture notes
 | [Pipeline](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
 | [Roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
 
+[Read more on the website](https://planifest.github.io/planifest-docs/)
 ---
 
 ## License
