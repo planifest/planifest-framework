@@ -56,21 +56,14 @@ A decision does **not** require an ADR if:
 
 ## ADR Format
 
-```markdown
-# ADR-{NNN}: {title}
+Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
-## Status
-Accepted
-
-## Context
-Why this decision needed to be made. What constraints or trade-offs were in play.
-
-## Decision
-What was decided. Be specific.
-
-## Consequences
-What becomes easier. What becomes harder. What is deferred. What risk is introduced or mitigated.
-```
+- **Context** — why this decision needed to be made
+- **Decision** — what was decided and why (be specific)
+- **Alternatives Considered** — table of options with pros, cons, and rejection reason
+- **Affected Components** — which components are impacted and how
+- **Consequences** — positive, negative, and risks (all three required)
+- **Related ADRs** — cross-references to other ADRs this depends on, extends, or conflicts with
 
 ---
 
