@@ -43,6 +43,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 | Operational Model | `plan/current/operational-model.md` | Runbook triggers, on-call expectations, alerting thresholds |
 | SLO Definitions | `plan/current/slo-definitions.md` | Error budgets, SLIs/SLOs |
 | Cost Model | `plan/current/cost-model.md` | Compute, storage, egress, third-party cost estimates |
+| Data Contract (per component) | `src/{component-id}/docs/data-contract.md` | Schema ownership, table definitions, invariants, relationships. Follow the [Data Contract Template](../templates/data-contract.template.md) and its [guide](../templates/data-contract-guide.md). One per data-owning component. |
 
 ---
 
