@@ -242,7 +242,7 @@ plan/
 
 ### Path Rules â€” plan/
 
-1. **Initiative ID** is kebab-case, human-chosen, and stable.
+1. **Initiative ID** follows the format `{0000000}-{kebab-case-name}` — a 7-digit zero-padded number prefix for chronological ordering, followed by a human-chosen kebab-case name.
 2. **No nesting** â€” specs, ADRs, and supporting docs are flat within the initiative folder. One level of subfolders only (adr/).
 3. **No code** â€” nothing executable lives in `plan/`. If it runs, it belongs in `src/`.
 4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `planifest.md` is updated per phase, not duplicated.
