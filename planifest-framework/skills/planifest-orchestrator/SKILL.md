@@ -306,7 +306,21 @@ The adoption mode is one of the first things you confirm with the human: "Is thi
 
 ## Change Pipeline
 
-When the human requests a modification to an existing initiative (not new work), invoke the **change-agent** skill instead of the full pipeline. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
+When the human requests a modification to an existing initiative (not new work), use this decision tree to determine the correct path:
+
+### Change vs New Initiative Decision Tree
+
+| Signal | Path |
+|--------|------|
+| Affects 1-2 existing components, no new components | **Change Pipeline** |
+| Bug fix or dependency update | **Change Pipeline** |
+| Adds a new component to an existing initiative | **Change Pipeline** (change-agent creates it, then hands off — see change-agent skill) |
+| New user stories that fit within an existing initiative's scope | **Change Pipeline** if < 3 stories, otherwise **New Initiative** |
+| New problem statement or new target users | **New Initiative** |
+| Touches > 3 components or requires new infrastructure | **New Initiative** |
+| Requires a new stack choice (e.g., adding a frontend to a backend-only initiative) | **New Initiative** |
+
+When using the Change Pipeline, invoke the **change-agent** skill. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
 
 Before invoking the change-agent, confirm with the human:
 - Which initiative?
