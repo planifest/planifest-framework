@@ -137,6 +137,7 @@ Write this to `plan/current/planifest.md`:
 ## Initiative
 - Problem: {one-line problem statement}
 - Adoption mode: greenfield | retrofit | agent-interface
+- Initiative ID: {0000000}-{kebab-case-name}
 
 ## Product Layer
 - User stories confirmed: {count}
@@ -149,6 +150,8 @@ Write this to `plan/current/planifest.md`:
 - Availability target: {value or "deferred - recorded in scope"}
 - Scalability target: {value or "deferred - recorded in scope"}
 - Security: {auth strategy, authz model, data classification}
+- Data privacy: {regulations, PII handling, retention policy or "no regulated data"}
+- Observability: {logging/metrics/tracing strategy or "standard defaults"}
 - Cost boundary: {value or "not constrained"}
 
 ## Engineering Layer
@@ -156,11 +159,16 @@ Write this to `plan/current/planifest.md`:
 - Components: {list with one-liner per component}
 - Data ownership: {component -> dataset mapping}
 - Deployment: {topology summary}
+- API versioning: {strategy or "not applicable"}
 
 ## Scope
 - In: {list}
 - Out: {list}
 - Deferred: {list - with notes on what is blocked until resolved}
+
+## Assumptions
+- {assumption} — impact if wrong: {what breaks}
+- {assumption} — impact if wrong: {what breaks}
 
 ## Risks
 - {list with likelihood/impact}
@@ -171,7 +179,10 @@ Write this to `plan/current/planifest.md`:
 
 ## Confirmation
 Human confirmed this Planifest before proceeding: yes / no
+Date confirmed: {ISO-8601}
 ```
+
+**Field mutability:** After human confirmation, the Planifest is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `Date confirmed` field records when the contract was locked.
 
 **Do not proceed to Phase 1 until the human has confirmed the Planifest.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, the pipeline begins.
 
