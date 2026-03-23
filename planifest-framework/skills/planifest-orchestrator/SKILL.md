@@ -171,6 +171,26 @@ Human confirmed this Planifest before proceeding: yes / no
 
 **Do not proceed to Phase 1 until the human has confirmed the Planifest.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, the pipeline begins.
 
+### Phase 0 → Phase 1 Gate Checklist
+
+Before presenting the Planifest for confirmation, verify every item:
+
+- [ ] Problem statement is specific and names the target user
+- [ ] At least one user story with testable acceptance criteria exists
+- [ ] Stack is fully declared (no "TBD" in language, runtime, framework, database, ORM, IaC, cloud, compute, CI)
+- [ ] Every component is named with clear single-responsibility purpose
+- [ ] Data ownership is assigned — every dataset maps to exactly one component
+- [ ] Scope has all three sections populated (in, out, deferred) — "Nothing deferred" is valid
+- [ ] At least one NFR has a measurable target (latency, availability, or scalability)
+- [ ] Security section names the auth strategy and data classification
+- [ ] Risks section has at least one entry with likelihood and impact
+- [ ] If multi-component: dependency order is stated
+- [ ] If phased: features are grouped into phases with dependency rationale
+- [ ] Adoption mode is confirmed (greenfield, retrofit, or agent-interface)
+- [ ] Initiative ID follows the format `{0000000}-{kebab-case-name}`
+
+If any item cannot be checked, coach the human on that specific gap before proceeding.
+
 ---
 
 ## Phase 1 - Specification
