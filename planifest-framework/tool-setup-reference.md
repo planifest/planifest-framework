@@ -140,7 +140,7 @@ AGENTS.md
 |------|--------|
 | **Skill discovery** | `.gemini/skills/{name}/SKILL.md` or `.agent/skills/{name}/SKILL.md` |
 | **Workflow discovery** | `.agent/workflows/{name}.md` (becomes `/name` slash command) |
-| **Boot file** | None needed - uses skill discovery directly |
+| **Boot file** | `GEMINI.md` (project root) |
 | **Personal skills** | `~/.gemini/antigravity/skills/` |
 | **Frontmatter** | `name` + `description` required |
 | **Progressive disclosure** | Yes |
@@ -162,6 +162,7 @@ AGENTS.md
     ├── initiative-pipeline.md
     ├── change-pipeline.md
     └── retrofit.md
+GEMINI.md
 ```
 
 ---
