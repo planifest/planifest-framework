@@ -296,7 +296,16 @@ The coaching conversation in Phase 0 and the pipeline phases are the same regard
 
 **Greenfield** - The human provides an Initiative Brief. You assess it from scratch.
 
-**Retrofit** - An existing codebase exists. Before coaching, read the codebase. Infer the existing architecture. Surface what already exists - components, patterns, decisions, tech debt. Then assess the brief against the discovered reality, not against a blank slate. The human may need to answer fewer questions because the codebase already answers them - or more, because the codebase reveals conflicts.
+**Retrofit** - An existing codebase exists. Before coaching, perform a structured discovery:
+
+1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — these reveal the stack
+2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.json` for each.
+3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
+4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists.
+5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record these in the design spec as existing constraints.
+6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
+
+Present the discovery summary to the human before coaching. The human may need to answer fewer questions because the codebase already answers them — or more, because the codebase reveals conflicts.
 
 **Agent Interface Layer** - An interface specification exists for a complex domain. Read it first. Your coaching is scoped to the interface - you develop against it, not the internals.
 
