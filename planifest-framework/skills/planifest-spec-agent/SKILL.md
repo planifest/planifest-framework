@@ -88,6 +88,18 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 ---
 
+## Phased Initiatives
+
+When the Planifest indicates a phased initiative (features grouped into phases):
+
+- **Produce spec artifacts for the current phase only.** Do not spec features in later phases — they may change based on what Phase 1 reveals.
+- **Name phase-specific artifacts with the phase suffix:** `design-spec-phase-2.md`, `scope-phase-2.md`, etc. The Planifest itself is updated per phase, not duplicated.
+- **Reference prior phase artifacts.** Phase 2's design spec should reference Phase 1's component manifests and data contracts as existing context, not re-specify them.
+- **Carry forward the domain glossary.** The glossary is cumulative — add new terms from each phase, never remove terms from prior phases.
+- **Carry forward the risk register.** Prior phase risks remain unless explicitly mitigated. Add new risks from the current phase.
+
+---
+
 ## Retrofit Mode
 
 When the Planifest indicates `adoption_mode: retrofit`, read the existing codebase before producing artifacts. Infer the existing architecture, identify components, surface undocumented decisions. Reconcile the Initiative Brief against the discovered reality. The spec must describe the system as it exists and what is changing - not just the change in isolation.
