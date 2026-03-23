@@ -270,6 +270,26 @@ Invoke the **docs-agent** skill.
 
 ---
 
+## Mid-Pipeline Requirement Changes
+
+If the human requests a change to requirements while the pipeline is in progress (Phases 1-6):
+
+1. **Assess scope of change:**
+   - Cosmetic (naming, wording, formatting) → fix in place, continue
+   - Additive (new user story, new endpoint) → update spec artifacts, re-run from the earliest affected phase
+   - Contradictory (reverses a prior decision) → halt, update the Planifest, create an ADR for the reversal, re-run from Phase 1
+
+2. **Re-run rules:**
+   - Re-running Phase 1 invalidates Phases 2-6 output. Delete stale artifacts before re-running.
+   - Re-running Phase 3 requires re-running Phase 4 (validation) at minimum.
+   - Never patch generated code to match a spec change — regenerate from the updated spec.
+
+3. **Record the change:** Add a "Requirement Change" entry to `pipeline-run.md` noting what changed, which phase was active, and what was re-run.
+
+If the human asks for a change that would fundamentally alter the initiative (different problem, different users, different domain), recommend starting a new initiative instead.
+
+---
+
 ## Adoption Modes
 
 The coaching conversation in Phase 0 and the pipeline phases are the same regardless of mode. What differs is the starting point.
