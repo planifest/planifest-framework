@@ -84,6 +84,16 @@ Run CI checks scoped to the blast radius of the change. Self-correct up to 5 tim
 - If the change modified an interface contract -> write a new ADR at `plan/current/adr/ADR-{NNN}-{title}.md` recording what changed, why, and the consequences for consumers.
 - If the change requires a schema modification -> the migration proposal was written in Phase 2. Confirm it is present and flagged for human review.
 
+**ADR invalidation:** If the change contradicts or reverses a prior ADR:
+1. Mark the prior ADR's status as `superseded` and add `Superseded by: ADR-{NNN}`
+2. Write the new ADR with a Context section that explains why the prior decision was reversed
+3. The new ADR must reference the prior ADR in its Related ADRs section
+
+**Rollback handling:** If the change needs to be reverted after deployment:
+1. The change-agent does not perform rollbacks automatically — rollbacks are human-initiated
+2. Document the rollback procedure in the change summary: what to revert, what data migration (if any) needs to be reversed, and what consumers need to be notified
+3. If the change included a schema migration, note whether the migration is backward-compatible (previous code version works with new schema) or requires a coordinated rollback
+
 ### Phase 5 - Update Documentation
 
 Update every artifact affected by the change:
