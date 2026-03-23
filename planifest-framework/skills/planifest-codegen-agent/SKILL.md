@@ -122,7 +122,9 @@ Between components, verify:
 **Testing:**
 - Every endpoint must have a corresponding integration test.
 - Every pure function must have a corresponding unit test.
+- For critical user flows (as identified in the design spec's acceptance criteria), write E2E tests that exercise the full request path from HTTP request to database and back.
 - Use the testing framework declared in the stack configuration.
+- Follow the [Testing Standards](../standards/testing-standards.md) for test structure, data management, and mocking boundaries.
 
 **Infrastructure:**
 - IaC must be parameterised - no hardcoded environment values.
