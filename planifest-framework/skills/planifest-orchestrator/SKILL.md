@@ -55,10 +55,14 @@ Planifest describes three layers of every initiative. Each must be covered.
 - Availability: what uptime is required? Is there an SLO?
 - Scalability: what load must it handle today? What about in 12 months?
 - Security constraints: authentication strategy, authorisation model, data sensitivity classification.
+- Data privacy: does this system handle PII, financial data, or health data? What regulations apply (GDPR, HIPAA, PCI-DSS, SOC2)? What data retention and deletion policies are required?
+- Observability: what logging, metrics, and tracing are required? What SLIs will be measured? See [Observability Standards](../standards/observability-standards.md).
+- API versioning: if this system exposes APIs, what is the versioning strategy? See [API Design Standards](../standards/api-design-standards.md).
 - Cost boundaries: is there a budget? What are the cost drivers?
 
 **Engineering** - Technical Delivery Plan. How the system will be built.
 - Stack declaration: frontend, backend, database, ORM, IaC, cloud provider, compute model, CI platform. Every choice explicit.
+- Team capability: what is the team's experience with the chosen stack? If the team is new to a technology, flag it as a risk.
 - Component design: what are the components, what does each one do, how do they relate?
 - Data ownership: which component owns which data?
 - Deployment topology: where does this run, how is it deployed?
