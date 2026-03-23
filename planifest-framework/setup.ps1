@@ -44,6 +44,15 @@ function Copy-PlanifestSkills {
         if (Test-Path $srcSkillMd) {
             New-Item -ItemType Directory -Path $destDir -Force | Out-Null
             Copy-Item -Path $srcSkillMd -Destination $destDir -Force
+
+            # Rewrite relative paths to match bundled directory structure
+            $skillMdPath = Join-Path $destDir "SKILL.md"
+            $skillContent = Get-Content -Path $skillMdPath -Raw
+            $skillContent = $skillContent -replace '\.\./templates/', './assets/templates/'
+            $skillContent = $skillContent -replace '\.\./standards/', './references/'
+            $skillContent = $skillContent -replace '\.\./schemas/', './assets/schemas/'
+            Set-Content -Path $skillMdPath -Value $skillContent -NoNewline -Encoding UTF8
+
             Write-Host "  + $skillName/SKILL.md"
             
             foreach ($optDir in @('scripts', 'assets', 'references')) {

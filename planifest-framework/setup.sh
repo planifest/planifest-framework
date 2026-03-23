@@ -31,6 +31,14 @@ copy_skills() {
       
       mkdir -p "$dest_dir"
       cp "$skill_dir/SKILL.md" "$dest_dir/SKILL.md"
+
+      # Rewrite relative paths to match bundled directory structure
+      sed -i.bak \
+        -e 's|\.\./templates/|./assets/templates/|g' \
+        -e 's|\.\./standards/|./references/|g' \
+        -e 's|\.\./schemas/|./assets/schemas/|g' \
+        "$dest_dir/SKILL.md" && rm -f "$dest_dir/SKILL.md.bak"
+
       echo "  + $skill_name/SKILL.md"
       
       for opt_dir in scripts assets references; do
