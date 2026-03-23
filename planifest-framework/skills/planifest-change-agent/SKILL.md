@@ -42,7 +42,20 @@ Before changing anything, read:
 5. `src/{affected-component}/docs/` - read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
 6. `plan/current/domain-glossary.md` - confirm you are using the correct terms
 
-Identify the blast radius - which other components depend on the ones you're changing.
+**Blast radius analysis:**
+
+1. Read `docs/dependency-graph.md` to find all components that consume or are consumed by the affected component(s)
+2. For each dependency, classify the coupling:
+   - **API consumer** — calls endpoints defined in the affected component's OpenAPI spec
+   - **Data reader** — reads from tables owned by the affected component
+   - **Event subscriber** — listens to events published by the affected component
+   - **Shared type consumer** — imports types from the affected component's shared package
+3. Determine impact level per dependent component:
+   - **Direct** — the change modifies an interface, schema, or type that this component uses
+   - **Indirect** — the change modifies internal behavior but the interface is unchanged
+   - **None** — no coupling to the changed surface area
+4. Only components with **Direct** impact require contract test updates and consumer notification
+5. Record the full blast radius in the Change Summary (Phase 2 output header)
 
 ### Phase 2 - Targeted Change
 
