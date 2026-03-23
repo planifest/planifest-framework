@@ -100,6 +100,23 @@ Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md` as the audit trail for th
 
 ---
 
+## New Component Handoff
+
+If the change request requires creating a new component (not just modifying existing ones):
+
+1. **Create the component scaffold:** `src/{new-component-id}/component.json` using the [Component Manifest Template](../templates/component-manifest.template.json)
+2. **Write the data contract** if the component owns data: `src/{new-component-id}/docs/data-contract.md`
+3. **Update the Planifest** at `plan/current/planifest.md` to include the new component in the components list
+4. **Update the dependency graph** at `docs/dependency-graph.md` to show the new component's relationships
+5. **Update the component registry** at `docs/component-registry.md` to include the new component
+6. **Build the component** following the same rules as the codegen-agent (code, tests, docs, IaC)
+
+The change-agent builds the new component inline — it does not hand off to the codegen-agent. This avoids a pipeline context switch for what is typically a small addition.
+
+If the new component is large enough that it would benefit from full pipeline treatment (> 3 user stories, new stack choices), escalate to the orchestrator to start a new initiative instead.
+
+---
+
 ## Output Header
 
 Before writing any code, produce this summary and write it to `plan/current/change-summary.md`:
