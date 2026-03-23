@@ -67,6 +67,8 @@ Pre-seeded by the human or orchestrator. The codegen-agent reads this - it does 
 | `stack.iac` | Yes | Infrastructure as code tool. |
 | `stack.cloud` | Yes | Target cloud provider. |
 | `stack.compute` | Yes | Compute platform. |
+| `stack.styling` | Conditional | CSS approach for frontend components (or `none`). |
+| `stack.componentLibrary` | Conditional | UI component library (or `none`). |
 | `stack.ci` | Yes | CI/CD platform. |
 
 ### Contract
@@ -141,6 +143,9 @@ Operational metadata used by the CI/CD pipeline and template stamping system.
 | `metadata.updatedAt` | Yes | Agent | ISO 8601 timestamp. Updated on every change. |
 | `metadata.createdBy` | Yes | System | `agent` or `human`. |
 | `metadata.lastModifiedBy` | Yes | System | `agent` or `human`. |
+| `metadata.skill` | Yes | Agent | Which skill produced or last modified this manifest (e.g., `codegen-agent`, `change-agent`). |
+| `metadata.tool` | Yes | Agent | Which agentic tool was used (e.g., `claude-code`, `cursor`, `antigravity`). |
+| `metadata.model` | Yes | Agent | Which model produced the output (e.g., `claude-sonnet-4-20250514`). |
 
 ---
 
