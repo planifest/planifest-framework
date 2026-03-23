@@ -28,6 +28,7 @@ This project uses the Planifest framework. These rules are non-negotiable and ap
 4. **Destructive schema operations require human approval.** Drop column, drop table, rename — propose and stop. No exceptions.
 5. **Data is owned by one component.** Never write to data owned by another component.
 6. **No credentials in context.** If a credential appears anywhere, flag it immediately and do not use it.
+7. **Update documentation after any deviation.** If implementation required deviating from the spec, plan, or design decisions, you MUST update the affected artifacts (plan/, docs/, or component.json) to reflect what was actually built. Documentation must always match reality.
 
 ## How to Handle Requests
 
@@ -42,6 +43,9 @@ Load the planifest-orchestrator skill and use the Change Pipeline.
 
 **When the user asks a question or requests non-code help:**
 Respond normally. These rules govern code generation, not conversation.
+
+**After human review and acceptance:**
+Move the active plan from plan/current/ to plan/_archive/{initiative-id}/. The initiative is not complete until the plan is archived.
 
 ## Workflows
 
