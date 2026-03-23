@@ -23,6 +23,7 @@ description: Performs a security review of the implementation, producing a secur
 ## Input
 
 - The validated implementation at `src/{component-id}/` (all components in the initiative)
+- Infrastructure as Code at `src/{component-id}/` (Terraform, Pulumi, CDK, etc. — if declared in the stack)
 - Design Specification at `plan/current/design-spec.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml`
 - Risk Register at `plan/current/risk-register.md`
@@ -67,6 +68,16 @@ Confirm all inputs are validated per the OpenAPI spec. Flag any endpoints accept
 ## Network Policy
 
 Review ingress and egress surface. Flag unnecessarily open ports or missing network policies.
+
+## Infrastructure as Code Review
+
+If IaC files exist (Terraform, Pulumi, CDK, CloudFormation), review for:
+- Overly permissive IAM roles or security groups
+- Public exposure of resources that should be private
+- Missing encryption at rest or in transit
+- Missing logging or audit trail configuration
+- Hardcoded secrets or default credentials
+- Non-compliant storage bucket policies
 
 ## Summary
 
