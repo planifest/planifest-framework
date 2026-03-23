@@ -123,6 +123,12 @@ Coach the human through this. If the brief describes something bigger than "a fe
 - "Feature X reads like it has several sub-features. Can we split it? A feature should be implementable in one agent session."
 - "These features have a dependency: Y needs Z to exist first. I'll put Z in Phase 1 and Y in Phase 2."
 
+**Monorepo decomposition:** When the initiative involves multiple components in the same repository, follow the [Monorepo Standards](../standards/monorepo-standards.md). Each component gets its own directory, manifest, and build configuration. Shared code goes in `src/shared/` only when genuinely needed by 2+ components.
+
+**Shared data decomposition:** When two components need the same data, one must own it. The other consumes it through a defined interface (API, event, shared type). Never allow two components to write to the same tables — this is a Hard Limit violation. If the human insists on shared writes, coach them to redesign with a single data-owning component.
+
+**Microservices vs monolith:** Do not assume microservices. A single-component monolith is often the right starting point. Coach the human: "Does each component need independent deployment and scaling? If not, a single component with clear module boundaries is simpler and still follows Planifest conventions."
+
 The [Initiative Brief Template](../templates/initiative-brief.template.md) guides the human through this before they reach you.
 
 ### What you produce at the end of Phase 0
