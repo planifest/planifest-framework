@@ -46,12 +46,36 @@ If any check fails -> self-correct:
 4. Re-run the failing check
 5. If the fix introduces new failures, address those too
 
-Maximum **5 self-correct cycles**. If the issue persists after 5 attempts, halt and report:
+Maximum **5 self-correct cycles**. Track each cycle:
 
-- What failed (exact error)
-- What you tried (each attempt)
-- Why it's not resolving (your assessment of the root cause)
-- Whether the issue is in the generated code, the spec, or the test itself
+```
+Cycle N:
+  Check: lint | typecheck | test | build
+  Error: <exact error message>
+  Root cause: <your diagnosis>
+  Fix: <what you changed and why>
+  Result: pass | new-failure | same-failure
+```
+
+If the issue persists after 5 attempts, **halt and escalate to the human** with this format:
+
+```
+VALIDATION BLOCKED — human intervention required
+
+Failing check: <lint | typecheck | test | build>
+Error: <exact error message>
+Attempts: 5/5 exhausted
+
+Cycle summary:
+  1. <diagnosis> → <fix> → <result>
+  2. <diagnosis> → <fix> → <result>
+  ...
+
+Root cause assessment: <code | spec-ambiguity | test-bug | environment | dependency>
+Recommended action: <what the human should do>
+```
+
+Do NOT proceed to the next pipeline phase if any check is failing. The pipeline is blocked until validation passes or the human overrides.
 
 ---
 
