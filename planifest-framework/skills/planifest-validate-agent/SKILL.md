@@ -88,6 +88,19 @@ Do NOT proceed to the next pipeline phase if any check is failing. The pipeline 
 
 ---
 
+## Standards References
+
+When validating, check fixes against these standards:
+
+- [Code Quality Standards](../standards/code-quality-standards.md) — module structure, naming, error handling
+- [Testing Standards](../standards/testing-standards.md) — test structure, coverage, mocking rules
+- [API Design Standards](../standards/api-design-standards.md) — endpoint naming, error responses, status codes
+- [Database Standards](../standards/database-standards.md) — query patterns, connection management
+
+Do not refactor code to meet standards during validation — only fix actual failures. If you notice a standards violation that isn't causing a test/lint/build failure, record it in recommendations for the docs-agent.
+
+---
+
 ## Capability Skills
 
 If a capability skill exists for the declared testing framework (e.g. `webapp-testing`), load it for guidance on test patterns and debugging strategies.
