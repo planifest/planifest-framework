@@ -109,6 +109,28 @@ Tool: {agent tool used}
 - **Every artifact must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly - do not leave a silent gap.
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
 - **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find - do not silently fix it.
+
+### Drift Detection
+
+Perform these specific drift checks:
+
+| Check | Source of Truth | Verify Against | Action if Drift Found |
+|-------|----------------|---------------|----------------------|
+| API endpoints | OpenAPI spec | Implemented routes | Flag: missing or extra endpoints |
+| Domain terms | Domain glossary | Code variable/function names | Flag: non-glossary terms in code |
+| Component boundaries | Planifest component list | `src/` directories with `component.json` | Flag: missing or extra components |
+| Data ownership | Component manifests (`data.ownsData`) | Database connection/query patterns | Flag: cross-component data writes |
+| ADR compliance | ADR decisions | Implementation patterns | Flag: code that contradicts an accepted ADR |
+| Dependency direction | Dependency graph | Import/require statements | Flag: undeclared dependencies |
+
+**Legitimate absences:** Not every artifact applies to every component. These are valid reasons an artifact may not exist:
+- No `data-contract.md` if `component.json` has `ownsData: false`
+- No `quirks.md` if no quirks were discovered
+- No `tech-debt.md` if no debt was identified
+- No E2E tests if the component has no user-facing endpoints
+
+Do not flag legitimate absences as drift. Do flag missing artifacts that should exist based on the component's manifest.
+
 - **Recommendations.** Produce `plan/current/recommendations.md` - suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
 
 ---
