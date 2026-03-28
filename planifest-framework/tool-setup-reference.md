@@ -172,7 +172,7 @@ GEMINI.md
 | Item | Detail |
 |------|--------|
 | **Skill discovery** | `.github/skills/{name}/SKILL.md` |
-| **Workflow discovery** | `.github/workflows/{name}.md` (natural language workflows) |
+| **Workflow discovery** | `.github/copilot-workflows/{name}.md` (natural language workflows — avoids GitHub Actions conflict) |
 | **Boot file** | `.github/copilot-instructions.md` |
 | **Personal skills** | `~/.copilot/skills/` |
 | **Frontmatter** | `name` + `description` + optional `license` |
@@ -189,7 +189,7 @@ GEMINI.md
 │   ├── _planifest-templates/
 │   ├── _planifest-standards/
 │   └── _planifest-schemas/
-├── workflows/
+├── copilot-workflows/
 │   ├── initiative-pipeline.md
 │   ├── change-pipeline.md
 │   └── retrofit.md

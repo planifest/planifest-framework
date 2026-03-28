@@ -64,6 +64,25 @@ Full implementation at `src/{component-id}/`:
 
 ---
 
+## Multi-Component Sequencing
+
+When the initiative defines multiple components, build them in dependency order:
+
+1. **Read the Planifest** to identify all components and their dependency relationships
+2. **Build shared packages first** — types, validation schemas, contracts that other components import
+3. **Build data-owning components next** — these define the schema that dependent components consume
+4. **Build dependent components last** — API consumers, frontends, workers that read from other components
+5. **Build each component fully** (code + tests + docs) before starting the next
+
+If two components have a circular dependency, halt and escalate — this indicates a design flaw that the spec-agent should resolve.
+
+Between components, verify:
+- Shared types are importable by the next component
+- API contracts match between producer and consumer
+- Data contracts are consistent across component boundaries
+
+---
+
 ## Rules
 
 **Implement against the spec:**
@@ -103,7 +122,9 @@ Full implementation at `src/{component-id}/`:
 **Testing:**
 - Every endpoint must have a corresponding integration test.
 - Every pure function must have a corresponding unit test.
+- For critical user flows (as identified in the design spec's acceptance criteria), write E2E tests that exercise the full request path from HTTP request to database and back.
 - Use the testing framework declared in the stack configuration.
+- Follow the [Testing Standards](../standards/testing-standards.md) for test structure, data management, and mocking boundaries.
 
 **Infrastructure:**
 - IaC must be parameterised - no hardcoded environment values.

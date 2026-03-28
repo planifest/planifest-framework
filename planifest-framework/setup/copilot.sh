@@ -2,11 +2,11 @@
 # https://docs.github.com/en/copilot
 #
 # Skills:    .github/skills/{name}/SKILL.md       (auto-discovered)
-# Workflows: .github/workflows/{name}.md          (natural language workflows)
+# Workflows: .github/copilot-workflows/{name}.md   (natural language workflows - avoids GitHub Actions conflict)
 # Boot file: .github/copilot-instructions.md
 
 TOOL_SKILLS_DIR=".github/skills"
-TOOL_WORKFLOWS_DIR=".github/workflows"
+TOOL_WORKFLOWS_DIR=".github/copilot-workflows"
 
 TOOL_BOOT_FILE=".github/copilot-instructions.md"
 

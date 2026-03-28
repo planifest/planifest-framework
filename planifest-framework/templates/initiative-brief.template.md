@@ -1,6 +1,10 @@
 # Initiative Brief - {{initiative-name}}
 
+**Initiative ID:** {{0000000}}-{{kebab-case-name}}
+
 > Written by a human. This is the input document that kicks off the Planifest pipeline. The orchestrator reads this and coaches you through any gaps before passing it to the spec-agent.
+>
+> **Initiative ID format:** A 7-digit zero-padded number followed by a kebab-case name (e.g., `0000001-user-auth`, `0000002-payment-gateway`). The numeric prefix keeps initiatives in chronological order when sorted alphabetically. Choose the next available number.
 
 ---
 

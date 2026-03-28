@@ -2,12 +2,12 @@
 # https://docs.github.com/en/copilot
 #
 # Skills:    .github/skills/{name}/SKILL.md       (auto-discovered)
-# Workflows: .github/workflows/{name}.md          (natural language workflows)
+# Workflows: .github/copilot-workflows/{name}.md   (natural language workflows - avoids GitHub Actions conflict)
 # Boot file: .github/copilot-instructions.md
 
 @{
     SkillsDir    = '.github\skills'
-    WorkflowsDir = '.github\workflows'
+    WorkflowsDir = '.github\copilot-workflows'
     BootFile     = '.github\copilot-instructions.md'
     BootContent  = @'
 # Planifest — Mandatory Framework Rules

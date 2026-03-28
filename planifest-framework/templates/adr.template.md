@@ -35,13 +35,34 @@ What was decided and why?
 
 ---
 
+## Affected Components
+
+Which components are impacted by this decision?
+
+| Component | Impact |
+|-----------|--------|
+| {{component-id}} | {{how this decision affects the component}} |
+
+---
+
 ## Consequences
 
 What follows from this decision - both positive and negative?
 
-- {{consequence-1}}
-- {{consequence-2}}
-- {{consequence-3}}
+**Positive:**
+- {{what becomes easier or better}}
+
+**Negative:**
+- {{what becomes harder or worse}}
+
+**Risks:**
+- {{what could go wrong as a result of this decision}}
+
+---
+
+## Related ADRs
+
+- {{ADR-id}} — {{relationship: extends | conflicts-with | depends-on | related-to}}
 
 ---
 
