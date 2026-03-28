@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, or GitHub Copilot
+- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, or Cline / Roo Code
 - A terminal with Bash (macOS/Linux) or PowerShell (Windows)
 
 ---
@@ -39,12 +39,12 @@ This copies skills into the directory your agentic tool expects:
 **macOS / Linux:**
 ```bash
 chmod +x planifest-framework/setup.sh
-./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, all
+./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, all
 ```
 
 **Windows (PowerShell):**
 ```powershell
-.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, all
+.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, all
 ```
 
 The script creates:

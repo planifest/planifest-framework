@@ -8,7 +8,7 @@
     This script handles shared logic only.
 
 .PARAMETER Tool
-    The agentic tool to configure: claude-code, cursor, codex, antigravity, copilot, or all.
+    The agentic tool to configure: claude-code, cursor, codex, antigravity, copilot, windsurf, cline, or all.
 
 .EXAMPLE
     .\planifest-framework\setup.ps1 claude-code
@@ -28,7 +28,7 @@ $SkillsSrc = Join-Path $ScriptDir 'skills'
 $WorkflowsSrc = Join-Path $ScriptDir 'workflows'
 $SetupDir = Join-Path $ScriptDir 'setup'
 
-$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot')
+$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot', 'windsurf', 'cline')
 
 # --- Shared functions ---
 

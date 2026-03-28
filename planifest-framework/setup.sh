@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Usage:  ./planifest-framework/setup.sh <tool>
 #
-# Tools:  claude-code | cursor | codex | antigravity | copilot | all
+# Tools:  claude-code | cursor | codex | antigravity | copilot | windsurf | cline | all
 #
 # Each tool's specific config lives in setup/<tool>.sh
 # This script handles shared logic only.
@@ -16,7 +16,7 @@ SKILLS_SRC="$SCRIPT_DIR/skills"
 WORKFLOWS_SRC="$SCRIPT_DIR/workflows"
 SETUP_DIR="$SCRIPT_DIR/setup"
 
-VALID_TOOLS="claude-code cursor codex antigravity copilot"
+VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline"
 
 # --- Shared functions ---
 
