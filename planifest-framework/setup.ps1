@@ -44,6 +44,15 @@ function Copy-PlanifestSkills {
         if (Test-Path $srcSkillMd) {
             New-Item -ItemType Directory -Path $destDir -Force | Out-Null
             Copy-Item -Path $srcSkillMd -Destination $destDir -Force
+
+            # Rewrite relative paths to match bundled directory structure
+            $skillMdPath = Join-Path $destDir "SKILL.md"
+            $skillContent = Get-Content -Path $skillMdPath -Raw
+            $skillContent = $skillContent -replace '\.\./templates/', './assets/templates/'
+            $skillContent = $skillContent -replace '\.\./standards/', './references/'
+            $skillContent = $skillContent -replace '\.\./schemas/', './assets/schemas/'
+            Set-Content -Path $skillMdPath -Value $skillContent -NoNewline -Encoding UTF8
+
             Write-Host "  + $skillName/SKILL.md"
             
             foreach ($optDir in @('scripts', 'assets', 'references')) {
@@ -233,7 +242,7 @@ plan/
 
 ### Path Rules â€” plan/
 
-1. **Initiative ID** is kebab-case, human-chosen, and stable.
+1. **Initiative ID** follows the format `{0000000}-{kebab-case-name}` — a 7-digit zero-padded number prefix for chronological ordering, followed by a human-chosen kebab-case name.
 2. **No nesting** â€” specs, ADRs, and supporting docs are flat within the initiative folder. One level of subfolders only (adr/).
 3. **No code** â€” nothing executable lives in `plan/`. If it runs, it belongs in `src/`.
 4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `planifest.md` is updated per phase, not duplicated.

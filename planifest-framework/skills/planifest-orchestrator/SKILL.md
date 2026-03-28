@@ -55,10 +55,14 @@ Planifest describes three layers of every initiative. Each must be covered.
 - Availability: what uptime is required? Is there an SLO?
 - Scalability: what load must it handle today? What about in 12 months?
 - Security constraints: authentication strategy, authorisation model, data sensitivity classification.
+- Data privacy: does this system handle PII, financial data, or health data? What regulations apply (GDPR, HIPAA, PCI-DSS, SOC2)? What data retention and deletion policies are required?
+- Observability: what logging, metrics, and tracing are required? What SLIs will be measured? See [Observability Standards](../standards/observability-standards.md).
+- API versioning: if this system exposes APIs, what is the versioning strategy? See [API Design Standards](../standards/api-design-standards.md).
 - Cost boundaries: is there a budget? What are the cost drivers?
 
 **Engineering** - Technical Delivery Plan. How the system will be built.
 - Stack declaration: frontend, backend, database, ORM, IaC, cloud provider, compute model, CI platform. Every choice explicit.
+- Team capability: what is the team's experience with the chosen stack? If the team is new to a technology, flag it as a risk.
 - Component design: what are the components, what does each one do, how do they relate?
 - Data ownership: which component owns which data?
 - Deployment topology: where does this run, how is it deployed?
@@ -119,6 +123,12 @@ Coach the human through this. If the brief describes something bigger than "a fe
 - "Feature X reads like it has several sub-features. Can we split it? A feature should be implementable in one agent session."
 - "These features have a dependency: Y needs Z to exist first. I'll put Z in Phase 1 and Y in Phase 2."
 
+**Monorepo decomposition:** When the initiative involves multiple components in the same repository, follow the [Monorepo Standards](../standards/monorepo-standards.md). Each component gets its own directory, manifest, and build configuration. Shared code goes in `src/shared/` only when genuinely needed by 2+ components.
+
+**Shared data decomposition:** When two components need the same data, one must own it. The other consumes it through a defined interface (API, event, shared type). Never allow two components to write to the same tables — this is a Hard Limit violation. If the human insists on shared writes, coach them to redesign with a single data-owning component.
+
+**Microservices vs monolith:** Do not assume microservices. A single-component monolith is often the right starting point. Coach the human: "Does each component need independent deployment and scaling? If not, a single component with clear module boundaries is simpler and still follows Planifest conventions."
+
 The [Initiative Brief Template](../templates/initiative-brief.template.md) guides the human through this before they reach you.
 
 ### What you produce at the end of Phase 0
@@ -133,6 +143,7 @@ Write this to `plan/current/planifest.md`:
 ## Initiative
 - Problem: {one-line problem statement}
 - Adoption mode: greenfield | retrofit | agent-interface
+- Initiative ID: {0000000}-{kebab-case-name}
 
 ## Product Layer
 - User stories confirmed: {count}
@@ -145,6 +156,8 @@ Write this to `plan/current/planifest.md`:
 - Availability target: {value or "deferred - recorded in scope"}
 - Scalability target: {value or "deferred - recorded in scope"}
 - Security: {auth strategy, authz model, data classification}
+- Data privacy: {regulations, PII handling, retention policy or "no regulated data"}
+- Observability: {logging/metrics/tracing strategy or "standard defaults"}
 - Cost boundary: {value or "not constrained"}
 
 ## Engineering Layer
@@ -152,11 +165,16 @@ Write this to `plan/current/planifest.md`:
 - Components: {list with one-liner per component}
 - Data ownership: {component -> dataset mapping}
 - Deployment: {topology summary}
+- API versioning: {strategy or "not applicable"}
 
 ## Scope
 - In: {list}
 - Out: {list}
 - Deferred: {list - with notes on what is blocked until resolved}
+
+## Assumptions
+- {assumption} — impact if wrong: {what breaks}
+- {assumption} — impact if wrong: {what breaks}
 
 ## Risks
 - {list with likelihood/impact}
@@ -167,9 +185,32 @@ Write this to `plan/current/planifest.md`:
 
 ## Confirmation
 Human confirmed this Planifest before proceeding: yes / no
+Date confirmed: {ISO-8601}
 ```
 
+**Field mutability:** After human confirmation, the Planifest is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `Date confirmed` field records when the contract was locked.
+
 **Do not proceed to Phase 1 until the human has confirmed the Planifest.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, the pipeline begins.
+
+### Phase 0 → Phase 1 Gate Checklist
+
+Before presenting the Planifest for confirmation, verify every item:
+
+- [ ] Problem statement is specific and names the target user
+- [ ] At least one user story with testable acceptance criteria exists
+- [ ] Stack is fully declared (no "TBD" in language, runtime, framework, database, ORM, IaC, cloud, compute, CI)
+- [ ] Every component is named with clear single-responsibility purpose
+- [ ] Data ownership is assigned — every dataset maps to exactly one component
+- [ ] Scope has all three sections populated (in, out, deferred) — "Nothing deferred" is valid
+- [ ] At least one NFR has a measurable target (latency, availability, or scalability)
+- [ ] Security section names the auth strategy and data classification
+- [ ] Risks section has at least one entry with likelihood and impact
+- [ ] If multi-component: dependency order is stated
+- [ ] If phased: features are grouped into phases with dependency rationale
+- [ ] Adoption mode is confirmed (greenfield, retrofit, or agent-interface)
+- [ ] Initiative ID follows the format `{0000000}-{kebab-case-name}`
+
+If any item cannot be checked, coach the human on that specific gap before proceeding.
 
 ---
 
@@ -250,13 +291,42 @@ Invoke the **docs-agent** skill.
 
 ---
 
+## Mid-Pipeline Requirement Changes
+
+If the human requests a change to requirements while the pipeline is in progress (Phases 1-6):
+
+1. **Assess scope of change:**
+   - Cosmetic (naming, wording, formatting) → fix in place, continue
+   - Additive (new user story, new endpoint) → update spec artifacts, re-run from the earliest affected phase
+   - Contradictory (reverses a prior decision) → halt, update the Planifest, create an ADR for the reversal, re-run from Phase 1
+
+2. **Re-run rules:**
+   - Re-running Phase 1 invalidates Phases 2-6 output. Delete stale artifacts before re-running.
+   - Re-running Phase 3 requires re-running Phase 4 (validation) at minimum.
+   - Never patch generated code to match a spec change — regenerate from the updated spec.
+
+3. **Record the change:** Add a "Requirement Change" entry to `pipeline-run.md` noting what changed, which phase was active, and what was re-run.
+
+If the human asks for a change that would fundamentally alter the initiative (different problem, different users, different domain), recommend starting a new initiative instead.
+
+---
+
 ## Adoption Modes
 
 The coaching conversation in Phase 0 and the pipeline phases are the same regardless of mode. What differs is the starting point.
 
 **Greenfield** - The human provides an Initiative Brief. You assess it from scratch.
 
-**Retrofit** - An existing codebase exists. Before coaching, read the codebase. Infer the existing architecture. Surface what already exists - components, patterns, decisions, tech debt. Then assess the brief against the discovered reality, not against a blank slate. The human may need to answer fewer questions because the codebase already answers them - or more, because the codebase reveals conflicts.
+**Retrofit** - An existing codebase exists. Before coaching, perform a structured discovery:
+
+1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — these reveal the stack
+2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.json` for each.
+3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
+4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists.
+5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record these in the design spec as existing constraints.
+6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
+
+Present the discovery summary to the human before coaching. The human may need to answer fewer questions because the codebase already answers them — or more, because the codebase reveals conflicts.
 
 **Agent Interface Layer** - An interface specification exists for a complex domain. Read it first. Your coaching is scoped to the interface - you develop against it, not the internals.
 
@@ -266,7 +336,21 @@ The adoption mode is one of the first things you confirm with the human: "Is thi
 
 ## Change Pipeline
 
-When the human requests a modification to an existing initiative (not new work), invoke the **change-agent** skill instead of the full pipeline. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
+When the human requests a modification to an existing initiative (not new work), use this decision tree to determine the correct path:
+
+### Change vs New Initiative Decision Tree
+
+| Signal | Path |
+|--------|------|
+| Affects 1-2 existing components, no new components | **Change Pipeline** |
+| Bug fix or dependency update | **Change Pipeline** |
+| Adds a new component to an existing initiative | **Change Pipeline** (change-agent creates it, then hands off — see change-agent skill) |
+| New user stories that fit within an existing initiative's scope | **Change Pipeline** if < 3 stories, otherwise **New Initiative** |
+| New problem statement or new target users | **New Initiative** |
+| Touches > 3 components or requires new infrastructure | **New Initiative** |
+| Requires a new stack choice (e.g., adding a frontend to a backend-only initiative) | **New Initiative** |
+
+When using the Change Pipeline, invoke the **change-agent** skill. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
 
 Before invoking the change-agent, confirm with the human:
 - Which initiative?

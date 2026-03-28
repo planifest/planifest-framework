@@ -23,6 +23,7 @@ description: Performs a security review of the implementation, producing a secur
 ## Input
 
 - The validated implementation at `src/{component-id}/` (all components in the initiative)
+- Infrastructure as Code at `src/{component-id}/` (Terraform, Pulumi, CDK, etc. — if declared in the stack)
 - Design Specification at `plan/current/design-spec.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml`
 - Risk Register at `plan/current/risk-register.md`
@@ -68,6 +69,16 @@ Confirm all inputs are validated per the OpenAPI spec. Flag any endpoints accept
 
 Review ingress and egress surface. Flag unnecessarily open ports or missing network policies.
 
+## Infrastructure as Code Review
+
+If IaC files exist (Terraform, Pulumi, CDK, CloudFormation), review for:
+- Overly permissive IAM roles or security groups
+- Public exposure of resources that should be private
+- Missing encryption at rest or in transit
+- Missing logging or audit trail configuration
+- Hardcoded secrets or default credentials
+- Non-compliant storage bucket policies
+
 ## Summary
 
 Overall risk rating: {Critical/High/Medium/Low}
@@ -77,6 +88,14 @@ Top actions before production:
 2. {second}
 3. {third}
 ```
+
+---
+
+## Role Boundary
+
+**You are report-only.** You do not modify code, configuration, or infrastructure. You produce a security report with findings and recommendations. The human decides which findings to act on and who implements the fixes.
+
+If you identify a critical vulnerability that is trivially fixable (e.g., a hardcoded credential), you still only report it — you do not fix it. The fix goes through the change-agent with proper documentation and audit trail.
 
 ---
 

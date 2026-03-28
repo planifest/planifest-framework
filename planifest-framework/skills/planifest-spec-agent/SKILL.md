@@ -43,6 +43,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 | Operational Model | `plan/current/operational-model.md` | Runbook triggers, on-call expectations, alerting thresholds |
 | SLO Definitions | `plan/current/slo-definitions.md` | Error budgets, SLIs/SLOs |
 | Cost Model | `plan/current/cost-model.md` | Compute, storage, egress, third-party cost estimates |
+| Data Contract (per component) | `src/{component-id}/docs/data-contract.md` | Schema ownership, table definitions, invariants, relationships. Follow the [Data Contract Template](../templates/data-contract.template.md) and its [guide](../templates/data-contract-guide.md). One per data-owning component. |
 
 ---
 
@@ -84,6 +85,18 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 **Assumptions:**
 - You may make documented assumptions for genuinely minor gaps. Record them in the risk register with likelihood: medium.
 - You must not assume away significant ambiguity. If something material is missing, report it back to the orchestrator - do not fill in the blank.
+
+---
+
+## Phased Initiatives
+
+When the Planifest indicates a phased initiative (features grouped into phases):
+
+- **Produce spec artifacts for the current phase only.** Do not spec features in later phases — they may change based on what Phase 1 reveals.
+- **Name phase-specific artifacts with the phase suffix:** `design-spec-phase-2.md`, `scope-phase-2.md`, etc. The Planifest itself is updated per phase, not duplicated.
+- **Reference prior phase artifacts.** Phase 2's design spec should reference Phase 1's component manifests and data contracts as existing context, not re-specify them.
+- **Carry forward the domain glossary.** The glossary is cumulative — add new terms from each phase, never remove terms from prior phases.
+- **Carry forward the risk register.** Prior phase risks remain unless explicitly mitigated. Add new risks from the current phase.
 
 ---
 

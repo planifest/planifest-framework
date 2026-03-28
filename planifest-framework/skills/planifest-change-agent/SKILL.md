@@ -42,7 +42,20 @@ Before changing anything, read:
 5. `src/{affected-component}/docs/` - read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
 6. `plan/current/domain-glossary.md` - confirm you are using the correct terms
 
-Identify the blast radius - which other components depend on the ones you're changing.
+**Blast radius analysis:**
+
+1. Read `docs/dependency-graph.md` to find all components that consume or are consumed by the affected component(s)
+2. For each dependency, classify the coupling:
+   - **API consumer** — calls endpoints defined in the affected component's OpenAPI spec
+   - **Data reader** — reads from tables owned by the affected component
+   - **Event subscriber** — listens to events published by the affected component
+   - **Shared type consumer** — imports types from the affected component's shared package
+3. Determine impact level per dependent component:
+   - **Direct** — the change modifies an interface, schema, or type that this component uses
+   - **Indirect** — the change modifies internal behavior but the interface is unchanged
+   - **None** — no coupling to the changed surface area
+4. Only components with **Direct** impact require contract test updates and consumer notification
+5. Record the full blast radius in the Change Summary (Phase 2 output header)
 
 ### Phase 2 - Targeted Change
 
@@ -71,6 +84,16 @@ Run CI checks scoped to the blast radius of the change. Self-correct up to 5 tim
 - If the change modified an interface contract -> write a new ADR at `plan/current/adr/ADR-{NNN}-{title}.md` recording what changed, why, and the consequences for consumers.
 - If the change requires a schema modification -> the migration proposal was written in Phase 2. Confirm it is present and flagged for human review.
 
+**ADR invalidation:** If the change contradicts or reverses a prior ADR:
+1. Mark the prior ADR's status as `superseded` and add `Superseded by: ADR-{NNN}`
+2. Write the new ADR with a Context section that explains why the prior decision was reversed
+3. The new ADR must reference the prior ADR in its Related ADRs section
+
+**Rollback handling:** If the change needs to be reverted after deployment:
+1. The change-agent does not perform rollbacks automatically — rollbacks are human-initiated
+2. Document the rollback procedure in the change summary: what to revert, what data migration (if any) needs to be reversed, and what consumers need to be notified
+3. If the change included a schema migration, note whether the migration is backward-compatible (previous code version works with new schema) or requires a coordinated rollback
+
 ### Phase 5 - Update Documentation
 
 Update every artifact affected by the change:
@@ -84,6 +107,23 @@ Update every artifact affected by the change:
 - ADRs - written in Phase 4 if needed
 
 Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md` as the audit trail for this change.
+
+---
+
+## New Component Handoff
+
+If the change request requires creating a new component (not just modifying existing ones):
+
+1. **Create the component scaffold:** `src/{new-component-id}/component.json` using the [Component Manifest Template](../templates/component-manifest.template.json)
+2. **Write the data contract** if the component owns data: `src/{new-component-id}/docs/data-contract.md`
+3. **Update the Planifest** at `plan/current/planifest.md` to include the new component in the components list
+4. **Update the dependency graph** at `docs/dependency-graph.md` to show the new component's relationships
+5. **Update the component registry** at `docs/component-registry.md` to include the new component
+6. **Build the component** following the same rules as the codegen-agent (code, tests, docs, IaC)
+
+The change-agent builds the new component inline — it does not hand off to the codegen-agent. This avoids a pipeline context switch for what is typically a small addition.
+
+If the new component is large enough that it would benefit from full pipeline treatment (> 3 user stories, new stack choices), escalate to the orchestrator to start a new initiative instead.
 
 ---
 

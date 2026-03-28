@@ -10,12 +10,23 @@
 
 ## Phases Completed
 
-- [ ] Specification
-- [ ] ADRs ({{n}} generated)
-- [ ] Code generation
-- [ ] Validation ({{n}} self-correct cycles)
-- [ ] Security review
-- [ ] Docs sync
+| Phase | Status | Gate Result | Notes |
+|-------|--------|-------------|-------|
+| 0 - Assess & Coach | {{pass/skip}} | Planifest confirmed: {{yes/no}} | {{coaching rounds count}} |
+| 1 - Specification | {{pass/fail/skip}} | All artifacts produced: {{yes/no}} | |
+| 2 - ADRs | {{pass/fail/skip}} | {{n}} ADRs generated | |
+| 3 - Code Generation | {{pass/fail/skip}} | Implementation complete: {{yes/no}} | {{deviations count}} |
+| 4 - Validation | {{pass/fail/blocked}} | CI clean: {{yes/no}} | {{self-correct cycles}} cycles |
+| 5 - Security | {{pass/fail/skip}} | Critical findings: {{count}} | |
+| 6 - Docs & Ship | {{pass/fail/skip}} | All docs synced: {{yes/no}} | |
+
+---
+
+## Requirement Changes During Run
+
+| Change | Phase Active | Classification | Action Taken |
+|--------|-------------|----------------|-------------|
+| {{description}} | {{phase number}} | cosmetic / additive / contradictory | {{what was re-run}} |
 
 ---
 

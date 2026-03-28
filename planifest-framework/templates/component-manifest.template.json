@@ -35,7 +35,7 @@
         "ci": "github-actions | gitlab-ci | bitbucket-pipelines"
     },
     "contract": {
-        "apiSpec": "docs/openapi.yaml",
+        "apiSpec": "plan/{{initiative-id}}/openapi-spec.yaml",
         "inputs": [
             {
                 "name": "{{endpoint-or-event-name}}",
