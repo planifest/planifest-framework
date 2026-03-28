@@ -114,6 +114,50 @@ function Copy-PlanifestWorkflow {
     Write-Host "  + workflows/$name.md"
 }
 
+function Invoke-PlanifestGuardrails {
+    Write-Host ""
+    Write-Host "  Activating Planifest Git Guardrails"
+
+    # Point Git to the version-controlled hooks directory
+    git config core.hooksPath planifest-framework/hooks
+    Write-Host "  + git config core.hooksPath planifest-framework/hooks"
+
+    # Note: chmod is not available on Windows; hooks are made executable by setup.sh on Unix.
+    # On Windows, Git for Windows respects the executable bit stored in the repo,
+    # so no additional step is required here.
+
+    # Deploy the CI/CD pipeline workflow
+    $githubWorkflows = Join-Path $ProjectRoot '.github\workflows'
+    $workflowSrc = Join-Path $ScriptDir 'hooks\planifest.yml'
+    if (Test-Path $workflowSrc) {
+        New-Item -ItemType Directory -Path $githubWorkflows -Force | Out-Null
+        $dest = Join-Path $githubWorkflows 'planifest.yml'
+        if (-not (Test-Path $dest)) {
+            Copy-Item -Path $workflowSrc -Destination $dest -Force
+            Write-Host "  + .github/workflows/planifest.yml (created)"
+        }
+        else {
+            Write-Host "  - .github/workflows/planifest.yml (already exists, skipped)"
+        }
+    }
+
+    # Deploy .gitattributes to enforce LF endings on hook scripts.
+    # Without this, Git for Windows re-adds CRLF on checkout, breaking the bash shebang.
+    $gitattributesSrc = Join-Path $ScriptDir '.gitattributes'
+    $gitattributesDest = Join-Path $ProjectRoot '.gitattributes'
+    if (Test-Path $gitattributesSrc) {
+        if (-not (Test-Path $gitattributesDest)) {
+            Copy-Item -Path $gitattributesSrc -Destination $gitattributesDest -Force
+            Write-Host "  + .gitattributes (created — enforces LF on hook scripts)"
+        }
+        else {
+            Write-Host "  - .gitattributes (already exists, skipped)"
+        }
+    }
+
+    Write-Host "  `u{2705} Git guardrails activated."
+}
+
 function Initialize-PlanifestRepo {
     Write-Host ""
     Write-Host "  Initializing Repository Structure"
@@ -384,6 +428,7 @@ Write-Host "Planifest Setup"
 Write-Host ("=" * 40)
 
 Initialize-PlanifestRepo
+Invoke-PlanifestGuardrails
 
 $ToolLower = $Tool.ToLower()
 
