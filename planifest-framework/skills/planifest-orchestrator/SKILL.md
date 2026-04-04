@@ -35,6 +35,50 @@ These are non-negotiable. They apply in every session, every phase.
 
 ---
 
+## Routing Directive
+
+Every request must be triaged before any action is taken. Route to exactly one of three tracks.
+
+### Three-Track Decision Tree
+
+| Signal | Track |
+|--------|-------|
+| Confined to UI styling, copy/text changes, or an isolated pure-function bug | **Fast Path** — if ALL Fast Path criteria are met |
+| Dependency version bump with no API changes | **Fast Path** — if ALL Fast Path criteria are met |
+| Bug fix or targeted change to 1–2 existing components | **Change Pipeline** |
+| Adds a new component to an existing initiative | **Change Pipeline** (change-agent creates it) |
+| New user stories that fit within an existing initiative's scope (< 3 stories) | **Change Pipeline** |
+| New features, new user stories (≥ 3), or new problem statement | **Initiative Pipeline** |
+| Touches > 3 components or requires new infrastructure | **Initiative Pipeline** |
+| Requires a new stack choice | **Initiative Pipeline** |
+| New target users or different domain | **Initiative Pipeline** |
+
+### Fast Path Criteria
+
+You may ONLY use the Fast Path if the request meets **ALL** of the following:
+
+1. It does **not** introduce new external dependencies
+2. It does **not** alter, add, or remove database schemas or data models
+3. It does **not** change security parameters, authentication, or routing logic
+4. It is confined to: UI styling, copy changes, or isolated pure-function logic bugs
+
+If **any** criterion fails, route to the Change Pipeline instead. Do not use Fast Path for changes that "feel" minor — use the heuristics deterministically.
+
+### Fast Path Execution
+
+If the Fast Path is engaged:
+
+1. **Do not** ask for a Feature Brief, Execution Plan, or ADR
+2. **Implement** the fix directly
+3. **Validate** — run CI checks (lint, typecheck, test, build) via the validate-agent or equivalent
+4. **Update** `component.json` with a patch version bump and updated `metadata.updatedAt`
+5. **Log** the change: append an entry to `plan/changelog/{initiative-id}-{YYYY-MM-DD}.md`
+6. **Commit** using the fast-path convention: `fix(fast-path): {description}`
+
+The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and relax the documentation check to require only `component.json` or a changelog update — not full `plan/` or `docs/` changes.
+
+---
+
 ## Phase 0 - Assess and Coach
 
 This is where you spend most of your time with the human. The goal is a complete specification - not a perfect one, but one where every required concern has been addressed or explicitly deferred.
@@ -334,30 +378,20 @@ The adoption mode is one of the first things you confirm with the human: "Is thi
 
 ---
 
-## Change Pipeline
+## Routing
 
-When the human requests a modification to an existing initiative (not new work), use this decision tree to determine the correct path:
+See the **Routing Directive** section above for the three-track decision tree (Fast Path / Change Pipeline / Initiative Pipeline).
 
-### Change vs New Initiative Decision Tree
+### Invoking the Change Pipeline
 
-| Signal | Path |
-|--------|------|
-| Affects 1-2 existing components, no new components | **Change Pipeline** |
-| Bug fix or dependency update | **Change Pipeline** |
-| Adds a new component to an existing initiative | **Change Pipeline** (change-agent creates it, then hands off — see change-agent skill) |
-| New user stories that fit within an existing initiative's scope | **Change Pipeline** if < 3 stories, otherwise **New Initiative** |
-| New problem statement or new target users | **New Initiative** |
-| Touches > 3 components or requires new infrastructure | **New Initiative** |
-| Requires a new stack choice (e.g., adding a frontend to a backend-only initiative) | **New Initiative** |
-
-When using the Change Pipeline, invoke the **change-agent** skill. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
+When routed to the Change Pipeline, invoke the **change-agent** skill. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
 
 Before invoking the change-agent, confirm with the human:
 - Which initiative?
 - Which component(s) are affected?
 - What is the change?
 
-You do not need to re-run Phase 0 coaching for a change - the specification already exists. But if the change request is ambiguous, clarify it before proceeding. One question at a time.
+You do not need to re-run Phase 0 coaching for a change — the specification already exists. But if the change request is ambiguous, clarify it before proceeding. One question at a time.
 
 ---
 

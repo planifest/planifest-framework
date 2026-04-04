@@ -14,7 +14,7 @@ Planifest fully supports the [Agent Skills specification](https://agentskills.io
 
 1. **Human writes an Initiative Brief** — what to build, why, and within what constraints
 2. **Agent coaches** — the orchestrator skill assesses the brief and asks focused questions until the specification is complete
-3. **Agent builds** — the pipeline skills execute in sequence: spec → ADR → codegen → validate → security → docs
+3. **Agent routes** — the orchestrator triages every request across three tracks: **Fast Path** (trivial fixes direct to code), **Change Pipeline** (targeted changes to existing work), or **Initiative Pipeline** (full spec → ADR → codegen → validate → security → docs)
 4. **Human reviews** — the PR gate is the universal backstop
 
 Every artifact the agent produces follows a template. Every file has a defined location. Every output records which skill, tool, and model produced it.
