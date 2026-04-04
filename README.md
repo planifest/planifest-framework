@@ -1,6 +1,10 @@
 # Planifest
 
-**A specification framework for agentic development.**
+**Because AI agents build from context, not guesses.**
+
+Planifest is an Agile context framework for AI development. It uses Just-in-Time planning to ensure your agents build from a solid Execution Plan rather than hallucinating in the dark.
+
+Code is ephemeral; architecture is permanent. Planifest's flawless paper trail gives you the ultimate choice: seamlessly refactor what you can, or confidently rewrite what you must.
 
 Planifest gives AI agents the structure they need to build software that a senior engineer would approve. It treats the human as the Product Owner and Technical Architect. The agent is the Tech Lead: highly capable, but operating within constraints the human sets.
 
@@ -10,14 +14,31 @@ Planifest fully supports the [Agent Skills specification](https://agentskills.io
 
 ---
 
-## How It Works
+## The Post-Agile Philosophy: Why Planifest Demands a Plan
 
-1. **Human writes a Feature Brief** — what to build, why, and within what constraints
-2. **Agent coaches** — the orchestrator skill assesses the brief and asks focused questions until the specification is complete
-3. **Agent routes** — the orchestrator triages every request across three tracks: **Fast Path** (trivial fixes direct to code), **Change Pipeline** (targeted changes to existing work), or **Initiative Pipeline** (full execution plan → ADR → codegen → validate → security → docs)
-4. **Human reviews** — the PR gate is the universal backstop
+Agile methodologies were invented to solve a human bottleneck: typing is slow. Because execution took months, heavy upfront planning was dangerous. The market would change before the code was finished.
 
-Every artifact the agent produces follows a template. Every file has a defined location. Every output records which skill, tool, and model produced it.
+**In the AI era, execution takes minutes.** When an agent can generate a 10,000-line feature in the time it takes to get coffee, the cost of execution drops to zero. But the cost of *hallucination* skyrockets. If an agent builds the wrong architecture at lightspeed, you spend days untangling it.
+
+Planifest is built on three core realities of agentic development:
+
+1. **Transparency beats brevity.** When AI writes the code, the code is just the compiled output. The *actual* source code is your prompt and your plan. If your plan is vague, the AI will invent the missing pieces, leaving you with zero transparency into its architectural choices.
+2. **Rewriting is faster than refactoring.** AI struggles to safely refactor large, undocumented codebases. Planifest makes your code ephemeral and your architecture permanent. With a perfect architectural record, you get the best of both worlds. The agent has the exact historical context needed to safely optimise existing code, or the full specification required to burn it down and build it better from scratch.
+3. **Agents build from context, not guesses.** Before a single line of code is generated, the agent must document its Execution Plan. If there are gaps in the Story Context, the agent stops and asks the human. It does not guess.
+
+---
+
+## How It Works: The Agentic Iteration Loop
+
+Planifest enforces a strict, fast-paced iteration loop to keep the AI aligned with human intent.
+
+1. **Human writes a Feature Brief** — What to build, why, and within what constraints.
+2. **Agent interrogates** — The Orchestrator Skill assesses the brief and asks focused questions until the context is complete.
+3. **Agent plans** — The agent generates an **Execution Plan** and an **ADR** (Architectural Decision Record).
+4. **Agent builds** — The agent executes the plan: code generation → validation → security checks → documentation updates.
+5. **Human reviews** — The Pull Request is the universal backstop.
+
+*(Note: Every artifact the agent produces follows a strict template, ensuring consistency across tools, models, and teams.)*
 
 ---
 
