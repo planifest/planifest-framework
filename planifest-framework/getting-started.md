@@ -62,8 +62,8 @@ The setup script also activates Planifest's **Progressive Guardrail System** —
 | Tier | When | What happens |
 |------|------|--------------|
 | **1 — Advisory pre-commit** | Every local commit | Prints a warning if code was staged without docs. Commit **succeeds**. |
-| **2 — Branch pre-push** | Every `git push` | Checks the *cumulative branch diff*. Push **fails** if `src/` was changed with no updates to `plan/`, `docs/`, or `component.json`. |
-| **3 — CI/CD pipeline** | Every Pull Request | Runs the same diff check in GitHub Actions. Blocks the merge button even if `--no-verify` was used. |
+| **2 — Branch pre-push** | Every `git push` | Checks the *cumulative branch diff*. Push **fails** if `src/` was changed with no updates to `plan/`, `docs/`, or `component.json` — **unless** all commits use the `fix(fast-path):` prefix, in which case only `component.json` or `plan/changelog/` is required. |
+| **3 — CI/CD pipeline** | Every Pull Request | Same check in GitHub Actions. Recognises the `fix(fast-path):` prefix and applies the same relaxed rule. Blocks the merge button if the rule is violated. |
 
 The hooks live in `planifest-framework/hooks/` and are wired via `git config core.hooksPath` — no `.git/` modifications required.
 
@@ -110,6 +110,27 @@ Initiative brief: plan/current/initiative-brief.md
 ```
 
 The orchestrator will read your codebase, infer the existing architecture, and reconcile the brief against reality.
+
+---
+
+## Trivial Fixes (Fast Path)
+
+For trivial changes — styling tweaks, copy corrections, isolated pure-function bugs — the orchestrator can route to the Fast Path, bypassing the spec and ADR overhead:
+
+```
+fix(fast-path): updated button colour to match brand guidelines
+```
+
+The orchestrator evaluates four criteria before allowing Fast Path:
+1. No new external dependencies
+2. No schema or data model changes
+3. No changes to security, auth, or routing logic
+4. Change is confined to UI styling, copy, or isolated pure-function bugs
+
+If all criteria pass: implement → validate → update `component.json` (patch bump) → log in `plan/changelog/`.
+If any criterion fails: route to Change Pipeline instead.
+
+Fast Path commits use the `fix(fast-path):` prefix — the pre-push hook and CI recognise this and only require `component.json` or a changelog update, not full `plan/` or `docs/` changes.
 
 ---
 
