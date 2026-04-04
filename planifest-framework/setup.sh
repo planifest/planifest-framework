@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # Usage:  ./planifest-framework/setup.sh <tool>
 #
-# Tools:  claude-code | cursor | codex | antigravity | copilot | all
+# Tools:  claude-code | cursor | codex | antigravity | copilot | windsurf | cline | all
 #
 # Each tool's specific config lives in setup/<tool>.sh
 # This script handles shared logic only.
@@ -16,7 +16,7 @@ SKILLS_SRC="$SCRIPT_DIR/skills"
 WORKFLOWS_SRC="$SCRIPT_DIR/workflows"
 SETUP_DIR="$SCRIPT_DIR/setup"
 
-VALID_TOOLS="claude-code cursor codex antigravity copilot"
+VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline"
 
 # --- Shared functions ---
 
@@ -87,6 +87,49 @@ copy_workflow() {
   mkdir -p "$target_dir"
   cp "$workflow_file" "$dest_file"
   echo "  + workflows/${name}.md"
+}
+
+activate_guardrails() {
+  echo ""
+  echo "  Activating Planifest Git Guardrails"
+
+  # Point Git to the version-controlled hooks directory
+  git config core.hooksPath planifest-framework/hooks
+  echo "  + git config core.hooksPath planifest-framework/hooks"
+
+  # Ensure hook scripts are executable (critical for Unix systems)
+  chmod +x "$SCRIPT_DIR/hooks/pre-commit"
+  chmod +x "$SCRIPT_DIR/hooks/pre-push"
+  echo "  + hooks/pre-commit (executable)"
+  echo "  + hooks/pre-push (executable)"
+
+  # Deploy the CI/CD pipeline workflow
+  local github_workflows="$PROJECT_ROOT/.github/workflows"
+  local workflow_src="$SCRIPT_DIR/hooks/planifest.yml"
+  if [ -f "$workflow_src" ]; then
+    mkdir -p "$github_workflows"
+    if [ ! -f "$github_workflows/planifest.yml" ]; then
+      cp "$workflow_src" "$github_workflows/planifest.yml"
+      echo "  + .github/workflows/planifest.yml (created)"
+    else
+      echo "  - .github/workflows/planifest.yml (already exists, skipped)"
+    fi
+  fi
+
+  # Deploy .gitattributes to enforce LF endings on hook scripts
+  # Without this, Git for Windows re-adds CRLF on checkout, breaking the bash shebang.
+  local gitattributes_src="$SCRIPT_DIR/.gitattributes"
+  local gitattributes_dest="$PROJECT_ROOT/.gitattributes"
+  if [ -f "$gitattributes_src" ]; then
+    if [ ! -f "$gitattributes_dest" ]; then
+      cp "$gitattributes_src" "$gitattributes_dest"
+      echo "  + .gitattributes (created — enforces LF on hook scripts)"
+    else
+      echo "  - .gitattributes (already exists, skipped)"
+    fi
+  fi
+
+  echo "  ✅ Git guardrails activated."
 }
 
 initialize_repo() {
@@ -356,6 +399,7 @@ echo "Planifest Setup"
 echo "â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•"
 
 initialize_repo
+activate_guardrails
 
 if [ "$TOOL" = "all" ]; then
   for t in $VALID_TOOLS; do

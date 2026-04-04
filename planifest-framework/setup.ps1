@@ -8,7 +8,7 @@
     This script handles shared logic only.
 
 .PARAMETER Tool
-    The agentic tool to configure: claude-code, cursor, codex, antigravity, copilot, or all.
+    The agentic tool to configure: claude-code, cursor, codex, antigravity, copilot, windsurf, cline, or all.
 
 .EXAMPLE
     .\planifest-framework\setup.ps1 claude-code
@@ -28,7 +28,7 @@ $SkillsSrc = Join-Path $ScriptDir 'skills'
 $WorkflowsSrc = Join-Path $ScriptDir 'workflows'
 $SetupDir = Join-Path $ScriptDir 'setup'
 
-$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot')
+$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot', 'windsurf', 'cline')
 
 # --- Shared functions ---
 
@@ -114,6 +114,50 @@ function Copy-PlanifestWorkflow {
     Write-Host "  + workflows/$name.md"
 }
 
+function Invoke-PlanifestGuardrails {
+    Write-Host ""
+    Write-Host "  Activating Planifest Git Guardrails"
+
+    # Point Git to the version-controlled hooks directory
+    git config core.hooksPath planifest-framework/hooks
+    Write-Host "  + git config core.hooksPath planifest-framework/hooks"
+
+    # Note: chmod is not available on Windows; hooks are made executable by setup.sh on Unix.
+    # On Windows, Git for Windows respects the executable bit stored in the repo,
+    # so no additional step is required here.
+
+    # Deploy the CI/CD pipeline workflow
+    $githubWorkflows = Join-Path $ProjectRoot '.github\workflows'
+    $workflowSrc = Join-Path $ScriptDir 'hooks\planifest.yml'
+    if (Test-Path $workflowSrc) {
+        New-Item -ItemType Directory -Path $githubWorkflows -Force | Out-Null
+        $dest = Join-Path $githubWorkflows 'planifest.yml'
+        if (-not (Test-Path $dest)) {
+            Copy-Item -Path $workflowSrc -Destination $dest -Force
+            Write-Host "  + .github/workflows/planifest.yml (created)"
+        }
+        else {
+            Write-Host "  - .github/workflows/planifest.yml (already exists, skipped)"
+        }
+    }
+
+    # Deploy .gitattributes to enforce LF endings on hook scripts.
+    # Without this, Git for Windows re-adds CRLF on checkout, breaking the bash shebang.
+    $gitattributesSrc = Join-Path $ScriptDir '.gitattributes'
+    $gitattributesDest = Join-Path $ProjectRoot '.gitattributes'
+    if (Test-Path $gitattributesSrc) {
+        if (-not (Test-Path $gitattributesDest)) {
+            Copy-Item -Path $gitattributesSrc -Destination $gitattributesDest -Force
+            Write-Host "  + .gitattributes (created - enforces LF on hook scripts)"
+        }
+        else {
+            Write-Host "  - .gitattributes (already exists, skipped)"
+        }
+    }
+
+    Write-Host "  `u{2705} Git guardrails activated."
+}
+
 function Initialize-PlanifestRepo {
     Write-Host ""
     Write-Host "  Initializing Repository Structure"
@@ -173,7 +217,7 @@ See [plan/initiative-structure.md](initiative-structure.md) for the canonical la
     $planStructure = Join-Path $planDir "initiative-structure.md"
     if (-not (Test-Path $planStructure)) {
         Set-Content -Path $planStructure -Value @'
-# Planifest â€” Repository Structure
+# Planifest - Repository Structure
 
 > The canonical layout for a Planifest-managed repository. Three top-level folders, three concerns.
 
@@ -183,99 +227,99 @@ See [plan/initiative-structure.md](initiative-structure.md) for the canonical la
 
 ```
 repo/
-â”œâ”€â”€ planifest-framework/        â† The framework (skills, templates, schemas, standards)
-â”‚                                 Drop this in. Don't modify it per-project.
-â”‚
-â”œâ”€â”€ plan/                       â† The specifications (organized by initiative)
-â”‚                                 Plans, briefs, specs, ADRs, risk, scope, glossary.
-â”‚                                 Everything that describes WHAT to build and WHY.
-â”‚
-â””â”€â”€ src/                        â† The code (organized by component)
-                                  Implementation, tests, config, manifests.
-                                  Everything that IS the built thing.
++-- planifest-framework/        <- The framework (skills, templates, schemas, standards)
+|                                  Drop this in. Don't modify it per-project.
+|
++-- plan/                       <- The specifications (organized by initiative)
+|                                  Plans, briefs, specs, ADRs, risk, scope, glossary.
+|                                  Everything that describes WHAT to build and WHY.
+|
++-- src/                        <- The code (organized by component)
+                                   Implementation, tests, config, manifests.
+                                   Everything that IS the built thing.
 ```
 
 ---
 
-## `planifest-framework/` â€” The Framework
+## `planifest-framework/` - The Framework
 
-This folder is the Planifest framework itself. It is the same across every project. You do not modify it per-initiative â€” you update it when the framework evolves.
+This folder is the Planifest framework itself. It is the same across every project. You do not modify it per-initiative - you update it when the framework evolves.
 
 ```
 planifest/
-â”œâ”€â”€ skills/           â† Agent instructions (orchestrator + phase skills)
-â”œâ”€â”€ templates/        â† File format templates for every artifact
-â”œâ”€â”€ schemas/          â† JSON Schema validation definitions
-â”œâ”€â”€ standards/        â† Code quality standards
-â””â”€â”€ spec/             â† This file â€” the canonical structure definition
++-- skills/           <- Agent instructions (orchestrator + phase skills)
++-- templates/        <- File format templates for every artifact
++-- schemas/          <- JSON Schema validation definitions
++-- standards/        <- Code quality standards
++-- spec/             <- This file - the canonical structure definition
 ```
 
 ---
 
-## `plan/` â€” The Plan/Specifications
+## `plan/` - The Plan/Specifications
 
 Organized by initiative. Each initiative gets a subfolder. This is where humans write briefs and agents write specs. No code lives here.
 
 ```
 plan/
-â””â”€â”€ {initiative-id}/
-    â”œâ”€â”€ initiative-brief.md          â† Human input (start here)
-    â”œâ”€â”€ planifest.md                 â† Validated plan (orchestrator output)
-    â”œâ”€â”€ pipeline-run.md              â† Audit trail (per run)
-    â”œâ”€â”€ pipeline-run-phase-2.md      â† Phase 2 audit (if phased)
-    â”‚
-    â”œâ”€â”€ design-spec.md               â† Functional & non-functional requirements
-    â”œâ”€â”€ design-spec-phase-2.md       â† Phase 2 spec (if phased)
-    â”œâ”€â”€ openapi-spec.yaml            â† API contract
-    â”œâ”€â”€ scope.md                     â† In / Out / Deferred
-    â”œâ”€â”€ risk-register.md             â† Risk items with likelihood & impact
-    â”œâ”€â”€ domain-glossary.md           â† Ubiquitous language
-    â”œâ”€â”€ security-report.md           â† Security review findings
-    â”œâ”€â”€ quirks.md                    â† Quirks and workarounds
-    â”œâ”€â”€ recommendations.md           â† Improvement suggestions
-    â”‚
-    â””â”€â”€ adr/
-        â”œâ”€â”€ ADR-001-{title}.md       â† Architecture decision records
-        â”œâ”€â”€ ADR-002-{title}.md
-        â””â”€â”€ ...
++-- {initiative-id}/
+    +-- initiative-brief.md          <- Human input (start here)
+    +-- planifest.md                 <- Validated plan (orchestrator output)
+    +-- pipeline-run.md              <- Audit trail (per run)
+    +-- pipeline-run-phase-2.md      <- Phase 2 audit (if phased)
+    |
+    +-- design-spec.md               <- Functional & non-functional requirements
+    +-- design-spec-phase-2.md       <- Phase 2 spec (if phased)
+    +-- openapi-spec.yaml            <- API contract
+    +-- scope.md                     <- In / Out / Deferred
+    +-- risk-register.md             <- Risk items with likelihood & impact
+    +-- domain-glossary.md           <- Ubiquitous language
+    +-- security-report.md           <- Security review findings
+    +-- quirks.md                    <- Quirks and workarounds
+    +-- recommendations.md           <- Improvement suggestions
+    |
+    +-- adr/
+        +-- ADR-001-{title}.md       <- Architecture decision records
+        +-- ADR-002-{title}.md
+        +-- ...
 ```
 
-### Path Rules â€” plan/
+### Path Rules - plan/
 
-1. **Initiative ID** follows the format `{0000000}-{kebab-case-name}` — a 7-digit zero-padded number prefix for chronological ordering, followed by a human-chosen kebab-case name.
-2. **No nesting** â€” specs, ADRs, and supporting docs are flat within the initiative folder. One level of subfolders only (adr/).
-3. **No code** â€” nothing executable lives in `plan/`. If it runs, it belongs in `src/`.
+1. **Initiative ID** follows the format `{0000000}-{kebab-case-name}` - a 7-digit zero-padded number prefix for chronological ordering, followed by a human-chosen kebab-case name.
+2. **No nesting** - specs, ADRs, and supporting docs are flat within the initiative folder. One level of subfolders only (adr/).
+3. **No code** - nothing executable lives in `plan/`. If it runs, it belongs in `src/`.
 4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `planifest.md` is updated per phase, not duplicated.
 5. **ADRs** are numbered sequentially. Never renumber. Superseded ADRs stay with `status: superseded`.
 
 ---
 
-## `src/` â€” The Code
+## `src/` - The Code
 
 Organized by component. Each component is a subfolder at the top level of `src/`. The component manifest lives with the code, not with the plan.
 
 ```
 src/
-â””â”€â”€ {component-id}/
-    â”œâ”€â”€ component.json               â† Component manifest (from template)
-    â”œâ”€â”€ package.json                  â† (or equivalent for the stack)
-    â”‚
-    â”œâ”€â”€ src/                          â† Implementation (structure varies by stack)
-    â”‚   â””â”€â”€ ...
-    â”‚
-    â”œâ”€â”€ tests/                        â† Tests
-    â”‚   â””â”€â”€ ...
-    â”‚
-    â””â”€â”€ docs/
-        â”œâ”€â”€ data-contract.md          â† Schema ownership & invariants
-        â””â”€â”€ migrations/
-            â””â”€â”€ proposed-{desc}.md    â† Migration proposals
++-- {component-id}/
+    +-- component.json               <- Component manifest (from template)
+    +-- package.json                  <- (or equivalent for the stack)
+    |
+    +-- src/                          <- Implementation (structure varies by stack)
+    |   +-- ...
+    |
+    +-- tests/                        <- Tests
+    |   +-- ...
+    |
+    +-- docs/
+        +-- data-contract.md          <- Schema ownership & invariants
+        +-- migrations/
+            +-- proposed-{desc}.md    <- Migration proposals
 ```
 
-### Path Rules â€” src/
+### Path Rules - src/
 
 1. **Component ID** is kebab-case, matches the `id` in `component.json`.
-2. **component.json is mandatory** â€” every component has one. Read it before any work; update it after every build.
+2. **component.json is mandatory** - every component has one. Read it before any work; update it after every build.
 3. **Component-specific docs** live with the component at `src/{component-id}/docs/`. These describe the component's data contract, migrations, and technical specifics.
 4. **Initiative-level docs** live in `plan/`. The component's `component.json` references the initiative via the `initiative` field.
 5. **Existing components** that predate Planifest are retrofitted by adding a `component.json` at their root.
@@ -286,17 +330,17 @@ src/
 
 ```
 plan/current/planifest.md
-    â””â”€â”€ lists component IDs â†’ src/{component-id}/component.json
-                                    â””â”€â”€ references initiative â†’ plan/
+    +-- lists component IDs -> src/{component-id}/component.json
+                                    +-- references initiative -> plan/
 
 plan/current/design-spec.md
-    â””â”€â”€ functional requirements â†’ implemented in â†’ src/{component-id}/src/
+    +-- functional requirements -> implemented in -> src/{component-id}/src/
 
 plan/current/adr/ADR-001-*.md
-    â””â”€â”€ decisions â†’ followed by â†’ src/{component-id}/src/
+    +-- decisions -> followed by -> src/{component-id}/src/
 
 plan/current/openapi-spec.yaml
-    â””â”€â”€ API contract â†’ implemented in â†’ src/{component-id}/src/
+    +-- API contract -> implemented in -> src/{component-id}/src/
 ```
 
 The relationship is bidirectional:
@@ -384,6 +428,7 @@ Write-Host "Planifest Setup"
 Write-Host ("=" * 40)
 
 Initialize-PlanifestRepo
+Invoke-PlanifestGuardrails
 
 $ToolLower = $Tool.ToLower()
 

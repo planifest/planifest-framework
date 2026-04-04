@@ -1,0 +1,32 @@
+#!/bin/bash
+# Planifest Pre-Push Hook: Enforce Branch Completeness
+# Tier 2: Developer gate — evaluates the cumulative diff of the entire branch.
+
+TARGET_BRANCH="origin/main"
+
+# Fetch latest to ensure accurate comparison
+git fetch origin main > /dev/null 2>&1
+
+# Get the cumulative list of files changed on this branch compared to main
+CHANGED_FILES=$(git diff --name-only $TARGET_BRANCH...HEAD)
+
+# Check if any files in src/ were modified across the whole branch
+if echo "$CHANGED_FILES" | grep -q "^src/"; then
+
+    # Check if plan/, docs/, or ANY component.json was updated
+    if ! echo "$CHANGED_FILES" | grep -qE "^(plan/|docs/|.*component\.json)"; then
+        echo "❌ PLANIFEST ENFORCEMENT FAILED: Push Rejected."
+        echo "----------------------------------------------------------------"
+        echo "Your branch contains code modifications, but is missing documentation."
+        echo "You cannot push this branch until you commit updates to:"
+        echo "  - plan/ (current or archived feature docs)"
+        echo "  - docs/ (living documentation)"
+        echo "  - OR the relevant component.json in the component folder"
+        echo "----------------------------------------------------------------"
+        echo "AGENT INSTRUCTION: The push failed. You must generate the missing"
+        echo "architectural or component documentation, commit it, and try pushing again."
+        exit 1 # Blocks the push
+    fi
+fi
+
+exit 0
