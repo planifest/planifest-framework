@@ -35,6 +35,33 @@ These are non-negotiable. They apply in every session, every phase.
 
 ---
 
+## Framework Index (JIT Loading)
+
+Do not assume you know the formatting or content of any Planifest template or phase skill. **Read the relevant file immediately before generating any output for that phase.** This is not optional — it prevents context rot and ensures your output matches the current template exactly.
+
+| When you are about to… | Read this first |
+|------------------------|------------------|
+| Begin Phase 0 (coach the human) | You are already reading it — this file is the orchestrator skill |
+| Ask the human to fill in an Initiative Brief | `planifest-framework/templates/initiative-brief.template.md` |
+| Begin Phase 1 (specification) | Load the `planifest-spec-agent` skill |
+| Produce a Design Specification | `planifest-framework/templates/design-spec.template.md` |
+| Produce a Domain Glossary | `planifest-framework/templates/domain-glossary.template.md` |
+| Produce a Risk Register | `planifest-framework/templates/risk-register.template.md` |
+| Produce a Scope document | `planifest-framework/templates/scope.template.md` |
+| Begin Phase 2 (ADRs) | Load the `planifest-adr-agent` skill |
+| Produce an ADR | `planifest-framework/templates/adr.template.md` |
+| Begin Phase 3 (code generation) | Load the `planifest-codegen-agent` skill |
+| Create or update a component manifest | `planifest-framework/templates/component-manifest.template.json` |
+| Begin Phase 4 (validation) | Load the `planifest-validate-agent` skill |
+| Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
+| Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
+| Handle a change request | Load the `planifest-change-agent` skill |
+| Write a Pipeline Run summary | `planifest-framework/templates/pipeline-run.template.md` |
+
+Load each file at the moment you need it — not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
+
+---
+
 ## Routing Directive
 
 Every request must be triaged before any action is taken. Route to exactly one of three tracks.
@@ -260,6 +287,8 @@ If any item cannot be checked, coach the human on that specific gap before proce
 
 ## Phase 1 - Specification
 
+**Before acting:** Load the `planifest-spec-agent` skill now. Do not begin specification work until you have read it.
+
 Invoke the **spec-agent** skill.
 
 **Input:** The confirmed Planifest + the original Initiative Brief
@@ -272,6 +301,8 @@ Invoke the **spec-agent** skill.
 
 ## Phase 2 - Architecture Decisions
 
+**Before acting:** Load the `planifest-adr-agent` skill now. Do not begin ADR work until you have read it.
+
 Invoke the **adr-agent** skill.
 
 **Input:** Design Specification, OpenAPI Specification (from Phase 1)
@@ -283,6 +314,8 @@ Invoke the **adr-agent** skill.
 ---
 
 ## Phase 3 - Code Generation
+
+**Before acting:** Load the `planifest-codegen-agent` skill now. Do not begin code generation until you have read it.
 
 Before invoking the codegen-agent, check whether relevant **capability skills** are available for the declared stack. Capability skills encode craft knowledge - how to write good React components, how to structure Fastify routes, how to write effective tests. Planifest skills encode discipline - what to build and why. The two are complementary.
 
@@ -300,6 +333,8 @@ Invoke the **codegen-agent** skill.
 
 ## Phase 4 - Validate
 
+**Before acting:** Load the `planifest-validate-agent` skill now. Do not begin validation until you have read it.
+
 Invoke the **validate-agent** skill.
 
 **Input:** The implementation from Phase 3
@@ -312,6 +347,8 @@ Invoke the **validate-agent** skill.
 
 ## Phase 5 - Security
 
+**Before acting:** Load the `planifest-security-agent` skill now. Do not begin security review until you have read it.
+
 Invoke the **security-agent** skill.
 
 **Input:** The validated implementation from Phase 4
@@ -323,6 +360,8 @@ Invoke the **security-agent** skill.
 ---
 
 ## Phase 6 - Documentation and Ship
+
+**Before acting:** Load the `planifest-docs-agent` skill now. Do not begin documentation until you have read it.
 
 Invoke the **docs-agent** skill.
 

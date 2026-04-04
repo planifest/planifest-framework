@@ -44,6 +44,14 @@ Respond normally. These rules govern code generation, not conversation.
 **After human review and acceptance:**
 Move the active plan from plan/current/ to plan/_archive/{initiative-id}/. The initiative is not complete until the plan is archived.
 
+## Dynamic Context Loading
+
+Do NOT load all framework skills and templates at session start. Load each skill or template **at the moment you need it** — this keeps the relevant content at the sharp end of your attention window and avoids context rot.
+
+- **To read a template:** read the file directly (e.g. `planifest-framework/templates/adr.template.md`) immediately before generating that artifact.
+- **To load a phase skill:** read the corresponding skill file (e.g. `planifest-framework/skills/planifest-spec-agent/SKILL.md`) at the start of that phase — not before.
+- The orchestrator skill contains a Framework Index that tells you exactly which file to read at each step.
+
 ## Workflows
 
   /initiative-pipeline    Full spec-to-ship pipeline for new initiatives
