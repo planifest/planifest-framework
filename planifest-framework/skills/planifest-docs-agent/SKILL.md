@@ -1,11 +1,11 @@
 ---
 name: planifest-docs-agent
-description: Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.
+description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
 ---
 
 # Planifest - docs-agent
 
-> You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the pipeline run audit trail.
+> You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the iteration log audit trail.
 
 ---
 
@@ -59,8 +59,8 @@ Write to `docs/` at the repository root:
 
 Confirm the following exist at `plan/` and are consistent:
 
-- Design Specification (from spec-agent)
-- OpenAPI Specification (from spec-agent)
+- Execution Plan (from spec-agent)
+- OpenAPI Specification (from spec-agent, if applicable)
 - Scope (from spec-agent)
 - Risk Register (from spec-agent)
 - Domain Glossary (from spec-agent)
@@ -76,12 +76,12 @@ Confirm the following exist at `plan/` and are consistent:
 Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md`:
 
 ```markdown
-# Pipeline Run - {initiative-id}
+# Iteration Log - {initiative-id}
 
 Date: {timestamp}
 Tool: {agent tool used}
 
-## Phases completed
+## Iteration Steps completed
 - [x] Specification
 - [x] Architecture Decisions ({n} ADRs)
 - [x] Code Generation
@@ -108,7 +108,7 @@ Tool: {agent tool used}
 
 - **Every artifact must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly - do not leave a silent gap.
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
-- **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find - do not silently fix it.
+- **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints (if applicable) should match what was implemented. Flag any drift you find - do not silently fix it.
 
 ### Drift Detection
 
@@ -116,7 +116,7 @@ Perform these specific drift checks:
 
 | Check | Source of Truth | Verify Against | Action if Drift Found |
 |-------|----------------|---------------|----------------------|
-| API endpoints | OpenAPI spec | Implemented routes | Flag: missing or extra endpoints |
+| API endpoints (if applicable) | OpenAPI spec | Implemented routes | Flag: missing or extra endpoints |
 | Domain terms | Domain glossary | Code variable/function names | Flag: non-glossary terms in code |
 | Component boundaries | Planifest component list | `src/` directories with `component.json` | Flag: missing or extra components |
 | Data ownership | Component manifests (`data.ownsData`) | Database connection/query patterns | Flag: cross-component data writes |

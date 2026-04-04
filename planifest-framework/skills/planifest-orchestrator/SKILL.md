@@ -42,9 +42,9 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | When you are about to… | Read this first |
 |------------------------|------------------|
 | Begin Phase 0 (coach the human) | You are already reading it — this file is the orchestrator skill |
-| Ask the human to fill in an Initiative Brief | `planifest-framework/templates/initiative-brief.template.md` |
+| Ask the human to fill in a Feature Brief | `planifest-framework/templates/feature-brief.template.md` |
 | Begin Phase 1 (specification) | Load the `planifest-spec-agent` skill |
-| Produce a Design Specification | `planifest-framework/templates/design-spec.template.md` |
+| Produce an Execution Plan | `planifest-framework/templates/execution-plan.template.md` |
 | Produce a Domain Glossary | `planifest-framework/templates/domain-glossary.template.md` |
 | Produce a Risk Register | `planifest-framework/templates/risk-register.template.md` |
 | Produce a Scope document | `planifest-framework/templates/scope.template.md` |
@@ -56,7 +56,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
 | Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
 | Handle a change request | Load the `planifest-change-agent` skill |
-| Write a Pipeline Run summary | `planifest-framework/templates/pipeline-run.template.md` |
+| Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
 
 Load each file at the moment you need it — not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
 
@@ -109,6 +109,8 @@ The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and rel
 ## Phase 0 - Assess and Coach
 
 This is where you spend most of your time with the human. The goal is a complete specification - not a perfect one, but one where every required concern has been addressed or explicitly deferred.
+
+Read the **Feature Brief** at `plan/current/feature-brief.md` before coaching begins.
 
 ### What you are assessing against
 
@@ -291,11 +293,11 @@ If any item cannot be checked, coach the human on that specific gap before proce
 
 Invoke the **spec-agent** skill.
 
-**Input:** The confirmed Planifest + the original Initiative Brief
+**Input:** The confirmed Planifest + the original Feature Brief
 
-**What it produces:** Design Specification, OpenAPI Specification, Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model - all written to `plan/`
+**What it produces:** Execution Plan, OpenAPI Specification (if applicable), Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model — all written to `plan/`
 
-**Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
+**Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec (if applicable) covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
 
 ---
 
@@ -305,7 +307,7 @@ Invoke the **spec-agent** skill.
 
 Invoke the **adr-agent** skill.
 
-**Input:** Design Specification, OpenAPI Specification (from Phase 1)
+**Input:** Execution Plan, OpenAPI Specification (if applicable, from Phase 1)
 
 **What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
 
@@ -405,7 +407,7 @@ The coaching conversation in Phase 0 and the pipeline phases are the same regard
 1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — these reveal the stack
 2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.json` for each.
 3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
-4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists.
+4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists (if applicable).
 5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record these in the design spec as existing constraints.
 6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
 
@@ -442,14 +444,14 @@ You do not need to re-run Phase 0 coaching for a change — the specification al
 - Three Layers: Product, Architecture, Engineering.
 
 **Templates** (agents should follow these for all output artifacts):
-- [Initiative Brief](../templates/initiative-brief.template.md) - human input
-- [Design Specification](../templates/design-spec.template.md) - spec-agent output
+- [Feature Brief](../templates/feature-brief.template.md) - human input
+- [Execution Plan](../templates/execution-plan.template.md) - spec-agent output
 - [ADR](../templates/adr.template.md) - adr-agent output
 - [Scope](../templates/scope.template.md) - spec-agent output
 - [Risk Register](../templates/risk-register.template.md) - spec-agent output, updated by any agent
 - [Domain Glossary](../templates/domain-glossary.template.md) - spec-agent output, updated by any agent
 - [Data Contract](../templates/data-contract.template.md) - codegen-agent output
 - [Component Manifest](../templates/component-manifest.template.json) - codegen-agent output ([guide](../templates/component-manifest-guide.md))
-- [Pipeline Run](../templates/pipeline-run.template.md) - written at end of every run
+- [Iteration Log](../templates/iteration-log.template.md) - written at end of every Agentic Iteration Loop
 
 **Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-change-agent`, `planifest-docs-agent`

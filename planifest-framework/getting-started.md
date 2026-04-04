@@ -69,30 +69,29 @@ The hooks live in `planifest-framework/hooks/` and are wired via `git config cor
 
 The CI workflow is copied to `.github/workflows/planifest.yml` on first setup.
 
-### 4. Write your first initiative brief
-
+### 4. Write your first feature brief
 
 Use the template:
 ```
-cp planifest-framework/templates/initiative-brief.template.md plan/current/initiative-brief.md
+cp planifest-framework/templates/feature-brief.template.md plan/current/feature-brief.md
 ```
 
-Fill it in. The [initiative brief guide](templates/initiative-brief-guide.md) walks you through each section.
+Fill it in. The [feature brief guide](templates/feature-brief-guide.md) walks you through each section.
 
 ### 5. Start the orchestrator
 
 Open your agentic tool. The orchestrator skill is now auto-discovered. Tell it:
 
 ```
-Execute the Planifest Initiative Pipeline.
-Initiative brief: plan/current/initiative-brief.md
+Execute the Planifest Agentic Iteration Loop.
+Feature brief: plan/current/feature-brief.md
 ```
 
 The orchestrator will:
 1. Assess your brief against the three layers (Product, Architecture, Engineering)
 2. Coach you through any gaps - one question at a time
 3. Produce the validated Planifest at `plan/current/planifest.md`
-4. Execute the pipeline: Spec -> ADRs -> Code -> Validate -> Security -> Docs
+4. Execute the Agentic Iteration Loop: Spec → ADRs → Code → Validate → Security → Docs
 
 ---
 
@@ -105,8 +104,8 @@ The orchestrator will:
 5. Tell the orchestrator to use **retrofit** adoption mode:
 
 ```
-Execute the Planifest Initiative Pipeline in retrofit mode.
-Initiative brief: plan/current/initiative-brief.md
+Execute the Planifest Agentic Iteration Loop in retrofit mode.
+Feature brief: plan/current/feature-brief.md
 ```
 
 The orchestrator will read your codebase, infer the existing architecture, and reconcile the brief against reality.
@@ -145,7 +144,7 @@ Component ID: auth-service
 Change request: Add refresh token rotation
 ```
 
-The change-agent handles it - no need to re-run the full pipeline.
+The change-agent handles it — no need to re-run the full Agentic Iteration Loop.
 
 ---
 
@@ -169,7 +168,7 @@ The setup script overwrites the generated copies. The source of truth is always 
 | `planifest-framework/` | ✅ | Source of truth - shared with team |
 | `planifest-framework/hooks/` | ✅ | Git hooks and CI workflow — applied by `setup.sh` / `setup.ps1` |
 | `.github/workflows/planifest.yml` | ✅ | CI/CD strict gate — deployed by setup, must be committed to take effect |
-| `plan/` | ✅ | Initiative specs, ADRs, scope docs |
+| `plan/` | ✅ | Feature briefs, execution plans, ADRs, scope docs |
 | `src/` | ✅ | Component code and manifests |
 | `docs/` | ✅ | Repo-wide registry and dependency graph |
 | `.claude/`, `.cursor/`, `.agents/`, `.gemini/`, `.github/skills/` | Optional | Generated copies - can be `.gitignore`d and regenerated |

@@ -1,6 +1,6 @@
-# Design Specification - {{initiative-name}}
+# Execution Plan - {{initiative-name}}
 
-> Written by the spec-agent. Derived from the Initiative Brief - not invented. Every requirement must be traceable to a user story or acceptance criterion.
+> Written by the spec-agent. Derived from the Feature Brief — not invented. Every requirement must be traceable to a user story or acceptance criterion.
 
 **Skill:** [spec-agent](../skills/spec-agent-SKILL.md)
 **Tool:** {{agentic-tool-name}}
@@ -21,7 +21,7 @@
 | FR-001 | {{specific, testable requirement}} | {{user story or acceptance criterion}} | must-have |
 | FR-002 | {{specific, testable requirement}} | {{user story or acceptance criterion}} | should-have |
 
-> Repeat per feature. If the initiative is phased, this spec covers only the features in this phase.
+> Repeat per feature. If the initiative is phased, this execution plan covers only the features in this phase.
 
 ---
 
@@ -59,7 +59,7 @@ Entities derived from the functional requirements. The full schema is in the com
 
 ## Component Interactions
 
-How components interact to fulfil the requirements. Maps to the integration points in the initiative brief.
+How components interact to fulfil the requirements. Maps to the integration points in the feature brief.
 
 ```mermaid
 flowchart LR

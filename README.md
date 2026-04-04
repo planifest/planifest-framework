@@ -1,6 +1,10 @@
 # Planifest
 
-**A specification framework for agentic development.**
+**Because AI agents build from context, not assumptions.**
+
+Planifest is an Agile context framework for AI development. It uses Just-in-Time planning to ensure your agents build from a solid Execution Plan rather than hallucinating in the dark.
+
+Code is ephemeral; architecture is permanent. Planifest's flawless paper trail gives you the ultimate choice: seamlessly refactor what you can, or confidently rewrite what you must.
 
 Planifest gives AI agents the structure they need to build software that a senior engineer would approve. It treats the human as the Product Owner and Technical Architect. The agent is the Tech Lead: highly capable, but operating within constraints the human sets.
 
@@ -10,14 +14,31 @@ Planifest fully supports the [Agent Skills specification](https://agentskills.io
 
 ---
 
-## How It Works
+## The Post-Agile Philosophy: Why Planifest Demands a Plan
 
-1. **Human writes an Initiative Brief** — what to build, why, and within what constraints
-2. **Agent coaches** — the orchestrator skill assesses the brief and asks focused questions until the specification is complete
-3. **Agent routes** — the orchestrator triages every request across three tracks: **Fast Path** (trivial fixes direct to code), **Change Pipeline** (targeted changes to existing work), or **Initiative Pipeline** (full spec → ADR → codegen → validate → security → docs)
-4. **Human reviews** — the PR gate is the universal backstop
+Agile methodologies were invented to solve a human bottleneck: typing is slow. Because execution took months, heavy upfront planning was dangerous. The market would change before the code was finished.
 
-Every artifact the agent produces follows a template. Every file has a defined location. Every output records which skill, tool, and model produced it.
+**In the AI era, execution takes minutes.** When an agent can generate a 10,000-line feature in the time it takes to get coffee, the cost of execution drops to zero. But the cost of *hallucination* skyrockets. If an agent builds the wrong architecture at lightspeed, you spend days untangling it.
+
+Planifest is built on three core realities of agentic development:
+
+1. **Transparency beats brevity.** When AI writes the code, the code is just the compiled output. The *actual* source code is your prompt and your plan. If your plan is vague, the AI will invent the missing pieces, leaving you with zero transparency into its architectural choices.
+2. **Context makes refactoring safe (and rewriting trivial).** AI struggles to safely modify large, undocumented codebases. Planifest makes your code ephemeral and your architecture permanent. With a perfect architectural record, you get the best of both worlds: the precise historical context an agent needs to confidently refactor existing code, and the full specification required to burn a component down and build it better from scratch.
+3. **Agents build from context, not assumptions.** Before a single line of code is generated, the agent must document its Execution Plan. If there are gaps in the Story Context, the agent stops and asks the human. It does not assume.
+
+---
+
+## How It Works: The Agentic Iteration Loop
+
+Planifest enforces a strict, fast-paced iteration loop to keep the AI aligned with human intent.
+
+1. **Human writes a Feature Brief** — What to build, why, and within what constraints.
+2. **Agent interrogates** — The Orchestrator Skill assesses the brief and asks focused questions until the context is complete.
+3. **Agent plans** — The agent generates an **Execution Plan** and an **ADR** (Architectural Decision Record).
+4. **Agent builds** — The agent executes the plan: code generation → validation → security checks → documentation updates.
+5. **Human reviews** — The Pull Request is the universal backstop.
+
+*(Note: Every artifact the agent produces follows a strict template, ensuring consistency across tools, models, and teams.)*
 
 ---
 
@@ -32,9 +53,8 @@ repo/
 │   ├── standards/    ← Code quality standards
 │   └── initiative-structure.md  ← Canonical directory layout
 │
-├── plan/             ← Specifications (organized by initiative)
-│                       Briefs, specs, ADRs, risk, scope, glossary.
-│                       Everything that describes WHAT to build and WHY.
+├── plan/             ← Feature briefs, execution plans, ADRs, risk registers, scope docs.
+│                       Organized by initiative. Everything that describes WHAT to build and WHY.
 │
 ├── src/              ← Code (organized by component)
 │                       Implementation, tests, config, manifests.
@@ -72,7 +92,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 **Human decides, agent executes.** The human chooses the architecture, the stack, the data ownership, and the scope. The agent implements within those constraints.
 
-**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential pipeline runs). This is how Planifest manages context at scale.
+**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential Agentic Iteration Loop runs). This is how Planifest manages context at scale.
 
 **Everything is traced.** Every agent-produced artifact records the skill that produced it, the tool it ran in, and the model that generated it.
 
@@ -85,9 +105,12 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 | Folder | Contents | Count |
 |--------|----------|-------|
 | [skills/](planifest-framework/skills/) | Orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, change-agent, docs-agent | 8 |
-| [templates/](planifest-framework/templates/) | Initiative brief, design spec, ADR, scope, risk register, domain glossary, data contract, component manifest (+guide), pipeline run | 10 |
+| [templates/](planifest-framework/templates/) | Feature brief, execution plan, ADR, scope, risk register, domain glossary, data contract, component manifest, iteration log, change summary, cost model, operational model, recommendations, security report, SLO definitions — each with a guide where applicable | 24 |
 | [schemas/](planifest-framework/schemas/) | Shared type definitions, domain document envelope | 2 |
-| [standards/](planifest-framework/standards/) | Code quality standards | 1 |
+| [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, testing, backend & frontend stack evaluations | 10 |
+| [setup/](planifest-framework/setup/) | Per-tool boot file templates (antigravity, claude-code, cline, codex, copilot, cursor, windsurf — `.sh` and `.ps1` for each) | 14 |
+| [hooks/](planifest-framework/hooks/) | Git hooks (pre-commit, pre-push) and CI workflow | 3 |
+| [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, initiative-pipeline, change-pipeline, retrofit | 4 |
 
 ---
 

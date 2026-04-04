@@ -1,6 +1,6 @@
-# Pipeline Run - {{initiative-id}}
+# Iteration Log - {{initiative-id}}
 
-**Skill:** [docs-agent](../skills/planifest-docs-agent/SKILL.md) (or whichever agent completes the final phase)
+**Skill:** [docs-agent](../skills/planifest-docs-agent/SKILL.md) (or whichever agent completes the final iteration step)
 **Date:** {{ISO-8601}}
 **Tool:** {{agentic-tool-name}} (local)
 **Model:** {{model-name-and-version, e.g. claude-sonnet-4-20250514, gpt-4.1, gemini-2.5-pro}}
@@ -8,7 +8,7 @@
 
 ---
 
-## Phases Completed
+## Iteration Steps Completed
 
 | Phase | Status | Gate Result | Notes |
 |-------|--------|-------------|-------|
@@ -56,4 +56,4 @@ git push origin initiative/{{initiative-id}}
 
 ---
 
-*Written by the agent at the end of every pipeline run. This is the audit trail.*
+*Written by the agent at the end of every Agentic Iteration Loop. This is the audit trail.*
