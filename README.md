@@ -106,7 +106,7 @@ These are non-negotiable, regardless of tool, model, or configuration:
 
 ## Documentation
 
-The `planifest-docs/` folder contains human documentation — architecture notes, research, and the project roadmap. Agents don't need these; they work from the skills and templates in `planifest-framework/`.
+**Planifest Docs* contains human documentation — architecture notes, research, and the project roadmap. Agents don't need these; they work from the skills and templates in `planifest-framework/`. There is a [git repository](https://github.com/planifest/planifest-docs) and also a [GitHub Pages website](https://planifest.github.io/planifest-docs/) for these docs.
 
 | Document | Purpose |
 |----------|---------|
