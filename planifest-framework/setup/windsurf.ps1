@@ -33,7 +33,10 @@ This project uses the Planifest framework. These rules are non-negotiable and ap
 4. Do NOT skip ahead to code generation under any circumstances
 
 **When the user asks to modify existing code:**
-Load the planifest-orchestrator skill and use the Change Pipeline.
+Load the planifest-orchestrator skill. It will triage the request across three tracks:
+- **Fast Path** — trivial fixes only (styling, copy, isolated pure-function bugs). No spec, no ADR. Commits must use fix(fast-path): prefix.
+- **Change Pipeline** — targeted changes to existing components.
+- **Initiative Pipeline** — new features or new work.
 
 **When the user asks a question or requests non-code help:**
 Respond normally. These rules govern code generation, not conversation.
@@ -45,6 +48,7 @@ Move the active plan from plan/current/ to plan/_archive/{initiative-id}/. The i
 
 - **Initiative Pipeline**: Load the planifest-orchestrator skill and execute the Initiative Pipeline. Provide an initiative brief at plan/current/initiative-brief.md.
 - **Change Pipeline**: Load the planifest-orchestrator skill and execute the Change Pipeline. Provide initiative ID, component ID, and change request.
+- **Fast Path**: Load the planifest-orchestrator skill. It will evaluate whether the request qualifies as trivial and execute directly. Commits use fix(fast-path): prefix.
 - **Retrofit**: Load the planifest-orchestrator skill with retrofit adoption mode.
 
 ## Key Paths
