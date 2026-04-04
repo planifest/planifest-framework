@@ -22,12 +22,14 @@ description: Generates the full implementation from the specification artifacts 
 
 ## Input
 
-- Component Manifest at `src/{component-id}/component.md` - read this first for stack, purpose, scope, and contract. See [Component Guide](../templates/component-guide.md)
-- Design Specification at `plan/current/design-spec.md`
-- OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
-- ADRs at `plan/current/adr/`
-- Planifest at `plan/current/planifest.md` (for stack declaration)
-- Domain Glossary at `plan/current/domain-glossary.md`
+**Precision Reading Protocol:**
+Do not read the entire `plan/` directory unconditionally. This wastes context tokens.
+1. Scope your context by navigating precisely:
+   - Component Manifest at `src/{component-id}/component.md` - read the YAML frontmatter first to determine if the body is needed.
+   - Execution Plan at `plan/current/execution-plan.md` - read for architecture overview.
+   - Individual Features at `plan/current/requirements/*.md` - **ONLY** read the specific requirement file you are actively implementing.
+   - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable).
+   - Domain Glossary at `plan/current/domain-glossary.md`.
 - Data Contracts at `src/{component-id}/docs/data-contract.md` (if they exist)
 - Code Quality Standards at [code-quality-standards.md](../standards/code-quality-standards.md)
 

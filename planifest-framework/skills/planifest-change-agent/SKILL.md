@@ -35,12 +35,14 @@ description: Handles modifications to existing initiatives - loads domain contex
 
 Before changing anything, read:
 
-1. `src/{component-id}/component.md` - understand the component's purpose, scope, contract, data ownership, stack, and current risk level. See [Component Guide](../templates/component-guide.md)
-2. `plan/current/execution-plan.md` - understand the full requirements
-3. `docs/component-registry.md` - understand what components exist
-4. `docs/dependency-graph.md` - understand how they relate
-5. `src/{affected-component}/docs/` - read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
-6. `plan/current/domain-glossary.md` - confirm you are using the correct terms
+**Precision Reading Protocol:**
+Do not exhaust token limits by loading all files. Read top-down selectively:
+1. `src/{component-id}/component.md` - read the frontmatter first. Only read the body if relevant.
+2. `plan/current/execution-plan.md` - read the overview.
+3. `plan/current/requirements/*.md` - ONLY read the specific functional requirement your change affects.
+4. `docs/component-registry.md` - understand what components exist.
+5. `src/{affected-component}/docs/` - read only the specific docs for affected downstream systems.
+6. `plan/current/domain-glossary.md` - confirm you are using the correct terms.
 
 **Blast radius analysis:**
 
