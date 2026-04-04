@@ -30,13 +30,13 @@ description: Produces specification artifacts (execution plan, OpenAPI spec (if 
 
 ## What You Produce
 
-Write each spec artifact to `plan/` as you complete it. Write the component manifest to `src/{component-id}/component.json`. Do not accumulate artifacts in memory.
+Write each spec artifact to `plan/` as you complete it. Write the component manifest to `src/{component-id}/component.md`. Do not accumulate artifacts in memory.
 
 | Artifact | Path | Purpose |
 |---|---|---|
 | Execution Plan | `plan/current/execution-plan.md` | Functional and non-functional requirements |
 | OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract (if the component acts as an API provider) |
-| Component Manifest | `src/{component-id}/component.json` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Manifest Template](../templates/component-manifest.template.json) and its [guide](../templates/component-manifest-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
+| Component Manifest | `src/{component-id}/component.md` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Template](../templates/component.template.md) and its [guide](../templates/component-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
 | Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
 | Risk Register | `plan/current/risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
 | Domain Glossary | `plan/current/domain-glossary.md` | Ubiquitous language for this initiative - agents and humans use these terms |
@@ -77,7 +77,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 - Do not produce generic risks. Every entry must be specific to this initiative.
 
 **Component manifest:**
-- Write the draft manifest to `src/{component-id}/component.json`. Create the component folder if it doesn't exist.
+- Write the draft manifest to `src/{component-id}/component.md`. Create the component folder if it doesn't exist.
 - Populate the `purpose`, `scope`, `risk`, and `contract` sections based on the specification you produce. The `stack` section is pre-seeded - do not modify it.
 - Set `pipeline.domainKnowledgePath` to `plan`.
 - `purpose.notResponsibleFor` is mandatory. Derive exclusions from the scope boundaries.

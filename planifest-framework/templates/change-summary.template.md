@@ -38,7 +38,7 @@
 
 ## Artifacts Updated
 
-- [ ] component.json version bumped
+- [ ] component.md version bumped
 - [ ] Design spec updated (if deviation from spec)
 - [ ] ADR created (if architectural decision)
 - [ ] Data contract updated (if schema change)

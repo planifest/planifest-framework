@@ -22,7 +22,7 @@ description: Generates the full implementation from the specification artifacts 
 
 ## Input
 
-- Component Manifest at `src/{component-id}/component.json` - read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
+- Component Manifest at `src/{component-id}/component.md` - read this first for stack, purpose, scope, and contract. See [Component Guide](../templates/component-guide.md)
 - Design Specification at `plan/current/design-spec.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
 - ADRs at `plan/current/adr/`
@@ -131,17 +131,17 @@ Between components, verify:
 - Dockerfiles must be multi-stage if the stack uses containers.
 
 **Component manifest - complete after build:**
-- After the implementation is built, update `component.json` to reflect what was actually implemented.
+- After the implementation is built, update `component.md` to reflect what was actually implemented.
 - Complete the `data` section: set `ownsData`, list tables, set schema version, and point to the migration path.
 - Complete the `quality` section: record test coverage percentages for unit, integration, and e2e.
 - Complete the `pipeline` section: set `templateVersion` and `domainKnowledgePath`.
 - Update `metadata.updatedAt` and `metadata.lastModifiedBy`.
 - Increment `version` to `0.1.0` on first build.
-- See the [Component Manifest Template](../templates/component-manifest.template.json) for the full schema.
+- See the [Component Template](../templates/component.template.md) for the full schema.
 
 **Quirks and tech debt:**
-- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.json`. Do not silently work around it.
-- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.json`.
+- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.md`. Do not silently work around it.
+- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.md`.
 
 ---
 

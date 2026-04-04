@@ -189,7 +189,7 @@ function Initialize-PlanifestRepo {
         Set-Content -Path $srcReadme -Value @'
 # src/
 
-Components live here. Each component is a subfolder with a `component.json` manifest.
+Components live here. Each component is a subfolder with a `component.md` manifest.
 
 See [planifest/spec/initiative-structure.md](../planifest/spec/initiative-structure.md) for the canonical layout.
 '@ -Encoding UTF8
@@ -301,7 +301,7 @@ Organized by component. Each component is a subfolder at the top level of `src/`
 ```
 src/
 +-- {component-id}/
-    +-- component.json               <- Component manifest (from template)
+    +-- component.md               <- Component manifest (from template)
     +-- package.json                  <- (or equivalent for the stack)
     |
     +-- src/                          <- Implementation (structure varies by stack)
@@ -318,11 +318,11 @@ src/
 
 ### Path Rules - src/
 
-1. **Component ID** is kebab-case, matches the `id` in `component.json`.
-2. **component.json is mandatory** - every component has one. Read it before any work; update it after every build.
+1. **Component ID** is kebab-case, matches the `id` in `component.md`.
+2. **component.md is mandatory** - every component has one. Read it before any work; update it after every build.
 3. **Component-specific docs** live with the component at `src/{component-id}/docs/`. These describe the component's data contract, migrations, and technical specifics.
-4. **Initiative-level docs** live in `plan/`. The component's `component.json` references the initiative via the `initiative` field.
-5. **Existing components** that predate Planifest are retrofitted by adding a `component.json` at their root.
+4. **Initiative-level docs** live in `plan/`. The component's `component.md` references the initiative via the `initiative` field.
+5. **Existing components** that predate Planifest are retrofitted by adding a `component.md` at their root.
 
 ---
 
@@ -330,7 +330,7 @@ src/
 
 ```
 plan/current/planifest.md
-    +-- lists component IDs -> src/{component-id}/component.json
+    +-- lists component IDs -> src/{component-id}/component.md
                                     +-- references initiative -> plan/
 
 plan/current/design-spec.md
@@ -345,7 +345,7 @@ plan/current/openapi-spec.yaml
 
 The relationship is bidirectional:
 - `planifest.md` lists all component IDs
-- Each `component.json` references its initiative ID
+- Each `component.md` references its initiative ID
 - The plan describes WHAT; the code IS the WHAT
 
 ---
@@ -357,7 +357,7 @@ If the repo already has code:
 1. Drop `planifest/` into the repo root
 2. Create `plan/` for the first initiative
 3. Move existing components under `src/` (or leave them if they're already there)
-4. Add a `component.json` to each existing component
+4. Add a `component.md` to each existing component
 5. The orchestrator's retrofit mode will read the codebase and infer the existing architecture
 
 ---

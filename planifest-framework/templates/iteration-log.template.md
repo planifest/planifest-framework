@@ -38,7 +38,7 @@
 
 ## Quirks
 
-{{anything unusual noticed during the run - written to docs/quirks.md and component.json}}
+{{anything unusual noticed during the run - written to docs/quirks.md and component.md}}
 
 ---
 

@@ -27,7 +27,7 @@ These are the core working directories:
 - `plan/` - The current change being planned (briefs, specs, planifest).
   - `plan/_archive/<initiative-id>/` - Historical changes filed here after human review and acceptance.
   - `plan/changelog/` - A log of all changes; each change is a separate file (`[initiative-id]-[YYYY-MM-DD].md`).
-- `src/` - Component source code, tests, and component manifests (`component.json`).
+- `src/` - Component source code, tests, and component manifests (`component.md`).
 - `docs/` - Living repository documentation (always current, no change records). Includes component registry and dependency graph.
 
 See [initiative-structure.md](../plan/initiative-structure.md) for the full layout.
@@ -62,7 +62,7 @@ The setup script also activates Planifest's **Progressive Guardrail System** —
 | Tier | When | What happens |
 |------|------|--------------|
 | **1 — Advisory pre-commit** | Every local commit | Prints a warning if code was staged without docs. Commit **succeeds**. |
-| **2 — Branch pre-push** | Every `git push` | Checks the *cumulative branch diff*. Push **fails** if `src/` was changed with no updates to `plan/`, `docs/`, or `component.json` — **unless** all commits use the `fix(fast-path):` prefix, in which case only `component.json` or `plan/changelog/` is required. |
+| **2 — Branch pre-push** | Every `git push` | Checks the *cumulative branch diff*. Push **fails** if `src/` was changed with no updates to `plan/`, `docs/`, or `component.md` — **unless** all commits use the `fix(fast-path):` prefix, in which case only `component.md` or `plan/changelog/` is required. |
 | **3 — CI/CD pipeline** | Every Pull Request | Same check in GitHub Actions. Recognises the `fix(fast-path):` prefix and applies the same relaxed rule. Blocks the merge button if the rule is violated. |
 
 The hooks live in `planifest-framework/hooks/` and are wired via `git config core.hooksPath` — no `.git/` modifications required.
@@ -100,7 +100,7 @@ The orchestrator will:
 1. Copy `planifest-framework/` into your repo root
 2. Run the setup script for your tool
 3. Create `docs/` if it doesn't exist
-4. Add a `component.json` manifest to each existing component in `src/` - use the [component manifest template](templates/component-manifest.template.json) and [guide](templates/component-manifest-guide.md)
+4. Add a `component.md` manifest to each existing component in `src/` - use the [component manifest template](templates/component.template.md) and [guide](templates/component-guide.md)
 5. Tell the orchestrator to use **retrofit** adoption mode:
 
 ```
@@ -126,10 +126,10 @@ The orchestrator evaluates four criteria before allowing Fast Path:
 3. No changes to security, auth, or routing logic
 4. Change is confined to UI styling, copy, or isolated pure-function bugs
 
-If all criteria pass: implement → validate → update `component.json` (patch bump) → log in `plan/changelog/`.
+If all criteria pass: implement → validate → update `component.md` (patch bump) → log in `plan/changelog/`.
 If any criterion fails: route to Change Pipeline instead.
 
-Fast Path commits use the `fix(fast-path):` prefix — the pre-push hook and CI recognise this and only require `component.json` or a changelog update, not full `plan/` or `docs/` changes.
+Fast Path commits use the `fix(fast-path):` prefix — the pre-push hook and CI recognise this and only require `component.md` or a changelog update, not full `plan/` or `docs/` changes.
 
 ---
 
