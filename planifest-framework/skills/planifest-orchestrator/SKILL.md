@@ -45,6 +45,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Ask the human to fill in a Feature Brief | `planifest-framework/templates/feature-brief.template.md` |
 | Begin Phase 1 (specification) | Load the `planifest-spec-agent` skill |
 | Produce an Execution Plan | `planifest-framework/templates/execution-plan.template.md` |
+| Define a granular requirement | `planifest-framework/templates/requirement.template.md` |
 | Produce a Domain Glossary | `planifest-framework/templates/domain-glossary.template.md` |
 | Produce a Risk Register | `planifest-framework/templates/risk-register.template.md` |
 | Produce a Scope document | `planifest-framework/templates/scope.template.md` |

@@ -34,7 +34,8 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 | Artifact | Path | Purpose |
 |---|---|---|
-| Execution Plan | `plan/current/execution-plan.md` | Functional and non-functional requirements |
+| Execution Plan | `plan/current/execution-plan.md` | Non-functional requirements, API/Data summary |
+| Functional Requirements | `plan/current/requirements/` | Granular requirement files (e.g., `req-001-auth.md`) |
 | OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract (if the component acts as an API provider) |
 | Component Manifest | `src/{component-id}/component.md` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Template](../templates/component.template.md) and its [guide](../templates/component-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
 | Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
@@ -51,7 +52,8 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 **Functional requirements:**
 - Derive directly from user stories in the brief. Do not invent requirements not stated or implied.
-- Each requirement must be traceable to a user story or acceptance criterion.
+- Distribute functional requirements into individual granular files at `plan/current/requirements/{req-id}-{slug}.md` using the [Requirement Template](../templates/requirement.template.md).
+- Do NOT output a monolithic list in the Execution Plan. Use discrete files.
 
 **Non-functional requirements:**
 - Must include specific, measurable targets. "The system should be fast" is not a requirement. "p95 latency < 200ms for the primary endpoint" is.
