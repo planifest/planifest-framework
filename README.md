@@ -12,9 +12,9 @@ Planifest fully supports the [Agent Skills specification](https://agentskills.io
 
 ## How It Works
 
-1. **Human writes an Initiative Brief** — what to build, why, and within what constraints
+1. **Human writes a Feature Brief** — what to build, why, and within what constraints
 2. **Agent coaches** — the orchestrator skill assesses the brief and asks focused questions until the specification is complete
-3. **Agent routes** — the orchestrator triages every request across three tracks: **Fast Path** (trivial fixes direct to code), **Change Pipeline** (targeted changes to existing work), or **Initiative Pipeline** (full spec → ADR → codegen → validate → security → docs)
+3. **Agent routes** — the orchestrator triages every request across three tracks: **Fast Path** (trivial fixes direct to code), **Change Pipeline** (targeted changes to existing work), or **Initiative Pipeline** (full execution plan → ADR → codegen → validate → security → docs)
 4. **Human reviews** — the PR gate is the universal backstop
 
 Every artifact the agent produces follows a template. Every file has a defined location. Every output records which skill, tool, and model produced it.
@@ -32,9 +32,8 @@ repo/
 │   ├── standards/    ← Code quality standards
 │   └── initiative-structure.md  ← Canonical directory layout
 │
-├── plan/             ← Specifications (organized by initiative)
-│                       Briefs, specs, ADRs, risk, scope, glossary.
-│                       Everything that describes WHAT to build and WHY.
+├── plan/             ← Feature briefs, execution plans, ADRs, risk registers, scope docs.
+│                       Organized by initiative. Everything that describes WHAT to build and WHY.
 │
 ├── src/              ← Code (organized by component)
 │                       Implementation, tests, config, manifests.
@@ -72,7 +71,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 **Human decides, agent executes.** The human chooses the architecture, the stack, the data ownership, and the scope. The agent implements within those constraints.
 
-**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential pipeline runs). This is how Planifest manages context at scale.
+**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential Agentic Iteration Loop runs). This is how Planifest manages context at scale.
 
 **Everything is traced.** Every agent-produced artifact records the skill that produced it, the tool it ran in, and the model that generated it.
 
@@ -85,7 +84,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 | Folder | Contents | Count |
 |--------|----------|-------|
 | [skills/](planifest-framework/skills/) | Orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, change-agent, docs-agent | 8 |
-| [templates/](planifest-framework/templates/) | Initiative brief, design spec, ADR, scope, risk register, domain glossary, data contract, component manifest (+guide), pipeline run | 10 |
+| [templates/](planifest-framework/templates/) | Feature brief, execution plan, ADR, scope, risk register, domain glossary, data contract, component manifest (+guide), iteration log | 10 |
 | [schemas/](planifest-framework/schemas/) | Shared type definitions, domain document envelope | 2 |
 | [standards/](planifest-framework/standards/) | Code quality standards | 1 |
 

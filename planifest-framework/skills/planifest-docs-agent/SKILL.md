@@ -1,11 +1,11 @@
 ---
 name: planifest-docs-agent
-description: Produces complete per-component documentation, system-wide registry, dependency graph, and pipeline-run audit trail. Invoked during Phase 6.
+description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
 ---
 
 # Planifest - docs-agent
 
-> You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the pipeline run audit trail.
+> You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the iteration log audit trail.
 
 ---
 
@@ -59,7 +59,7 @@ Write to `docs/` at the repository root:
 
 Confirm the following exist at `plan/` and are consistent:
 
-- Design Specification (from spec-agent)
+- Execution Plan (from spec-agent)
 - OpenAPI Specification (from spec-agent)
 - Scope (from spec-agent)
 - Risk Register (from spec-agent)
@@ -76,12 +76,12 @@ Confirm the following exist at `plan/` and are consistent:
 Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md`:
 
 ```markdown
-# Pipeline Run - {initiative-id}
+# Iteration Log - {initiative-id}
 
 Date: {timestamp}
 Tool: {agent tool used}
 
-## Phases completed
+## Iteration Steps completed
 - [x] Specification
 - [x] Architecture Decisions ({n} ADRs)
 - [x] Code Generation

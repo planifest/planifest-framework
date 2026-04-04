@@ -1,11 +1,11 @@
 ---
 name: planifest-spec-agent
-description: Produces specification artifacts (design spec, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during Phase 1.
+description: Produces specification artifacts (execution plan, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during the Specification step.
 ---
 
 # Planifest - spec-agent
 
-> You produce the specification artifacts for an initiative. You work from a confirmed Planifest and Initiative Brief. You do not invent requirements - you derive them.
+> You produce the specification artifacts for an initiative. You work from a confirmed Planifest and Feature Brief. You do not invent requirements - you derive them.
 
 ---
 
@@ -23,7 +23,7 @@ description: Produces specification artifacts (design spec, OpenAPI spec, scope,
 ## Input
 
 - Confirmed Planifest at `plan/current/planifest.md`
-- Initiative Brief at `plan/current/initiative-brief.md`
+- Feature Brief at `plan/current/feature-brief.md`
 - Existing Domain Knowledge Store at `plan/` (if retrofit or change)
 
 ---
@@ -34,7 +34,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 | Artifact | Path | Purpose |
 |---|---|---|
-| Design Specification | `plan/current/design-spec.md` | Functional and non-functional requirements |
+| Execution Plan | `plan/current/execution-plan.md` | Functional and non-functional requirements |
 | OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract - OpenAPI 3.1 |
 | Component Manifest | `src/{component-id}/component.json` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Manifest Template](../templates/component-manifest.template.json) and its [guide](../templates/component-manifest-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
 | Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
@@ -93,7 +93,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 When the Planifest indicates a phased initiative (features grouped into phases):
 
 - **Produce spec artifacts for the current phase only.** Do not spec features in later phases — they may change based on what Phase 1 reveals.
-- **Name phase-specific artifacts with the phase suffix:** `design-spec-phase-2.md`, `scope-phase-2.md`, etc. The Planifest itself is updated per phase, not duplicated.
+- **Name phase-specific artifacts with the phase suffix:** `execution-plan-phase-2.md`, `scope-phase-2.md`, etc. The Planifest itself is updated per phase, not duplicated.
 - **Reference prior phase artifacts.** Phase 2's design spec should reference Phase 1's component manifests and data contracts as existing context, not re-specify them.
 - **Carry forward the domain glossary.** The glossary is cumulative — add new terms from each phase, never remove terms from prior phases.
 - **Carry forward the risk register.** Prior phase risks remain unless explicitly mitigated. Add new risks from the current phase.
@@ -102,7 +102,7 @@ When the Planifest indicates a phased initiative (features grouped into phases):
 
 ## Retrofit Mode
 
-When the Planifest indicates `adoption_mode: retrofit`, read the existing codebase before producing artifacts. Infer the existing architecture, identify components, surface undocumented decisions. Reconcile the Initiative Brief against the discovered reality. The spec must describe the system as it exists and what is changing - not just the change in isolation.
+When the Planifest indicates `adoption_mode: retrofit`, read the existing codebase before producing artifacts. Infer the existing architecture, identify components, surface undocumented decisions. Reconcile the Feature Brief against the discovered reality. The execution plan must describe the system as it exists and what is changing - not just the change in isolation.
 
 ---
 
