@@ -1,3 +1,9 @@
+---
+title: "Change Summary - {{change-title}}"
+summary: "High-level summary of what was accomplished in this iteration."
+status: "active"
+version: "0.1.0"
+---
 # Change Summary - {{change-title}}
 
 **Skill:** [change-agent](../skills/change-agent-SKILL.md)

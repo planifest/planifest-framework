@@ -1,3 +1,9 @@
+---
+title: "ADR {{NNN}}: {{title}}"
+summary: "One paragraph summary of the decision and its impact."
+status: "proposed | accepted | rejected | superseded"
+version: "0.1.0"
+---
 # ADR-{{NNN}} - {{title}}
 
 **Skill:** [adr-agent](../skills/adr-agent-SKILL.md)
