@@ -36,7 +36,7 @@ description: Handles modifications to existing initiatives - loads domain contex
 Before changing anything, read:
 
 1. `src/{component-id}/component.json` - understand the component's purpose, scope, contract, data ownership, stack, and current risk level. See [Component Manifest Guide](../templates/component-manifest-guide.md)
-2. `plan/current/execution-plan.md` - understand the full specification
+2. `plan/current/execution-plan.md` - understand the full requirements
 3. `docs/component-registry.md` - understand what components exist
 4. `docs/dependency-graph.md` - understand how they relate
 5. `src/{affected-component}/docs/` - read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
