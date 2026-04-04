@@ -366,6 +366,33 @@ If the repo already has code:
 '@ -Encoding UTF8
         Write-Host "  + plan/initiative-structure.md (created)"
     }
+
+    # Add tool ignore rules to keep context windows lean
+    $ignoreContent = @"
+
+# Planifest - Token Reduction (keeps agent semantic search from bloating context)
+plan/_archive/
+node_modules/
+dist/
+build/
+out/
+.next/
+"@
+
+    foreach ($ignoreFile in @('.cursorignore', '.claudeignore', '.windsurfignore', '.clineignore')) {
+        $ignorePath = Join-Path $ProjectRoot $ignoreFile
+        if (-not (Test-Path $ignorePath)) {
+            Set-Content -Path $ignorePath -Value $ignoreContent -Encoding UTF8
+            Write-Host "  + $ignoreFile (created)"
+        }
+        else {
+            $existing = Get-Content -Path $ignorePath -Raw
+            if ($existing -notmatch "Planifest - Token Reduction") {
+                Add-Content -Path $ignorePath -Value $ignoreContent -Encoding UTF8
+                Write-Host "  + $ignoreFile (appended Planifest ignore rules)"
+            }
+        }
+    }
 }
 
 function Invoke-PlanifestSetup {

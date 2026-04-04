@@ -335,6 +335,26 @@ If the repo already has code:
 EOF
     echo "  + plan/initiative-structure.md (created)"
   fi
+
+  # Add tool ignore rules to keep context windows lean
+  local ignore_content="
+# Planifest - Token Reduction (keeps agent semantic search from bloating context)
+plan/_archive/
+node_modules/
+dist/
+build/
+out/
+.next/
+"
+  for ignore_file in ".cursorignore" ".claudeignore" ".windsurfignore" ".clineignore"; do
+    if [ ! -f "$PROJECT_ROOT/$ignore_file" ]; then
+      echo "$ignore_content" > "$PROJECT_ROOT/$ignore_file"
+      echo "  + $ignore_file (created)"
+    elif ! grep -q "Planifest - Token Reduction" "$PROJECT_ROOT/$ignore_file"; then
+      echo "$ignore_content" >> "$PROJECT_ROOT/$ignore_file"
+      echo "  + $ignore_file (appended Planifest ignore rules)"
+    fi
+  done
 }
 
 setup_tool() {
