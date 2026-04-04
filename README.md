@@ -105,9 +105,12 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 | Folder | Contents | Count |
 |--------|----------|-------|
 | [skills/](planifest-framework/skills/) | Orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, change-agent, docs-agent | 8 |
-| [templates/](planifest-framework/templates/) | Feature brief, execution plan, ADR, scope, risk register, domain glossary, data contract, component manifest (+guide), iteration log | 10 |
+| [templates/](planifest-framework/templates/) | Feature brief, execution plan, ADR, scope, risk register, domain glossary, data contract, component manifest, iteration log, change summary, cost model, operational model, recommendations, security report, SLO definitions — each with a guide where applicable | 24 |
 | [schemas/](planifest-framework/schemas/) | Shared type definitions, domain document envelope | 2 |
-| [standards/](planifest-framework/standards/) | Code quality standards | 1 |
+| [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, testing, backend & frontend stack evaluations | 10 |
+| [setup/](planifest-framework/setup/) | Per-tool boot file templates (antigravity, claude-code, cline, codex, copilot, cursor, windsurf — `.sh` and `.ps1` for each) | 14 |
+| [hooks/](planifest-framework/hooks/) | Git hooks (pre-commit, pre-push) and CI workflow | 3 |
+| [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, initiative-pipeline, change-pipeline, retrofit | 4 |
 
 ---
 
