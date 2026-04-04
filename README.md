@@ -1,6 +1,6 @@
 # Planifest
 
-**Because AI agents build from context, not guesses.**
+**Because AI agents build from context, not assumptions.**
 
 Planifest is an Agile context framework for AI development. It uses Just-in-Time planning to ensure your agents build from a solid Execution Plan rather than hallucinating in the dark.
 
@@ -24,7 +24,7 @@ Planifest is built on three core realities of agentic development:
 
 1. **Transparency beats brevity.** When AI writes the code, the code is just the compiled output. The *actual* source code is your prompt and your plan. If your plan is vague, the AI will invent the missing pieces, leaving you with zero transparency into its architectural choices.
 2. **Context makes refactoring safe (and rewriting trivial).** AI struggles to safely modify large, undocumented codebases. Planifest makes your code ephemeral and your architecture permanent. With a perfect architectural record, you get the best of both worlds: the precise historical context an agent needs to confidently refactor existing code, and the full specification required to burn a component down and build it better from scratch.
-3. **Agents build from context, not guesses.** Before a single line of code is generated, the agent must document its Execution Plan. If there are gaps in the Story Context, the agent stops and asks the human. It does not guess.
+3. **Agents build from context, not assumptions.** Before a single line of code is generated, the agent must document its Execution Plan. If there are gaps in the Story Context, the agent stops and asks the human. It does not assume.
 
 ---
 
