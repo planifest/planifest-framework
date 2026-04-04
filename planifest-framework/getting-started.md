@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, or GitHub Copilot
+- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, or Cline / Roo Code
 - A terminal with Bash (macOS/Linux) or PowerShell (Windows)
 
 ---
@@ -39,22 +39,38 @@ This copies skills into the directory your agentic tool expects:
 **macOS / Linux:**
 ```bash
 chmod +x planifest-framework/setup.sh
-./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, all
+./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, all
 ```
 
 **Windows (PowerShell):**
 ```powershell
-.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, all
+.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, all
 ```
 
 The script creates:
 - Skill folders with YAML frontmatter (so the tool auto-discovers them)
 - Supporting files (templates, standards, schemas) alongside the skills
 - A boot file for your tool (e.g., `CLAUDE.md`, `AGENTS.md`)
+- Git guardrails (see below)
 
 See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
 
+### 3a. Git Guardrails (activated automatically)
+
+The setup script also activates Planifest's **Progressive Guardrail System** — a three-tier enforcement model that protects `main` without blocking atomic commits:
+
+| Tier | When | What happens |
+|------|------|--------------|
+| **1 — Advisory pre-commit** | Every local commit | Prints a warning if code was staged without docs. Commit **succeeds**. |
+| **2 — Branch pre-push** | Every `git push` | Checks the *cumulative branch diff*. Push **fails** if `src/` was changed with no updates to `plan/`, `docs/`, or `component.json`. |
+| **3 — CI/CD pipeline** | Every Pull Request | Runs the same diff check in GitHub Actions. Blocks the merge button even if `--no-verify` was used. |
+
+The hooks live in `planifest-framework/hooks/` and are wired via `git config core.hooksPath` — no `.git/` modifications required.
+
+The CI workflow is copied to `.github/workflows/planifest.yml` on first setup.
+
 ### 4. Write your first initiative brief
+
 
 Use the template:
 ```
@@ -130,6 +146,8 @@ The setup script overwrites the generated copies. The source of truth is always 
 | Path | Commit? | Why |
 |------|:-------:|-----|
 | `planifest-framework/` | ✅ | Source of truth - shared with team |
+| `planifest-framework/hooks/` | ✅ | Git hooks and CI workflow — applied by `setup.sh` / `setup.ps1` |
+| `.github/workflows/planifest.yml` | ✅ | CI/CD strict gate — deployed by setup, must be committed to take effect |
 | `plan/` | ✅ | Initiative specs, ADRs, scope docs |
 | `src/` | ✅ | Component code and manifests |
 | `docs/` | ✅ | Repo-wide registry and dependency graph |
