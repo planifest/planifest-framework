@@ -1,6 +1,6 @@
 ---
 name: planifest-spec-agent
-description: Produces specification artifacts (execution plan, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during the Specification step.
+description: Produces specification artifacts (execution plan, OpenAPI spec (if applicable), scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during the Specification step.
 ---
 
 # Planifest - spec-agent
@@ -35,7 +35,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 | Artifact | Path | Purpose |
 |---|---|---|
 | Execution Plan | `plan/current/execution-plan.md` | Functional and non-functional requirements |
-| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract - OpenAPI 3.1 |
+| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract (if the component acts as an API provider) |
 | Component Manifest | `src/{component-id}/component.json` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Manifest Template](../templates/component-manifest.template.json) and its [guide](../templates/component-manifest-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
 | Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
 | Risk Register | `plan/current/risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
@@ -57,10 +57,11 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 - Must include specific, measurable targets. "The system should be fast" is not a requirement. "p95 latency < 200ms for the primary endpoint" is.
 - If the Planifest records a deferred NFR, note it in the scope document and do not fabricate a target.
 
-**OpenAPI specification:**
+**OpenAPI specification (if applicable):**
+- **CRITICAL CONDITION:** Generate this ONLY if the initiative includes building or modifying an API. If the component is purely a UI component, a daemon, or a library, omit the OpenAPI specification entirely.
 - Must cover every endpoint implied by the functional requirements. No more, no less.
 - Use OpenAPI 3.1 with JSON Schema for request/response bodies.
-- Generate this early - everything downstream implements against it.
+- Generate this early (if applicable) - everything downstream implements against it.
 
 **Domain glossary:**
 - Define every domain term used in the spec. If the brief introduces terms, define them.

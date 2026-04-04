@@ -295,9 +295,9 @@ Invoke the **spec-agent** skill.
 
 **Input:** The confirmed Planifest + the original Feature Brief
 
-**What it produces:** Execution Plan, OpenAPI Specification, Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model — all written to `plan/`
+**What it produces:** Execution Plan, OpenAPI Specification (if applicable), Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model — all written to `plan/`
 
-**Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
+**Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec (if applicable) covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
 
 ---
 
@@ -307,7 +307,7 @@ Invoke the **spec-agent** skill.
 
 Invoke the **adr-agent** skill.
 
-**Input:** Execution Plan, OpenAPI Specification (from Phase 1)
+**Input:** Execution Plan, OpenAPI Specification (if applicable, from Phase 1)
 
 **What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
 
@@ -407,7 +407,7 @@ The coaching conversation in Phase 0 and the pipeline phases are the same regard
 1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — these reveal the stack
 2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.json` for each.
 3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
-4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists.
+4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists (if applicable).
 5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record these in the design spec as existing constraints.
 6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
 

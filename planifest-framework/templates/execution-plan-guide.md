@@ -71,7 +71,7 @@ Material gaps the spec-agent couldn't resolve from the brief. These are **not** 
 
 ```
 Feature Brief -> Execution Plan -> ADRs -> Code
-              -> OpenAPI Spec          ↗
+              -> OpenAPI Spec (if API) ↗
               -> Data Model ──-> Data Contract
 ```
 

@@ -60,7 +60,7 @@ Write to `docs/` at the repository root:
 Confirm the following exist at `plan/` and are consistent:
 
 - Execution Plan (from spec-agent)
-- OpenAPI Specification (from spec-agent)
+- OpenAPI Specification (from spec-agent, if applicable)
 - Scope (from spec-agent)
 - Risk Register (from spec-agent)
 - Domain Glossary (from spec-agent)
@@ -108,7 +108,7 @@ Tool: {agent tool used}
 
 - **Every artifact must be accounted for.** If one is missing, produce it. If one cannot be produced (e.g. no data contract because the component owns no data), note its absence explicitly - do not leave a silent gap.
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
-- **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints should match what was implemented. Flag any drift you find - do not silently fix it.
+- **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints (if applicable) should match what was implemented. Flag any drift you find - do not silently fix it.
 
 ### Drift Detection
 
@@ -116,7 +116,7 @@ Perform these specific drift checks:
 
 | Check | Source of Truth | Verify Against | Action if Drift Found |
 |-------|----------------|---------------|----------------------|
-| API endpoints | OpenAPI spec | Implemented routes | Flag: missing or extra endpoints |
+| API endpoints (if applicable) | OpenAPI spec | Implemented routes | Flag: missing or extra endpoints |
 | Domain terms | Domain glossary | Code variable/function names | Flag: non-glossary terms in code |
 | Component boundaries | Planifest component list | `src/` directories with `component.json` | Flag: missing or extra components |
 | Data ownership | Component manifests (`data.ownsData`) | Database connection/query patterns | Flag: cross-component data writes |
