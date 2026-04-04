@@ -25,7 +25,7 @@ description: Performs a security review of the implementation, producing a secur
 - The validated implementation at `src/{component-id}/` (all components in the initiative)
 - Infrastructure as Code at `src/{component-id}/` (Terraform, Pulumi, CDK, etc. — if declared in the stack)
 - Design Specification at `plan/current/design-spec.md`
-- OpenAPI Specification at `plan/current/openapi-spec.yaml`
+- OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
 - Risk Register at `plan/current/risk-register.md`
 
 ---
@@ -59,11 +59,11 @@ Confirm how secrets are handled. Flag any hardcoded credentials, environment var
 
 ## Authentication & Authorisation Review
 
-Review the auth strategy against the OpenAPI spec. Flag endpoints missing auth, over-permissioned roles, or token handling issues.
+If an API, review the auth strategy against the OpenAPI spec. Flag endpoints missing auth, over-permissioned roles, or token handling issues.
 
 ## Input Validation Review
 
-Confirm all inputs are validated per the OpenAPI spec. Flag any endpoints accepting unvalidated input.
+If an API, confirm all inputs are validated per the OpenAPI spec. Flag any endpoints accepting unvalidated input.
 
 ## Network Policy
 

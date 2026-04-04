@@ -24,7 +24,7 @@ description: Generates the full implementation from the specification artifacts 
 
 - Component Manifest at `src/{component-id}/component.json` - read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
 - Design Specification at `plan/current/design-spec.md`
-- OpenAPI Specification at `plan/current/openapi-spec.yaml`
+- OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
 - ADRs at `plan/current/adr/`
 - Planifest at `plan/current/planifest.md` (for stack declaration)
 - Domain Glossary at `plan/current/domain-glossary.md`
@@ -86,7 +86,7 @@ Between components, verify:
 ## Rules
 
 **Implement against the spec:**
-- The OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
+- If building an API, the OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it - do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
 - Different stacks have different agent characteristics. The [Backend Stack Evaluation](../standards/backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.

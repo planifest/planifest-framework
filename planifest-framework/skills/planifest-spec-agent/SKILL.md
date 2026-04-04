@@ -1,11 +1,11 @@
 ---
 name: planifest-spec-agent
-description: Produces specification artifacts (design spec, OpenAPI spec, scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during Phase 1.
+description: Produces specification artifacts (execution plan, OpenAPI spec (if applicable), scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during the Specification step.
 ---
 
 # Planifest - spec-agent
 
-> You produce the specification artifacts for an initiative. You work from a confirmed Planifest and Initiative Brief. You do not invent requirements - you derive them.
+> You produce the specification artifacts for an initiative. You work from a confirmed Planifest and Feature Brief. You do not invent requirements - you derive them.
 
 ---
 
@@ -23,7 +23,7 @@ description: Produces specification artifacts (design spec, OpenAPI spec, scope,
 ## Input
 
 - Confirmed Planifest at `plan/current/planifest.md`
-- Initiative Brief at `plan/current/initiative-brief.md`
+- Feature Brief at `plan/current/feature-brief.md`
 - Existing Domain Knowledge Store at `plan/` (if retrofit or change)
 
 ---
@@ -34,8 +34,8 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 | Artifact | Path | Purpose |
 |---|---|---|
-| Design Specification | `plan/current/design-spec.md` | Functional and non-functional requirements |
-| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract - OpenAPI 3.1 |
+| Execution Plan | `plan/current/execution-plan.md` | Functional and non-functional requirements |
+| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract (if the component acts as an API provider) |
 | Component Manifest | `src/{component-id}/component.json` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Manifest Template](../templates/component-manifest.template.json) and its [guide](../templates/component-manifest-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your specification |
 | Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
 | Risk Register | `plan/current/risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
@@ -57,10 +57,11 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 - Must include specific, measurable targets. "The system should be fast" is not a requirement. "p95 latency < 200ms for the primary endpoint" is.
 - If the Planifest records a deferred NFR, note it in the scope document and do not fabricate a target.
 
-**OpenAPI specification:**
+**OpenAPI specification (if applicable):**
+- **CRITICAL CONDITION:** Generate this ONLY if the initiative includes building or modifying an API. If the component is purely a UI component, a daemon, or a library, omit the OpenAPI specification entirely.
 - Must cover every endpoint implied by the functional requirements. No more, no less.
 - Use OpenAPI 3.1 with JSON Schema for request/response bodies.
-- Generate this early - everything downstream implements against it.
+- Generate this early (if applicable) - everything downstream implements against it.
 
 **Domain glossary:**
 - Define every domain term used in the spec. If the brief introduces terms, define them.
@@ -93,7 +94,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 When the Planifest indicates a phased initiative (features grouped into phases):
 
 - **Produce spec artifacts for the current phase only.** Do not spec features in later phases — they may change based on what Phase 1 reveals.
-- **Name phase-specific artifacts with the phase suffix:** `design-spec-phase-2.md`, `scope-phase-2.md`, etc. The Planifest itself is updated per phase, not duplicated.
+- **Name phase-specific artifacts with the phase suffix:** `execution-plan-phase-2.md`, `scope-phase-2.md`, etc. The Planifest itself is updated per phase, not duplicated.
 - **Reference prior phase artifacts.** Phase 2's design spec should reference Phase 1's component manifests and data contracts as existing context, not re-specify them.
 - **Carry forward the domain glossary.** The glossary is cumulative — add new terms from each phase, never remove terms from prior phases.
 - **Carry forward the risk register.** Prior phase risks remain unless explicitly mitigated. Add new risks from the current phase.
@@ -102,7 +103,7 @@ When the Planifest indicates a phased initiative (features grouped into phases):
 
 ## Retrofit Mode
 
-When the Planifest indicates `adoption_mode: retrofit`, read the existing codebase before producing artifacts. Infer the existing architecture, identify components, surface undocumented decisions. Reconcile the Initiative Brief against the discovered reality. The spec must describe the system as it exists and what is changing - not just the change in isolation.
+When the Planifest indicates `adoption_mode: retrofit`, read the existing codebase before producing artifacts. Infer the existing architecture, identify components, surface undocumented decisions. Reconcile the Feature Brief against the discovered reality. The execution plan must describe the system as it exists and what is changing - not just the change in isolation.
 
 ---
 
