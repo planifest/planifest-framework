@@ -1,6 +1,8 @@
 ---
 name: planifest-spec-agent
 description: Produces specification artifacts (execution plan, OpenAPI spec (if applicable), scope, risk register, domain glossary) for an initiative. Invoked by the orchestrator during the Specification step.
+bundle_templates: [component.template.md, component-guide.md, data-contract.template.md, data-contract-guide.md, requirement.template.md, execution-plan.template.md, scope.template.md, risk-register.template.md, domain-glossary.template.md]
+bundle_standards: []
 ---
 
 # Planifest - spec-agent

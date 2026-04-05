@@ -1,6 +1,8 @@
 ---
 name: planifest-orchestrator
 description: Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs.
+bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.md, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md]
+bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md]
 ---
 
 # Planifest Orchestrator

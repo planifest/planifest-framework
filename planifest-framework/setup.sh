@@ -36,6 +36,7 @@ copy_skills() {
       sed -i.bak \
         -e 's|\.\./templates/|./assets/templates/|g' \
         -e 's|\.\./standards/|./references/|g' \
+        -e 's|\.\./standards/reference/|./references/reference/|g' \
         -e 's|\.\./schemas/|./assets/schemas/|g' \
         "$dest_dir/SKILL.md" && rm -f "$dest_dir/SKILL.md.bak"
 
@@ -47,18 +48,56 @@ copy_skills() {
         fi
       done
       
-      # Bundle shared resources directly into the skill
+      # Selective bundling: read bundle_templates and bundle_standards from SKILL.md frontmatter
+      local skill_md="$skill_dir/SKILL.md"
+      
+      # Parse bundle_templates from frontmatter
+      local bundle_templates
+      bundle_templates=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep '^bundle_templates:' | sed 's/bundle_templates: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//')
+      
+      # Parse bundle_standards from frontmatter
+      local bundle_standards
+      bundle_standards=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep '^bundle_standards:' | sed 's/bundle_standards: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//')
+      
+      # Bundle only declared templates (or all if no manifest found)
       if [ -d "$SCRIPT_DIR/templates" ]; then
         mkdir -p "$dest_dir/assets/templates"
-        cp -r "$SCRIPT_DIR/templates"/* "$dest_dir/assets/templates/"
+        if [ -n "$bundle_templates" ]; then
+          for tpl in $bundle_templates; do
+            local tpl_path="$SCRIPT_DIR/templates/$tpl"
+            if [ -f "$tpl_path" ]; then
+              cp "$tpl_path" "$dest_dir/assets/templates/"
+            fi
+          done
+          echo "    templates: selective ($(echo $bundle_templates | wc -w | tr -d ' ') files)"
+        else
+          cp -r "$SCRIPT_DIR/templates"/* "$dest_dir/assets/templates/"
+          echo "    templates: all (no manifest)"
+        fi
       fi
+      
+      # Always bundle schemas (small, universally needed)
       if [ -d "$SCRIPT_DIR/schemas" ]; then
         mkdir -p "$dest_dir/assets/schemas"
         cp -r "$SCRIPT_DIR/schemas"/* "$dest_dir/assets/schemas/"
       fi
+      
+      # Bundle only declared standards (or all if no manifest found)
       if [ -d "$SCRIPT_DIR/standards" ]; then
         mkdir -p "$dest_dir/references"
-        cp -r "$SCRIPT_DIR/standards"/* "$dest_dir/references/"
+        if [ -n "$bundle_standards" ]; then
+          for std in $bundle_standards; do
+            local std_path="$SCRIPT_DIR/standards/$std"
+            if [ -f "$std_path" ]; then
+              cp "$std_path" "$dest_dir/references/"
+            fi
+          done
+          echo "    standards: selective ($(echo $bundle_standards | wc -w | tr -d ' ') files)"
+        else
+          # No manifest — copy all top-level standards (skip reference/ subdirectory)
+          find "$SCRIPT_DIR/standards" -maxdepth 1 -type f -exec cp {} "$dest_dir/references/" \;
+          echo "    standards: all top-level (no manifest)"
+        fi
       fi
     fi
   done

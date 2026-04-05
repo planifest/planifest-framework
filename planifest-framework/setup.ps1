@@ -49,6 +49,7 @@ function Copy-PlanifestSkills {
             $skillMdPath = Join-Path $destDir "SKILL.md"
             $skillContent = Get-Content -Path $skillMdPath -Raw
             $skillContent = $skillContent -replace '\.\./templates/', './assets/templates/'
+            $skillContent = $skillContent -replace '\.\./standards/reference/', './references/reference/'
             $skillContent = $skillContent -replace '\.\./standards/', './references/'
             $skillContent = $skillContent -replace '\.\./schemas/', './assets/schemas/'
             Set-Content -Path $skillMdPath -Value $skillContent -NoNewline -Encoding UTF8
@@ -62,14 +63,38 @@ function Copy-PlanifestSkills {
                 }
             }
 
-            # Bundle shared resources directly into the skill
+            # Parse bundle_templates and bundle_standards from SKILL.md frontmatter
+            $rawContent = Get-Content -Path $srcSkillMd -Raw
+            $bundleTemplates = @()
+            $bundleStandards = @()
+            if ($rawContent -match '(?m)^bundle_templates:\s*\[([^\]]*)\]') {
+                $bundleTemplates = $Matches[1].Trim() -split '\s*,\s*' | Where-Object { $_ }
+            }
+            if ($rawContent -match '(?m)^bundle_standards:\s*\[([^\]]*)\]') {
+                $bundleStandards = $Matches[1].Trim() -split '\s*,\s*' | Where-Object { $_ }
+            }
+
+            # Bundle only declared templates (or all if no manifest found)
             $templatesSrc = Join-Path $ScriptDir "templates"
             if (Test-Path $templatesSrc) {
                 $destTemplates = Join-Path $destDir "assets\templates"
                 New-Item -ItemType Directory -Path $destTemplates -Force | Out-Null
-                Copy-Item -Path "$templatesSrc\*" -Destination $destTemplates -Recurse -Force
+                if ($bundleTemplates.Count -gt 0) {
+                    foreach ($tpl in $bundleTemplates) {
+                        $tplPath = Join-Path $templatesSrc $tpl
+                        if (Test-Path $tplPath) {
+                            Copy-Item -Path $tplPath -Destination $destTemplates -Force
+                        }
+                    }
+                    Write-Host "    templates: selective ($($bundleTemplates.Count) files)"
+                }
+                else {
+                    Copy-Item -Path "$templatesSrc\*" -Destination $destTemplates -Recurse -Force
+                    Write-Host "    templates: all (no manifest)"
+                }
             }
 
+            # Always bundle schemas (small, universally needed)
             $schemasSrc = Join-Path $ScriptDir "schemas"
             if (Test-Path $schemasSrc) {
                 $destSchemas = Join-Path $destDir "assets\schemas"
@@ -77,11 +102,27 @@ function Copy-PlanifestSkills {
                 Copy-Item -Path "$schemasSrc\*" -Destination $destSchemas -Recurse -Force
             }
 
+            # Bundle only declared standards (or all top-level if no manifest found)
             $standardsSrc = Join-Path $ScriptDir "standards"
             if (Test-Path $standardsSrc) {
                 $destRefs = Join-Path $destDir "references"
                 New-Item -ItemType Directory -Path $destRefs -Force | Out-Null
-                Copy-Item -Path "$standardsSrc\*" -Destination $destRefs -Recurse -Force
+                if ($bundleStandards.Count -gt 0) {
+                    foreach ($std in $bundleStandards) {
+                        $stdPath = Join-Path $standardsSrc $std
+                        if (Test-Path $stdPath) {
+                            Copy-Item -Path $stdPath -Destination $destRefs -Force
+                        }
+                    }
+                    Write-Host "    standards: selective ($($bundleStandards.Count) files)"
+                }
+                else {
+                    # No manifest — copy all top-level standards (skip reference/ subdirectory)
+                    Get-ChildItem -Path $standardsSrc -File | ForEach-Object {
+                        Copy-Item -Path $_.FullName -Destination $destRefs -Force
+                    }
+                    Write-Host "    standards: all top-level (no manifest)"
+                }
             }
         }
     }

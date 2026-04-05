@@ -1,6 +1,8 @@
 ---
 name: planifest-change-agent
 description: Handles modifications to existing initiatives - loads domain context, implements the minimum change, validates, and updates documentation.
+bundle_templates: [component.template.md, change-summary.template.md]
+bundle_standards: [code-quality-standards.md]
 ---
 
 # Planifest - change-agent

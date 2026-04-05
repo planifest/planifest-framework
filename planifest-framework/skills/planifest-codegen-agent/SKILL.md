@@ -1,6 +1,8 @@
 ---
 name: planifest-codegen-agent
 description: Generates the full implementation from the specification artifacts - application code, tests, infrastructure, configuration. Invoked during Phase 3.
+bundle_templates: [component.template.md, data-contract.template.md]
+bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md]
 ---
 
 # Planifest - codegen-agent

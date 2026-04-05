@@ -1,6 +1,8 @@
 ---
 name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
+bundle_templates: [iteration-log.template.md, recommendations.template.md]
+bundle_standards: []
 ---
 
 # Planifest - docs-agent
