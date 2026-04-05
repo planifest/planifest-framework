@@ -156,7 +156,7 @@ Planifest describes three layers of every initiative. Each must be covered.
 1. Problem statement and user stories - if these are unclear, nothing downstream is derivable
 2. Acceptance criteria - these become the test cases; vagueness here propagates everywhere
 3. **Initiative decomposition** - is this initiative small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big initiatives into features and phases before proceeding.
-4. Stack declaration - the codegen-agent cannot begin without this. Draw the human's attention to the [Backend Stack Evaluation](../standards/backend-stack-evaluation.md) - not all stacks are equal for agent-generated code. For the frontend, draw attention to the [Frontend Stack Evaluation](../standards/frontend-stack-evaluation.md).
+4. Stack declaration - the codegen-agent cannot begin without this. Draw the human's attention to the [Stack Summary](../standards/stack-summary.md) - not all stacks are equal for agent-generated code. For deep evaluation, see [Backend Stack Evaluation](../standards/reference/backend-stack-evaluation.md) and [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md).
 4. Scope boundaries - what's out is as important as what's in
 5. Non-functional requirements - performance, availability, scalability, security
 6. Component design and data ownership - these inform the architecture
