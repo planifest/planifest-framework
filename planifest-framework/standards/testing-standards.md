@@ -24,15 +24,28 @@ E2E tests are recommended but not required at the component level. The orchestra
 
 ---
 
-## 2. Test Structure
+## 2. Agentic TDD & Requirement Traceability
 
-Every test follows the **Arrange-Act-Assert** pattern:
+Agents must employ **Agentic TDD (Test-Driven Development)** to guarantee semantic correctness. The LLM must not evaluate its own success probabilistically; it must prove it deterministically.
 
-```
-test("descriptive name that reads as a specification", () => {
-  // Arrange — set up preconditions
-  // Act — perform the operation
-  // Assert — verify the outcome
+**The Agentic TDD Loop:**
+1. Read the functional requirement (`plan/current/requirements/req-*.md`).
+2. Write the failing test case *first*.
+3. Execute the test to verify it fails (establishing the boundary).
+4. Write the implementation logic.
+5. Execute the test to verify it passes.
+
+**Requirement Traceability:**
+Every functional requirement must be explicitly traceable to a test. You MUST include the requirement ID in the test description or suite name.
+
+```javascript
+// ✅ Correct: Traceable to req-001-auth
+describe("req-001-auth: user login flow", () => {
+  test("returns 401 when password is mathematically invalid", () => {
+    // Arrange — set up preconditions
+    // Act — perform the operation
+    // Assert — verify the outcome
+  })
 })
 ```
 
