@@ -434,6 +434,30 @@ out/
             }
         }
     }
+
+    # Deploy .cursorindexingignore — excludes large reference docs from semantic
+    # search indexing but keeps them accessible via explicit @ mention
+    $indexingIgnoreContent = @"
+
+# Planifest - Indexing Exclusions (files accessible via @ mention but excluded from search)
+*-evaluation.md
+*-guide.md
+tool-setup-reference.md
+getting-started.md
+"@
+
+    $indexingIgnorePath = Join-Path $ProjectRoot ".cursorindexingignore"
+    if (-not (Test-Path $indexingIgnorePath)) {
+        Set-Content -Path $indexingIgnorePath -Value $indexingIgnoreContent -Encoding UTF8
+        Write-Host "  + .cursorindexingignore (created)"
+    }
+    else {
+        $existing = Get-Content -Path $indexingIgnorePath -Raw
+        if ($existing -notmatch "Planifest - Indexing Exclusions") {
+            Add-Content -Path $indexingIgnorePath -Value $indexingIgnoreContent -Encoding UTF8
+            Write-Host "  + .cursorindexingignore (appended Planifest rules)"
+        }
+    }
 }
 
 function Invoke-PlanifestSetup {

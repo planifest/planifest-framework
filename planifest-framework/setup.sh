@@ -394,6 +394,24 @@ out/
       echo "  + $ignore_file (appended Planifest ignore rules)"
     fi
   done
+
+  # Deploy .cursorindexingignore — excludes large reference docs from semantic
+  # search indexing but keeps them accessible via explicit @ mention
+  local indexing_ignore_content="
+# Planifest - Indexing Exclusions (files accessible via @ mention but excluded from search)
+*-evaluation.md
+*-guide.md
+tool-setup-reference.md
+getting-started.md
+"
+  local indexing_ignore_file="$PROJECT_ROOT/.cursorindexingignore"
+  if [ ! -f "$indexing_ignore_file" ]; then
+    echo "$indexing_ignore_content" > "$indexing_ignore_file"
+    echo "  + .cursorindexingignore (created)"
+  elif ! grep -q "Planifest - Indexing Exclusions" "$indexing_ignore_file"; then
+    echo "$indexing_ignore_content" >> "$indexing_ignore_file"
+    echo "  + .cursorindexingignore (appended Planifest rules)"
+  fi
 }
 
 setup_tool() {
