@@ -305,7 +305,7 @@ Organized by initiative. Each initiative gets a subfolder. This is where humans 
 plan/
 +-- {initiative-id}/
     +-- initiative-brief.md          <- Human input (start here)
-    +-- planifest.md                 <- Validated plan (orchestrator output)
+    +-- design.md                 <- Validated plan (orchestrator output)
     +-- pipeline-run.md              <- Audit trail (per run)
     +-- pipeline-run-phase-2.md      <- Phase 2 audit (if phased)
     |
@@ -330,7 +330,7 @@ plan/
 1. **Initiative ID** follows the format `{0000000}-{kebab-case-name}` - a 7-digit zero-padded number prefix for chronological ordering, followed by a human-chosen kebab-case name.
 2. **No nesting** - specs, ADRs, and supporting docs are flat within the initiative folder. One level of subfolders only (adr/).
 3. **No code** - nothing executable lives in `plan/`. If it runs, it belongs in `src/`.
-4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `planifest.md` is updated per phase, not duplicated.
+4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `design.md` is updated per phase, not duplicated.
 5. **ADRs** are numbered sequentially. Never renumber. Superseded ADRs stay with `status: superseded`.
 
 ---
@@ -370,7 +370,7 @@ src/
 ## How the Three Folders Connect
 
 ```
-plan/current/planifest.md
+plan/current/design.md
     +-- lists component IDs -> src/{component-id}/component.yml
                                     +-- references initiative -> plan/
 
@@ -385,7 +385,7 @@ plan/current/openapi-spec.yaml
 ```
 
 The relationship is bidirectional:
-- `planifest.md` lists all component IDs
+- `design.md` lists all component IDs
 - Each `component.yml` references its initiative ID
 - The plan describes WHAT; the code IS the WHAT
 
