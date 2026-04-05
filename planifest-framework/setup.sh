@@ -444,7 +444,10 @@ setup_tool() {
   fi
 
   # Create boot file (if tool defines one)
-  if [ -n "$TOOL_BOOT_FILE" ]; then
+  if [ -n "${TOOL_BOOT_FILE:-}" ]; then
+    if [ -z "${TOOL_BOOT_CONTENT:-}" ] && [ -n "${TOOL_BOOT_TEMPLATE:-}" ]; then
+      TOOL_BOOT_CONTENT=$(cat "$SCRIPT_DIR/../$TOOL_BOOT_TEMPLATE")
+    fi
     write_boot_file "$PROJECT_ROOT/$TOOL_BOOT_FILE" "$TOOL_BOOT_CONTENT"
   fi
 

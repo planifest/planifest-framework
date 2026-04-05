@@ -491,7 +491,12 @@ function Invoke-PlanifestSetup {
 
     # Create boot file (if tool defines one)
     if ($toolConfig.BootFile) {
-        Write-PlanifestBootFile -RelPath $toolConfig.BootFile -Content $toolConfig.BootContent
+        $bootContent = $toolConfig.BootContent
+        if (-not $bootContent -and $toolConfig.BootTemplate) {
+            $bootContentPath = Join-Path $ProjectRoot $toolConfig.BootTemplate
+            $bootContent = Get-Content -Raw -Path $bootContentPath
+        }
+        Write-PlanifestBootFile -RelPath $toolConfig.BootFile -Content $bootContent
     }
 
     Write-Host "  Done."
