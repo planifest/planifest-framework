@@ -1,6 +1,8 @@
 ---
 name: planifest-validate-agent
 description: Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.
+bundle_templates: []
+bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-standards.md, database-standards.md]
 ---
 
 # Planifest - validate-agent

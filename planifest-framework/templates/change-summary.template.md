@@ -1,3 +1,9 @@
+---
+title: "Change Summary - {{change-title}}"
+summary: "High-level summary of what was accomplished in this iteration."
+status: "active"
+version: "0.1.0"
+---
 # Change Summary - {{change-title}}
 
 **Skill:** [change-agent](../skills/change-agent-SKILL.md)
@@ -38,7 +44,7 @@
 
 ## Artifacts Updated
 
-- [ ] component.json version bumped
+- [ ] component.yml version bumped
 - [ ] Design spec updated (if deviation from spec)
 - [ ] ADR created (if architectural decision)
 - [ ] Data contract updated (if schema change)

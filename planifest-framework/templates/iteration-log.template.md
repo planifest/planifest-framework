@@ -1,3 +1,9 @@
+---
+title: "Iteration Log - {{initiative-id}}"
+summary: "Execution log for the agent session."
+status: "active"
+version: "0.1.0"
+---
 # Iteration Log - {{initiative-id}}
 
 **Skill:** [docs-agent](../skills/planifest-docs-agent/SKILL.md) (or whichever agent completes the final iteration step)
@@ -38,7 +44,7 @@
 
 ## Quirks
 
-{{anything unusual noticed during the run - written to docs/quirks.md and component.json}}
+{{anything unusual noticed during the run - written to docs/quirks.md and component.yml}}
 
 ---
 

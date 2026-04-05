@@ -35,7 +35,7 @@ The orchestrator must confirm all four before this workflow is used:
 
 3. **Validate.** Run CI checks (lint, typecheck, test, build). Self-correct up to 3 times. If CI still fails after 3 attempts, escalate to the Change Pipeline.
 
-4. **Update `component.json`.**
+4. **Update `component.yml`.**
    - Increment the patch version (e.g. `1.2.3` → `1.2.4`)
    - Update `metadata.updatedAt` to today's ISO-8601 date
 
@@ -51,7 +51,7 @@ The orchestrator must confirm all four before this workflow is used:
    ```
    fix(fast-path): {description}
    ```
-   The pre-push hook and CI workflow recognise this prefix and require only `component.json` or `plan/changelog/` to be updated — not full `plan/` or `docs/` changes.
+   The pre-push hook and CI workflow recognise this prefix and require only `component.yml` or `plan/changelog/` to be updated — not full `plan/` or `docs/` changes.
 
 ## What is NOT touched
 

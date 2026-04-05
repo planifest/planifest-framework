@@ -58,7 +58,7 @@ repo/
 │
 ├── src/              ← Code (organized by component)
 │                       Implementation, tests, config, manifests.
-│                       Each component has a component.json at its root.
+│                       Each component has a component.yml at its root.
 │
 └── planifest-docs/        ← Project documentation (for humans, not agents)
                         Architecture notes, research, roadmap.

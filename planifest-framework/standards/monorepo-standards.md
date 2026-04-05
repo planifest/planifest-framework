@@ -9,13 +9,13 @@
 ```
 src/
 ├── {component-a}/
-│   ├── component.json
+│   ├── component.yml
 │   ├── package.json (or equivalent)
 │   ├── src/
 │   ├── tests/
 │   └── docs/
 ├── {component-b}/
-│   ├── component.json
+│   ├── component.yml
 │   ├── ...
 └── shared/
     ├── types/          — shared type definitions
@@ -54,7 +54,7 @@ src/
 
 ## 5. Versioning
 
-- Each component has its own version in `component.json`
+- Each component has its own version in `component.yml`
 - Shared packages follow semver independently
 - Breaking changes to shared packages require updating all consumers in the same PR
 

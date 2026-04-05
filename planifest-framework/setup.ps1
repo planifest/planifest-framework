@@ -49,6 +49,7 @@ function Copy-PlanifestSkills {
             $skillMdPath = Join-Path $destDir "SKILL.md"
             $skillContent = Get-Content -Path $skillMdPath -Raw
             $skillContent = $skillContent -replace '\.\./templates/', './assets/templates/'
+            $skillContent = $skillContent -replace '\.\./standards/reference/', './references/reference/'
             $skillContent = $skillContent -replace '\.\./standards/', './references/'
             $skillContent = $skillContent -replace '\.\./schemas/', './assets/schemas/'
             Set-Content -Path $skillMdPath -Value $skillContent -NoNewline -Encoding UTF8
@@ -62,14 +63,38 @@ function Copy-PlanifestSkills {
                 }
             }
 
-            # Bundle shared resources directly into the skill
+            # Parse bundle_templates and bundle_standards from SKILL.md frontmatter
+            $rawContent = Get-Content -Path $srcSkillMd -Raw
+            $bundleTemplates = @()
+            $bundleStandards = @()
+            if ($rawContent -match '(?m)^bundle_templates:\s*\[([^\]]*)\]') {
+                $bundleTemplates = $Matches[1].Trim() -split '\s*,\s*' | Where-Object { $_ }
+            }
+            if ($rawContent -match '(?m)^bundle_standards:\s*\[([^\]]*)\]') {
+                $bundleStandards = $Matches[1].Trim() -split '\s*,\s*' | Where-Object { $_ }
+            }
+
+            # Bundle only declared templates (or all if no manifest found)
             $templatesSrc = Join-Path $ScriptDir "templates"
             if (Test-Path $templatesSrc) {
                 $destTemplates = Join-Path $destDir "assets\templates"
                 New-Item -ItemType Directory -Path $destTemplates -Force | Out-Null
-                Copy-Item -Path "$templatesSrc\*" -Destination $destTemplates -Recurse -Force
+                if ($bundleTemplates.Count -gt 0) {
+                    foreach ($tpl in $bundleTemplates) {
+                        $tplPath = Join-Path $templatesSrc $tpl
+                        if (Test-Path $tplPath) {
+                            Copy-Item -Path $tplPath -Destination $destTemplates -Force
+                        }
+                    }
+                    Write-Host "    templates: selective ($($bundleTemplates.Count) files)"
+                }
+                else {
+                    Copy-Item -Path "$templatesSrc\*" -Destination $destTemplates -Recurse -Force
+                    Write-Host "    templates: all (no manifest)"
+                }
             }
 
+            # Always bundle schemas (small, universally needed)
             $schemasSrc = Join-Path $ScriptDir "schemas"
             if (Test-Path $schemasSrc) {
                 $destSchemas = Join-Path $destDir "assets\schemas"
@@ -77,11 +102,27 @@ function Copy-PlanifestSkills {
                 Copy-Item -Path "$schemasSrc\*" -Destination $destSchemas -Recurse -Force
             }
 
+            # Bundle only declared standards (or all top-level if no manifest found)
             $standardsSrc = Join-Path $ScriptDir "standards"
             if (Test-Path $standardsSrc) {
                 $destRefs = Join-Path $destDir "references"
                 New-Item -ItemType Directory -Path $destRefs -Force | Out-Null
-                Copy-Item -Path "$standardsSrc\*" -Destination $destRefs -Recurse -Force
+                if ($bundleStandards.Count -gt 0) {
+                    foreach ($std in $bundleStandards) {
+                        $stdPath = Join-Path $standardsSrc $std
+                        if (Test-Path $stdPath) {
+                            Copy-Item -Path $stdPath -Destination $destRefs -Force
+                        }
+                    }
+                    Write-Host "    standards: selective ($($bundleStandards.Count) files)"
+                }
+                else {
+                    # No manifest — copy all top-level standards (skip reference/ subdirectory)
+                    Get-ChildItem -Path $standardsSrc -File | ForEach-Object {
+                        Copy-Item -Path $_.FullName -Destination $destRefs -Force
+                    }
+                    Write-Host "    standards: all top-level (no manifest)"
+                }
             }
         }
     }
@@ -189,7 +230,7 @@ function Initialize-PlanifestRepo {
         Set-Content -Path $srcReadme -Value @'
 # src/
 
-Components live here. Each component is a subfolder with a `component.json` manifest.
+Components live here. Each component is a subfolder with a `component.yml` manifest.
 
 See [planifest/spec/initiative-structure.md](../planifest/spec/initiative-structure.md) for the canonical layout.
 '@ -Encoding UTF8
@@ -301,7 +342,7 @@ Organized by component. Each component is a subfolder at the top level of `src/`
 ```
 src/
 +-- {component-id}/
-    +-- component.json               <- Component manifest (from template)
+    +-- component.yml               <- Component manifest (from template)
     +-- package.json                  <- (or equivalent for the stack)
     |
     +-- src/                          <- Implementation (structure varies by stack)
@@ -318,11 +359,11 @@ src/
 
 ### Path Rules - src/
 
-1. **Component ID** is kebab-case, matches the `id` in `component.json`.
-2. **component.json is mandatory** - every component has one. Read it before any work; update it after every build.
+1. **Component ID** is kebab-case, matches the `id` in `component.yml`.
+2. **component.yml is mandatory** - every component has one. Read it before any work; update it after every build.
 3. **Component-specific docs** live with the component at `src/{component-id}/docs/`. These describe the component's data contract, migrations, and technical specifics.
-4. **Initiative-level docs** live in `plan/`. The component's `component.json` references the initiative via the `initiative` field.
-5. **Existing components** that predate Planifest are retrofitted by adding a `component.json` at their root.
+4. **Initiative-level docs** live in `plan/`. The component's `component.yml` references the initiative via the `initiative` field.
+5. **Existing components** that predate Planifest are retrofitted by adding a `component.yml` at their root.
 
 ---
 
@@ -330,7 +371,7 @@ src/
 
 ```
 plan/current/planifest.md
-    +-- lists component IDs -> src/{component-id}/component.json
+    +-- lists component IDs -> src/{component-id}/component.yml
                                     +-- references initiative -> plan/
 
 plan/current/design-spec.md
@@ -345,7 +386,7 @@ plan/current/openapi-spec.yaml
 
 The relationship is bidirectional:
 - `planifest.md` lists all component IDs
-- Each `component.json` references its initiative ID
+- Each `component.yml` references its initiative ID
 - The plan describes WHAT; the code IS the WHAT
 
 ---
@@ -357,7 +398,7 @@ If the repo already has code:
 1. Drop `planifest/` into the repo root
 2. Create `plan/` for the first initiative
 3. Move existing components under `src/` (or leave them if they're already there)
-4. Add a `component.json` to each existing component
+4. Add a `component.yml` to each existing component
 5. The orchestrator's retrofit mode will read the codebase and infer the existing architecture
 
 ---
@@ -365,6 +406,57 @@ If the repo already has code:
 *Templates for each file are in [planifest/templates/](../templates/). Skills reference these paths.*
 '@ -Encoding UTF8
         Write-Host "  + plan/initiative-structure.md (created)"
+    }
+
+    # Add tool ignore rules to keep context windows lean
+    $ignoreContent = @"
+
+# Planifest - Token Reduction (keeps agent semantic search from bloating context)
+plan/_archive/
+node_modules/
+dist/
+build/
+out/
+.next/
+"@
+
+    foreach ($ignoreFile in @('.cursorignore', '.claudeignore', '.windsurfignore', '.clineignore')) {
+        $ignorePath = Join-Path $ProjectRoot $ignoreFile
+        if (-not (Test-Path $ignorePath)) {
+            Set-Content -Path $ignorePath -Value $ignoreContent -Encoding UTF8
+            Write-Host "  + $ignoreFile (created)"
+        }
+        else {
+            $existing = Get-Content -Path $ignorePath -Raw
+            if ($existing -notmatch "Planifest - Token Reduction") {
+                Add-Content -Path $ignorePath -Value $ignoreContent -Encoding UTF8
+                Write-Host "  + $ignoreFile (appended Planifest ignore rules)"
+            }
+        }
+    }
+
+    # Deploy .cursorindexingignore — excludes large reference docs from semantic
+    # search indexing but keeps them accessible via explicit @ mention
+    $indexingIgnoreContent = @"
+
+# Planifest - Indexing Exclusions (files accessible via @ mention but excluded from search)
+*-evaluation.md
+*-guide.md
+tool-setup-reference.md
+getting-started.md
+"@
+
+    $indexingIgnorePath = Join-Path $ProjectRoot ".cursorindexingignore"
+    if (-not (Test-Path $indexingIgnorePath)) {
+        Set-Content -Path $indexingIgnorePath -Value $indexingIgnoreContent -Encoding UTF8
+        Write-Host "  + .cursorindexingignore (created)"
+    }
+    else {
+        $existing = Get-Content -Path $indexingIgnorePath -Raw
+        if ($existing -notmatch "Planifest - Indexing Exclusions") {
+            Add-Content -Path $indexingIgnorePath -Value $indexingIgnoreContent -Encoding UTF8
+            Write-Host "  + .cursorindexingignore (appended Planifest rules)"
+        }
     }
 }
 

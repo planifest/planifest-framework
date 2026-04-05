@@ -36,6 +36,7 @@ copy_skills() {
       sed -i.bak \
         -e 's|\.\./templates/|./assets/templates/|g' \
         -e 's|\.\./standards/|./references/|g' \
+        -e 's|\.\./standards/reference/|./references/reference/|g' \
         -e 's|\.\./schemas/|./assets/schemas/|g' \
         "$dest_dir/SKILL.md" && rm -f "$dest_dir/SKILL.md.bak"
 
@@ -47,18 +48,56 @@ copy_skills() {
         fi
       done
       
-      # Bundle shared resources directly into the skill
+      # Selective bundling: read bundle_templates and bundle_standards from SKILL.md frontmatter
+      local skill_md="$skill_dir/SKILL.md"
+      
+      # Parse bundle_templates from frontmatter
+      local bundle_templates
+      bundle_templates=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep '^bundle_templates:' | sed 's/bundle_templates: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//')
+      
+      # Parse bundle_standards from frontmatter
+      local bundle_standards
+      bundle_standards=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep '^bundle_standards:' | sed 's/bundle_standards: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//')
+      
+      # Bundle only declared templates (or all if no manifest found)
       if [ -d "$SCRIPT_DIR/templates" ]; then
         mkdir -p "$dest_dir/assets/templates"
-        cp -r "$SCRIPT_DIR/templates"/* "$dest_dir/assets/templates/"
+        if [ -n "$bundle_templates" ]; then
+          for tpl in $bundle_templates; do
+            local tpl_path="$SCRIPT_DIR/templates/$tpl"
+            if [ -f "$tpl_path" ]; then
+              cp "$tpl_path" "$dest_dir/assets/templates/"
+            fi
+          done
+          echo "    templates: selective ($(echo $bundle_templates | wc -w | tr -d ' ') files)"
+        else
+          cp -r "$SCRIPT_DIR/templates"/* "$dest_dir/assets/templates/"
+          echo "    templates: all (no manifest)"
+        fi
       fi
+      
+      # Always bundle schemas (small, universally needed)
       if [ -d "$SCRIPT_DIR/schemas" ]; then
         mkdir -p "$dest_dir/assets/schemas"
         cp -r "$SCRIPT_DIR/schemas"/* "$dest_dir/assets/schemas/"
       fi
+      
+      # Bundle only declared standards (or all if no manifest found)
       if [ -d "$SCRIPT_DIR/standards" ]; then
         mkdir -p "$dest_dir/references"
-        cp -r "$SCRIPT_DIR/standards"/* "$dest_dir/references/"
+        if [ -n "$bundle_standards" ]; then
+          for std in $bundle_standards; do
+            local std_path="$SCRIPT_DIR/standards/$std"
+            if [ -f "$std_path" ]; then
+              cp "$std_path" "$dest_dir/references/"
+            fi
+          done
+          echo "    standards: selective ($(echo $bundle_standards | wc -w | tr -d ' ') files)"
+        else
+          # No manifest — copy all top-level standards (skip reference/ subdirectory)
+          find "$SCRIPT_DIR/standards" -maxdepth 1 -type f -exec cp {} "$dest_dir/references/" \;
+          echo "    standards: all top-level (no manifest)"
+        fi
       fi
     fi
   done
@@ -160,7 +199,7 @@ initialize_repo() {
     cat << 'EOF' > "$src_dir/README.md"
 # src/
 
-Components live here. Each component is a subfolder with a `component.json` manifest.
+Components live here. Each component is a subfolder with a `component.yml` manifest.
 
 See [planifest/spec/initiative-structure.md](../planifest/spec/initiative-structure.md) for the canonical layout.
 EOF
@@ -270,7 +309,7 @@ Organized by component. Each component is a subfolder at the top level of `src/`
 ```
 src/
 â””â”€â”€ {component-id}/
-    â”œâ”€â”€ component.json               â† Component manifest (from template)
+    â”œâ”€â”€ component.yml               â† Component manifest (from template)
     â”œâ”€â”€ package.json                  â† (or equivalent for the stack)
     â”‚
     â”œâ”€â”€ src/                          â† Implementation (structure varies by stack)
@@ -287,11 +326,11 @@ src/
 
 ### Path Rules â€” src/
 
-1. **Component ID** is kebab-case, matches the `id` in `component.json`.
-2. **component.json is mandatory** â€” every component has one. Read it before any work; update it after every build.
+1. **Component ID** is kebab-case, matches the `id` in `component.yml`.
+2. **component.yml is mandatory** â€” every component has one. Read it before any work; update it after every build.
 3. **Component-specific docs** live with the component at `src/{component-id}/docs/`. These describe the component's data contract, migrations, and technical specifics.
-4. **Initiative-level docs** live in `plan/`. The component's `component.json` references the initiative via the `initiative` field.
-5. **Existing components** that predate Planifest are retrofitted by adding a `component.json` at their root.
+4. **Initiative-level docs** live in `plan/`. The component's `component.yml` references the initiative via the `initiative` field.
+5. **Existing components** that predate Planifest are retrofitted by adding a `component.yml` at their root.
 
 ---
 
@@ -299,7 +338,7 @@ src/
 
 ```
 plan/current/planifest.md
-    â””â”€â”€ lists component IDs â†’ src/{component-id}/component.json
+    â””â”€â”€ lists component IDs â†’ src/{component-id}/component.yml
                                     â””â”€â”€ references initiative â†’ plan/
 
 plan/current/design-spec.md
@@ -314,7 +353,7 @@ plan/current/openapi-spec.yaml
 
 The relationship is bidirectional:
 - `planifest.md` lists all component IDs
-- Each `component.json` references its initiative ID
+- Each `component.yml` references its initiative ID
 - The plan describes WHAT; the code IS the WHAT
 
 ---
@@ -326,7 +365,7 @@ If the repo already has code:
 1. Drop `planifest/` into the repo root
 2. Create `plan/` for the first initiative
 3. Move existing components under `src/` (or leave them if they're already there)
-4. Add a `component.json` to each existing component
+4. Add a `component.yml` to each existing component
 5. The orchestrator's retrofit mode will read the codebase and infer the existing architecture
 
 ---
@@ -334,6 +373,44 @@ If the repo already has code:
 *Templates for each file are in [planifest/templates/](../templates/). Skills reference these paths.*
 EOF
     echo "  + plan/initiative-structure.md (created)"
+  fi
+
+  # Add tool ignore rules to keep context windows lean
+  local ignore_content="
+# Planifest - Token Reduction (keeps agent semantic search from bloating context)
+plan/_archive/
+node_modules/
+dist/
+build/
+out/
+.next/
+"
+  for ignore_file in ".cursorignore" ".claudeignore" ".windsurfignore" ".clineignore"; do
+    if [ ! -f "$PROJECT_ROOT/$ignore_file" ]; then
+      echo "$ignore_content" > "$PROJECT_ROOT/$ignore_file"
+      echo "  + $ignore_file (created)"
+    elif ! grep -q "Planifest - Token Reduction" "$PROJECT_ROOT/$ignore_file"; then
+      echo "$ignore_content" >> "$PROJECT_ROOT/$ignore_file"
+      echo "  + $ignore_file (appended Planifest ignore rules)"
+    fi
+  done
+
+  # Deploy .cursorindexingignore — excludes large reference docs from semantic
+  # search indexing but keeps them accessible via explicit @ mention
+  local indexing_ignore_content="
+# Planifest - Indexing Exclusions (files accessible via @ mention but excluded from search)
+*-evaluation.md
+*-guide.md
+tool-setup-reference.md
+getting-started.md
+"
+  local indexing_ignore_file="$PROJECT_ROOT/.cursorindexingignore"
+  if [ ! -f "$indexing_ignore_file" ]; then
+    echo "$indexing_ignore_content" > "$indexing_ignore_file"
+    echo "  + .cursorindexingignore (created)"
+  elif ! grep -q "Planifest - Indexing Exclusions" "$indexing_ignore_file"; then
+    echo "$indexing_ignore_content" >> "$indexing_ignore_file"
+    echo "  + .cursorindexingignore (appended Planifest rules)"
   fi
 }
 
