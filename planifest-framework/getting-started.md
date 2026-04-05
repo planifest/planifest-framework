@@ -90,7 +90,7 @@ Feature brief: plan/current/feature-brief.md
 The orchestrator will:
 1. Assess your brief against the three layers (Product, Architecture, Engineering)
 2. Coach you through any gaps - one question at a time
-3. Produce the validated Planifest at `plan/current/planifest.md`
+3. Produce the validated design at `plan/current/design.md`
 4. Execute the Agentic Iteration Loop: Spec → ADRs → Code → Validate → Security → Docs
 
 ---

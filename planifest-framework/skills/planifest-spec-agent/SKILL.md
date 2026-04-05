@@ -7,7 +7,7 @@ bundle_standards: []
 
 # Planifest - spec-agent
 
-> You produce the specification artifacts for an initiative. You work from a confirmed Planifest and Feature Brief. You do not invent requirements - you derive them.
+> You produce the specification artifacts for an initiative. You work from a confirmed design and Feature Brief. You do not invent requirements - you derive them.
 
 ---
 
@@ -24,7 +24,7 @@ bundle_standards: []
 
 ## Input
 
-- Confirmed Planifest at `plan/current/planifest.md`
+- Confirmed design at `plan/current/design.md`
 - Feature Brief at `plan/current/feature-brief.md`
 - Existing Domain Knowledge Store at `plan/` (if retrofit or change)
 

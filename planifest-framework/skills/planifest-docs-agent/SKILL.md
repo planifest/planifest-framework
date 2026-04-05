@@ -26,7 +26,7 @@ bundle_standards: []
 
 - All artifacts produced by prior phases at `plan/`
 - The implementation at `src/{component-id}/` (all components in the initiative)
-- The Planifest at `plan/current/planifest.md`
+- The design at `plan/current/design.md`
 
 ---
 
