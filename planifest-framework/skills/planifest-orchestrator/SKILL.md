@@ -1,7 +1,7 @@
 ---
 name: planifest-orchestrator
 description: Guides a human from an initial idea to a complete specification, then executes the Planifest pipeline to build it. Use this for new initiatives or full pipeline runs.
-bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.md, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md]
+bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.yml, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md]
 bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md]
 ---
 
@@ -54,7 +54,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Begin Phase 2 (ADRs) | Load the `planifest-adr-agent` skill |
 | Produce an ADR | `planifest-framework/templates/adr.template.md` |
 | Begin Phase 3 (code generation) | Load the `planifest-codegen-agent` skill |
-| Create or update a component manifest | `planifest-framework/templates/component.template.md` |
+| Create or update a component manifest | `planifest-framework/templates/component.template.yml` |
 | Begin Phase 4 (validation) | Load the `planifest-validate-agent` skill |
 | Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
 | Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
@@ -101,11 +101,11 @@ If the Fast Path is engaged:
 1. **Do not** ask for a Feature Brief, Execution Plan, or ADR
 2. **Implement** the fix directly
 3. **Validate** — run CI checks (lint, typecheck, test, build) via the validate-agent or equivalent
-4. **Update** `component.md` with a patch version bump and updated `metadata.updatedAt`
+4. **Update** `component.yml` with a patch version bump and updated `metadata.updatedAt`
 5. **Log** the change: append an entry to `plan/changelog/{initiative-id}-{YYYY-MM-DD}.md`
 6. **Commit** using the fast-path convention: `fix(fast-path): {description}`
 
-The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and relax the documentation check to require only `component.md` or a changelog update — not full `plan/` or `docs/` changes.
+The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and relax the documentation check to require only `component.yml` or a changelog update — not full `plan/` or `docs/` changes.
 
 ---
 
@@ -408,7 +408,7 @@ The coaching conversation in Phase 0 and the pipeline phases are the same regard
 **Retrofit** - An existing codebase exists. Before coaching, perform a structured discovery:
 
 1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — these reveal the stack
-2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.md` for each.
+2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.yml` for each.
 3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
 4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists (if applicable).
 5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record these in the design spec as existing constraints.
@@ -454,7 +454,7 @@ You do not need to re-run Phase 0 coaching for a change — the specification al
 - [Risk Register](../templates/risk-register.template.md) - spec-agent output, updated by any agent
 - [Domain Glossary](../templates/domain-glossary.template.md) - spec-agent output, updated by any agent
 - [Data Contract](../templates/data-contract.template.md) - codegen-agent output
-- [Component Manifest](../templates/component.template.md) - codegen-agent output ([guide](../templates/component-guide.md))
+- [Component Manifest](../templates/component.template.yml) - codegen-agent output ([guide](../templates/component-guide.md))
 - [Iteration Log](../templates/iteration-log.template.md) - written at end of every Agentic Iteration Loop
 
 **Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-change-agent`, `planifest-docs-agent`

@@ -1,7 +1,7 @@
 ---
 name: planifest-codegen-agent
 description: Generates the full implementation from the specification artifacts - application code, tests, infrastructure, configuration. Invoked during Phase 3.
-bundle_templates: [component.template.md, data-contract.template.md]
+bundle_templates: [component.template.yml, data-contract.template.md]
 bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md]
 ---
 
@@ -27,7 +27,7 @@ bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summar
 **Precision Reading Protocol:**
 Do not read the entire `plan/` directory unconditionally. This wastes context tokens.
 1. Scope your context by navigating precisely:
-   - Component Manifest at `src/{component-id}/component.md` - read the YAML frontmatter first to determine if the body is needed.
+   - Component Manifest at `src/{component-id}/component.yml` - read the YAML frontmatter first to determine if the body is needed.
    - Execution Plan at `plan/current/execution-plan.md` - read for architecture overview.
    - Individual Features at `plan/current/requirements/*.md` - **ONLY** read the specific requirement file you are actively implementing.
    - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable).
@@ -135,17 +135,17 @@ Between components, verify:
 - Dockerfiles must be multi-stage if the stack uses containers.
 
 **Component manifest - complete after build:**
-- After the implementation is built, update `component.md` to reflect what was actually implemented.
+- After the implementation is built, update `component.yml` to reflect what was actually implemented.
 - Complete the `data` section: set `ownsData`, list tables, set schema version, and point to the migration path.
 - Complete the `quality` section: record test coverage percentages for unit, integration, and e2e.
 - Complete the `pipeline` section: set `templateVersion` and `domainKnowledgePath`.
 - Update `metadata.updatedAt` and `metadata.lastModifiedBy`.
 - Increment `version` to `0.1.0` on first build.
-- See the [Component Template](../templates/component.template.md) for the full schema.
+- See the [Component Template](../templates/component.template.yml) for the full schema.
 
 **Quirks and tech debt:**
-- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.md`. Do not silently work around it.
-- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.md`.
+- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.yml`. Do not silently work around it.
+- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.yml`.
 
 ---
 

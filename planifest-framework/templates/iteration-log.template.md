@@ -44,7 +44,7 @@ version: "0.1.0"
 
 ## Quirks
 
-{{anything unusual noticed during the run - written to docs/quirks.md and component.md}}
+{{anything unusual noticed during the run - written to docs/quirks.md and component.yml}}
 
 ---
 

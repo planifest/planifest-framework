@@ -44,7 +44,7 @@ version: "0.1.0"
 
 ## Artifacts Updated
 
-- [ ] component.md version bumped
+- [ ] component.yml version bumped
 - [ ] Design spec updated (if deviation from spec)
 - [ ] ADR created (if architectural decision)
 - [ ] Data contract updated (if schema change)

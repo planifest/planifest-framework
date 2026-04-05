@@ -36,7 +36,7 @@ Include:
 
 ### Quirks
 
-Anything unusual the agent noticed during the run. These are also written to `quirks.md` and the component's `component.md`. Examples:
+Anything unusual the agent noticed during the run. These are also written to `quirks.md` and the component's `component.yml`. Examples:
 - "The ORM generates a LEFT JOIN where an INNER JOIN would be correct - worked around with a raw query"
 - "The test framework doesn't support parallel execution with this database driver"
 
