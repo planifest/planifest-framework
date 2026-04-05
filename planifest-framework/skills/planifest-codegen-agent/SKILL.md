@@ -110,8 +110,10 @@ Between components, verify:
 - Before writing any component that owns data, check whether a data contract exists at `src/{component-id}/docs/data-contract.md`. If one exists, implement against it. If none exists, create one there before writing any schema code.
 - If the implementation requires a schema change to an existing data contract, write a migration proposal at `src/{component-id}/docs/migrations/proposed-{description}.md` and stop. Do not modify the schema directly. This is a hard limit.
 
-**Write incrementally:**
-- Scaffold first, then implement routes/handlers, then tests, then IaC.
+**Write incrementally (Agentic TDD):**
+- Scaffold first, then define the domain models.
+- **Test-Driven Execution:** For every functional requirement, write the failing test case *first*. Next, write the implementation logic to make it pass. You are authorized to run test commands iteratively to verify semantic correctness.
+- Do not generate core application logic without a corresponding failing test.
 - Write to disk after each stage. Do not accumulate the entire implementation in memory.
 
 **Code quality:**
@@ -124,11 +126,13 @@ Between components, verify:
 **Shared types:**
 - All types shared between frontend and backend must be defined once in the shared package and imported by both. Never duplicate type definitions.
 
-**Testing:**
+**Testing & Requirement Traceability:**
+- Every functional requirement from `plan/current/requirements/` MUST have a mapped test case. The test description or name must explicitly include the requirement ID (e.g., `describe('req-001-auth: login flow', ...)`).
 - Every endpoint must have a corresponding integration test.
 - Every pure function must have a corresponding unit test.
 - For critical user flows (as identified in the design spec's acceptance criteria), write E2E tests that exercise the full request path from HTTP request to database and back.
 - Use the testing framework declared in the stack configuration.
+- Run tests iteratively yourself to boundary semantic correctness before moving to the next requirement.
 - Follow the [Testing Standards](../standards/testing-standards.md) for test structure, data management, and mocking boundaries.
 
 **Infrastructure:**

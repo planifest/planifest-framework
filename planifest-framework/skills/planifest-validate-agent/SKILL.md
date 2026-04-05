@@ -31,14 +31,15 @@ bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-s
 
 ## Process
 
-Run the project's CI checks in this order:
+Run the project's CI checks in this strict order:
 
-1. **Lint** - code style and static analysis
-2. **Type-check** - type system verification
-3. **Test** - unit tests, integration tests, contract tests
-4. **Build** - confirm the project compiles and builds cleanly
+1. **Semantic Correctness** - Verify that every functional requirement from `plan/current/requirements/` has a mapped, executing test case identifiable by its req-ID. If logic exists without a covering test, semantic validation fails.
+2. **Lint** - code style and static analysis
+3. **Type-check** - type system verification
+4. **Test** - unit tests, integration tests, contract tests (MUST pass and report the tracked req-IDs)
+5. **Build** - confirm the project compiles and builds cleanly
 
-If all checks pass -> report success, proceed to the next phase.
+If all checks pass (including semantic traceability) -> report success, proceed to the next phase.
 
 If any check fails -> self-correct:
 
