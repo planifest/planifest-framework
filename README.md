@@ -4,7 +4,7 @@
 
 Planifest is an Agile context framework for AI development. It uses Just-in-Time planning to ensure your agents build from a solid Execution Plan rather than hallucinating in the dark.
 
-Code is ephemeral; architecture is permanent. Planifest's flawless paper trail gives you the ultimate choice: seamlessly refactor what you can, or confidently rewrite what you must.
+Code is ephemeral; architecture is permanent. Planifest's paper trail gives you the ultimate choice: refactor what you can, or confidently rewrite what you must.
 
 Planifest gives AI agents the structure they need to build software that a senior engineer would approve. It treats the human as the Product Owner and Technical Architect. The agent is the Tech Lead: highly capable, but operating within constraints the human sets.
 
