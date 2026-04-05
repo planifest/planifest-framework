@@ -55,7 +55,7 @@ The orchestrator must confirm all four before this workflow is used:
 
 ## What is NOT touched
 
-- `plan/current/planifest.md` — no modification
+- `plan/current/design.md` — no modification
 - `plan/current/design-spec.md` — no modification
 - `plan/current/adr/` — no new ADRs
 - `docs/` — no modification (unless the fix directly corrects a documentation error)

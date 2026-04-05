@@ -272,7 +272,7 @@ Organized by initiative. Each initiative gets a subfolder. This is where humans 
 plan/
 â””â”€â”€ {initiative-id}/
     â”œâ”€â”€ initiative-brief.md          â† Human input (start here)
-    â”œâ”€â”€ planifest.md                 â† Validated plan (orchestrator output)
+    â”œâ”€â”€ design.md                 â† Validated plan (orchestrator output)
     â”œâ”€â”€ pipeline-run.md              â† Audit trail (per run)
     â”œâ”€â”€ pipeline-run-phase-2.md      â† Phase 2 audit (if phased)
     â”‚
@@ -297,7 +297,7 @@ plan/
 1. **Initiative ID** follows the format `{0000000}-{kebab-case-name}` — a 7-digit zero-padded number prefix for chronological ordering, followed by a human-chosen kebab-case name.
 2. **No nesting** â€” specs, ADRs, and supporting docs are flat within the initiative folder. One level of subfolders only (adr/).
 3. **No code** â€” nothing executable lives in `plan/`. If it runs, it belongs in `src/`.
-4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `planifest.md` is updated per phase, not duplicated.
+4. **Phased initiatives** append the phase number: `design-spec-phase-2.md`, `pipeline-run-phase-2.md`. The `design.md` is updated per phase, not duplicated.
 5. **ADRs** are numbered sequentially. Never renumber. Superseded ADRs stay with `status: superseded`.
 
 ---
@@ -337,7 +337,7 @@ src/
 ## How the Three Folders Connect
 
 ```
-plan/current/planifest.md
+plan/current/design.md
     â””â”€â”€ lists component IDs â†’ src/{component-id}/component.yml
                                     â””â”€â”€ references initiative â†’ plan/
 
@@ -352,7 +352,7 @@ plan/current/openapi-spec.yaml
 ```
 
 The relationship is bidirectional:
-- `planifest.md` lists all component IDs
+- `design.md` lists all component IDs
 - Each `component.yml` references its initiative ID
 - The plan describes WHAT; the code IS the WHAT
 
@@ -444,7 +444,10 @@ setup_tool() {
   fi
 
   # Create boot file (if tool defines one)
-  if [ -n "$TOOL_BOOT_FILE" ]; then
+  if [ -n "${TOOL_BOOT_FILE:-}" ]; then
+    if [ -z "${TOOL_BOOT_CONTENT:-}" ] && [ -n "${TOOL_BOOT_TEMPLATE:-}" ]; then
+      TOOL_BOOT_CONTENT=$(cat "$SCRIPT_DIR/../$TOOL_BOOT_TEMPLATE")
+    fi
     write_boot_file "$PROJECT_ROOT/$TOOL_BOOT_FILE" "$TOOL_BOOT_CONTENT"
   fi
 

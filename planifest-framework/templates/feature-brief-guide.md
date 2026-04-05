@@ -104,7 +104,7 @@ How you know the initiative is done. These become the orchestrator's exit criter
 1. You write the brief and save it to `plan/current/feature-brief.md`
 2. You tell the orchestrator to load it
 3. The orchestrator assesses it against the three layers (Product, Architecture, Engineering) and coaches you through any gaps - one question at a time
-4. Once complete, the orchestrator produces the Planifest (the validated plan) and begins the Agentic Iteration Loop
+4. Once complete, the orchestrator produces the Planifest (the validated design) and begins the Agentic Iteration Loop
 
 ---
 

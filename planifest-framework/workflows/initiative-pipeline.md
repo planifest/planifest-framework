@@ -19,7 +19,7 @@ Execute the full Planifest pipeline for a new initiative.
    - Read the feature brief
    - Assess against the three layers: Product, Architecture, Engineering
    - Coach the human through gaps - one question at a time, in priority order
-   - Produce the validated Planifest at `plan/current/planifest.md`
+   - Produce the validated design at `plan/current/design.md`
    - **Gate:** Human confirms the Planifest before proceeding
 3. **Phase 1 - Specification** (invoke spec-agent)
    - Produce: execution plan, OpenAPI spec (if applicable), scope, risk register, domain glossary, operational model, SLO definitions, cost model

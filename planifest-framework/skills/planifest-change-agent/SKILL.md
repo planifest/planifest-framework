@@ -120,7 +120,7 @@ If the change request requires creating a new component (not just modifying exis
 
 1. **Create the component scaffold:** `src/{new-component-id}/component.yml` using the [Component Template](../templates/component.template.yml)
 2. **Write the data contract** if the component owns data: `src/{new-component-id}/docs/data-contract.md`
-3. **Update the Planifest** at `plan/current/planifest.md` to include the new component in the components list
+3. **Update the design** at `plan/current/design.md` to include the new component in the components list
 4. **Update the dependency graph** at `docs/dependency-graph.md` to show the new component's relationships
 5. **Update the component registry** at `docs/component-registry.md` to include the new component
 6. **Build the component** following the same rules as the codegen-agent (code, tests, docs, IaC)

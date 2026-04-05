@@ -26,7 +26,7 @@ bundle_standards: []
 
 - Design Specification at `plan/current/design-spec.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml`
-- Planifest at `plan/current/planifest.md` (for stack declaration)
+- design at `plan/current/design.md` (for stack declaration)
 
 ---
 
