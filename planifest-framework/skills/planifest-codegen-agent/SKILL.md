@@ -93,8 +93,9 @@ Between components, verify:
 - If building an API, the OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it - do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
-- Different stacks have different agent characteristics. The [Stack Summary](../standards/stack-summary.md) documents the trade-offs (see [full backend evaluation](../standards/reference/backend-stack-evaluation.md) for details). If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
-- For frontend stacks, the [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
+- Different stacks have different agent characteristics. The [Stack Summary](../standards/stack-summary.md) documents these trade-offs (with links to full evaluations if needed). Be deliberately attentive to known agent pitfalls:
+  - **Backend pitfalls:** missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust.
+  - **Frontend pitfalls:** `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
 **Deviation & Escalation Protocol:**
 - Software engineering is inherently discovery-driven. If a fundamental architectural blocker is identified that makes the pre-set specification flawed, you are empowered to manage it. You have two choices:
