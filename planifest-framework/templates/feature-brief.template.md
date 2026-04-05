@@ -1,3 +1,9 @@
+---
+title: "Feature Brief - {{initiative-name}}"
+summary: "The business case, scope, and product requirements for the initiative."
+status: "draft | approved"
+version: "0.1.0"
+---
 # Feature Brief - {{initiative-name}}
 
 **Initiative ID:** {{0000000}}-{{kebab-case-name}}

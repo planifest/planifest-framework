@@ -1,6 +1,8 @@
 ---
 name: planifest-codegen-agent
 description: Generates the full implementation from the specification artifacts - application code, tests, infrastructure, configuration. Invoked during Phase 3.
+bundle_templates: [component.template.yml, data-contract.template.md]
+bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md]
 ---
 
 # Planifest - codegen-agent
@@ -22,12 +24,14 @@ description: Generates the full implementation from the specification artifacts 
 
 ## Input
 
-- Component Manifest at `src/{component-id}/component.json` - read this first for stack, purpose, scope, and contract. See [Component Manifest Guide](../templates/component-manifest-guide.md)
-- Design Specification at `plan/current/design-spec.md`
-- OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
-- ADRs at `plan/current/adr/`
-- Planifest at `plan/current/planifest.md` (for stack declaration)
-- Domain Glossary at `plan/current/domain-glossary.md`
+**Precision Reading Protocol:**
+Do not read the entire `plan/` directory unconditionally. This wastes context tokens.
+1. Scope your context by navigating precisely:
+   - Component Manifest at `src/{component-id}/component.yml` - read the YAML frontmatter first to determine if the body is needed.
+   - Execution Plan at `plan/current/execution-plan.md` - read for architecture overview.
+   - Individual Features at `plan/current/requirements/*.md` - **ONLY** read the specific requirement file you are actively implementing.
+   - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable).
+   - Domain Glossary at `plan/current/domain-glossary.md`.
 - Data Contracts at `src/{component-id}/docs/data-contract.md` (if they exist)
 - Code Quality Standards at [code-quality-standards.md](../standards/code-quality-standards.md)
 
@@ -89,8 +93,9 @@ Between components, verify:
 - If building an API, the OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it - do not override it silently.
 - The stack configuration defines the technology. Do not introduce frameworks, libraries, or tools not declared in it.
-- Different stacks have different agent characteristics. The [Backend Stack Evaluation](../standards/backend-stack-evaluation.md) documents the trade-offs. If the declared stack has known agent pitfalls (e.g. missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust), be deliberately attentive to them.
-- For frontend stacks, the [Frontend Stack Evaluation](../standards/frontend-stack-evaluation.md) documents the trade-offs. Key frontend pitfalls: `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
+- Different stacks have different agent characteristics. The [Stack Summary](../standards/stack-summary.md) documents these trade-offs (with links to full evaluations if needed). Be deliberately attentive to known agent pitfalls:
+  - **Backend pitfalls:** missing `await` in Node.js, `any` escape hatch in TypeScript, verbose error messages in Rust.
+  - **Frontend pitfalls:** `useEffect` dependency arrays in React, stale closures, state management sprawl, hydration mismatches in SSR frameworks, and generic "AI slop" visual output without constrained design vocabulary (e.g. shadcn/ui).
 
 **Deviation & Escalation Protocol:**
 - Software engineering is inherently discovery-driven. If a fundamental architectural blocker is identified that makes the pre-set specification flawed, you are empowered to manage it. You have two choices:
@@ -131,17 +136,17 @@ Between components, verify:
 - Dockerfiles must be multi-stage if the stack uses containers.
 
 **Component manifest - complete after build:**
-- After the implementation is built, update `component.json` to reflect what was actually implemented.
+- After the implementation is built, update `component.yml` to reflect what was actually implemented.
 - Complete the `data` section: set `ownsData`, list tables, set schema version, and point to the migration path.
 - Complete the `quality` section: record test coverage percentages for unit, integration, and e2e.
 - Complete the `pipeline` section: set `templateVersion` and `domainKnowledgePath`.
 - Update `metadata.updatedAt` and `metadata.lastModifiedBy`.
 - Increment `version` to `0.1.0` on first build.
-- See the [Component Manifest Template](../templates/component-manifest.template.json) for the full schema.
+- See the [Component Template](../templates/component.template.yml) for the full schema.
 
 **Quirks and tech debt:**
-- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.json`. Do not silently work around it.
-- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.json`.
+- If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.yml`. Do not silently work around it.
+- If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.yml`.
 
 ---
 

@@ -1,6 +1,8 @@
 ---
 name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
+bundle_templates: [iteration-log.template.md, recommendations.template.md]
+bundle_standards: []
 ---
 
 # Planifest - docs-agent
@@ -118,13 +120,13 @@ Perform these specific drift checks:
 |-------|----------------|---------------|----------------------|
 | API endpoints (if applicable) | OpenAPI spec | Implemented routes | Flag: missing or extra endpoints |
 | Domain terms | Domain glossary | Code variable/function names | Flag: non-glossary terms in code |
-| Component boundaries | Planifest component list | `src/` directories with `component.json` | Flag: missing or extra components |
+| Component boundaries | Planifest component list | `src/` directories with `component.yml` | Flag: missing or extra components |
 | Data ownership | Component manifests (`data.ownsData`) | Database connection/query patterns | Flag: cross-component data writes |
 | ADR compliance | ADR decisions | Implementation patterns | Flag: code that contradicts an accepted ADR |
 | Dependency direction | Dependency graph | Import/require statements | Flag: undeclared dependencies |
 
 **Legitimate absences:** Not every artifact applies to every component. These are valid reasons an artifact may not exist:
-- No `data-contract.md` if `component.json` has `ownsData: false`
+- No `data-contract.md` if `component.yml` has `ownsData: false`
 - No `quirks.md` if no quirks were discovered
 - No `tech-debt.md` if no debt was identified
 - No E2E tests if the component has no user-facing endpoints

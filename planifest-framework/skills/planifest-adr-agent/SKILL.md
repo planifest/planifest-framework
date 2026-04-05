@@ -1,6 +1,8 @@
 ---
 name: planifest-adr-agent
 description: Produces Architecture Decision Records for each significant decision in the specification. Invoked by the orchestrator during Phase 2.
+bundle_templates: [adr.template.md]
+bundle_standards: []
 ---
 
 # Planifest - adr-agent

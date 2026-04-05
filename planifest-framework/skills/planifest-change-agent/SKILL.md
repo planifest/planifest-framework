@@ -1,6 +1,8 @@
 ---
 name: planifest-change-agent
 description: Handles modifications to existing initiatives - loads domain context, implements the minimum change, validates, and updates documentation.
+bundle_templates: [component.template.yml, change-summary.template.md]
+bundle_standards: [code-quality-standards.md]
 ---
 
 # Planifest - change-agent
@@ -35,12 +37,14 @@ description: Handles modifications to existing initiatives - loads domain contex
 
 Before changing anything, read:
 
-1. `src/{component-id}/component.json` - understand the component's purpose, scope, contract, data ownership, stack, and current risk level. See [Component Manifest Guide](../templates/component-manifest-guide.md)
-2. `plan/current/execution-plan.md` - understand the full requirements
-3. `docs/component-registry.md` - understand what components exist
-4. `docs/dependency-graph.md` - understand how they relate
-5. `src/{affected-component}/docs/` - read the purpose, interface contract, dependencies, data contract, risk, and quirks for every component the change touches
-6. `plan/current/domain-glossary.md` - confirm you are using the correct terms
+**Precision Reading Protocol:**
+Do not exhaust token limits by loading all files. Read top-down selectively:
+1. `src/{component-id}/component.yml` - read the frontmatter first. Only read the body if relevant.
+2. `plan/current/execution-plan.md` - read the overview.
+3. `plan/current/requirements/*.md` - ONLY read the specific functional requirement your change affects.
+4. `docs/component-registry.md` - understand what components exist.
+5. `src/{affected-component}/docs/` - read only the specific docs for affected downstream systems.
+6. `plan/current/domain-glossary.md` - confirm you are using the correct terms.
 
 **Blast radius analysis:**
 
@@ -98,7 +102,7 @@ Run CI checks scoped to the blast radius of the change. Self-correct up to 5 tim
 
 Update every artifact affected by the change:
 
-- `component.json` - update `contract`, `risk`, `quality`, `data`, and `metadata` sections if any changed. Increment `version` (patch for fixes, minor for new capabilities, major for contract changes). Update `metadata.updatedAt`.
+- `component.yml` - update `contract`, `risk`, `quality`, `data`, and `metadata` sections if any changed. Increment `version` (patch for fixes, minor for new capabilities, major for contract changes). Update `metadata.updatedAt`.
 - `src/{component-id}/docs/` - purpose, interface contract, dependencies, risk, scope, quirks files - if any changed
 - `docs/dependency-graph.md` - if component relationships changed
 - `docs/component-registry.md` - if a component was added, removed, or its summary changed
@@ -114,7 +118,7 @@ Write `plan/changelog/{initiative-id}-<YYYY-MM-DD>.md` as the audit trail for th
 
 If the change request requires creating a new component (not just modifying existing ones):
 
-1. **Create the component scaffold:** `src/{new-component-id}/component.json` using the [Component Manifest Template](../templates/component-manifest.template.json)
+1. **Create the component scaffold:** `src/{new-component-id}/component.yml` using the [Component Template](../templates/component.template.yml)
 2. **Write the data contract** if the component owns data: `src/{new-component-id}/docs/data-contract.md`
 3. **Update the Planifest** at `plan/current/planifest.md` to include the new component in the components list
 4. **Update the dependency graph** at `docs/dependency-graph.md` to show the new component's relationships

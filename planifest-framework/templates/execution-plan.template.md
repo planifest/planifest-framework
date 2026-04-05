@@ -12,16 +12,12 @@
 
 ---
 
-## Functional Requirements
+## Functional Requirements Directory
 
-### Feature: {{feature-name}}
+Functional requirements are split into granular files to optimise agent context windows.
 
-| ID | Requirement | Source | Priority |
-|----|------------|--------|----------|
-| FR-001 | {{specific, testable requirement}} | {{user story or acceptance criterion}} | must-have |
-| FR-002 | {{specific, testable requirement}} | {{user story or acceptance criterion}} | should-have |
-
-> Repeat per feature. If the initiative is phased, this execution plan covers only the features in this phase.
+See `plan/current/requirements/` for individual feature specifications.
+*Each file follows the [Requirement Template](../templates/requirement.template.md).*
 
 ---
 
