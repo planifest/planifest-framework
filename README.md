@@ -51,10 +51,10 @@ repo/
 │   ├── templates/    ← File format templates for every artifact
 │   ├── schemas/      ← JSON Schema validation definitions
 │   ├── standards/    ← Code quality standards
-│   └── initiative-structure.md  ← Canonical directory layout
+│   └── [feature-structure.md](plan/feature-structure.md)  ← Canonical directory layout
 │
 ├── plan/             ← Feature briefs, execution plans, ADRs, risk registers, scope docs.
-│                       Organized by initiative. Everything that describes WHAT to build and WHY.
+│                       Organized by feature. Everything that describes WHAT to build and WHY.
 │
 ├── src/              ← Code (organized by component)
 │                       Implementation, tests, config, manifests.
@@ -110,7 +110,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 | [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, testing, backend & frontend stack evaluations | 10 |
 | [setup/](planifest-framework/setup/) | Per-tool boot file templates (antigravity, claude-code, cline, codex, copilot, cursor, windsurf — `.sh` and `.ps1` for each) | 14 |
 | [hooks/](planifest-framework/hooks/) | Git hooks (pre-commit, pre-push) and CI workflow | 3 |
-| [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, initiative-pipeline, change-pipeline, retrofit | 4 |
+| [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, feature-pipeline, change-pipeline, retrofit | 4 |
 
 ---
 
