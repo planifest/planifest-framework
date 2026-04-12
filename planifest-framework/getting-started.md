@@ -37,39 +37,53 @@ See [feature-structure.md](../plan/feature-structure.md) for the full layout.
 
 ### 3. Run the setup script
 
-This copies skills into the directory your agentic tool expects:
+This copies skills into the directory your agentic tool expects.
 
-**macOS / Linux:**
+#### Basic setup
+
 ```bash
+# macOS / Linux
 chmod +x planifest-framework/setup.sh
 ./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, all
 ```
 
-**Windows (PowerShell):**
 ```powershell
+# Windows (PowerShell)
 .\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, all
 ```
 
-The script creates:
-- Skill folders with YAML frontmatter (so the tool auto-discovers them)
-- Supporting files (templates, standards, schemas) alongside the skills
-- A boot file for your tool (e.g., `CLAUDE.md`, `AGENTS.md`)
+Installs:
+- Skill folders with YAML frontmatter (auto-discovered by your tool)
+- Supporting files (templates, standards, schemas)
+- A boot file for your tool (e.g. `CLAUDE.md`, `AGENTS.md`)
 - Git guardrails (see below)
 
-See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
+The agent uses native tools (`Grep`, `Bash`, `WebFetch`) directly. No context window protection.
 
-#### Optional: context-mode MCP
+#### Option: Context-Mode (recommended)
 
-[context-mode](https://github.com/mksglu/context-mode) is an MCP plugin that protects your agent's context window from flooding — large command output, file analysis, and web fetches are routed through a sandbox so only summaries enter context.
+Follow the guidance above around the tool, then consider the option to use the Context Mode MCP service.
 
-If you have context-mode installed, pass the flag during setup to also install its routing rules:
+[context-mode](https://github.com/mksglu/context-mode) routes large output — search results, file analysis, web fetches — into a sandboxed knowledge base. Only summaries enter the context window, so the agent stays fast and focused on large codebases.
+
+Install context-mode first, then pass `--context-mode-mcp` during setup, after the tool selection argument:
 
 ```bash
-./planifest-framework/setup.sh claude-code --context-mode-mcp     # macOS / Linux
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp    # Windows (PowerShell)
+# macOS / Linux
+chmod +x planifest-framework/setup.sh
+./planifest-framework/setup.sh claude-code --context-mode-mcp
 ```
 
-This installs a routing rules file alongside your boot file (e.g. `AGENTS.md` for Claude Code, `.cursor/rules/context-mode.mdc` for Cursor). The Planifest skills will automatically use context-mode tools when available.
+```powershell
+# Windows (PowerShell)
+.\planifest-framework\setup.ps1 claude-code --context-mode-mcp
+```
+
+Installs everything above, plus routing rules and (for Claude Code) enforcement hooks that prevent the agent bypassing context-mode.
+
+See [docs/context-mode.md](../docs/context-mode.md) for how it works and prerequisites.
+
+See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
 
 ### 3a. Git Guardrails (activated automatically)
 
