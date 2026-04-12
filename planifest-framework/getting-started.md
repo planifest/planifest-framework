@@ -58,6 +58,19 @@ The script creates:
 
 See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
 
+#### Optional: context-mode MCP
+
+[context-mode](https://github.com/mksglu/context-mode) is an MCP plugin that protects your agent's context window from flooding — large command output, file analysis, and web fetches are routed through a sandbox so only summaries enter context.
+
+If you have context-mode installed, pass the flag during setup to also install its routing rules:
+
+```bash
+./planifest-framework/setup.sh claude-code --context-mode-mcp     # macOS / Linux
+.\planifest-framework\setup.ps1 claude-code --context-mode-mcp    # Windows (PowerShell)
+```
+
+This installs a routing rules file alongside your boot file (e.g. `AGENTS.md` for Claude Code, `.cursor/rules/context-mode.mdc` for Cursor). The Planifest skills will automatically use context-mode tools when available.
+
 ### 3a. Git Guardrails (activated automatically)
 
 The setup script also activates Planifest's **Progressive Guardrail System** - a three-tier enforcement model that protects `main` without blocking atomic commits:
@@ -160,7 +173,9 @@ After updating any files in `planifest-framework/` (skills, templates, standards
 
 ```bash
 # Re-run setup to sync changes to your tool's directory
-./planifest-framework/setup.sh claude-code       # or your tool
+./planifest-framework/setup.sh claude-code                        # macOS / Linux
+.\planifest-framework\setup.ps1 claude-code                       # Windows (PowerShell)
+./planifest-framework/setup.sh claude-code --context-mode-mcp    # include if context-mode is installed
 ```
 
 The setup script overwrites the generated copies. The source of truth is always `planifest-framework/`.

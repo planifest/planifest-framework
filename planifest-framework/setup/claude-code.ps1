@@ -9,5 +9,8 @@
     SkillsDir    = '.claude\skills'
     WorkflowsDir = '.claude\commands'
     BootFile     = 'CLAUDE.md'
-    BootTemplate = "planifest-framework/templates/standard-boot.md"
+    BootTemplate   = "planifest-framework/templates/standard-boot.md"
+    # context-mode MCP routing rules — installed as AGENTS.md when context-mode is configured
+    AgentsFile     = 'AGENTS.md'
+    AgentsTemplate = "planifest-framework/templates/context-mode-agents.md"
 }
