@@ -118,7 +118,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 These are non-negotiable, regardless of tool, model, or configuration:
 
-1. **Specification must be complete before codegen begins**
+1. **Requirements must be complete before codegen begins**
 2. **No direct schema modification** — migration proposal required, human approves
 3. **Destructive schema operations require human approval** — no exceptions
 4. **Data is owned by one component** — never write to another component's data
