@@ -1,0 +1,106 @@
+# Planifest Component Manifest
+id: "setup-hook-integration"
+name: "Setup Hook Integration"
+feature: "0000001-context-mode-enforcement-hooks"
+version: "0.1.0"
+status: "active"
+type: "component-pack"
+domain: "developer-tooling"
+summary: "Changes to setup.sh, setup.ps1, and setup/claude-code.* that copy enforcement hook scripts and write settings.json PreToolUse wiring when --context-mode-mcp is passed."
+systemContext: "Part of the planifest-framework setup infrastructure. Activated when the user runs setup with --context-mode-mcp. Installs context-mode-hooks scripts to .claude/hooks/context-mode/ and writes hook entries to .claude/settings.json."
+
+responsibilities:
+  - "Copy hook scripts from planifest-framework/hooks/context-mode/ to .claude/hooks/context-mode/ when --context-mode-mcp is passed"
+  - "Create .claude/hooks/context-mode/ directory if it does not exist"
+  - "Make installed hook scripts executable (chmod +x) on Unix"
+  - "Write PreToolUse hook entries for Grep, Bash, and WebFetch into .claude/settings.json using additive merge"
+  - "Leave settings.json unchanged and skip script copying when --context-mode-mcp is absent"
+
+exceptions:
+  - "Must NOT remove previously installed hooks when flag is absent on re-run (no uninstall in v1)"
+  - "Must NOT replace the entire settings.json — only merge hook entries additively"
+  - "Must NOT configure the MCP server connection — that is the user's responsibility"
+  - "Must NOT wire hooks for non-Claude Code tools in this feature"
+
+stack:
+  language: "bash"
+  runtime: "bash"
+  framework: "none"
+  frontend: "none"
+  styling: "none"
+  componentLibrary: "none"
+  database: "none"
+  orm: "none"
+  testing: "bash"
+  iac: "none"
+  cloud: "none"
+  compute: "none"
+  ci: "github-actions"
+
+contract:
+  apiSpec: "none"
+  inputs:
+    - name: "--context-mode-mcp flag"
+      type: "cli-argument"
+      description: "Opt-in flag passed to setup.sh or setup.ps1 that triggers hook installation"
+  outputs:
+    - name: ".claude/hooks/context-mode/"
+      type: "filesystem"
+      description: "Directory containing installed hook scripts"
+    - name: ".claude/settings.json (hooks section)"
+      type: "filesystem"
+      description: "PreToolUse hook entries added to the Claude Code settings file"
+  consumedBy: []
+  consumes:
+    - "context-mode-hooks — source scripts copied from planifest-framework/hooks/context-mode/"
+  breakingChangePolicy: "requires-human-approval"
+
+data:
+  ownsData: false
+  dataContract: "none"
+  tables: []
+  schemaVersion: "0.0.0"
+  migrationPath: "none"
+
+scope:
+  inScope:
+    - "setup.sh changes for --context-mode-mcp flag processing"
+    - "setup.ps1 changes for --context-mode-mcp flag processing"
+    - "setup/claude-code.sh and setup/claude-code.ps1 hook path declarations"
+    - "Claude Code only"
+  outOfScope:
+    - "Hook wiring for Cursor, Windsurf, Cline, Antigravity"
+    - "Hook uninstall / removal logic"
+  deferred:
+    - "Hook wiring for other tools pending hook architecture confirmation"
+
+risk:
+  level: "medium"
+  items:
+    - "settings.json merge may overwrite existing hooks if not implemented carefully (R-005)"
+    - "Bash shebang on Windows — chmod/path handling differs (R-004)"
+    - "settings.json hook schema assumption may be wrong (R-002)"
+
+quality:
+  testCoverage:
+    unit: 0
+    integration: 0
+    e2e: 0
+  techDebt:
+    - "setup.ps1 ConvertTo-Json depth: PowerShell default depth is 2; using -Depth 10 workaround. If settings.json nesting exceeds depth 10, content will be truncated to string."
+  quirks:
+    - "setup.ps1 hook entries use forward-slash paths in command values — this matches Claude Code hook config expectations even on Windows"
+
+pipeline:
+  templateVersion: "1.0.0"
+  featureMode: "retrofit"
+  domainKnowledgePath: "plan"
+
+metadata:
+  createdAt: "2026-04-12"
+  updatedAt: "2026-04-12"
+  createdBy: "agent"
+  lastModifiedBy: "agent"
+  skill: "planifest-codegen-agent"
+  tool: "claude-code"
+  model: "claude-sonnet-4-6"
