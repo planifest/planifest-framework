@@ -161,6 +161,89 @@ function Copy-PlanifestWorkflow {
     Write-Host "  + workflows/$name.md"
 }
 
+function Merge-HookSettings {
+    # Merge PreToolUse hook entries into .claude/settings.json (REQ-004)
+    # Additive merge: existing content preserved; Grep/Bash/WebFetch entries
+    # removed then re-added for idempotency on re-run.
+    param(
+        [string]$SettingsPath,
+        [string]$HooksDir   # relative path used in command values
+    )
+
+    $newEntries = @(
+        @{ matcher = "Grep";     hooks = @(@{ type = "command"; command = "$HooksDir/block-grep.sh" }) }
+        @{ matcher = "Bash";     hooks = @(@{ type = "command"; command = "$HooksDir/block-bash.sh" }) }
+        @{ matcher = "WebFetch"; hooks = @(@{ type = "command"; command = "$HooksDir/block-webfetch.sh" }) }
+    )
+
+    if (Test-Path $SettingsPath) {
+        # Additive merge using PowerShell JSON handling
+        $existing = Get-Content -Raw -Path $SettingsPath | ConvertFrom-Json -Depth 10
+
+        # Ensure hooks.PreToolUse exists
+        if (-not $existing.hooks) {
+            $existing | Add-Member -NotePropertyName 'hooks' -NotePropertyValue ([PSCustomObject]@{}) -Force
+        }
+        if (-not $existing.hooks.PreToolUse) {
+            $existing.hooks | Add-Member -NotePropertyName 'PreToolUse' -NotePropertyValue @() -Force
+        }
+
+        # Remove existing Grep/Bash/WebFetch entries, then append new ones
+        $toRemove = @('Grep', 'Bash', 'WebFetch')
+        $filtered = @($existing.hooks.PreToolUse | Where-Object { $toRemove -notcontains $_.matcher })
+        $existing.hooks.PreToolUse = $filtered + $newEntries
+
+        $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  ~ .claude/settings.json (context-mode hook entries merged)"
+    }
+    else {
+        $dir = Split-Path -Parent $SettingsPath
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+
+        $settings = [PSCustomObject]@{
+            hooks = [PSCustomObject]@{
+                PreToolUse = $newEntries
+            }
+        }
+        $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  + .claude/settings.json (created with context-mode hook entries)"
+    }
+}
+
+function Install-ContextModeHooks {
+    # Copy enforcement hook scripts and wire settings.json (REQ-004)
+    param(
+        [string]$HooksSrcRel,    # relative to ScriptDir  e.g. hooks/context-mode
+        [string]$HooksDirRel,    # relative to ProjectRoot e.g. .claude/hooks/context-mode
+        [string]$SettingsRel     # relative to ProjectRoot e.g. .claude/settings.json
+    )
+
+    $src      = Join-Path $ScriptDir $HooksSrcRel
+    $dest     = Join-Path $ProjectRoot $HooksDirRel
+    $settings = Join-Path $ProjectRoot $SettingsRel
+
+    if (-not (Test-Path $src)) {
+        Write-Host "  ! Warning: hook scripts not found at $src — skipping hook installation"
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  Installing context-mode enforcement hooks"
+
+    # Create target directory
+    New-Item -ItemType Directory -Path $dest -Force | Out-Null
+
+    # Copy each script
+    Get-ChildItem -Path $src -Filter '*.sh' | ForEach-Object {
+        $destFile = Join-Path $dest $_.Name
+        Copy-Item -Path $_.FullName -Destination $destFile -Force
+        Write-Host "  + $HooksDirRel/$($_.Name)"
+    }
+
+    # Merge settings.json wiring
+    Merge-HookSettings -SettingsPath $settings -HooksDir $HooksDirRel
+}
+
 function Invoke-PlanifestGuardrails {
     Write-Host ""
     Write-Host "  Activating Planifest Git Guardrails"
@@ -510,6 +593,14 @@ function Invoke-PlanifestSetup {
         $agentsContentPath = Join-Path $ProjectRoot $toolConfig.AgentsTemplate
         $agentsContent = Get-Content -Raw -Path $agentsContentPath
         Write-PlanifestBootFile -RelPath $toolConfig.AgentsFile -Content $agentsContent
+    }
+
+    # Install context-mode enforcement hooks if --context-mode-mcp flag is set (REQ-004)
+    if ($ContextModeMcp -and $toolConfig.HooksSrc -and $toolConfig.HooksDir -and $toolConfig.SettingsFile) {
+        Install-ContextModeHooks `
+            -HooksSrcRel  $toolConfig.HooksSrc `
+            -HooksDirRel  $toolConfig.HooksDir `
+            -SettingsRel  $toolConfig.SettingsFile
     }
 
     Write-Host "  Done."
