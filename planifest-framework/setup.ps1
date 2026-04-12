@@ -7,18 +7,24 @@
     Each tool's specific config lives in setup/<tool>.ps1.
     This script handles shared logic only.
 
-.PARAMETER Tool
-    The agentic tool to configure: claude-code, cursor, codex, antigravity, copilot, windsurf, cline, or all.
-
 .EXAMPLE
     .\planifest-framework\setup.ps1 claude-code
+    .\planifest-framework\setup.ps1 claude-code --context-mode-mcp
     .\planifest-framework\setup.ps1 all
 #>
 
-param(
-    [Parameter(Position = 0)]
-    [string]$Tool
-)
+# Manual arg parsing — supports --flag style for cross-platform consistency
+$Tool = $null
+$ContextModeMcp = $false
+foreach ($arg in $args) {
+    switch ($arg) {
+        '--context-mode-mcp' { $ContextModeMcp = $true }
+        default {
+            if ($arg -like '-*') { Write-Host "Unknown flag: $arg"; exit 1 }
+            else { $Tool = $arg }
+        }
+    }
+}
 
 $ErrorActionPreference = 'Stop'
 
@@ -499,6 +505,13 @@ function Invoke-PlanifestSetup {
         Write-PlanifestBootFile -RelPath $toolConfig.BootFile -Content $bootContent
     }
 
+    # Install context-mode MCP routing rules if --context-mode-mcp flag is set
+    if ($ContextModeMcp -and $toolConfig.AgentsFile -and $toolConfig.AgentsTemplate) {
+        $agentsContentPath = Join-Path $ProjectRoot $toolConfig.AgentsTemplate
+        $agentsContent = Get-Content -Raw -Path $agentsContentPath
+        Write-PlanifestBootFile -RelPath $toolConfig.AgentsFile -Content $agentsContent
+    }
+
     Write-Host "  Done."
 }
 
@@ -508,13 +521,18 @@ if (-not $Tool) {
     Write-Host ""
     Write-Host "Planifest Setup"
     Write-Host ""
-    Write-Host "Usage: .\planifest-framework\setup.ps1 [tool]"
+    Write-Host "Usage: .\planifest-framework\setup.ps1 [tool] [--context-mode-mcp]"
     Write-Host ""
     Write-Host "Tools:"
     foreach ($t in $ValidTools) {
         Write-Host "  $t"
     }
     Write-Host "  all"
+    Write-Host ""
+    Write-Host "Flags:"
+    Write-Host "  --context-mode-mcp   Install context-mode MCP routing rules file"
+    Write-Host "                       (only needed if context-mode MCP plugin is installed)"
+    Write-Host "                       See: https://github.com/mksglu/context-mode"
     Write-Host ""
     Write-Host "Run from the repository root."
     Write-Host "Each tool's config: planifest-framework\setup\[tool].ps1"
