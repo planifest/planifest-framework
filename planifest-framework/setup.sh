@@ -17,6 +17,7 @@ WORKFLOWS_SRC="$SCRIPT_DIR/workflows"
 SETUP_DIR="$SCRIPT_DIR/setup"
 
 VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline"
+CONTEXT_MODE_MCP=false
 
 # --- Shared functions ---
 
@@ -451,24 +452,43 @@ setup_tool() {
     write_boot_file "$PROJECT_ROOT/$TOOL_BOOT_FILE" "$TOOL_BOOT_CONTENT"
   fi
 
+  # Install context-mode MCP routing rules (AGENTS.md) if --context-mode-mcp flag is set
+  if [ "$CONTEXT_MODE_MCP" = true ] && [ -n "${TOOL_AGENTS_FILE:-}" ] && [ -n "${TOOL_AGENTS_TEMPLATE:-}" ]; then
+    local agents_content
+    agents_content=$(cat "$SCRIPT_DIR/../$TOOL_AGENTS_TEMPLATE")
+    write_boot_file "$PROJECT_ROOT/$TOOL_AGENTS_FILE" "$agents_content"
+  fi
+
   echo "  Done."
 }
 
 # --- Main ---
 
-TOOL="${1:-}"
+TOOL=""
+for arg in "$@"; do
+  case "$arg" in
+    --context-mode-mcp) CONTEXT_MODE_MCP=true ;;
+    -*) echo "Unknown flag: $arg"; exit 1 ;;
+    *) TOOL="$arg" ;;
+  esac
+done
 
 if [ -z "$TOOL" ]; then
   echo ""
   echo "Planifest Setup"
   echo ""
-  echo "Usage: ./planifest-framework/setup.sh <tool>"
+  echo "Usage: ./planifest-framework/setup.sh <tool> [--context-mode-mcp]"
   echo ""
   echo "Tools:"
   for t in $VALID_TOOLS; do
     echo "  $t"
   done
   echo "  all"
+  echo ""
+  echo "Flags:"
+  echo "  --context-mode-mcp   Install context-mode MCP routing rules file"
+  echo "                       (only needed if context-mode MCP plugin is installed)"
+  echo "                       See: https://github.com/mksglu/context-mode"
   echo ""
   echo "Run from the repository root."
   echo "Each tool's config: planifest-framework/setup/<tool>.sh"

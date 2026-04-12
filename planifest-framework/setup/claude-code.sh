@@ -11,3 +11,7 @@ TOOL_WORKFLOWS_DIR=".claude/commands"
 TOOL_BOOT_FILE="CLAUDE.md"
 
 TOOL_BOOT_TEMPLATE="planifest-framework/templates/standard-boot.md"
+
+# context-mode MCP routing rules — installed as AGENTS.md when context-mode is configured
+TOOL_AGENTS_FILE="AGENTS.md"
+TOOL_AGENTS_TEMPLATE="planifest-framework/templates/context-mode-agents.md"
