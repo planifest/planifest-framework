@@ -80,5 +80,30 @@ Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
 ---
 
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-adr-agent"`, `phase: "adr"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — at task entry:
+```json
+{ "phase_name": "adr" }
+```
+
+**`phase_end`** — at task exit:
+```json
+{ "phase_name": "adr", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`adr_decision`** — after each ADR is written to disk:
+```json
+{ "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }
+```
+
+---
+
 *This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
 

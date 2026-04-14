@@ -21,3 +21,7 @@ TOOL_AGENTS_TEMPLATE="planifest-framework/templates/context-mode-agents.md"
 TOOL_HOOKS_SRC="hooks/context-mode"
 TOOL_HOOKS_DIR=".claude/hooks/context-mode"
 TOOL_SETTINGS_FILE=".claude/settings.json"
+
+# structured telemetry hooks — installed when both --structured-telemetry-mcp and --context-mode-mcp are passed
+TOOL_TELEMETRY_HOOKS_SRC="hooks/telemetry"
+TOOL_TELEMETRY_HOOKS_DIR=".claude/hooks/telemetry"

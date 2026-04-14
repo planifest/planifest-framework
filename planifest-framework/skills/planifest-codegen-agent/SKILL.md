@@ -157,5 +157,45 @@ Between components, verify:
 
 ---
 
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-codegen-agent"`, `phase: "codegen"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — at task entry:
+```json
+{ "phase_name": "codegen" }
+```
+
+**`phase_end`** — at task exit:
+```json
+{ "phase_name": "codegen", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`deviation`** — when implementation diverges from the confirmed design:
+```json
+{ "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }
+```
+
+**`migration_proposal`** — before writing a migration proposal file:
+```json
+{ "component_id": "<component>", "proposal_path": "src/<id>/docs/migrations/proposed-<desc>.md", "destructive": true | false }
+```
+
+**`self_correction`** — when retrying a failed action:
+```json
+{ "phase_name": "codegen", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
+```
+
+**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+```json
+{ "phase_name": "codegen", "action_id": "<action>", "attempt_count": 5 }
+```
+
+---
+
 *This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
 

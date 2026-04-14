@@ -114,5 +114,36 @@ If you identify a critical vulnerability that is trivially fixable (e.g., a hard
 
 ---
 
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-security-agent"`, `phase: "security"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — at task entry:
+```json
+{ "phase_name": "security" }
+```
+
+**`phase_end`** — at task exit:
+```json
+{ "phase_name": "security", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`security_finding`** — for each vulnerability or risk identified:
+```json
+{ "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN>" }
+```
+`cwe` is optional — omit if not applicable.
+
+**`deviation`** — if output diverges from the confirmed design (non-security divergence):
+```json
+{ "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+```
+
+---
+
 *This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
 

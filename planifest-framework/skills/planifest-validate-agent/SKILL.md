@@ -112,5 +112,40 @@ If a capability skill exists for the declared testing framework (e.g. `webapp-te
 
 ---
 
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-validate-agent"`, `phase: "validate"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — at task entry:
+```json
+{ "phase_name": "validate" }
+```
+
+**`phase_end`** — at task exit:
+```json
+{ "phase_name": "validate", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`validation_failure`** — for each test or check failure:
+```json
+{ "failure_type": "test" | "lint" | "type" | "build", "phase_name": "validate", "attempt_number": <n>, "action_id": "<suite or check name>" }
+```
+
+**`self_correction`** — when retrying after a failure:
+```json
+{ "phase_name": "validate", "attempt_number": <n>, "action_id": "<action>", "correction_type": "fix_and_retry" }
+```
+
+**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+```json
+{ "phase_name": "validate", "action_id": "<action>", "attempt_count": 5 }
+```
+
+---
+
 *This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
 
