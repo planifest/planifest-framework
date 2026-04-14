@@ -18,6 +18,8 @@ SETUP_DIR="$SCRIPT_DIR/setup"
 
 VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline"
 CONTEXT_MODE_MCP=false
+STRUCTURED_TELEMETRY_MCP=false
+BACKEND_URL="http://localhost:3741"
 
 # --- Shared functions ---
 
@@ -203,6 +205,77 @@ install_context_mode_hooks() {
 
   # Merge PreToolUse wiring into settings.json
   merge_hook_settings "$settings" "$hooks_dir_rel"
+}
+
+merge_telemetry_hook_settings() {
+  # Merge PostToolUse context-pressure hook entry into .claude/settings.json
+  # Idempotent: removes existing context-pressure entry before re-adding.
+  local settings_file="$1"
+  local hooks_dir="$2"   # relative path used in the command value
+  local backend_url="$3"
+
+  local hook_cmd="PLANIFEST_TELEMETRY_URL=$backend_url node $hooks_dir/context-pressure.mjs"
+
+  local new_hook
+  new_hook=$(jq -n \
+    --arg cmd "$hook_cmd" \
+    '[{"matcher":".*","hooks":[{"type":"command","command":$cmd,"async":true,"timeout":5000}]}]')
+
+  if [ -f "$settings_file" ]; then
+    local merged
+    merged=$(jq \
+      --argjson new_hook "$new_hook" \
+      '
+        .hooks //= {} |
+        .hooks.PostToolUse //= [] |
+        .hooks.PostToolUse |= (
+          map(select(
+            (.hooks // []) | map(.command // "") | any(test("context-pressure")) | not
+          ))
+          + $new_hook
+        )
+      ' "$settings_file")
+    printf '%s\n' "$merged" > "$settings_file"
+    echo "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
+  else
+    mkdir -p "$(dirname "$settings_file")"
+    jq -n --argjson new_hook "$new_hook" \
+      '{"hooks":{"PostToolUse":$new_hook}}' > "$settings_file"
+    echo "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+  fi
+}
+
+install_telemetry_hooks() {
+  # Copy context-pressure hook script and wire PostToolUse in settings.json (REQ-008, REQ-010)
+  # Only called when both --structured-telemetry-mcp and --context-mode-mcp are active.
+  local hooks_src_rel="$1"   # relative to SCRIPT_DIR  e.g. hooks/telemetry
+  local hooks_dir_rel="$2"   # relative to PROJECT_ROOT e.g. .claude/hooks/telemetry
+  local settings_rel="$3"    # relative to PROJECT_ROOT e.g. .claude/settings.json
+  local backend_url="$4"
+
+  local src="$SCRIPT_DIR/$hooks_src_rel"
+  local dest="$PROJECT_ROOT/$hooks_dir_rel"
+  local settings="$PROJECT_ROOT/$settings_rel"
+
+  if [ ! -d "$src" ]; then
+    echo "  ! Warning: telemetry hook scripts not found at $src — skipping"
+    return
+  fi
+
+  echo ""
+  echo "  Installing structured telemetry hooks"
+
+  mkdir -p "$dest"
+
+  for script in "$src"/*.mjs; do
+    [ -f "$script" ] || continue
+    local script_name
+    script_name="$(basename "$script")"
+    cp "$script" "$dest/$script_name"
+    echo "  + $hooks_dir_rel/$script_name"
+  done
+
+  merge_telemetry_hook_settings "$settings" "$hooks_dir_rel" "$backend_url"
 }
 
 activate_guardrails() {
@@ -540,17 +613,42 @@ setup_tool() {
     install_context_mode_hooks "$TOOL_HOOKS_SRC" "$TOOL_HOOKS_DIR" "$TOOL_SETTINGS_FILE"
   fi
 
+  # Write telemetry opt-in sentinel so skills know emission is authorised (REQ-004)
+  if [ "$STRUCTURED_TELEMETRY_MCP" = true ]; then
+    local sentinel="$PROJECT_ROOT/.claude/telemetry-enabled"
+    mkdir -p "$(dirname "$sentinel")"
+    if [ ! -f "$sentinel" ]; then
+      touch "$sentinel"
+      echo "  + .claude/telemetry-enabled (telemetry opt-in sentinel)"
+    else
+      echo "  - .claude/telemetry-enabled (already exists)"
+    fi
+  fi
+
+  # Install telemetry hooks only when BOTH flags are active (REQ-010)
+  if [ "$STRUCTURED_TELEMETRY_MCP" = true ] && [ "$CONTEXT_MODE_MCP" = true ] && \
+     [ -n "${TOOL_TELEMETRY_HOOKS_SRC:-}" ] && [ -n "${TOOL_TELEMETRY_HOOKS_DIR:-}" ] && \
+     [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
+    install_telemetry_hooks "$TOOL_TELEMETRY_HOOKS_SRC" "$TOOL_TELEMETRY_HOOKS_DIR" "$TOOL_SETTINGS_FILE" "$BACKEND_URL"
+  fi
+
   echo "  Done."
 }
 
 # --- Main ---
 
 TOOL=""
-for arg in "$@"; do
-  case "$arg" in
-    --context-mode-mcp) CONTEXT_MODE_MCP=true ;;
-    -*) echo "Unknown flag: $arg"; exit 1 ;;
-    *) TOOL="$arg" ;;
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --context-mode-mcp) CONTEXT_MODE_MCP=true; shift ;;
+    --structured-telemetry-mcp) STRUCTURED_TELEMETRY_MCP=true; shift ;;
+    --backend-url)
+      if [[ -z "${2:-}" ]] || [[ "${2:-}" == -* ]]; then
+        echo "Error: --backend-url requires a value"; exit 1
+      fi
+      BACKEND_URL="$2"; shift 2 ;;
+    -*) echo "Unknown flag: $1"; exit 1 ;;
+    *) TOOL="$1"; shift ;;
   esac
 done
 
@@ -567,9 +665,13 @@ if [ -z "$TOOL" ]; then
   echo "  all"
   echo ""
   echo "Flags:"
-  echo "  --context-mode-mcp   Install context-mode MCP routing rules file"
-  echo "                       (only needed if context-mode MCP plugin is installed)"
-  echo "                       See: https://github.com/mksglu/context-mode"
+  echo "  --context-mode-mcp           Install context-mode MCP routing rules file"
+  echo "                               (only needed if context-mode MCP plugin is installed)"
+  echo "                               See: https://github.com/mksglu/context-mode"
+  echo "  --structured-telemetry-mcp   Install structured telemetry hooks"
+  echo "                               Requires --context-mode-mcp to also be set."
+  echo "                               Context-pressure hook installed when both flags are active."
+  echo "  --backend-url <url>          Override telemetry backend URL (default: http://localhost:3741)"
   echo ""
   echo "Run from the repository root."
   echo "Each tool's config: planifest-framework/setup/<tool>.sh"

@@ -145,5 +145,35 @@ If a capability skill exists for document generation formats needed by the featu
 
 ---
 
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-docs-agent"`, `phase: "docs"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — at task entry:
+```json
+{ "phase_name": "docs" }
+```
+
+**`phase_end`** — at task exit:
+```json
+{ "phase_name": "docs", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`doc_gap`** — when documentation is missing or incomplete for a component:
+```json
+{ "component_id": "<component>", "description": "<what is missing>" }
+```
+
+**`deviation`** — if output diverges from the confirmed design:
+```json
+{ "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+```
+
+---
+
 *This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
 
