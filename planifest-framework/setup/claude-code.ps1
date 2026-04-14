@@ -17,4 +17,7 @@
     HooksSrc       = 'hooks/context-mode'
     HooksDir       = '.claude/hooks/context-mode'
     SettingsFile   = '.claude/settings.json'
+    # structured telemetry hooks — installed when both flags are passed
+    TelemetryHooksSrc = 'hooks/telemetry'
+    TelemetryHooksDir = '.claude/hooks/telemetry'
 }

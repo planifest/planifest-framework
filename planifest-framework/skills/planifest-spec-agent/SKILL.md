@@ -113,5 +113,30 @@ When the confirmed design indicates `adoption_mode: retrofit`, read the existing
 
 ---
 
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-spec-agent"`, `phase: "spec"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — at task entry:
+```json
+{ "phase_name": "spec" }
+```
+
+**`phase_end`** — at task exit:
+```json
+{ "phase_name": "spec", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`spec_gap`** — when the spec cannot proceed without human input:
+```json
+{ "question": "<blocking question>", "phase_name": "spec" }
+```
+
+---
+
 *This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
 

@@ -16,12 +16,21 @@
 # Manual arg parsing — supports --flag style for cross-platform consistency
 $Tool = $null
 $ContextModeMcp = $false
-foreach ($arg in $args) {
-    switch ($arg) {
-        '--context-mode-mcp' { $ContextModeMcp = $true }
+$StructuredTelemetryMcp = $false
+$BackendUrl = 'http://localhost:3741'
+$i = 0
+while ($i -lt $args.Count) {
+    switch ($args[$i]) {
+        '--context-mode-mcp'          { $ContextModeMcp = $true; $i++ }
+        '--structured-telemetry-mcp'  { $StructuredTelemetryMcp = $true; $i++ }
+        '--backend-url' {
+            $i++
+            if ($i -ge $args.Count) { Write-Host "Error: --backend-url requires a value"; exit 1 }
+            $BackendUrl = $args[$i]; $i++
+        }
         default {
-            if ($arg -like '-*') { Write-Host "Unknown flag: $arg"; exit 1 }
-            else { $Tool = $arg }
+            if ($args[$i] -like '-*') { Write-Host "Unknown flag: $($args[$i])"; exit 1 }
+            else { $Tool = $args[$i]; $i++ }
         }
     }
 }
@@ -178,7 +187,7 @@ function Merge-HookSettings {
 
     if (Test-Path $SettingsPath) {
         # Additive merge using PowerShell JSON handling
-        $existing = Get-Content -Raw -Path $SettingsPath | ConvertFrom-Json -Depth 10
+        $existing = Get-Content -Raw -Path $SettingsPath | ConvertFrom-Json
 
         # Ensure hooks.PreToolUse exists
         if (-not $existing.hooks) {
@@ -242,6 +251,88 @@ function Install-ContextModeHooks {
 
     # Merge settings.json wiring
     Merge-HookSettings -SettingsPath $settings -HooksDir $HooksDirRel
+}
+
+function Merge-TelemetryHookSettings {
+    # Merge PostToolUse context-pressure hook entry into .claude/settings.json
+    # Idempotent: removes existing context-pressure entry before re-adding.
+    param(
+        [string]$SettingsPath,
+        [string]$HooksDir,
+        [string]$BackendUrl
+    )
+
+    $hookCmd = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/context-pressure.mjs"
+    $newEntry = @(
+        @{
+            matcher = ".*"
+            hooks = @(@{ type = "command"; command = $hookCmd; async = $true; timeout = 5000 })
+        }
+    )
+
+    if (Test-Path $SettingsPath) {
+        $existing = Get-Content -Raw -Path $SettingsPath | ConvertFrom-Json
+
+        if (-not $existing.hooks) {
+            $existing | Add-Member -NotePropertyName 'hooks' -NotePropertyValue ([PSCustomObject]@{}) -Force
+        }
+        if (-not $existing.hooks.PostToolUse) {
+            $existing.hooks | Add-Member -NotePropertyName 'PostToolUse' -NotePropertyValue @() -Force
+        }
+
+        # Remove existing context-pressure entries then append new one
+        $filtered = @($existing.hooks.PostToolUse | Where-Object {
+            $hooks = $_.hooks
+            -not ($hooks | Where-Object { $_.command -match 'context-pressure' })
+        })
+        $existing.hooks.PostToolUse = $filtered + $newEntry
+
+        $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
+    }
+    else {
+        $dir = Split-Path -Parent $SettingsPath
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+
+        $settings = [PSCustomObject]@{
+            hooks = [PSCustomObject]@{ PostToolUse = $newEntry }
+        }
+        $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+    }
+}
+
+function Install-TelemetryHooks {
+    # Copy context-pressure hook and wire PostToolUse in settings.json (REQ-008, REQ-010)
+    # Only called when both --structured-telemetry-mcp and --context-mode-mcp are active.
+    param(
+        [string]$HooksSrcRel,    # relative to ScriptDir  e.g. hooks/telemetry
+        [string]$HooksDirRel,    # relative to ProjectRoot e.g. .claude/hooks/telemetry
+        [string]$SettingsRel,    # relative to ProjectRoot e.g. .claude/settings.json
+        [string]$BackendUrl
+    )
+
+    $src      = Join-Path $ScriptDir $HooksSrcRel
+    $dest     = Join-Path $ProjectRoot $HooksDirRel
+    $settings = Join-Path $ProjectRoot $SettingsRel
+
+    if (-not (Test-Path $src)) {
+        Write-Host "  ! Warning: telemetry hook scripts not found at $src — skipping"
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  Installing structured telemetry hooks"
+
+    New-Item -ItemType Directory -Path $dest -Force | Out-Null
+
+    Get-ChildItem -Path $src -Filter '*.mjs' | ForEach-Object {
+        $destFile = Join-Path $dest $_.Name
+        Copy-Item -Path $_.FullName -Destination $destFile -Force
+        Write-Host "  + $HooksDirRel/$($_.Name)"
+    }
+
+    Merge-TelemetryHookSettings -SettingsPath $settings -HooksDir $HooksDirRel -BackendUrl $BackendUrl
 }
 
 function Invoke-PlanifestGuardrails {
@@ -603,6 +694,29 @@ function Invoke-PlanifestSetup {
             -SettingsRel  $toolConfig.SettingsFile
     }
 
+    # Write telemetry opt-in sentinel so skills know emission is authorised (REQ-004)
+    if ($StructuredTelemetryMcp) {
+        $sentinel = Join-Path $ProjectRoot '.claude\telemetry-enabled'
+        $sentinelDir = Split-Path -Parent $sentinel
+        if (-not (Test-Path $sentinelDir)) { New-Item -ItemType Directory -Path $sentinelDir -Force | Out-Null }
+        if (-not (Test-Path $sentinel)) {
+            New-Item -ItemType File -Path $sentinel -Force | Out-Null
+            Write-Host "  + .claude/telemetry-enabled (telemetry opt-in sentinel)"
+        } else {
+            Write-Host "  - .claude/telemetry-enabled (already exists)"
+        }
+    }
+
+    # Install telemetry hooks only when BOTH flags are active (REQ-010)
+    if ($StructuredTelemetryMcp -and $ContextModeMcp -and
+        $toolConfig.TelemetryHooksSrc -and $toolConfig.TelemetryHooksDir -and $toolConfig.SettingsFile) {
+        Install-TelemetryHooks `
+            -HooksSrcRel  $toolConfig.TelemetryHooksSrc `
+            -HooksDirRel  $toolConfig.TelemetryHooksDir `
+            -SettingsRel  $toolConfig.SettingsFile `
+            -BackendUrl   $BackendUrl
+    }
+
     Write-Host "  Done."
 }
 
@@ -621,9 +735,13 @@ if (-not $Tool) {
     Write-Host "  all"
     Write-Host ""
     Write-Host "Flags:"
-    Write-Host "  --context-mode-mcp   Install context-mode MCP routing rules file"
-    Write-Host "                       (only needed if context-mode MCP plugin is installed)"
-    Write-Host "                       See: https://github.com/mksglu/context-mode"
+    Write-Host "  --context-mode-mcp           Install context-mode MCP routing rules file"
+    Write-Host "                               (only needed if context-mode MCP plugin is installed)"
+    Write-Host "                               See: https://github.com/mksglu/context-mode"
+    Write-Host "  --structured-telemetry-mcp   Install structured telemetry hooks"
+    Write-Host "                               Requires --context-mode-mcp to also be set."
+    Write-Host "                               Context-pressure hook installed when both flags are active."
+    Write-Host "  --backend-url <url>          Override telemetry backend URL (default: http://localhost:3741)"
     Write-Host ""
     Write-Host "Run from the repository root."
     Write-Host "Each tool's config: planifest-framework\setup\[tool].ps1"

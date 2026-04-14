@@ -461,3 +461,38 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 
 **Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-change-agent`, `planifest-docs-agent`
 
+---
+
+## Telemetry
+
+**Gate — check both before every emission. If either is false, skip silently:**
+1. `emit_event` tool is present in this session.
+2. `.claude/telemetry-enabled` exists in the project root.
+
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-orchestrator"`, `phase: <current phase>`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+
+**`phase_start`** — before delegating to each phase skill:
+```json
+{ "phase_name": "<phase being started>" }
+```
+
+**`phase_end`** — after each phase skill returns:
+```json
+{ "phase_name": "<phase>", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+```
+
+**`phase_skip`** — when a phase is bypassed as unnecessary:
+```json
+{ "phase_name": "<skipped phase>", "reason": "<why>" }
+```
+
+**`spec_gap`** — when human clarification is required before proceeding:
+```json
+{ "question": "<the question>", "phase_name": "<current phase>" }
+```
+
+**`mcp_impact`** — once at the end of a complete pipeline run, after the final `phase_end`:
+```json
+{ "mcp_mode": "<active mode>", "avg_token_delta": <number>, "peak_fill_pct": <number> }
+```
+
