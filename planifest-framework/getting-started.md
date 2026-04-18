@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, or Cline / Roo Code
+- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, Cline, Roo Code, or OpenCode
 - A terminal with Bash (macOS/Linux) or PowerShell (Windows)
 
 ---
@@ -44,12 +44,12 @@ This copies skills into the directory your agentic tool expects.
 ```bash
 # macOS / Linux
 chmod +x planifest-framework/setup.sh
-./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, all
+./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, roo-code, opencode, all
 ```
 
 ```powershell
 # Windows (PowerShell)
-.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, all
+.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, roo-code, opencode, all
 ```
 
 Installs:
@@ -134,6 +134,24 @@ cp planifest-framework/templates/feature-brief.template.md plan/current/feature-
 ```
 
 Fill it in. The [feature brief guide](templates/feature-brief-guide.md) walks you through each section.
+
+### 4a. Understanding phase indicators (REQ-018)
+
+Every agent response begins with a phase prefix so you always know where you are in the pipeline:
+
+| Prefix | Phase | What the agent is doing |
+|--------|-------|-------------------------|
+| `P0:` | Assess & Coach | Reviewing the brief; asking gap questions |
+| `P1:` | Spec | Writing requirements, scope, glossary, risk register |
+| `P2:` | ADRs | Documenting architecture decisions |
+| `P3:` | Codegen | Generating implementation |
+| `P4:` | Validate | Running CI checks; self-correcting |
+| `P5:` | Security | Security review |
+| `P6:` | Docs | Documentation artifacts |
+| `P7:` | Ship | PR, changelog, archive |
+| `PC:` | Change | Change pipeline (existing feature modification) |
+
+If you see `Px: Resuming…` at the start of a session, the orchestrator detected existing artefacts in `plan/current/` and is continuing where it left off — no P0 briefing.
 
 ### 5. Start the orchestrator
 

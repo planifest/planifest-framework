@@ -16,7 +16,7 @@ SKILLS_SRC="$SCRIPT_DIR/skills"
 WORKFLOWS_SRC="$SCRIPT_DIR/workflows"
 SETUP_DIR="$SCRIPT_DIR/setup"
 
-VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline"
+VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline roo-code opencode"
 CONTEXT_MODE_MCP=false
 STRUCTURED_TELEMETRY_MCP=false
 BACKEND_URL="http://localhost:3741"
@@ -205,6 +205,64 @@ install_context_mode_hooks() {
 
   # Merge PreToolUse wiring into settings.json
   merge_hook_settings "$settings" "$hooks_dir_rel"
+}
+
+install_tier1_hooks() {
+  # Copy Tier 1 adapter + shared enforcement/telemetry scripts (REQ-009, REQ-013).
+  # The adapter uses dirname(ADAPTER_DIR) as HOOKS_DIR, so scripts must be siblings
+  # of the adapters/ directory under TOOL_HOOKS_INSTALL_DIR.
+  local adapter_src_rel="$1"       # e.g. hooks/adapters/cursor.mjs
+  local adapter_dest_rel="$2"      # e.g. .cursor/hooks/adapters/cursor.mjs
+  local hooks_install_dir_rel="$3" # e.g. .cursor/hooks
+
+  local adapter_src="$SCRIPT_DIR/$adapter_src_rel"
+  local adapter_dest="$PROJECT_ROOT/$adapter_dest_rel"
+  local hooks_install_dir="$PROJECT_ROOT/$hooks_install_dir_rel"
+
+  if [ ! -f "$adapter_src" ]; then
+    echo "  ! Warning: adapter not found at $adapter_src — skipping Tier 1 hook install"
+    return
+  fi
+
+  echo ""
+  echo "  Installing Planifest Tier 1 adapter hooks (REQ-009)"
+
+  # Copy adapter
+  mkdir -p "$(dirname "$adapter_dest")"
+  cp "$adapter_src" "$adapter_dest"
+  echo "  + $adapter_dest_rel"
+
+  # Copy enforcement scripts (gate-write, check-design)
+  local enf_src="$SCRIPT_DIR/hooks/enforcement"
+  local enf_dest="$hooks_install_dir/enforcement"
+  if [ -d "$enf_src" ]; then
+    mkdir -p "$enf_dest"
+    for script in "$enf_src"/*.mjs; do
+      [ -f "$script" ] || continue
+      local script_name
+      script_name="$(basename "$script")"
+      cp "$script" "$enf_dest/$script_name"
+      echo "  + $hooks_install_dir_rel/enforcement/$script_name"
+    done
+  fi
+
+  # Copy telemetry scripts (emit-phase-start, emit-phase-end)
+  local telem_src="$SCRIPT_DIR/hooks/telemetry"
+  local telem_dest="$hooks_install_dir/telemetry"
+  if [ -d "$telem_src" ]; then
+    mkdir -p "$telem_dest"
+    for script in "$telem_src"/emit-phase-*.mjs; do
+      [ -f "$script" ] || continue
+      local script_name
+      script_name="$(basename "$script")"
+      cp "$script" "$telem_dest/$script_name"
+      echo "  + $hooks_install_dir_rel/telemetry/$script_name"
+    done
+  fi
+
+  echo "  [Planifest] Tier 1 adapter hooks installed."
+  echo "  Register the adapter in your tool's hook configuration:"
+  echo "    $adapter_dest_rel"
 }
 
 merge_telemetry_hook_settings() {
@@ -613,6 +671,17 @@ setup_tool() {
     install_context_mode_hooks "$TOOL_HOOKS_SRC" "$TOOL_HOOKS_DIR" "$TOOL_SETTINGS_FILE"
   fi
 
+  # Install Planifest enforcement hooks unconditionally (REQ-008)
+  # Not gated on MCP flags — enforcement applies to all Planifest-enabled projects.
+  if [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
+    install_enforcement_hooks "hooks/enforcement" ".claude/hooks/enforcement" "$TOOL_SETTINGS_FILE"
+  fi
+
+  # Tier 1 / 1b: copy adapter + shared hook scripts (REQ-009, REQ-010, REQ-013)
+  if [[ "${PLANIFEST_TIER:-}" =~ ^1 ]] && [ -n "${TOOL_HOOK_ADAPTER_SRC:-}" ]; then
+    install_tier1_hooks "$TOOL_HOOK_ADAPTER_SRC" "$TOOL_HOOK_ADAPTER_DEST" "$TOOL_HOOKS_INSTALL_DIR"
+  fi
+
   # Write telemetry opt-in sentinel so skills know emission is authorised (REQ-004)
   if [ "$STRUCTURED_TELEMETRY_MCP" = true ]; then
     local sentinel="$PROJECT_ROOT/.claude/telemetry-enabled"
@@ -630,6 +699,23 @@ setup_tool() {
      [ -n "${TOOL_TELEMETRY_HOOKS_SRC:-}" ] && [ -n "${TOOL_TELEMETRY_HOOKS_DIR:-}" ] && \
      [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
     install_telemetry_hooks "$TOOL_TELEMETRY_HOOKS_SRC" "$TOOL_TELEMETRY_HOOKS_DIR" "$TOOL_SETTINGS_FILE" "$BACKEND_URL"
+  fi
+
+  # Tier 3 tools: no hook system — print deterministic enforcement warning (REQ-012)
+  if [ "${PLANIFEST_TIER:-}" = "3" ]; then
+    echo ""
+    echo "  ⚠  [Planifest] $tool does not support deterministic enforcement hooks."
+    echo "     Scope enforcement and telemetry emission are instruction-based only."
+    echo "     Writes are NOT blocked at the tool level — agent instruction compliance"
+    echo "     is the only enforcement mechanism for this tool."
+  fi
+
+  # Tier 1 / 1b: remind operator to register the adapter in the tool's hook settings
+  if [[ "${PLANIFEST_TIER:-}" =~ ^1 ]] && [ -n "${TOOL_HOOK_ADAPTER_DEST:-}" ]; then
+    echo ""
+    echo "  ℹ  [Planifest] Tier ${PLANIFEST_TIER} — enforcement active via adapter."
+    echo "     If the adapter is not yet registered in $tool's hook settings, wire it manually."
+    echo "     Adapter path: $TOOL_HOOK_ADAPTER_DEST"
   fi
 
   echo "  Done."
@@ -684,12 +770,22 @@ echo "Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â�
 initialize_repo
 activate_guardrails
 
+run_tool_setup() {
+  local t="$1"
+  # opencode has its own bespoke setup script (Tier 2: Bun plugin)
+  if [ "$t" = "opencode" ]; then
+    bash "$SETUP_DIR/opencode.sh"
+  else
+    setup_tool "$t"
+  fi
+}
+
 if [ "$TOOL" = "all" ]; then
   for t in $VALID_TOOLS; do
-    setup_tool "$t"
+    run_tool_setup "$t"
   done
 elif echo "$VALID_TOOLS" | grep -qw "$TOOL"; then
-  setup_tool "$TOOL"
+  run_tool_setup "$TOOL"
 else
   echo "Unknown tool: $TOOL"
   echo "Valid tools: $VALID_TOOLS, all"

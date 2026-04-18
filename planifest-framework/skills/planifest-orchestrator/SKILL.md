@@ -3,6 +3,8 @@ name: planifest-orchestrator
 description: Guides a human from an initial idea to a complete set of requirements, then executes the confirmed design pipeline to build it. Use this for new features or full pipeline runs.
 bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.yml, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md]
 bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md]
+hooks:
+  phase: orchestrator
 ---
 
 # Planifest Orchestrator
@@ -37,6 +39,43 @@ These are non-negotiable. They apply in every session, every phase.
 
 ---
 
+## Response Prefix Convention
+
+Every response you produce **must** begin with the phase prefix below. This is non-negotiable — it lets the human orient instantly without reading prose.
+
+| Prefix | Phase |
+|--------|-------|
+| `P0:` | Assess & Coach |
+| `P1:` | Spec |
+| `P2:` | ADRs |
+| `P3:` | Codegen |
+| `P4:` | Validate |
+| `P5:` | Security |
+| `P6:` | Docs |
+| `P7:` | Ship |
+| `PC:` | Change Pipeline |
+
+Standard formats:
+- Entering a phase: `Px: Starting — {one-liner of what you are about to do}`
+- Resuming a session: `Px: Resuming — {what was in progress, what is next}`
+- Completing a phase: `Px: Complete — {one-liner summary of output}`
+- Blocking on a gap: `P0: Blocked — {specific gap preventing progress}`
+- Skipping a phase: `Px: Skipped — {reason}`
+
+---
+
+## Resume Detection
+
+On every session start, before taking any action:
+
+1. Check `plan/current/` for existing artefacts (`design.md`, `requirements/`, `adr/`, etc.)
+2. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
+3. Check for `.skips` file — if present, read and acknowledge skipped phases at the top of your response
+4. If artefacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
+5. If no artefacts: open with `P0:` and begin coaching
+
+---
+
 ## Framework Index (JIT Loading)
 
 Do not assume you know the formatting or content of any Planifest template or phase skill. **Read the relevant file immediately before generating any output for that phase.** This is not optional - it prevents context rot and ensures your output matches the current template exactly.
@@ -58,6 +97,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Begin Phase 4 (validation) | Load the `planifest-validate-agent` skill |
 | Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
 | Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
+| Begin Phase 7 (ship) | Load the `planifest-ship-agent` skill |
 | Handle a change request | Load the `planifest-change-agent` skill |
 | Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
 
@@ -109,7 +149,55 @@ The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and rel
 
 ---
 
+## Phase Skip Protocol
+
+When a human explicitly requests to skip a phase (e.g. "skip security", "we don't need ADRs"):
+
+1. **Acknowledge the skip immediately** — do not argue, do not ask for justification
+2. **Write the skip record** to `.skips` in the same turn (append if file exists):
+   ```
+   {phase}: skipped by human on {ISO-8601 date} — {reason if given, or "no reason given"}
+   ```
+3. **Continue** to the next phase
+4. The ship-agent will read `.skips` and include it in the changelog when archiving
+
+---
+
 ## Phase 0 - Assess and Coach
+
+### Opening Briefing
+
+When starting a new session (no resume detected), open with this structured briefing:
+
+```
+P0: Starting
+
+Pipeline phases: P0 Assess → P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Ship
+
+Tool detected: {tool name or "unknown — checking..."}
+Hooks status:
+  - gate-write (PreToolUse): {registered / not registered / unknown}
+  - check-design (UserPromptSubmit): {registered / not registered / unknown}
+
+{If any hook is not registered:}
+  ⚠ Enforcement hooks not detected. Run: ./planifest-framework/setup.sh {tool}
+  Until hooks are registered, scope enforcement is instruction-based only.
+
+Reading feature brief…
+```
+
+Detect the tool by checking:
+1. `CLAUDE_CODE_*` env vars → Claude Code
+2. `.cursor/` directory exists → Cursor
+3. `WINDSURF_*` env vars or `.windsurf/` directory → Windsurf
+4. `.clinerules` file exists → Cline
+5. `OPENAI_*` env vars and `.agents/` directory → Codex
+6. `.opencode/` directory → OpenCode
+7. Otherwise: "unknown"
+
+Check hook registration by looking for `gate-write` in `.claude/settings.json` (Claude Code) or the tool-appropriate hooks config.
+
+---
 
 This is where you spend most of your time with the human. The goal is a complete set of requirements - not a perfect one, but one where every required concern has been addressed or explicitly deferred.
 
@@ -364,7 +452,7 @@ Invoke the **security-agent** skill.
 
 ---
 
-## Phase 6 - Documentation and Ship
+## Phase 6 - Documentation
 
 **Before acting:** Load the `planifest-docs-agent` skill now. Do not begin documentation until you have read it.
 
@@ -372,10 +460,23 @@ Invoke the **docs-agent** skill.
 
 **Input:** All artifacts from all phases
 
-**What it produces:** Living repository documentation at `docs/` (component registry, dependency graph), a changelog entry log (`plan/changelog/{feature-id}-{YYYY-MM-DD}.md`), and recommendations.
+**What it produces:** Living repository documentation at `docs/` (component registry, dependency graph), per-component docs at `src/{component-id}/docs/`, and recommendations.
 
-**Gate:** Every living artifact has been produced and no historical change logs reside in `docs/`. The active plan is complete and ready for human review.
-**Post-Review Action:** Once the human reviews and accepts the change, you must move the active plan (brief, spec, ADRs) from the `plan/current/` root into the historical feature tracking directory `plan/`.
+**Gate:** Every living artifact has been produced and is consistent. The active plan is complete and ready for human review.
+
+---
+
+## Phase 7 - Ship
+
+**Before acting:** Load the `planifest-ship-agent` skill now. Do not begin ship actions until you have read it.
+
+Invoke the **ship-agent** skill.
+
+**Input:** All artifacts from all phases; `.skips` file (if any)
+
+**What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `.skips` processed and deleted, `plan/current/` archived to `plan/archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
+
+**Gate:** PR URL returned, archive path confirmed, changelog confirmed.
 
 ---
 
@@ -459,7 +560,7 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 - [Component Manifest](../templates/component.template.yml) - codegen-agent output ([guide](../templates/component-guide.md))
 - [Iteration Log](../templates/iteration-log.template.md) - written at end of every Agentic Iteration Loop
 
-**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-change-agent`, `planifest-docs-agent`
+**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-change-agent`
 
 ---
 
@@ -507,11 +608,13 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 
 ---
 
-**You own all phase lifecycle events for phases 1–6. Phase skills do NOT emit `phase_start`, `phase_end`, or `phase_skip` — that is your responsibility as the orchestrator.**
+**Hook scripts are the primary emission mechanism for `phase_start` and `phase_end` (via `emit-phase-start.mjs` and `emit-phase-end.mjs` installed by setup.sh). These emit automatically on every Write/Edit PreToolUse event when `PLANIFEST_TELEMETRY_URL` is set. The instructions below are the backup path for tools without native hook support (Tier 3) or when telemetry hooks are not installed.**
+
+**You own `phase_skip` events — these are never emitted by hooks. Phase skills do NOT emit `phase_start`, `phase_end`, or `phase_skip` — that is your responsibility as the orchestrator.**
 
 **`phase_start`** — emit immediately before invoking each phase skill:
 ```json
-{ "phase_name": "spec" | "adr" | "codegen" | "validate" | "security" | "docs" }
+{ "phase_name": "spec" | "adr" | "codegen" | "validate" | "security" | "docs" | "ship" }
 ```
 
 **`phase_end`** — emit immediately after the gate check for each phase:

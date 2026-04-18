@@ -19,6 +19,16 @@ This project uses the confirmed design framework. These rules are non-negotiable
 - **Check `.cursorindexingignore`:** The `standards/reference/` directory and guide files are deliberately excluded from your semantic search index to preserve your context window. If you need deep domain knowledge about frameworks or pitfalls, explicitly read those files using `@` mentions.
 - **Use context-mode MCP when available:** If `mcp__context-mode__ctx_batch_execute` is available, apply the routing rules in `AGENTS.md`. Key rules: use `ctx_batch_execute` for codebase discovery; `ctx_execute_file` for analysis-only file reads; `ctx_execute(language:"shell")` for large-output shell commands; `ctx_fetch_and_index` + `ctx_search` for web fetching. Use the `Read` tool only when you need file content in context for editing.
 
+## Hook Enforcement
+
+Planifest installs deterministic enforcement hooks via `setup.sh`. These run automatically:
+
+- **gate-write** (PreToolUse: Write, Edit): Blocks writes to `src/` unless `plan/current/design.md` exists AND the target path matches a declared component. Writes to `plan/`, `docs/`, and other always-permitted paths are never blocked.
+- **check-design** (UserPromptSubmit): Injects active component scope from `design.md` as additional context.
+- **emit-phase-start / emit-phase-end**: Structured telemetry for pipeline phases (no-op if `PLANIFEST_TELEMETRY_URL` is unset).
+
+Enforcement failures exit 2 and surface a human-readable message. All unexpected errors exit 0 — hooks never block your session unexpectedly.
+
 ## Escalation
 
 If you are blocked, unable to resolve tests after 5 attempts, or confused by conflicting requirements, **STOP**. Do not guess. State clearly what is blocking you and ask the human for direction.
