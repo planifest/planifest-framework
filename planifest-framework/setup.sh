@@ -718,6 +718,41 @@ setup_tool() {
     echo "     Adapter path: $TOOL_HOOK_ADAPTER_DEST"
   fi
 
+  # Tier 1b (Codex CLI): activate codex_hooks feature flag and register adapter (REQ-010)
+  if [ "${PLANIFEST_TIER:-}" = "1b" ] && [ -n "${TOOL_HOOK_ADAPTER_DEST:-}" ]; then
+    local codex_config="$PROJECT_ROOT/.codex/config.toml"
+    mkdir -p "$(dirname "$codex_config")"
+    if [ ! -f "$codex_config" ]; then
+      cat > "$codex_config" << 'TOML'
+[features]
+codex_hooks = true
+
+[hooks]
+TOML
+      echo "pre_tool_use = \"node $TOOL_HOOK_ADAPTER_DEST\"" >> "$codex_config"
+      echo "  + .codex/config.toml (created with codex_hooks + pre_tool_use hook)"
+    else
+      # Idempotent: add codex_hooks if absent
+      if ! grep -q "codex_hooks" "$codex_config"; then
+        printf '\n[features]\ncodex_hooks = true\n' >> "$codex_config"
+        echo "  ~ .codex/config.toml (codex_hooks = true appended)"
+      else
+        echo "  - .codex/config.toml (codex_hooks already present)"
+      fi
+      # Idempotent: add pre_tool_use hook if absent
+      if ! grep -q "pre_tool_use" "$codex_config"; then
+        printf '\n[hooks]\npre_tool_use = "node %s"\n' "$TOOL_HOOK_ADAPTER_DEST" >> "$codex_config"
+        echo "  ~ .codex/config.toml (pre_tool_use hook registered)"
+      else
+        echo "  - .codex/config.toml (pre_tool_use already registered)"
+      fi
+    fi
+    echo ""
+    echo "  ⚠  [Planifest] Note: Codex CLI hooks are Bash-only."
+    echo "     Write interception works in shell environments."
+    echo "     Windows is not supported."
+  fi
+
   echo "  Done."
 }
 
