@@ -21,6 +21,7 @@ version: "0.1.0"
 - The orchestrator opens with: `Px: Resuming {feature-id} — {phase-name} in progress. {brief status summary}.`
 - The P0 briefing (phase table, tool detection, hooks check) is NOT repeated on resume — it was already completed.
 - If `plan/current/.skips` exists, the orchestrator reads and acknowledges the skipped phases.
+- If `plan/current/.feature-id` exists and its contents differ from the feature currently being started, the orchestrator warns: `"P0: ⚠ plan/current/ contains artefacts for feature {X}. Archive manually or load that feature."` It does not auto-proceed.
 
 ## Acceptance Criteria
 
@@ -28,6 +29,7 @@ version: "0.1.0"
 - [ ] The resume message includes the feature ID and current phase name.
 - [ ] Skipped phases from `.skips` are acknowledged in the resume message.
 - [ ] Resuming at P3 (codegen in progress) correctly identifies and loads the right phase state.
+- [ ] `.feature-id` present with a different feature ID triggers a stale-artefacts warning and halts auto-resume.
 
 ## Dependencies
 

@@ -28,12 +28,13 @@
 
 ### DD-003 — Scope enforcement uses two-tier path classification (Option C)
 
-Checking whether a specific file path matches the design's component scope requires machine-readable structure in design.md that does not exist yet. For v1, the gate uses a simpler two-tier model:
+Checking whether a specific file path matches the design's component scope requires machine-readable structure in design.md that does not exist yet. The gate uses a two-check model:
 
-- **Always permitted:** `plan/`, `docs/`, `CLAUDE.md`, `AGENTS.md` — planning and documentation files are never blocked
-- **Requires design.md:** everything else (src/, planifest-framework/, hooks/, any .mjs/.sh/.md outside plan/ and docs/) — blocked if `plan/current/design.md` does not exist
+- **Check 1 — Always permitted paths:** `plan/`, `docs/`, `CLAUDE.md`, `AGENTS.md` — these never trigger the gate regardless of design.md state.
+- **Check 2 — Design existence:** everything outside the always-permitted list is blocked with exit code 2 if `plan/current/design.md` does not exist.
+- **Check 3 — Path membership:** if design.md exists, the target path must match a component path prefix listed in the design. Non-matching paths are blocked with exit code 2 and a clear message identifying the unmatched path.
 
-**Resolution:** `gate-write.mjs` classifies the target path. Permitted paths proceed. Everything else checks for design.md existence and blocks if absent.
+**Resolution:** `gate-write.mjs` runs the three checks in order. Permitted paths pass at Check 1. Everything else must clear Checks 2 and 3. Exit code 2 blocks; exit code 0 passes. The always-permitted list covers planning artefacts so plan-phase work is never self-blocking.
 
 ---
 

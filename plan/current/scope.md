@@ -17,6 +17,7 @@ version: "0.1.0"
 - `planifest-framework/hooks/telemetry/emit-phase-end.mjs`
 - `hooks:` frontmatter block on 7 phase SKILL.md files (spec, adr, codegen, validate, security, docs, ship)
 - Flag-file guard preventing duplicate `phase_start` per session per phase
+- `.claude/.planifest-session` — project-scoped session ID fallback file (created by emit-phase-start.mjs when `PLANIFEST_SESSION_ID` is absent; deleted at Ship)
 
 ### Track B — Plan compliance enforcement hooks
 - `planifest-framework/hooks/enforcement/check-design.mjs` (UserPromptSubmit: scope injection)
@@ -41,6 +42,7 @@ version: "0.1.0"
 - Orchestrator SKILL.md updated: Phase 7 routing, Px prefix, resume logic, telemetry note
 - `getting-started.md` "Understanding phase indicators" section (DD-011)
 - Ship archives `plan/current/` → `plan/archive/{feature-id}-{YYYY-MM-DD}/` with `-{n}` collision handling
+- `plan/current/.feature-id` — written by ship-agent at Phase 7 start; enables stale-artefact detection in resume detection; deleted after archive copy
 
 ### Structured-telemetry-mcp (coordinated deploy)
 - Add `"ship"` to phase enum; retain `"change"`

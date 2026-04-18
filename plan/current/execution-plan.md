@@ -74,6 +74,7 @@ See `plan/current/requirements/` for individual feature requirements.
 | req-019-ship-agent-skill.md | D | planifest-ship-agent SKILL.md (new Phase 7 skill) |
 | req-020-orchestrator-skill-updates.md | D | Orchestrator SKILL.md: Phase 7 routing, Px, resume, telemetry note |
 | req-021-mcp-ship-enum.md | coordinated | structured-telemetry-mcp adds "ship" to phase enum |
+| req-022-claude-md-update.md | B | CLAUDE.md note that hook enforcement is active |
 
 ---
 

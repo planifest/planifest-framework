@@ -29,6 +29,8 @@ version: "0.1.0"
 - [ ] Flag file is present at expected path after first emission.
 - [ ] Second invocation of emit-phase-start.mjs with same session_id + phase exits 0 without emitting.
 - [ ] Flag file directory is created automatically if missing.
+- [ ] When `PLANIFEST_SESSION_ID` is absent, `.claude/.planifest-session` is created on first hook invocation with a UUID value.
+- [ ] Subsequent hook invocations in the same project (no env var) read the same session ID from `.planifest-session` and correctly deduplicate.
 
 ## Dependencies
 
