@@ -1,6 +1,6 @@
 ﻿---
 name: planifest-change-agent
-description: Handles modifications to existing features - loads domain context, implements the minimum change, validates, and updates documentation.
+description: Handles targeted modifications to existing features — loads domain context, implements the minimum change, validates, and updates documentation. Invoked via the Change Pipeline route.
 bundle_templates: [component.template.yml, change-summary.template.md]
 bundle_standards: [code-quality-standards.md]
 ---
@@ -114,6 +114,7 @@ Update every artifact affected by the change:
 
 Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md` as the audit trail for this change.
 
+
 ---
 
 ## New Component Handoff
@@ -179,16 +180,6 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
   "timestamp": "<ISO 8601 UTC>",
   "data": { }
 }
-```
-
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "change" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "change", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
 ```
 
 **`deviation`** — when implementation diverges from the confirmed design:

@@ -1,276 +1,393 @@
-# Design - 0000002-structured-telemetry-framework-integration
+# Confirmed Design — 0000003 Hook-Based Enforcement: Telemetry & Plan Compliance
 
-**Status:** draft
-**Version:** 0.1.0
-
----
-
-## Feature
-
-- **Problem:** Agent behaviour across pipeline phases is unobservable. No structured telemetry is emitted by framework skills. Deviations, spec gaps, self-corrections, and validation failures are invisible unless printed to the conversation.
-- **Adoption mode:** retrofit (existing setup scripts + skill files)
-- **Feature ID:** 0000002-structured-telemetry-framework-integration
+**Status:** Design confirmed
+**Feature ID:** 0000003-hook-based-enforcement
+**Date:** 2026-04-18
 
 ---
 
-## Product Layer
+## Design Decisions
 
-- User stories: 3
-  1. As an operator, I want to see when each pipeline phase starts and ends so I can identify bottlenecks.
-  2. As an operator, I want to capture spec gaps and deviations so I can audit framework quality over time.
-  3. As an operator, I want context pressure events captured automatically so I can correlate context usage with agent behaviour.
-- Acceptance criteria: 5
-  1. `--structured-telemetry-mcp` flag installs telemetry hooks in the project folder and wires them in `.claude/settings.json`.
-  2. Each agent skill emits `phase_start` and `phase_end` events at task boundaries when `emit_event` is available.
-  3. No event is emitted when `emit_event` tool is absent — agent proceeds silently.
-  4. Context pressure hook is installed only when both `--structured-telemetry-mcp` and `--context-mode-mcp` flags are active.
-  5. All emitted payloads match the server's strict schema (`additionalProperties: false`).
-- Constraints: No local file fallbacks. No auto-discovery. Tool presence checked before every emission.
-- Integrations: Structured Telemetry MCP Server (0008a) via stdio proxy → HTTP backend at `http://localhost:3741`
+### DD-001 — PreToolUse fires on every tool call; flag-file guard is required
+
+`PreToolUse` fires on every tool call inside the agentic loop. The `emit-phase-start.mjs` script must guard against re-emission using a temp flag file keyed by `session_id + phase`. Without the guard, `phase_start` would emit once per tool call for the duration of the phase.
+
+**Resolution:** Flag file at `{tmpdir}/planifest-telemetry/phase-start-{session_id}-{phase}`. On first invocation: write file + emit. On subsequent invocations: detect file exists + exit 0 silently.
 
 ---
 
-## Architecture Layer
+### DD-002 — Stop fires per turn; multiple emissions per phase are expected
 
-- Latency target: < 5ms per `emit_event` call (async fire-and-forget in MCP transport)
-- Availability target: not applicable — telemetry is best-effort; failures are silent
-- Security: no credentials, no sensitive data. Hook reads context fill % only. No tool input is logged.
-- Data privacy: no regulated data
-- Cost boundary: not constrained
+`Stop` fires at the end of every response turn. A multi-turn phase (e.g. validate retrying 5 times) produces multiple `phase_end` emissions. This is acceptable: the backend receives several and the last one is the true completion signal. No deduplication is needed in the hook script.
+
+**Resolution:** `emit-phase-end.mjs` always emits on `Stop`. Duration is calculated from the flag file timestamp written by `emit-phase-start.mjs`. If the flag file is absent (phase_start hook never fired), duration is omitted.
 
 ---
 
-## Engineering Layer
+### DD-003 — Scope enforcement uses two-tier path classification (Option C)
 
-- Stack: PowerShell + bash (setup scripts) / Markdown (SKILL.md updates) / JavaScript ESM (hook script) / JSON (settings wiring)
-- Components:
-  - **`setup-telemetry-flag`** — changes to `setup.sh` and `setup.ps1` adding `--structured-telemetry-mcp` flag and optional `--backend-url` override. Installs telemetry hooks into `.claude/hooks/telemetry/` and wires them in `.claude/settings.json` for the workspace. MCP server registration is handled by the 0008a deploy/setup scripts.
-  - **`skill-telemetry-sections`** — Telemetry sections added to 8 SKILL.md files: orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, change-agent, security-agent, docs-agent.
-  - **`context-pressure-hook`** — new `hooks/telemetry/context-pressure.mjs`. Installed to `.claude/hooks/telemetry/` and registered as `PostToolUse` in `settings.json` only when both flags are active.
-- Data ownership: no data owned — framework emits events only; DuckDB is owned by 0008a
-- Deployment: local only — scripts run at setup time; hook files copied to `.claude/hooks/telemetry/`
+Checking whether a specific file path matches the design's component scope requires machine-readable structure in design.md that does not exist yet. For v1, the gate uses a simpler two-tier model:
 
----
+- **Always permitted:** `plan/`, `docs/`, `CLAUDE.md`, `AGENTS.md` — planning and documentation files are never blocked
+- **Requires design.md:** everything else (src/, planifest-framework/, hooks/, any .mjs/.sh/.md outside plan/ and docs/) — blocked if `plan/current/design.md` does not exist
 
-## Event Envelope
-
-Every event shares this envelope:
-
-| Field | Source |
-|---|---|
-| `schema_version` | Always `"1.0"` |
-| `event` | Specific event type |
-| `session_id` | context-mode session ID if available; otherwise `crypto.randomUUID()` per run |
-| `initiative_id` | Feature ID from `plan/current/design.md` header; omit if not in a pipeline run |
-| `phase` | Current pipeline phase name |
-| `agent` | Skill name |
-| `tool` | Agentic tool: `claude-code`, `cursor`, etc. |
-| `model` | Model identifier, e.g. `claude-sonnet-4-6` |
-| `mcp_mode` | `none` \| `workspace` \| `context` \| `workspace+context` — determined at session start |
-| `timestamp` | ISO 8601 at point of emission |
-| `model_config` | Optional. Free-form object for tool-specific model settings, e.g. `{ "effort": "high" }` or `{ "thinking": true, "budget_tokens": 10000 }`. Omit if not relevant. |
-| `data` | Typed payload per event schema |
-
-### `mcp_mode` determination
-
-| Active setup flags | `mcp_mode` value |
-|---|---|
-| Neither `--mcp-workspace` nor `--context-mode-mcp` | `"none"` |
-| `--mcp-workspace` only | `"workspace"` |
-| `--context-mode-mcp` only | `"context"` |
-| Both | `"workspace+context"` |
+**Resolution:** `gate-write.mjs` classifies the target path. Permitted paths proceed. Everything else checks for design.md existence and blocks if absent.
 
 ---
 
-## Skill Telemetry Sections
+### DD-007 — Phase 0 opens with a structured human briefing and hooks health check
 
-### planifest-orchestrator
+Phase 0 (Assess & Coach) currently jumps straight into asking the human about their feature. Two gaps:
+1. First-time users don't know what they've signed up for — phases, what each produces, how to exit
+2. Nothing confirms hooks are wired before implementation begins — a failed hook setup only surfaces later when enforcement silently doesn't fire
 
-**phase_start** — emit before delegating to any phase skill:
-```json
-{ "phase_name": "<current phase name>" }
+**Resolution:** Orchestrator SKILL.md Phase 0 section gains two mandatory opening steps:
+
+**Step 1 — Process briefing** (always, at Phase 0 start):
+Open with exactly this shape — `Px` prefix, the phase name, the opening question, then the phase table:
+
+```
+P0: Starting the "Assess & Coach" phase. What do you want to develop?
+
+Subsequently, we'll go through the following phases until we complete the feature.
+
+| Phase | Name     |
+|-------|----------|
+| 1     | Spec     |
+| 2     | ADR      |
+| 3     | Codegen  |
+| 4     | Validate |
+| 5     | Security |
+| 6     | Docs     |
+| 7     | Ship     |
+
+You can ask questions, redirect, or pause at any point.
 ```
 
-**phase_end** — emit after each phase skill returns:
-```json
-{ "phase_name": "<phase>", "status": "pass" | "fail", "duration_ms": <elapsed> }
+Each subsequent phase opening follows the same pattern — `Px` prefix, phase name, one-sentence description of what happens in this phase:
+
+```
+P6: Starting the "Documentation" phase. Here we will produce per-component docs,
+the system-wide registry, dependency graph, and the iteration log audit trail.
 ```
 
-**phase_skip** — emit when a phase is determined unnecessary and bypassed:
-```json
-{ "phase_name": "<skipped phase>", "reason": "<why it was skipped>" }
-```
-
-**spec_gap** — emit when human clarification is required before proceeding:
-```json
-{ "question": "<the question being asked>", "phase_name": "<current phase>" }
-```
-
-**mcp_impact** — emit once at the end of a complete pipeline run, after the final `phase_end`:
-```json
-{ "mcp_mode": "<active mode>", "avg_token_delta": <number>, "peak_fill_pct": <number> }
-```
-Query with `{ "mode": "mcp_impact" }` to compare token impact across MCP configurations. `group_by: "mcp_mode"` on bottleneck queries will also work once BUG-001 in 0008c is deployed.
+**Step 2 — Hooks health check** (at Phase 0, after briefing):
+Detect which tool is running (Claude Code, Cursor, Windsurf, etc.) and verify that Planifest hooks are installed:
+- For Claude Code: check `.claude/settings.json` contains the enforcement hooks
+- For Cursor: check `.cursor/hooks.json` exists and contains Planifest entries
+- For Codex CLI: check `~/.codex/config.toml` has `features.codex_hooks = true` and `.codex/hooks.json` exists
+- For tools without hooks (Tier 3): inform the human that deterministic enforcement is unavailable for their tool and explain what that means
+- If hooks missing for a hook-capable tool: surface a clear warning with remediation step (`run setup.sh --tool <name>`) before proceeding
 
 ---
 
-### planifest-spec-agent
+### DD-008 — Orchestrator periodically reminds the human of the current phase
 
-**phase_start** at task entry. **phase_end** at task exit.
+In multi-phase runs the human can lose track of where they are, especially after validation retries or long codegen. The orchestrator should surface the current phase at natural boundaries.
 
-**spec_gap** when the spec cannot proceed without human input:
-```json
-{ "question": "<blocking question>", "phase_name": "spec" }
+**Resolution:** Orchestrator SKILL.md gains a periodic reminder rule:
+- Every agent response begins with **`Px`** where `x` is the current phase number (e.g. `P0`, `P3`). This applies to the orchestrator and all sub-skill agents it invokes.
+- At the **start of each phase**: announce phase name, number, and one-liner ("▶ P3 — Codegen: writing implementation files")
+- After a **phase completes**: confirm completion and state what phase comes next ("✅ P3 — Codegen complete. Moving to P4 — Validate.")
+- After **5 or more tool calls within a phase**: re-surface the `Px` prefix with a brief status line to maintain orientation
+- Standing reminder in each phase section: "The human may redirect, pause, or ask questions at any point — acknowledge and adapt"
+
+The `Px` prefix is a **hard convention** — not optional prose. Every response from every Planifest agent starts with it. The prefix goes before any other content on the first line. This includes escalation messages: `Px: Escalating — could not resolve [action] after 5 attempts. [description]. Please advise.`
+
+**Phase exit summary** — each phase close mirrors the open:
 ```
+P3 ✅ Codegen complete. Produced: src/auth/, component.yml, 12 test files.
+Moving to P4 — Validate.
+```
+
+**Phase skip** — if the human directs a phase to be skipped, the orchestrator responds:
+```
+P5: Skipped by human direction. Reason: [human's stated reason]. Recorded in iteration log.
+```
+The skip is written to `plan/changelog/{feature-id}-<date>.md` under a `## Skipped Phases` heading.
 
 ---
 
-### planifest-adr-agent
+### DD-012 — Ship phase archives `plan/current/` on completion
 
-**phase_start** at task entry. **phase_end** at task exit.
+After a successful Ship (PR raised, changelog written, docs complete), `plan/current/` must be archived so the workspace is clean for the next feature. Leaving artefacts in `plan/current/` after shipping causes resume-detection (DD-009) to misread the state as an in-progress feature.
 
-**adr_decision** after each ADR is written:
-```json
-{ "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<the option selected>" }
-```
+**Resolution:** The final step of the ship-agent is:
+1. Determine the feature ID from `plan/current/feature-brief.md` frontmatter
+2. Move `plan/current/` → `plan/archive/{feature-id}/`
+3. Confirm `plan/current/` is empty (or does not exist) before declaring Ship complete
+4. Emit a `phase_end` telemetry event with `status: "pass"`
 
----
-
-### planifest-codegen-agent, planifest-change-agent
-
-**phase_start** / **phase_end** at task boundaries.
-
-**deviation** when implementation diverges from the confirmed design:
-```json
-{ "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }
-```
-
-**migration_proposal** when a schema change is required (before writing the proposal file):
-```json
-{ "component_id": "<component>", "proposal_path": "src/<id>/docs/migrations/proposed-<desc>.md", "destructive": true | false }
-```
-
-**self_correction** when retrying a failed action:
-```json
-{ "phase_name": "<phase>", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
-```
-
-**retry_limit_exceeded** when the 5-attempt escalation ceiling is hit:
-```json
-{ "phase_name": "<phase>", "action_id": "<action>", "attempt_count": 5 }
-```
+This mirrors the manual archive step the orchestrator performed when transitioning from feature 0000002 → 0000003, but makes it deterministic and automated.
 
 ---
 
-### planifest-validate-agent
+### DD-009 — Resume detection on re-entry
 
-**phase_start** / **phase_end** at task boundaries.
+When the orchestrator is invoked without a fresh feature request (e.g. after a context reset or new session on an in-progress feature), it must detect the current phase from existing `plan/` artefacts rather than restarting from P0.
 
-**validation_failure** for each test or check failure:
-```json
-{ "failure_type": "<test|lint|type|build>", "phase_name": "validate", "attempt_number": <n>, "action_id": "<test suite or check name>" }
-```
-
-**self_correction** when retrying after a failure:
-```json
-{ "phase_name": "validate", "attempt_number": <n>, "action_id": "<action>", "correction_type": "fix_and_retry" }
-```
-
-**retry_limit_exceeded** when the 5-attempt escalation ceiling is hit:
-```json
-{ "phase_name": "validate", "action_id": "<action>", "attempt_count": 5 }
-```
+**Resolution:** Orchestrator Phase 0 opens with a check:
+1. Does `plan/current/design.md` exist? If yes → feature is in progress
+2. Scan `plan/current/` for presence of phase artefacts (spec, ADRs, security report, etc.) to determine the furthest completed phase
+3. Open with: `Px: Resuming [phase name]. [Brief summary of what exists.] Shall we continue?`
+4. If no `design.md` → treat as new feature, open with P0 briefing as normal
 
 ---
 
-### planifest-security-agent
+### DD-010 — Hooks health check shows inline remediation command
 
-**phase_start** / **phase_end** at task boundaries.
+The P0 hooks health check (DD-007 Step 2) must not just warn — it must give the human a copy-pasteable fix.
 
-**security_finding** for each vulnerability or risk identified:
-```json
-{ "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN — optional>" }
+**Resolution:** If hooks are missing or misconfigured for the detected tool, the check outputs:
 ```
-
-**deviation** if the output diverges from the confirmed design (non-security):
-```json
-{ "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+P0 ⚠ Hooks not detected for [tool]. Enforcement and telemetry will not fire.
+To install: run ./planifest-framework/setup.sh --tool [tool]
+            (Windows: .\planifest-framework\setup.ps1 -Tool [tool])
+Continuing without hooks — you can run setup at any time.
 ```
+If hooks are confirmed present: `P0 ✅ Hooks verified for [tool].` — one line, no noise.
 
 ---
 
-### planifest-docs-agent
+### DD-011 — `getting-started.md` documents the `Px` convention
 
-**phase_start** / **phase_end** at task boundaries.
+New users encounter `P0:` on their first interaction and need to know what it means.
 
-**doc_gap** when documentation is missing or incomplete for a component:
-```json
-{ "component_id": "<component>", "description": "<what is missing>" }
+**Resolution:** Add a short section to `getting-started.md` — "Understanding phase indicators" — explaining:
+- Every Planifest agent response opens with `Px` where `x` is the current phase number
+- P0 is Assess & Coach; P1–P7 are the implementation phases
+- The prefix is there so you always know where you are without asking
+
+---
+
+### DD-005 — Multi-tool hook support via three enforcement tiers
+
+Research across the 8 non-Claude supported tools (cursor, codex-cli, antigravity, copilot, windsurf, cline, roo-code, opencode) shows fragmented hook capabilities. A single implementation does not fit all. The design adopts three tiers keyed on the tool's native capability:
+
+- **Tier 1 — Native shell hooks, full write interception** (claude-code, cursor, windsurf, cline): tools ship shell-command lifecycle hooks with stdin JSON and blocking semantics. `PreToolUse` intercepts Write/Edit calls directly. Planifest's `.mjs` scripts run directly; per-tool adapters translate native input/output formats to the common envelope.
+- **Tier 1b — Native shell hooks, Bash-only interception** (codex-cli): full lifecycle hooks (`SessionStart`, `UserPromptSubmit`, `PreToolUse`, `PostToolUse`, `Stop`) with exit-code-2 + JSON blocking. However `PreToolUse` only intercepts `Bash` today — not `Write`/`Edit`/`MCP`. Track B `gate-write` degrades: can block bash-based writes but cannot intercept direct Write tool calls. Track A telemetry and Track B `check-design` context injection work fully. Requires `features.codex_hooks = true` in `~/.codex/config.toml`; Windows support temporarily disabled.
+- **Tier 2 — Plugin shim** (opencode): tool uses a JS/TS plugin system rather than shell hooks. Planifest ships `@planifest/opencode-hooks` npm plugin that wraps the same `.mjs` scripts via `Bun.spawn`, emitting Claude-Code-shape stdin JSON so hook bodies stay tool-agnostic.
+- **Tier 3 — MCP + instructions fallback** (copilot, antigravity, roo-code): tool has no lifecycle hooks. Enforcement degrades to MCP tool gating, `AGENTS.md`/`copilot-instructions.md` advisory rules, and CI/branch-protection guards. Telemetry emission relies on agent compliance (as today).
+
+**Resolution:** Per-tool adapter directory layout `planifest-framework/hooks/adapters/{tool}/`, with `setup/{tool}.sh` emitting native config. Tier-3 tools receive instructions + MCP registration only; users are warned at setup time that deterministic enforcement is unavailable for those tools.
+
+---
+
+### DD-006 — Common envelope across tiers
+
+All `.mjs` hook scripts (Track A `emit-phase-*`, Track B `check-design`, `gate-write`) read a normalised stdin JSON envelope with `{session_id, cwd, tool_input, event}` regardless of the originating tool. Per-tool adapter scripts translate native formats (Cursor JSON, Windsurf JSON, Cline JSON, OpenCode plugin object) into this shape and translate decision output back (exit 2 for Windsurf/Claude; `{"permission":"deny"}` for Cursor; `{"cancel":true}` for Cline; `throw` for OpenCode).
+
+**Resolution:** Hook script bodies remain unchanged across tools. Adapter layer isolates per-tool differences.
+
+---
+
+### DD-004 — Write gate blocks (exit code 2), not warns
+
+Warn-only is equivalent to the current state: another instruction the LLM can ignore. The gate must be a hard block. Exit code 2 surfaces the message to Claude as feedback, which it can act on (create a design first).
+
+**Resolution:** `gate-write.mjs` exits with code 2 and a clear message: `"No confirmed design found at plan/current/design.md. Complete Phase 0 and confirm the design before writing implementation files."`
+
+---
+
+## Architecture
+
+### Track A — Phase lifecycle telemetry
+
+```
+Skill frontmatter (e.g. planifest-spec-agent/SKILL.md)
+  └── hooks:
+        PreToolUse → emit-phase-start.mjs spec
+        Stop       → emit-phase-end.mjs spec
+
+emit-phase-start.mjs <phase>
+  1. Read stdin JSON → extract session_id, cwd
+  2. Check .claude/telemetry-enabled sentinel → exit 0 if absent
+  3. Check flag file → exit 0 if already emitted this session
+  4. Write flag file with start timestamp (epoch ms)
+  5. POST phase_start event to ${PLANIFEST_TELEMETRY_URL}/emit
+  6. Fire-and-forget, 3s abort, silent errors
+
+emit-phase-end.mjs <phase>
+  1. Read stdin JSON → extract session_id, cwd
+  2. Check .claude/telemetry-enabled sentinel → exit 0 if absent
+  3. Read flag file → compute duration_ms if present
+  4. POST phase_end event to ${PLANIFEST_TELEMETRY_URL}/emit
+  5. Fire-and-forget, 3s abort, silent errors
 ```
 
-**deviation** if the output diverges from the confirmed design:
-```json
-{ "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+**Affected skills:** spec, adr, codegen, validate, security, docs, ship (7 files)
+
+**Not affected:** orchestrator — it emits phase_start/phase_end via instructions as a complementary signal. Hooks are the primary mechanism; instructions are backup.
+
+---
+
+### Track B — Plan compliance enforcement
+
+```
+.claude/settings.json (installed by setup.sh / setup.ps1)
+  └── hooks:
+        UserPromptSubmit → check-design.mjs (inject scope context)
+        PreToolUse Write|Edit → gate-write.mjs (block if no design)
+
+check-design.mjs
+  1. Read stdin JSON → extract cwd
+  2. Read plan/current/design.md → extract ## Scope section
+  3. Return additionalContext with scope summary
+  4. Exit 0 if design.md absent (no context to inject)
+
+gate-write.mjs
+  1. Read stdin JSON → extract tool_input.file_path (or path), cwd
+  2. Classify path:
+     - Starts with plan/, docs/, or is CLAUDE.md/AGENTS.md → exit 0 (permitted)
+     - Anything else → check for plan/current/design.md
+  3. If design.md exists → exit 0 (permitted)
+  4. If design.md absent → exit 2 with blocking message
 ```
 
+**Installation:** Both hooks installed unconditionally by `setup.sh`/`setup.ps1` (not gated on MCP flags). Enforcement applies to all Planifest installs.
+
 ---
 
-## Context Pressure Hook
+### Track C — Multi-tool hook support
 
-When both `--structured-telemetry-mcp` and `--context-mode-mcp` are active, setup installs a `PostToolUse` hook that reads the current context fill % after each tool call and emits `context_pressure` if it exceeds 70% (default threshold).
+Per-tool capability summary and mapping:
 
-```json
-{
-  "event": "context_pressure",
-  "data": {
-    "context_fill_pct": 78.5,
-    "unused_sources": ["design.md", "ADR-003"],
-    "trigger": "threshold_exceeded"
-  }
-}
+| Tool | Tier | PreToolUse | Stop/End | UserPromptSubmit | Block Signal | Config Surface |
+|------|------|-----------|----------|------------------|--------------|----------------|
+| claude-code | 1 | ✅ | `Stop` | ✅ | exit 2 / JSON | `.claude/settings.json` |
+| cursor | 1 | `beforeMCPExecution`, `beforeShellExecution` | `stop` | `beforeSubmitPrompt` | JSON `permission`/`continue` | `.cursor/hooks.json` — no enable flag; auto-activates on file presence (stable, Cursor 1.7+) |
+| windsurf | 1 | `pre_mcp_tool_use`, `pre_write_code`, `pre_run_command` | `post_cascade_response` | `pre_user_prompt` | exit 2 | `hooks.json` (workspace) |
+| cline | 1 | `PreToolUse` | `TaskComplete` | `UserPromptSubmit` | JSON `{"cancel":true}` | `.clinerules/hooks/` |
+| opencode | 2 | `tool.execute.before` | `event` (filter `session.idle`) | `chat.message` | `throw` / mutate output | `@planifest/opencode-hooks` plugin |
+| codex-cli | 1b | `PreToolUse` (Bash only) | `Stop` | `UserPromptSubmit` | exit 2 / `{"decision":"block"}` | `.codex/hooks.json` — **requires** `features.codex_hooks = true` in `~/.codex/config.toml`; Windows unsupported |
+| copilot | 3 | — | — | — | — | `.github/copilot-instructions.md`, MCP |
+| antigravity | 3 | — | — | — | — | `AGENTS.md`, MCP, Agent Permissions |
+| roo-code | 3 | — | — | — | — | `.roo/rules/`, MCP, custom Modes |
+
+**Architecture:**
+
+```
+planifest-framework/hooks/
+  ├── telemetry/
+  │   ├── emit-phase-start.mjs      # Shared — reads common envelope
+  │   ├── emit-phase-end.mjs        # Shared
+  │   └── context-pressure.mjs      # Existing
+  ├── enforcement/
+  │   ├── check-design.mjs          # Shared
+  │   └── gate-write.mjs            # Shared
+  └── adapters/
+      ├── cursor.mjs                # ~20 lines: translate Cursor JSON → common envelope; exit-2 → {"permission":"deny"}
+      ├── codex.mjs                 # ~25 lines: translate Codex hookSpecificOutput shape; exit-2 + {"decision":"block"} both supported
+      ├── cline.mjs                 # ~20 lines: translate Cline JSON → common envelope; exit-2 → {"cancel":true,"errorMessage":"..."}
+      └── opencode/                 # npm package only — needs package.json + TS source
+          ├── package.json          # name: @planifest/opencode-hooks
+          └── src/
+              ├── index.ts          # Plugin entrypoint; registers all hook events
+              └── adapter.ts        # Shells out to .mjs scripts via Bun.spawn; maps throw/output mutation back
 ```
 
-Installed at: `.claude/hooks/telemetry/context-pressure.mjs`
-Registered in: `.claude/settings.json` as `PostToolUse`
+Notes:
+- **windsurf**: no adapter needed — uses exit-2 identical to Claude Code; hook scripts run directly
+- **claude-code**: no adapter — native envelope
+- **Tier-3 tools** (codex-cli, copilot, antigravity, roo-code): no hook scripts; setup writes instruction files only
+
+**Tier 1b (codex-cli):** setup writes `.codex/hooks.json` and enables `features.codex_hooks = true`. Telemetry (Track A) and context injection (Track B `check-design`) work fully. `gate-write` degrades — only bash-based writes are interceptable; direct Write/Edit tool calls are not blocked. Setup warns the user of this limitation and that Windows is unsupported.
+
+**Tier 3 tools (copilot, antigravity, roo-code):** setup writes instructions-only integration (`AGENTS.md` fragment + MCP server registration) and emits a warning explaining that deterministic enforcement is unavailable. Telemetry relies on agent compliance with SKILL.md instructions (current state).
 
 ---
 
-## Files Changed
+## File Inventory
 
-| File | Change |
-|---|---|
-| `planifest-framework/setup.sh` | Add `--structured-telemetry-mcp` flag; write sentinel; install hooks |
-| `planifest-framework/setup.ps1` | Same (PowerShell) |
-| `.claude/telemetry-enabled` | Sentinel written by setup; skills gate on this + `emit_event` presence |
-| `planifest-framework/hooks/telemetry/context-pressure.mjs` | New hook |
-| `skills/planifest-orchestrator/SKILL.md` | Add Telemetry section |
-| `skills/planifest-spec-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-adr-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-codegen-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-validate-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-change-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-security-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-docs-agent/SKILL.md` | Add Telemetry section |
+| File | Status | Notes |
+|------|--------|-------|
+| `planifest-framework/hooks/telemetry/emit-phase-start.mjs` | New | Track A |
+| `planifest-framework/hooks/telemetry/emit-phase-end.mjs` | New | Track A |
+| `planifest-framework/hooks/enforcement/check-design.mjs` | New | Track B |
+| `planifest-framework/hooks/enforcement/gate-write.mjs` | New | Track B |
+| `planifest-framework/skills/planifest-spec-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P1` response prefix rule |
+| `planifest-framework/skills/planifest-adr-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P2` response prefix rule |
+| `planifest-framework/skills/planifest-codegen-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P3` response prefix rule |
+| `planifest-framework/skills/planifest-validate-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P4` response prefix rule |
+| `planifest-framework/skills/planifest-security-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P5` response prefix rule |
+| `planifest-framework/skills/planifest-docs-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P6` response prefix rule |
+| `planifest-framework/skills/planifest-change-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P7` response prefix rule; rename phase value `"change"` → `"ship"` in telemetry envelope |
+| `planifest-framework/skills/planifest-orchestrator/SKILL.md` | Modify | Note hooks as primary mechanism; add Phase 0 briefing script; add hooks health check with inline remediation; add periodic phase reminder + phase exit summary; add resume detection; add phase skip handling; `Px` prefix on all responses; escalation messages carry `Px` |
+| `planifest-framework/getting-started.md` | Modify | Add "Understanding phase indicators" section explaining `Px` convention |
+| `planifest-framework/setup.sh` | Modify | Install enforcement hooks; copy new telemetry scripts |
+| `planifest-framework/setup.ps1` | Modify | Same |
+| `planifest-framework/setup/claude-code.sh` | Modify | Add enforcement hook config vars |
+| `planifest-framework/setup/claude-code.ps1` | Modify | Same |
+| `planifest-framework/hooks/adapters/cursor.mjs` | New | Track C — translate Cursor JSON in/out |
+| `planifest-framework/hooks/adapters/codex.mjs` | New | Track C (Tier 1b) — translate Codex `hookSpecificOutput` shape; note Bash-only PreToolUse limitation |
+| `planifest-framework/hooks/adapters/cline.mjs` | New | Track C — wrap JSON cancel output |
+| `planifest-framework/hooks/adapters/opencode/package.json` | New | Track C — `@planifest/opencode-hooks` npm package |
+| `planifest-framework/hooks/adapters/opencode/src/index.ts` | New | Track C — plugin entrypoint |
+| `planifest-framework/hooks/adapters/opencode/src/adapter.ts` | New | Track C — Bun.spawn shim to .mjs scripts |
+| `planifest-framework/setup/cursor.sh` / `.ps1` | New | Track C — write `.cursor/hooks.json`; no enable flag needed, hooks auto-activate |
+| `planifest-framework/setup/windsurf.sh` / `.ps1` | New | Track C — write workspace `hooks.json` |
+| `planifest-framework/setup/cline.sh` / `.ps1` | New | Track C — write `.clinerules/hooks/` scripts |
+| `planifest-framework/setup/opencode.sh` / `.ps1` | New | Track C — register plugin in `opencode.json` |
+| `planifest-framework/setup/codex-cli.sh` / `.ps1` | New | Track C (Tier 1b) — write `.codex/hooks.json`; append `features.codex_hooks = true` to `~/.codex/config.toml`; warn Bash-only interception + Windows unsupported |
+| `planifest-framework/setup/copilot.sh` / `.ps1` | New | Track C (Tier 3) — write copilot-instructions.md + MCP; warn no hooks |
+| `planifest-framework/setup/antigravity.sh` / `.ps1` | New | Track C (Tier 3) — write AGENTS.md + MCP; warn no hooks |
+| `planifest-framework/setup/roo-code.sh` / `.ps1` | New | Track C (Tier 3) — write `.roo/rules/` + MCP; warn no hooks |
 
 ---
 
-## Resolved Questions
+## Build Plan
 
-1. **Auto-discovery:** The setup script does not auto-discover a running server. The `--structured-telemetry-mcp` flag is always required. ✅
-2. **Schema bundling:** The framework does not bundle a local copy of the schema. Validation is performed exclusively by the MCP server at ingestion time. ✅
-3. **MCP config format:** `command + args` (stdio proxy → HTTP backend). Not SSE URL. Works identically across Claude Code, Claude Desktop, and Cursor. ✅
-4. **New event types (`phase_skip`, `security_finding`, `retry_limit_exceeded`, `adr_decision`, `doc_gap`):** Not yet in the 0008a server schema. 0008c must be implemented and deployed before these events can be emitted. ✅ (tracked in `docs/0008c`)
-5. **`mcp_impact` and `model_config`:** Both are fully implemented and documented in the 0008a MCP repo. They were absent from 0008b — now corrected in this design. ✅
+**Phase 0 — Track D orchestrator UX (do first — no dependencies)**
+1. Update orchestrator SKILL.md: Phase 0 briefing script (phase list, process overview, standing invitation)
+2. Update orchestrator SKILL.md: Phase 0 hooks health check (per-tool detection + verification logic + Tier-3 warning)
+3. Update orchestrator SKILL.md: periodic phase reminder rules (announce at start/end of each phase; re-surface after 5+ tool calls; `Px` prefix on every response)
+4. Update orchestrator SKILL.md: phase exit summary format
+5. Update orchestrator SKILL.md: resume detection logic (scan plan/ artefacts; open with `Px: Resuming…`)
+6. Update orchestrator SKILL.md: phase skip handling (`Px: Skipped by human direction`; write to iteration log)
+7. Update orchestrator SKILL.md: escalation messages carry `Px` prefix
+8. Update orchestrator SKILL.md: hooks health check inline remediation command (DD-010)
+9. Update all 7 sub-skill SKILL.md files: add `Px` response prefix rule matching their phase number
+10. Update `getting-started.md`: add "Understanding phase indicators" section (DD-011)
+
+**Phase 1 — Track A telemetry scripts**
+1. Write `emit-phase-start.mjs`
+2. Write `emit-phase-end.mjs`
+3. Add `hooks:` frontmatter to all 7 phase skill SKILL.md files
+4. Update orchestrator SKILL.md note
+5. Run setup to deploy; smoke test with a real emit
+
+**Phase 2 — Track B enforcement scripts**
+6. Write `gate-write.mjs`
+7. Write `check-design.mjs`
+8. Update `setup/claude-code.sh` and `setup/claude-code.ps1` with enforcement hook config vars
+9. Update `setup.sh` and `setup.ps1` to install enforcement hooks unconditionally
+10. Run setup; verify gate blocks a write with no design.md; verify it passes with one present
+
+**Phase 3 — Track C Tier 1 adapters (cursor, windsurf, cline)**
+11. Write `adapters/cursor/adapter.mjs` + `setup/cursor.{sh,ps1}`
+12. Write `adapters/windsurf/adapter.mjs` + `setup/windsurf.{sh,ps1}`
+13. Write `adapters/cline/adapter.mjs` + `setup/cline.{sh,ps1}`
+14. Verify Track A (telemetry) and Track B (enforcement) fire through each adapter with a smoke test
+
+**Phase 4 — Track C Tier 2 (opencode)**
+15. Write `adapters/opencode/` npm plugin source (TS)
+16. Write `setup/opencode.{sh,ps1}` that adds plugin to `opencode.json`
+17. Smoke test plugin blocks write when `design.md` absent
+
+**Phase 5 — Track C Tier 3 (codex-cli, copilot, antigravity, roo-code)**
+18. Write `setup/{tool}.{sh,ps1}` for each tier-3 tool: emit AGENTS.md/instructions fragment + MCP registration + user warning explaining no deterministic enforcement
+19. Ensure telemetry instructions in SKILL.md remain the fallback path for tier-3 tools
+
+**Phase 6 — Validate & ship**
+20. Run test suite (`test-setup-telemetry.sh`, `test-skill-telemetry.sh`)
+21. Update `test-setup-telemetry.sh` to cover enforcement hook installation across all 9 tools
+22. Add per-tool smoke tests under `tests/adapters/{tool}/`
+23. Commit, update changelog, update `getting-started.md` with per-tool hook support matrix
 
 ---
 
-## Dependencies
+## NFRs
 
-- Upstream: 0008a Structured Telemetry MCP Server (backend must be running before setup)
-- Upstream: **0008c** Structured Telemetry MCP Changes — new event types (`phase_skip`, `security_finding`, `retry_limit_exceeded`, `adr_decision`, `doc_gap`) require 0008c schema additions before they can be emitted
-- Upstream: 0006c context-mode MCP (required only for automated `context_pressure` events)
-- Downstream: none
-
-## Confirmation
-
-Human confirmed this design before proceeding: yes
+- All hook scripts must exit 0 on any unexpected error (never block the session due to script failure)
+- Hook scripts must complete within 3 seconds (telemetry: abort fetch; enforcement: fast path check only)
+- No external dependencies beyond Node.js built-ins (`fs`, `path`, `os`)

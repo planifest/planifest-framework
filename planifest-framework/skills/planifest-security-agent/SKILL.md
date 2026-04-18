@@ -137,16 +137,6 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 }
 ```
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "security" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "security", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
-
 **`security_finding`** — for each vulnerability or risk identified:
 ```json
 { "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN>" }
@@ -156,6 +146,16 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 **`deviation`** — if output diverges from the confirmed design (non-security divergence):
 ```json
 { "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+```
+
+**`self_correction`** — when retrying a failed check or analysis:
+```json
+{ "phase_name": "security", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
+```
+
+**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+```json
+{ "phase_name": "security", "action_id": "<action>", "attempt_count": 5 }
 ```
 
 ---

@@ -486,27 +486,50 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 }
 ```
 
-**`phase_start`** — before delegating to each phase skill:
+**Event type reference** (14 types as of v0.2.0):
+
+| Category | Event | When |
+|---|---|---|
+| Pipeline lifecycle | `phase_start` | Phase beginning |
+| | `phase_end` | Phase completion with status/duration |
+| | `phase_skip` | Phase bypassed with reason |
+| Quality & validation | `spec_gap` | Unanswered question blocking progress |
+| | `validation_failure` | Failed check with retry tracking |
+| | `self_correction` | Agent correcting its own output |
+| | `deviation` | Implementation diverged from spec |
+| Schema & data | `migration_proposal` | Proposed destructive schema change |
+| Token & context | `context_pressure` | Context window fill % (hook-emitted, not agent) |
+| | `mcp_impact` | Token delta by MCP mode |
+| Decisions & findings | `adr_decision` | Architectural decision recorded |
+| | `security_finding` | Vulnerability found (severity: low\|medium\|high\|critical) |
+| | `retry_limit_exceeded` | Action hit max attempts |
+| | `doc_gap` | Missing documentation identified |
+
+---
+
+**You own all phase lifecycle events for phases 1–6. Phase skills do NOT emit `phase_start`, `phase_end`, or `phase_skip` — that is your responsibility as the orchestrator.**
+
+**`phase_start`** — emit immediately before invoking each phase skill:
 ```json
-{ "phase_name": "<phase being started>" }
+{ "phase_name": "spec" | "adr" | "codegen" | "validate" | "security" | "docs" }
 ```
 
-**`phase_end`** — after each phase skill returns:
+**`phase_end`** — emit immediately after the gate check for each phase:
 ```json
 { "phase_name": "<phase>", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
 ```
 
-**`phase_skip`** — when a phase is bypassed as unnecessary:
+**`phase_skip`** — emit instead of `phase_start`/`phase_end` when a phase is bypassed:
 ```json
 { "phase_name": "<skipped phase>", "reason": "<why>" }
 ```
 
-**`spec_gap`** — when human clarification is required before proceeding:
+**`spec_gap`** — when human clarification is required before proceeding (Phase 0):
 ```json
-{ "question": "<the question>", "phase_name": "<current phase>" }
+{ "question": "<the question>", "phase_name": "orchestrator" }
 ```
 
-**`mcp_impact`** — once at the end of a complete pipeline run, after the final `phase_end`:
+**`mcp_impact`** — once after the final `phase_end` of a complete pipeline run:
 ```json
 { "mcp_mode": "<active mode>", "avg_token_delta": <number>, "peak_fill_pct": <number> }
 ```

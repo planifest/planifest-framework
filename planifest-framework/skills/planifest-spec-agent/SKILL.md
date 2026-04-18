@@ -136,16 +136,6 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 }
 ```
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "spec" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "spec", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
-
 **`spec_gap`** — when the spec cannot proceed without human input:
 ```json
 { "question": "<blocking question>", "phase_name": "spec" }

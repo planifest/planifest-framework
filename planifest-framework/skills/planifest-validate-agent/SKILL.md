@@ -135,16 +135,6 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 }
 ```
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "validate" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "validate", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
-
 **`validation_failure`** — for each test or check failure:
 ```json
 { "failure_type": "test" | "lint" | "type" | "build", "phase_name": "validate", "attempt_number": <n>, "action_id": "<suite or check name>" }

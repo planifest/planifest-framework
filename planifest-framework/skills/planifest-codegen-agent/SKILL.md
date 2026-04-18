@@ -180,16 +180,6 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 }
 ```
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "codegen" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "codegen", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
-
 **`deviation`** — when implementation diverges from the confirmed design:
 ```json
 { "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }

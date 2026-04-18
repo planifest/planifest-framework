@@ -103,16 +103,6 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 }
 ```
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "adr" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "adr", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
-
 **`adr_decision`** — after each ADR is written to disk:
 ```json
 { "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }
