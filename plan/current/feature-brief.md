@@ -8,6 +8,8 @@
 > **Scope addition (2026-04-18):** opencode added as a supported tool on this release. Hook support to be researched and wired alongside Track A and Track B where the tool supports it.
 >
 > **Scope addition (2026-04-18, revised):** research completed across all 8 non-Claude supported tools. Design updated to include multi-tool hook support across three enforcement tiers (native shell hooks, plugin shim, MCP+instructions fallback). See `design.md` → "Track C — Multi-tool hook support".
+>
+> **Scope addition (2026-04-18, final):** Track D expanded with tool detection mechanism, `.skips` file for mid-run skip tracking, date-stamped archive paths with collision handling, and `planifest-ship-agent` as a distinct new skill for Phase 7. Structured-telemetry-mcp `"ship"` enum addition moved in-scope (coordinated deploy required).
 
 ---
 
@@ -59,16 +61,19 @@ Add two hooks to the project settings (`.claude/settings.json`), installed by `s
 - Orchestrator SKILL.md update: note hooks are the primary emission mechanism; instructions are backup
 
 **Track D — Orchestrator UX & Phase 0 health checks**
-- Phase 0 opens with a structured human briefing: list all phases, explain process start→end, invite questions
-- Phase 0 validates hook installation for the detected tool (or warns if hooks cannot be verified); remediation command shown inline
-- Orchestrator periodically reminds the human of the current phase during multi-phase runs; every agent response prefixed `Px`
-- Each phase closes with a summary of artefacts produced and the name of the next phase
-- Resume detection: orchestrator detects current phase from `plan/` artefacts on re-entry and opens with `Px: Resuming…` instead of restarting from P0
-- Explicit phase skip: human-directed skips are acknowledged, logged in the iteration log, and prefixed `Px: Skipped by human direction`
-- Escalation messages carry `Px` prefix so the human knows which phase is blocked
-- `getting-started.md` updated with a section explaining the `Px` convention
-- Ship phase final step: archive `plan/current/` → `plan/archive/{feature-id}/` automatically on completion
-- Orchestrator SKILL.md updated with all of the above
+- Phase 0 opens with structured human briefing (`Px` prefix, phase table, standing invitation to redirect)
+- Phase 0 detects active tool via `PLANIFEST_TOOL` env var → directory markers → human prompt fallback
+- Phase 0 validates hook installation for the detected tool; inline remediation command shown if missing
+- Tier-3 tools (copilot, antigravity, roo-code): human informed that deterministic enforcement is unavailable
+- Every pipeline agent response prefixed `Px` (P0–P7); change-agent uses `PC` (Change Pipeline — not a numbered phase)
+- Each phase opens with name + one-liner; closes with artefact summary and next phase name
+- Escalation messages carry `Px` prefix
+- Resume detection: scan `plan/` artefacts on re-entry; open with `Px: Resuming…` not P0 briefing
+- Phase skip: `Px: Skipped by human direction` written to `plan/current/.skips` immediately; appended to iteration log and deleted at Ship time
+- Ship phase archives `plan/current/` → `plan/archive/{feature-id}-{YYYY-MM-DD}/` with `-{n}` collision suffix
+- `getting-started.md` updated with "Understanding phase indicators" section
+- `planifest-ship-agent/SKILL.md` (new) — Phase 7 only: raise PR, write changelog, archive plan
+- Orchestrator SKILL.md updated with all of the above including Phase 7 Ship section
 
 **Track B — Plan compliance**
 - `planifest-framework/hooks/enforcement/check-design.mjs` (new) — UserPromptSubmit hook: reads design.md, injects scope as additionalContext
@@ -76,17 +81,31 @@ Add two hooks to the project settings (`.claude/settings.json`), installed by `s
 - `setup.sh` / `setup.ps1`: install both enforcement hooks unconditionally (not gated on MCP flags — enforcement applies to all installs)
 - CLAUDE.md update: note hook enforcement is active; manual checks are redundant but left as documentation
 
+**Track C — Multi-tool hook support**
+- Tier 1 (native shell hooks, full write interception): cursor, windsurf, cline — per-tool adapter `.mjs` + setup scripts
+- Tier 1b (native shell hooks, Bash-only interception): codex-cli — adapter + setup appends `features.codex_hooks = true`; warns Bash-only + Windows unsupported
+- Tier 2 (plugin shim): opencode — `@planifest/opencode-hooks` npm plugin; setup registers in `opencode.json`
+- Tier 3 (MCP + instructions fallback): copilot, antigravity, roo-code — setup writes instructions only; warns no deterministic enforcement
+- `planifest-framework/hooks/adapters/cursor.mjs` (new)
+- `planifest-framework/hooks/adapters/codex.mjs` (new)
+- `planifest-framework/hooks/adapters/cline.mjs` (new)
+- `planifest-framework/hooks/adapters/opencode/` (new npm package)
+- Per-tool setup scripts: `setup/{cursor,windsurf,cline,opencode,codex-cli,copilot,antigravity,roo-code}.{sh,ps1}` (new)
+
+**Structured-telemetry-mcp (coordinated)**
+- Add `"ship"` to the phase enum; remove or retain `"change"` (change-agent keeps `"change"`; ship-agent uses `"ship"`)
+- Deploy MCP server update before ship-agent merge — breaking change if downstream queries filter on phase
+
 ### Out of scope
-- Changes to the structured-telemetry MCP server
 - `mcp_mode` auto-detection in telemetry hooks (hardcode `"none"` for now)
 - `phase_end` status inference (always `"pass"` from hooks; orchestrator instructions handle `"fail"` cases)
 - LLM-based (prompt hook) scope reasoning — command hooks with path matching are sufficient for v1
-- Windows-specific hook command compatibility
+- Windows-specific hook command compatibility for Tier 1 adapters (codex-cli Windows limitation documented, not fixed)
 
 ### Dependencies
 - Feature 0000002 complete ✅
 - Claude Code hooks reference reviewed ✅
-- `structured-telemetry-mcp` server for Track A
+- `structured-telemetry-mcp` server — Track A (telemetry emission) and coordinated deploy for `"ship"` phase enum addition
 
 ---
 
@@ -104,11 +123,21 @@ Add two hooks to the project settings (`.claude/settings.json`), installed by `s
 7. When `design.md` exists and file is in scope, writes proceed unblocked
 8. Enforcement hooks are installed on every `setup.sh`/`setup.ps1` run regardless of MCP flags
 
+**Track C**
+9. Tier 1 tools (cursor, windsurf, cline): gate-write and check-design fire via native hooks; blocking works end-to-end
+10. Tier 1b (codex-cli): telemetry and context injection work; gate-write degrades gracefully with documented Bash-only limitation
+11. Tier 2 (opencode): plugin blocks write when design.md absent; telemetry emits via plugin
+12. Tier 3 tools: setup completes without error; human receives clear warning that enforcement is unavailable
+
+**Track D**
+13. Every agent response in a pipeline run begins with `Px`
+14. Phase 0 opens with the phase table and standing invitation on first invocation; detects tool and verifies hooks
+15. On re-entry to an in-progress feature, orchestrator resumes at correct phase without restarting P0
+16. Human-directed phase skip is written to `.skips` immediately and survives a context reset
+17. Ship archives `plan/current/` to a date-stamped path; no collision on same-day re-run
+
 ---
 
 ## Open Questions
 
-1. Does `PreToolUse` in a skill's frontmatter fire on every tool use or only the first? (Flag-file guard handles either case but affects implementation complexity.)
-2. When multiple phases run in one session, does each skill's `Stop` hook fire per-phase or once at session end?
-3. For Track B `gate-write.mjs`: how should "file path within design scope" be determined? Options: (a) explicit component path list in design.md frontmatter, (b) presence of `src/<component-id>/` pattern matching against design.md component IDs, (c) allowlist of always-permitted paths (plan/, docs/, CLAUDE.md).
-4. Should `gate-write.mjs` block or warn-only for the first iteration? Blocking is safer but may be disruptive until the hook is well-tuned.
+All open questions resolved in design. See DD-001 through DD-012 in `plan/current/design.md`.

@@ -72,7 +72,12 @@ the system-wide registry, dependency graph, and the iteration log audit trail.
 ```
 
 **Step 2 — Hooks health check** (at Phase 0, after briefing):
-Detect which tool is running (Claude Code, Cursor, Windsurf, etc.) and verify that Planifest hooks are installed:
+Detect which tool is running using this priority order:
+1. Check `PLANIFEST_TOOL` env var (set by setup scripts) — most reliable
+2. Check for tool-specific marker directories/files: `.claude/` → claude-code; `.cursor/` → cursor; `.windsurf/` → windsurf; `.clinerules/` → cline; `.codex/` → codex-cli; `.opencode/` or `opencode.json` → opencode; `.github/copilot-instructions.md` → copilot; `AGENTS.md` + none of the above → antigravity or roo-code (distinguish by asking)
+3. If undetectable → ask the human: "Which AI coding tool are you using?" with a numbered list
+
+Verify that Planifest hooks are installed for the detected tool:
 - For Claude Code: check `.claude/settings.json` contains the enforcement hooks
 - For Cursor: check `.cursor/hooks.json` exists and contains Planifest entries
 - For Codex CLI: check `~/.codex/config.toml` has `features.codex_hooks = true` and `.codex/hooks.json` exists
@@ -104,7 +109,7 @@ Moving to P4 — Validate.
 ```
 P5: Skipped by human direction. Reason: [human's stated reason]. Recorded in iteration log.
 ```
-The skip is written to `plan/changelog/{feature-id}-<date>.md` under a `## Skipped Phases` heading.
+The skip is written immediately to `plan/current/.skips` (one line per skip: `{YYYY-MM-DD} P{x} {phase-name}: {reason}`). This file is readable by resume detection (DD-009) so a resumed session knows what was skipped. At Ship time the ship-agent appends the skips to the iteration log under `## Skipped Phases` and deletes `.skips` before archiving.
 
 ---
 
@@ -114,9 +119,10 @@ After a successful Ship (PR raised, changelog written, docs complete), `plan/cur
 
 **Resolution:** The final step of the ship-agent is:
 1. Determine the feature ID from `plan/current/feature-brief.md` frontmatter
-2. Move `plan/current/` → `plan/archive/{feature-id}/`
-3. Confirm `plan/current/` is empty (or does not exist) before declaring Ship complete
-4. Emit a `phase_end` telemetry event with `status: "pass"`
+2. Move `plan/current/` → `plan/archive/{feature-id}-{YYYY-MM-DD}/` (today's date)
+3. If the target path already exists, append `-{n}` (e.g. `-2`) to avoid collision
+4. Confirm `plan/current/` is empty (or does not exist) before declaring Ship complete
+5. Emit a `phase_end` telemetry event with `status: "pass"`
 
 This mirrors the manual archive step the orchestrator performed when transitioning from feature 0000002 → 0000003, but makes it deterministic and automated.
 
@@ -289,7 +295,7 @@ planifest-framework/hooks/
 Notes:
 - **windsurf**: no adapter needed — uses exit-2 identical to Claude Code; hook scripts run directly
 - **claude-code**: no adapter — native envelope
-- **Tier-3 tools** (codex-cli, copilot, antigravity, roo-code): no hook scripts; setup writes instruction files only
+- **Tier-3 tools** (copilot, antigravity, roo-code): no hook scripts; setup writes instruction files only
 
 **Tier 1b (codex-cli):** setup writes `.codex/hooks.json` and enables `features.codex_hooks = true`. Telemetry (Track A) and context injection (Track B `check-design`) work fully. `gate-write` degrades — only bash-based writes are interceptable; direct Write/Edit tool calls are not blocked. Setup warns the user of this limitation and that Windows is unsupported.
 
@@ -311,9 +317,11 @@ Notes:
 | `planifest-framework/skills/planifest-validate-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P4` response prefix rule |
 | `planifest-framework/skills/planifest-security-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P5` response prefix rule |
 | `planifest-framework/skills/planifest-docs-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P6` response prefix rule |
-| `planifest-framework/skills/planifest-change-agent/SKILL.md` | Modify | Add hooks frontmatter; add `P7` response prefix rule; rename phase value `"change"` → `"ship"` in telemetry envelope |
-| `planifest-framework/skills/planifest-orchestrator/SKILL.md` | Modify | Note hooks as primary mechanism; add Phase 0 briefing script; add hooks health check with inline remediation; add periodic phase reminder + phase exit summary; add resume detection; add phase skip handling; `Px` prefix on all responses; escalation messages carry `Px` |
+| `planifest-framework/skills/planifest-change-agent/SKILL.md` | Modify | Add hooks frontmatter; `PC` response prefix rule (Change Pipeline — not a numbered phase); rename internal section labels Phase 1–5 → Step 1–5 (avoid clash with pipeline P1–P7); telemetry phase value remains `"change"` |
+| `planifest-framework/skills/planifest-ship-agent/SKILL.md` | New | Phase 7 only — raise PR, write changelog, archive `plan/current/`; telemetry `"phase": "ship"` |
+| `planifest-framework/skills/planifest-orchestrator/SKILL.md` | Modify | Note hooks as primary mechanism; add Phase 0 briefing script; add hooks health check (tool detection + verification + inline remediation); add periodic phase reminder + phase exit summary; add resume detection; add phase skip handling + `.skips` file; `Px` prefix on all responses; escalation messages carry `Px`; add Phase 7 Ship section; update `phase_start` enum to include `"ship"` |
 | `planifest-framework/getting-started.md` | Modify | Add "Understanding phase indicators" section explaining `Px` convention |
+| `CLAUDE.md` | Modify | Note hook enforcement is active; manual gate checks are redundant but retained as documentation |
 | `planifest-framework/setup.sh` | Modify | Install enforcement hooks; copy new telemetry scripts |
 | `planifest-framework/setup.ps1` | Modify | Same |
 | `planifest-framework/setup/claude-code.sh` | Modify | Add enforcement hook config vars |
@@ -337,52 +345,59 @@ Notes:
 
 ## Build Plan
 
-**Phase 0 — Track D orchestrator UX (do first — no dependencies)**
-1. Update orchestrator SKILL.md: Phase 0 briefing script (phase list, process overview, standing invitation)
-2. Update orchestrator SKILL.md: Phase 0 hooks health check (per-tool detection + verification logic + Tier-3 warning)
-3. Update orchestrator SKILL.md: periodic phase reminder rules (announce at start/end of each phase; re-surface after 5+ tool calls; `Px` prefix on every response)
-4. Update orchestrator SKILL.md: phase exit summary format
-5. Update orchestrator SKILL.md: resume detection logic (scan plan/ artefacts; open with `Px: Resuming…`)
-6. Update orchestrator SKILL.md: phase skip handling (`Px: Skipped by human direction`; write to iteration log)
-7. Update orchestrator SKILL.md: escalation messages carry `Px` prefix
-8. Update orchestrator SKILL.md: hooks health check inline remediation command (DD-010)
-9. Update all 7 sub-skill SKILL.md files: add `Px` response prefix rule matching their phase number
-10. Update `getting-started.md`: add "Understanding phase indicators" section (DD-011)
+**Track D — Orchestrator UX (do first — no dependencies)**
+1. Write `planifest-ship-agent/SKILL.md` (new): Phase 7 only — raise PR, write changelog, archive plan/current/
+2. Update orchestrator SKILL.md: Phase 0 briefing script (phase list, process overview, standing invitation)
+3. Update orchestrator SKILL.md: Phase 0 hooks health check (tool detection via env/markers/ask; verification; Tier-3 warning; inline remediation)
+4. Update orchestrator SKILL.md: Phase 7 Ship section (load planifest-ship-agent; gate check; update phase_start enum to include "ship")
+5. Update orchestrator SKILL.md: periodic phase reminder rules (`Px` prefix on every response; announce at start/end; re-surface after 5+ tool calls)
+6. Update orchestrator SKILL.md: phase exit summary format
+7. Update orchestrator SKILL.md: resume detection logic (scan plan/ artefacts; open with `Px: Resuming…`)
+8. Update orchestrator SKILL.md: phase skip handling (`Px: Skipped`; write to `.skips` immediately)
+9. Update orchestrator SKILL.md: escalation messages carry `Px` prefix
+10. Update all 7 pipeline sub-skill SKILL.md files: add `Px` response prefix (P1–P6 + P7 for ship-agent)
+11. Update change-agent SKILL.md: add `PC` response prefix; rename internal Phase 1–5 → Step 1–5
+12. Update `getting-started.md`: "Understanding phase indicators" section (DD-011)
+13. Update `CLAUDE.md`: note hook enforcement active
 
-**Phase 1 — Track A telemetry scripts**
+**Track A — Telemetry scripts**
 1. Write `emit-phase-start.mjs`
 2. Write `emit-phase-end.mjs`
 3. Add `hooks:` frontmatter to all 7 phase skill SKILL.md files
 4. Update orchestrator SKILL.md note
 5. Run setup to deploy; smoke test with a real emit
 
-**Phase 2 — Track B enforcement scripts**
+**Track B — Enforcement scripts**
 6. Write `gate-write.mjs`
 7. Write `check-design.mjs`
 8. Update `setup/claude-code.sh` and `setup/claude-code.ps1` with enforcement hook config vars
 9. Update `setup.sh` and `setup.ps1` to install enforcement hooks unconditionally
 10. Run setup; verify gate blocks a write with no design.md; verify it passes with one present
 
-**Phase 3 — Track C Tier 1 adapters (cursor, windsurf, cline)**
+**Track C (Tier 1) — Adapters: cursor, windsurf, cline**
 11. Write `adapters/cursor/adapter.mjs` + `setup/cursor.{sh,ps1}`
 12. Write `adapters/windsurf/adapter.mjs` + `setup/windsurf.{sh,ps1}`
 13. Write `adapters/cline/adapter.mjs` + `setup/cline.{sh,ps1}`
 14. Verify Track A (telemetry) and Track B (enforcement) fire through each adapter with a smoke test
 
-**Phase 4 — Track C Tier 2 (opencode)**
+**Track C (Tier 2) — opencode plugin**
 15. Write `adapters/opencode/` npm plugin source (TS)
 16. Write `setup/opencode.{sh,ps1}` that adds plugin to `opencode.json`
 17. Smoke test plugin blocks write when `design.md` absent
 
-**Phase 5 — Track C Tier 3 (codex-cli, copilot, antigravity, roo-code)**
+**Track C (Tier 3) — Instructions fallback: codex-cli, copilot, antigravity, roo-code**
 18. Write `setup/{tool}.{sh,ps1}` for each tier-3 tool: emit AGENTS.md/instructions fragment + MCP registration + user warning explaining no deterministic enforcement
 19. Ensure telemetry instructions in SKILL.md remain the fallback path for tier-3 tools
 
-**Phase 6 — Validate & ship**
-20. Run test suite (`test-setup-telemetry.sh`, `test-skill-telemetry.sh`)
-21. Update `test-setup-telemetry.sh` to cover enforcement hook installation across all 9 tools
-22. Add per-tool smoke tests under `tests/adapters/{tool}/`
-23. Commit, update changelog, update `getting-started.md` with per-tool hook support matrix
+**Track C (Tier 1b) — codex-cli setup**
+20. Write `setup/codex-cli.{sh,ps1}`: write `.codex/hooks.json`, append `features.codex_hooks = true` to `~/.codex/config.toml`, warn Bash-only + Windows unsupported
+
+**Validate & ship**
+21. Run test suite (`test-setup-telemetry.sh`, `test-skill-telemetry.sh`)
+22. Update `test-setup-telemetry.sh` to cover enforcement hook installation across all 9 tools
+23. Add per-tool smoke tests under `tests/adapters/{tool}/`
+24. **Coordinate structured-telemetry-mcp deploy:** add `"ship"` to the phase enum on the MCP server before committing ship-agent — this is a breaking change if any downstream queries filter on `phase = "change"`. Deploy order: MCP server update first, then ship-agent merge.
+25. Commit, update changelog, update `getting-started.md` with per-tool hook support matrix
 
 ---
 
@@ -390,4 +405,6 @@ Notes:
 
 - All hook scripts must exit 0 on any unexpected error (never block the session due to script failure)
 - Hook scripts must complete within 3 seconds (telemetry: abort fetch; enforcement: fast path check only)
-- No external dependencies beyond Node.js built-ins (`fs`, `path`, `os`)
+- Track A + B hook scripts: no external dependencies beyond Node.js built-ins (`fs`, `path`, `os`)
+- Track C Tier 1 adapters: no external dependencies beyond Node.js built-ins
+- Track C Tier 2 (opencode plugin): TypeScript + Bun runtime — external dependency is acceptable as opencode ships Bun; no additional npm installs required beyond `@planifest/opencode-hooks` itself
