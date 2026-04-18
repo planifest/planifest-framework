@@ -14,6 +14,8 @@
 
 **Resolution:** Flag file at `{tmpdir}/planifest-telemetry/phase-start-{session_id}-{phase}`. On first invocation: write file + emit. On subsequent invocations: detect file exists + exit 0 silently.
 
+**Session ID fallback (R-005 mitigation):** Not all tools provide `PLANIFEST_SESSION_ID`. If the env var is absent, `emit-phase-start.mjs` reads (or creates) a project-scoped session file at `{cwd}/.claude/.planifest-session`. On first creation, the file contains a generated UUID. Subsequent hook invocations in the same project read this file as the session ID — consistent across process restarts. The ship-agent deletes `.planifest-session` alongside `.skips` during Phase 7 archiving.
+
 ---
 
 ### DD-002 — Stop fires per turn; multiple emissions per phase are expected
@@ -119,10 +121,16 @@ After a successful Ship (PR raised, changelog written, docs complete), `plan/cur
 
 **Resolution:** The final step of the ship-agent is:
 1. Determine the feature ID from `plan/current/feature-brief.md` frontmatter
-2. Move `plan/current/` → `plan/archive/{feature-id}-{YYYY-MM-DD}/` (today's date)
-3. If the target path already exists, append `-{n}` (e.g. `-2`) to avoid collision
-4. Confirm `plan/current/` is empty (or does not exist) before declaring Ship complete
-5. Emit a `phase_end` telemetry event with `status: "pass"`
+2. Write `plan/current/.feature-id` with the feature ID (allows resume detection to identify stale artefacts from a failed ship attempt)
+3. **Copy** `plan/current/` → `plan/archive/{feature-id}-{YYYY-MM-DD}/` (today's date) — copy first, delete after
+4. If the target archive path already exists, append `-{n}` (e.g. `-2`) to avoid collision
+5. Delete `plan/current/` contents (`.skips`, `.planifest-session`, all artefacts) after successful copy
+6. Confirm `plan/current/` is empty (or does not exist) before declaring Ship complete
+7. Emit a `phase_end` telemetry event with `status: "pass"`
+
+**Two-phase archive rationale (R-007 mitigation):** Copy-then-delete means a failure mid-archive leaves artefacts in both locations. This is safe and idempotent — a re-run finds the archive path, adds `-{n}`, and proceeds. A move (rename) that fails mid-way can leave `plan/current/` partially deleted, which is harder to recover from.
+
+**`.feature-id` marker (R-007 mitigation):** Resume detection (DD-009) reads `plan/current/.feature-id` to identify which feature the artefacts belong to. If the marker is absent or contains a different feature ID than the session's active feature, the orchestrator warns the human before proceeding.
 
 This mirrors the manual archive step the orchestrator performed when transitioning from feature 0000002 → 0000003, but makes it deterministic and automated.
 
@@ -396,7 +404,7 @@ Notes:
 21. Run test suite (`test-setup-telemetry.sh`, `test-skill-telemetry.sh`)
 22. Update `test-setup-telemetry.sh` to cover enforcement hook installation across all 9 tools
 23. Add per-tool smoke tests under `tests/adapters/{tool}/`
-24. **Coordinate structured-telemetry-mcp deploy:** add `"ship"` to the phase enum on the MCP server before committing ship-agent — this is a breaking change if any downstream queries filter on `phase = "change"`. Deploy order: MCP server update first, then ship-agent merge.
+24. **Coordinate structured-telemetry-mcp deploy:** add `"ship"` to the phase enum on the MCP server before committing ship-agent. Deploy order: MCP server update first, then ship-agent merge. **Functional impact is telemetry gap only** — ship-agent hook scripts exit 0 on schema rejection and never block execution. Add a CI check to the ship-agent PR that POSTs a test event with `"phase": "ship"` to the MCP endpoint and fails the build if the schema rejects it, enforcing the deploy order automatically (R-001 mitigation).
 25. Commit, update changelog, update `getting-started.md` with per-tool hook support matrix
 
 ---

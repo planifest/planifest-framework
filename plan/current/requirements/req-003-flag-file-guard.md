@@ -20,6 +20,8 @@ version: "0.1.0"
 - On subsequent calls within the same session, the script detects the flag file and exits 0 without emitting.
 - Flag files are written atomically (write to a temp path, then rename) to prevent race conditions.
 - The `planifest-telemetry/` directory is created if it does not exist.
+- **Session ID fallback:** If `PLANIFEST_SESSION_ID` is not set, `emit-phase-start.mjs` reads `{cwd}/.claude/.planifest-session`. If that file does not exist, it creates it with a generated UUID. This value is used as the session ID for the flag file key, ensuring the guard is consistent across process restarts within the same project.
+- The `.planifest-session` file is deleted by the ship-agent at Phase 7 alongside `.skips`.
 
 ## Acceptance Criteria
 
@@ -31,4 +33,4 @@ version: "0.1.0"
 ## Dependencies
 
 - REQ-001 (phase_start hook must invoke emit-phase-start.mjs).
-- `PLANIFEST_SESSION_ID` environment variable available at hook execution time.
+- `PLANIFEST_SESSION_ID` environment variable available at hook execution time (optional — fallback uses `.planifest-session` file).

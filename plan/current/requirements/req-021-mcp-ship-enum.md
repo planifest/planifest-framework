@@ -20,6 +20,8 @@ version: "0.1.0"
 - The MCP server update is deployed before `planifest-ship-agent/SKILL.md` is merged — the ship-agent references `"phase": "ship"` and will fail telemetry validation if the enum is not present.
 - The deploy is coordinated: MCP server update → merge ship-agent → merge orchestrator routing update.
 - Any existing telemetry queries that filter `phase = "change"` are unaffected (additive change only).
+- **Functional impact if deploy order is violated:** ship-agent hook scripts exit 0 on schema rejection (telemetry gap only — ship-agent execution is never blocked).
+- **CI guard:** The ship-agent PR includes a CI check that POSTs a test event with `"phase": "ship"` to the configured MCP endpoint. The build fails if the schema rejects it, enforcing the deploy order automatically.
 
 ## Acceptance Criteria
 
