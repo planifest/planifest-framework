@@ -114,26 +114,11 @@ If a capability skill exists for the declared testing framework (e.g. `webapp-te
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. Do not emit if either fails.**
+**Gate — check both before every emission. If either is false, skip silently:**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-validate-agent",
-  "phase": "validate",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-validate-agent"`, `phase: "validate"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
 
 **`phase_start`** — at task entry:
 ```json

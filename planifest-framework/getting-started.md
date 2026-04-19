@@ -83,33 +83,6 @@ Installs everything above, plus routing rules (`AGENTS.md`) and (for Claude Code
 
 See [docs/context-mode.md](../docs/context-mode.md) for how it works and prerequisites.
 
-#### Option: Structured Telemetry
-
-Emit structured events from skills and hooks into a local telemetry backend for observability — pipeline phase timings, context-pressure alerts, and skill execution traces.
-
-Requires the [structured-telemetry-mcp](https://github.com/anthropics/structured-telemetry-mcp) server to be running, then pass `--structured-telemetry-mcp` during setup:
-
-```bash
-# macOS / Linux
-./planifest-framework/setup.sh claude-code --structured-telemetry-mcp
-```
-
-```powershell
-# Windows (PowerShell)
-.\planifest-framework\setup.ps1 claude-code --structured-telemetry-mcp
-```
-
-Installs everything in Basic setup, plus:
-- `.claude/telemetry-enabled` sentinel — opt-in gate that authorises skills to emit events
-
-When combined with `--context-mode-mcp`, also installs the `context-pressure.mjs` PostToolUse hook, which emits a telemetry event whenever context window pressure exceeds the configured threshold.
-
-The default backend URL is `http://localhost:3741`. Override it with `--backend-url`:
-
-```bash
-./planifest-framework/setup.sh claude-code --structured-telemetry-mcp --backend-url http://myhost:4000
-```
-
 See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
 
 ### 3a. Git Guardrails (activated automatically)
@@ -214,16 +187,9 @@ After updating any files in `planifest-framework/` (skills, templates, standards
 
 ```bash
 # Re-run setup to sync changes to your tool's directory
-./planifest-framework/setup.sh claude-code                                                        # macOS / Linux
-./planifest-framework/setup.sh claude-code --context-mode-mcp                                    # include if context-mode is installed
-./planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp         # include if both MCPs are installed
-```
-
-
-```powershell
-.\planifest-framework\setup.ps1 claude-code                                                       # Windows (PowerShell)
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp                                    # include if context-mode is installed
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp --structured-telemetry-mcp         # include if both MCPs are installed#
+./planifest-framework/setup.sh claude-code                        # macOS / Linux
+.\planifest-framework\setup.ps1 claude-code                       # Windows (PowerShell)
+./planifest-framework/setup.sh claude-code --context-mode-mcp    # include if context-mode is installed
 ```
 
 The setup script overwrites the generated copies. The source of truth is always `planifest-framework/`.
@@ -242,7 +208,6 @@ The setup script overwrites the generated copies. The source of truth is always 
 | `docs/` | ✅ | Repo-wide registry and dependency graph |
 | `.claude/`, `.cursor/`, `.agents/`, `.gemini/`, `.github/skills/` | Optional | Generated copies - can be `.gitignore`d and regenerated |
 | `CLAUDE.md`, `AGENTS.md` | Optional | Boot files - tool-specific |
-| `.claude/telemetry-enabled` | Optional | Telemetry opt-in sentinel - commit if the whole team uses structured telemetry |
 
 If your team all uses the same tool, commit the generated files. If different team members use different tools, `.gitignore` them and let each person run the setup script.
 
