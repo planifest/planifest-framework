@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-013 - Per-tool setup scripts for all 9 supported tools"
 summary: "Each of the 9 supported tools has a dedicated idempotent setup script pair (sh + ps1)."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-013 - Per-tool setup scripts for all 9 supported tools

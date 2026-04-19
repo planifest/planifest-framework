@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-015 - Phase 0 opens with structured briefing, detects tool, and verifies hooks"
 summary: "On first invocation, Phase 0 presents the phase table, detects the active tool, and validates hook installation."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-015 - Phase 0 structured briefing and hooks health check

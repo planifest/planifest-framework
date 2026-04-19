@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-018 - getting-started.md updated with phase indicators section"
 summary: "getting-started.md gains a new section explaining the Px prefix convention and how to read phase indicators."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-018 - getting-started.md phase indicators section

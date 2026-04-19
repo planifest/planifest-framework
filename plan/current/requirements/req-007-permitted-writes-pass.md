@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-007 - Permitted path writes pass through unblocked"
 summary: "gate-write.mjs never blocks a write that is within the confirmed design component paths."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-007 - Permitted path writes pass through unblocked

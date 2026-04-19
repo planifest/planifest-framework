@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-014 - Every orchestrator agent response prefixed Px"
 summary: "All Planifest pipeline agent responses begin with Px where x is the phase number (P0–P7); change-agent uses PC."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-014 - Every agent response prefixed Px

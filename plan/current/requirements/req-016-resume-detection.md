@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-016 - Resume detection on orchestrator re-entry"
 summary: "When plan/current/ artefacts exist, the orchestrator resumes at the correct phase rather than restarting P0."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-016 - Resume detection on re-entry

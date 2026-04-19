@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-006 - Write/Edit blocked when design absent or path out of scope"
 summary: "gate-write.mjs blocks file writes when no confirmed design exists or the target path is outside approved component paths."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-006 - Write/Edit blocked when design absent or path out of scope

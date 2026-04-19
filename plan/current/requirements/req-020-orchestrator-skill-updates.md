@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-020 - Orchestrator SKILL.md updated for Phase 7 and all UX changes"
 summary: "The orchestrator SKILL.md gains Phase 7 Ship routing, Px prefix rules, resume detection, and hooks-as-primary-emission note."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-020 - Orchestrator SKILL.md updates

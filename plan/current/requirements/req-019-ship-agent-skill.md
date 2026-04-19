@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-019 - planifest-ship-agent SKILL.md (new Phase 7 skill)"
 summary: "A new dedicated skill for Phase 7: raise PR, write changelog, archive plan/current/."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-019 - planifest-ship-agent SKILL.md

@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-002 - Phase end fires with duration_ms"
 summary: "phase_end telemetry event is emitted by the Stop hook with a populated duration_ms field."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-002 - Phase end fires with duration_ms

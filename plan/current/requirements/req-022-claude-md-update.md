@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-022 - CLAUDE.md updated to note active hook enforcement"
 summary: "CLAUDE.md gains a note that enforcement hooks are active and manual compliance checks are now redundant documentation."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-022 - CLAUDE.md update

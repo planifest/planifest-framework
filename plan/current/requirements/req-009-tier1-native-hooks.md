@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-009 - Tier 1 tools enforce via native shell hooks"
 summary: "Cursor, Windsurf, and Cline execute gate-write and check-design via their native hook systems."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-009 - Tier 1 tools enforce via native shell hooks

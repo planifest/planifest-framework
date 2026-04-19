@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-012 - Tier 3: MCP + instructions fallback for unsupported tools"
 summary: "Copilot, Antigravity, and Roo Code receive instructions-only enforcement with a clear human warning."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-012 - Tier 3: MCP + instructions fallback

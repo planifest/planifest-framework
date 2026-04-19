@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-011 - Tier 2: OpenCode plugin shim"
 summary: "@planifest/opencode-hooks npm plugin bridges OpenCode's JS plugin system to Planifest enforcement scripts."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-011 - Tier 2: OpenCode plugin shim

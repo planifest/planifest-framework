@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-003 - Flag-file guard prevents duplicate phase_start"
 summary: "A temp-file sentinel ensures phase_start is emitted at most once per session per phase."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-003 - Flag-file guard prevents duplicate phase_start

@@ -29,6 +29,8 @@ Planifest installs deterministic enforcement hooks via `setup.sh`. These run aut
 
 Enforcement failures exit 2 and surface a human-readable message. All unexpected errors exit 0 — hooks never block your session unexpectedly.
 
+Hook enforcement is active: `gate-write.mjs` blocks writes outside confirmed design scope; `check-design.mjs` injects scope context on every turn. Manual scope checks in these instructions are retained as documentation but are now redundant enforcement.
+
 ## Escalation
 
 If you are blocked, unable to resolve tests after 5 attempts, or confused by conflicting requirements, **STOP**. Do not guess. State clearly what is blocking you and ask the human for direction.

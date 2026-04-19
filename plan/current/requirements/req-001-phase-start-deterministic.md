@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-001 - Phase start fires deterministically"
 summary: "phase_start telemetry event is emitted by a hook script, not by LLM instruction compliance."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-001 - Phase start fires deterministically

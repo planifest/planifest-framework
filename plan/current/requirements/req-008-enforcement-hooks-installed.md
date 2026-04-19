@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-008 - Enforcement hooks installed unconditionally by setup scripts"
 summary: "setup.sh and setup.ps1 install gate-write and check-design hooks on every run, regardless of MCP configuration."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-008 - Enforcement hooks installed unconditionally by setup scripts

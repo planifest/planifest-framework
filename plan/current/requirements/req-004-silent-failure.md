@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-004 - Hook scripts exit silently when telemetry absent"
 summary: "Telemetry hook scripts never block the agent session regardless of environment state."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-004 - Hook scripts exit silently when telemetry absent

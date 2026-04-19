@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-010 - Tier 1b: Codex CLI hooks with documented Bash-only limitation"
 summary: "Codex CLI hook support activated via features.codex_hooks flag; Bash-only interception documented."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-010 - Tier 1b: Codex CLI hooks with Bash-only limitation

@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-017 - Human-directed phase skip recorded to .skips immediately"
 summary: "When a human directs the orchestrator to skip a phase, the skip is written to plan/current/.skips immediately."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-017 - Phase skip tracking

@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-005 - UserPromptSubmit injects scope context"
 summary: "At the start of every turn, the confirmed design scope is injected as additionalContext so the agent always has it visible."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-005 - UserPromptSubmit injects scope context
