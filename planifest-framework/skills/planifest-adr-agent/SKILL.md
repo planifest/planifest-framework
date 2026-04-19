@@ -82,11 +82,26 @@ Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. Do not emit if either fails.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-adr-agent"`, `phase: "adr"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
+
+```json
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-adr-agent",
+  "phase": "adr",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
+```
 
 **`phase_start`** — at task entry:
 ```json
