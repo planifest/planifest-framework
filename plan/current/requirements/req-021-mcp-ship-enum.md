@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-021 - structured-telemetry-mcp phase enum gains 'ship'"
 summary: "The MCP server's phase enum is updated to include 'ship' as a valid value, coordinated with ship-agent deployment."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-021 - structured-telemetry-mcp ship enum addition
@@ -25,10 +25,10 @@ version: "0.1.0"
 
 ## Acceptance Criteria
 
-- [ ] MCP server schema accepts `"ship"` as a valid `phase` value without error.
-- [ ] `"change"` remains valid (no regression for change-agent telemetry).
-- [ ] MCP server update is deployed before ship-agent code is merged.
-- [ ] Telemetry query for `phase = "ship"` returns ship-phase events correctly.
+- [x] MCP server schema accepts `"ship"` as a valid `phase` value without error.
+- [x] `"change"` remains valid (no regression for change-agent telemetry).
+- [x] MCP server update is deployed before ship-agent code is merged.
+- [x] Telemetry query for `phase = "ship"` returns ship-phase events correctly.
 
 ## Dependencies
 

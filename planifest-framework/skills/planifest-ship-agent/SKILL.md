@@ -176,8 +176,6 @@ plan/current/ is empty and ready for the next feature.
 { "phase_name": "ship", "status": "pass", "duration_ms": <elapsed> }
 ```
 
-> Note: the `"ship"` phase value requires the structured-telemetry-mcp schema to include `"ship"` in the phase enum (REQ-021). If the schema has not been updated, the emit call will fail silently — Ship proceeds normally (ADR-005).
-
 ---
 
 *This skill is invoked by the orchestrator at Phase 7. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
