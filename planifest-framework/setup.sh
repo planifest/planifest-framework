@@ -54,13 +54,17 @@ copy_skills() {
       # Selective bundling: read bundle_templates and bundle_standards from SKILL.md frontmatter
       local skill_md="$skill_dir/SKILL.md"
       
+      # Parse frontmatter: awk handles identical start/end --- delimiters correctly
+      local frontmatter
+      frontmatter=$(awk '/^---$/{c++; if(c==2) exit; next} c==1{print}' "$skill_md")
+
       # Parse bundle_templates from frontmatter
       local bundle_templates
-      bundle_templates=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep '^bundle_templates:' | sed 's/bundle_templates: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//')
-      
+      bundle_templates=$(echo "$frontmatter" | grep '^bundle_templates:' | sed 's/bundle_templates: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//' || true)
+
       # Parse bundle_standards from frontmatter
       local bundle_standards
-      bundle_standards=$(sed -n '/^---$/,/^---$/p' "$skill_md" | grep '^bundle_standards:' | sed 's/bundle_standards: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//')
+      bundle_standards=$(echo "$frontmatter" | grep '^bundle_standards:' | sed 's/bundle_standards: *\[//;s/\]//;s/,/ /g;s/^ *//;s/ *$//' || true)
       
       # Bundle only declared templates (or all if no manifest found)
       if [ -d "$SCRIPT_DIR/templates" ]; then
@@ -135,40 +139,68 @@ merge_hook_settings() {
   # Merge PreToolUse hook entries into .claude/settings.json (REQ-004)
   # Uses additive merge: existing content is preserved; Grep/Bash/WebFetch entries
   # are removed then re-added to ensure idempotency on re-run.
+  # Requires jq or node.
   local settings_file="$1"
   local hooks_dir="$2"  # relative path used in the command value (e.g. .claude/hooks/context-mode)
 
-  local new_hooks
-  new_hooks=$(jq -n \
-    --arg grep_cmd  "$hooks_dir/block-grep.sh" \
-    --arg bash_cmd  "$hooks_dir/block-bash.sh" \
-    --arg fetch_cmd "$hooks_dir/block-webfetch.sh" \
-    '[
-      {"matcher":"Grep",     "hooks":[{"type":"command","command":$grep_cmd}]},
-      {"matcher":"Bash",     "hooks":[{"type":"command","command":$bash_cmd}]},
-      {"matcher":"WebFetch", "hooks":[{"type":"command","command":$fetch_cmd}]}
-    ]')
-
-  if [ -f "$settings_file" ]; then
-    # Additive merge: preserve existing entries; replace Grep/Bash/WebFetch on re-run
-    local merged
-    merged=$(jq \
-      --argjson new_hooks "$new_hooks" \
-      '
-        .hooks //= {} |
-        .hooks.PreToolUse //= [] |
-        .hooks.PreToolUse |= (
-          map(select(.matcher | IN("Grep","Bash","WebFetch") | not))
-          + $new_hooks
-        )
-      ' "$settings_file")
-    printf '%s\n' "$merged" > "$settings_file"
-    echo "  ~ .claude/settings.json (context-mode hook entries merged)"
+  if command -v jq >/dev/null 2>&1; then
+    local new_hooks
+    new_hooks=$(jq -n \
+      --arg grep_cmd  "$hooks_dir/block-grep.sh" \
+      --arg bash_cmd  "$hooks_dir/block-bash.sh" \
+      --arg fetch_cmd "$hooks_dir/block-webfetch.sh" \
+      '[
+        {"matcher":"Grep",     "hooks":[{"type":"command","command":$grep_cmd}]},
+        {"matcher":"Bash",     "hooks":[{"type":"command","command":$bash_cmd}]},
+        {"matcher":"WebFetch", "hooks":[{"type":"command","command":$fetch_cmd}]}
+      ]')
+    if [ -f "$settings_file" ]; then
+      local merged
+      merged=$(jq \
+        --argjson new_hooks "$new_hooks" \
+        '
+          .hooks //= {} |
+          .hooks.PreToolUse //= [] |
+          .hooks.PreToolUse |= (
+            map(select(.matcher | IN("Grep","Bash","WebFetch") | not))
+            + $new_hooks
+          )
+        ' "$settings_file")
+      printf '%s\n' "$merged" > "$settings_file"
+      echo "  ~ .claude/settings.json (context-mode hook entries merged)"
+    else
+      mkdir -p "$(dirname "$settings_file")"
+      jq -n --argjson new_hooks "$new_hooks" \
+        '{"hooks":{"PreToolUse":$new_hooks}}' > "$settings_file"
+      echo "  + .claude/settings.json (created with context-mode hook entries)"
+    fi
+  elif command -v node >/dev/null 2>&1; then
+    PLANIFEST_HOOKS_DIR="$hooks_dir" PLANIFEST_SETTINGS="$settings_file" node -e '
+      const fs = require("fs"), path = require("path");
+      const hd = process.env.PLANIFEST_HOOKS_DIR;
+      const sf = process.env.PLANIFEST_SETTINGS;
+      const newHooks = [
+        {matcher:"Grep",     hooks:[{type:"command",command:hd+"/block-grep.sh"}]},
+        {matcher:"Bash",     hooks:[{type:"command",command:hd+"/block-bash.sh"}]},
+        {matcher:"WebFetch", hooks:[{type:"command",command:hd+"/block-webfetch.sh"}]}
+      ];
+      let s = {};
+      if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
+      s.hooks = s.hooks || {};
+      s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
+        .filter(h => !["Grep","Bash","WebFetch"].includes(h.matcher))
+        .concat(newHooks);
+      fs.mkdirSync(path.dirname(sf),{recursive:true});
+      fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
+    '
+    if [ -f "$settings_file" ]; then
+      echo "  ~ .claude/settings.json (context-mode hook entries merged)"
+    else
+      echo "  + .claude/settings.json (created with context-mode hook entries)"
+    fi
   else
-    mkdir -p "$(dirname "$settings_file")"
-    jq -n --argjson new_hooks "$new_hooks" \
-      '{"hooks":{"PreToolUse":$new_hooks}}' > "$settings_file"
-    echo "  + .claude/settings.json (created with context-mode hook entries)"
+    echo "  ! Warning: neither jq nor node found — skipping settings.json hook wiring"
+    echo "  ! Manually add PreToolUse hooks for Grep/Bash/WebFetch to .claude/settings.json"
   fi
 }
 
@@ -265,6 +297,71 @@ install_tier1_hooks() {
   echo "    $adapter_dest_rel"
 }
 
+install_enforcement_hooks() {
+  # Copy gate-write.mjs + check-design.mjs and wire PreToolUse/UserPromptSubmit (REQ-006, REQ-008).
+  # Always installed, regardless of MCP flags.
+  local hooks_src_rel="$1"   # e.g. hooks/enforcement
+  local hooks_dir_rel="$2"   # e.g. .claude/hooks/enforcement
+  local settings_rel="$3"    # e.g. .claude/settings.json
+
+  local src="$SCRIPT_DIR/$hooks_src_rel"
+  local dest="$PROJECT_ROOT/$hooks_dir_rel"
+  local settings="$PROJECT_ROOT/$settings_rel"
+
+  if [ ! -d "$src" ]; then
+    echo "  ! Warning: enforcement hook scripts not found at $src — skipping"
+    return
+  fi
+
+  echo ""
+  echo "  Installing Planifest enforcement hooks"
+
+  mkdir -p "$dest"
+  for script in "$src"/*.mjs; do
+    [ -f "$script" ] || continue
+    local script_name
+    script_name="$(basename "$script")"
+    cp "$script" "$dest/$script_name"
+    echo "  + $hooks_dir_rel/$script_name"
+  done
+
+  # Wire into settings.json (requires node; jq fallback not needed — node is always available)
+  local gate_cmd="$hooks_dir_rel/gate-write.mjs"
+  local design_cmd="$hooks_dir_rel/check-design.mjs"
+
+  if command -v node >/dev/null 2>&1; then
+    PLANIFEST_GATE="$gate_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+      const fs = require("fs"), path = require("path");
+      const gate   = process.env.PLANIFEST_GATE;
+      const design = process.env.PLANIFEST_DESIGN;
+      const sf     = process.env.PLANIFEST_SETTINGS;
+      let s = {};
+      if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
+      s.hooks = s.hooks || {};
+      // PreToolUse: gate-write for Write and Edit (idempotent: remove then re-add)
+      s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
+        .filter(h => !["Write","Edit"].includes(h.matcher) ||
+                     !(h.hooks||[]).some(e => (e.command||"").includes("gate-write")));
+      s.hooks.PreToolUse.push(
+        {matcher:"Write", hooks:[{type:"command",command:gate}]},
+        {matcher:"Edit",  hooks:[{type:"command",command:gate}]}
+      );
+      // UserPromptSubmit: check-design (idempotent)
+      s.hooks.UserPromptSubmit = (s.hooks.UserPromptSubmit || [])
+        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("check-design")));
+      s.hooks.UserPromptSubmit.push(
+        {matcher:".*", hooks:[{type:"command",command:design}]}
+      );
+      fs.mkdirSync(path.dirname(sf),{recursive:true});
+      fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
+    '
+    echo "  ~ $settings_rel (enforcement hooks wired)"
+  else
+    echo "  ! Warning: node not found — skipping settings.json enforcement hook wiring"
+    echo "  ! Manually add gate-write (Write/Edit PreToolUse) and check-design (UserPromptSubmit) to $settings_rel"
+  fi
+}
+
 merge_telemetry_hook_settings() {
   # Merge PostToolUse context-pressure hook entry into .claude/settings.json
   # Idempotent: removes existing context-pressure entry before re-adding.
@@ -274,32 +371,55 @@ merge_telemetry_hook_settings() {
 
   local hook_cmd="PLANIFEST_TELEMETRY_URL=$backend_url node $hooks_dir/context-pressure.mjs"
 
-  local new_hook
-  new_hook=$(jq -n \
-    --arg cmd "$hook_cmd" \
-    '[{"matcher":".*","hooks":[{"type":"command","command":$cmd,"async":true,"timeout":5000}]}]')
-
-  if [ -f "$settings_file" ]; then
-    local merged
-    merged=$(jq \
-      --argjson new_hook "$new_hook" \
-      '
-        .hooks //= {} |
-        .hooks.PostToolUse //= [] |
-        .hooks.PostToolUse |= (
-          map(select(
-            (.hooks // []) | map(.command // "") | any(test("context-pressure")) | not
-          ))
-          + $new_hook
-        )
-      ' "$settings_file")
-    printf '%s\n' "$merged" > "$settings_file"
-    echo "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
+  if command -v jq >/dev/null 2>&1; then
+    local new_hook
+    new_hook=$(jq -n \
+      --arg cmd "$hook_cmd" \
+      '[{"matcher":".*","hooks":[{"type":"command","command":$cmd,"async":true,"timeout":5000}]}]')
+    if [ -f "$settings_file" ]; then
+      local merged
+      merged=$(jq \
+        --argjson new_hook "$new_hook" \
+        '
+          .hooks //= {} |
+          .hooks.PostToolUse //= [] |
+          .hooks.PostToolUse |= (
+            map(select(
+              (.hooks // []) | map(.command // "") | any(test("context-pressure")) | not
+            ))
+            + $new_hook
+          )
+        ' "$settings_file")
+      printf '%s\n' "$merged" > "$settings_file"
+      echo "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
+    else
+      mkdir -p "$(dirname "$settings_file")"
+      jq -n --argjson new_hook "$new_hook" \
+        '{"hooks":{"PostToolUse":$new_hook}}' > "$settings_file"
+      echo "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+    fi
+  elif command -v node >/dev/null 2>&1; then
+    PLANIFEST_HOOK_CMD="$hook_cmd" PLANIFEST_SETTINGS="$settings_file" node -e '
+      const fs = require("fs"), path = require("path");
+      const cmd = process.env.PLANIFEST_HOOK_CMD;
+      const sf  = process.env.PLANIFEST_SETTINGS;
+      const newHook = [{matcher:".*",hooks:[{type:"command",command:cmd,async:true,timeout:5000}]}];
+      let s = {};
+      if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
+      s.hooks = s.hooks || {};
+      s.hooks.PostToolUse = (s.hooks.PostToolUse || [])
+        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("context-pressure")))
+        .concat(newHook);
+      fs.mkdirSync(path.dirname(sf),{recursive:true});
+      fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
+    '
+    if [ -f "$settings_file" ]; then
+      echo "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
+    else
+      echo "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+    fi
   else
-    mkdir -p "$(dirname "$settings_file")"
-    jq -n --argjson new_hook "$new_hook" \
-      '{"hooks":{"PostToolUse":$new_hook}}' > "$settings_file"
-    echo "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+    echo "  ! Warning: neither jq nor node found — skipping telemetry settings.json wiring"
   fi
 }
 
@@ -347,8 +467,10 @@ activate_guardrails() {
   # Ensure hook scripts are executable (critical for Unix systems)
   chmod +x "$SCRIPT_DIR/hooks/pre-commit"
   chmod +x "$SCRIPT_DIR/hooks/pre-push"
+  [ -f "$SCRIPT_DIR/hooks/commit-msg" ] && chmod +x "$SCRIPT_DIR/hooks/commit-msg"
   echo "  + hooks/pre-commit (executable)"
   echo "  + hooks/pre-push (executable)"
+  [ -f "$SCRIPT_DIR/hooks/commit-msg" ] && echo "  + hooks/commit-msg (executable)"
 
   # Deploy the CI/CD pipeline workflow
   local github_workflows="$PROJECT_ROOT/.github/workflows"
@@ -758,6 +880,17 @@ TOML
 
 # --- Main ---
 
+# Skill subcommands — delegate to skill-sync.sh and exit immediately (REQ-024)
+_FIRST_ARG="${1:-}"
+if [[ "$_FIRST_ARG" =~ ^(add-skill|remove-skill|preserve-skill|unpreserve-skill)$ ]]; then
+  _SYNC_OP="${_FIRST_ARG%%-skill}"  # add-skill→add, preserve-skill→preserve, etc.
+  SYNC_SCRIPT="$SCRIPT_DIR/scripts/skill-sync.sh"
+  [ -f "$SYNC_SCRIPT" ] || { echo "Error: skill-sync.sh not found. Re-run setup.sh first."; exit 1; }
+  chmod +x "$SYNC_SCRIPT"
+  shift
+  exec bash "$SYNC_SCRIPT" "$_SYNC_OP" "$@"
+fi
+
 TOOL=""
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -812,6 +945,12 @@ run_tool_setup() {
     bash "$SETUP_DIR/opencode.sh"
   else
     setup_tool "$t"
+  fi
+  # Re-sync external skills after tool setup (REQ-024/REQ-025)
+  local sync_script="$SCRIPT_DIR/scripts/skill-sync.sh"
+  if [ -f "$sync_script" ]; then
+    chmod +x "$sync_script"
+    bash "$sync_script" sync "$t" 2>/dev/null || true
   fi
 }
 

@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-026 - P0 skill discovery"
 summary: "The orchestrator's P0 Opening Briefing includes a skill discovery step: the agent checks available Anthropic skills relevant to the feature and offers them to the human before planning begins."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-026 - P0 skill discovery

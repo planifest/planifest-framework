@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-023 - Commit message standard"
 summary: "A commit message standard document and advisory commit-msg hook. Messages must be concise, scope-focused, and must not attribute authorship to AI tools."
-status: "draft"
+status: "done"
 version: "0.1.0"
 ---
 # Requirement: REQ-023 - Commit message standard

@@ -119,18 +119,7 @@ Write `plan/current/.feature-id` containing the feature ID (e.g. `0000003-hook-b
 
 This marker enables resume detection to identify stale artefacts from a failed archive (DD-012, ADR-006).
 
-### Step 6 — Remove plan-scoped external skills (REQ-025)
-
-Before archiving, clean up plan-scoped skills that are ephemeral by design (ADR-010):
-
-1. Check `planifest-framework/external-skills.json` — if it exists, read the `skills` array
-2. For each entry where `scope == "plan"`:
-   - Remove the tool-installed copy: run `skill-sync.sh remove {name} {tool}`
-   - Remove from `plan/current/external-skills/{name}/` if present
-3. Remove plan-scoped entries from `external-skills.json`; if no entries remain, delete the file
-4. Skills with `scope == "preserved"` are left in place — they survive archive
-
-### Step 7 — Archive plan/current/
+### Step 6 — Archive plan/current/
 
 **Copy-then-delete** (ADR-006 — never use atomic move):
 
@@ -141,7 +130,7 @@ Before archiving, clean up plan-scoped skills that are ephemeral by design (ADR-
 5. Delete `plan/current/` contents — including `.skips` (already processed), `.planifest-session`, `.feature-id`
 6. Confirm `plan/current/` is empty
 
-### Step 8 — Confirm to human
+### Step 7 — Confirm to human
 
 ```
 P7: Ship complete.
@@ -182,10 +171,12 @@ plan/current/ is empty and ready for the next feature.
 { "phase_name": "ship" }
 ```
 
-**`phase_end`** — after Step 8 (archive confirmed):
+**`phase_end`** — after Step 7 (archive confirmed):
 ```json
 { "phase_name": "ship", "status": "pass", "duration_ms": <elapsed> }
 ```
+
+> Note: the `"ship"` phase value requires the structured-telemetry-mcp schema to include `"ship"` in the phase enum (REQ-021). If the schema has not been updated, the emit call will fail silently — Ship proceeds normally (ADR-005).
 
 ---
 

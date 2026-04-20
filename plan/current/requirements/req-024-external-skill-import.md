@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-024 - External skill import"
 summary: "Agent-driven command to fetch skills from the official Anthropic skills repository and install them into the active plan. setup.sh add-skill is a manual escape hatch only."
-status: "draft"
+status: "done"
 version: "0.2.0"
 ---
 # Requirement: REQ-024 - External skill import

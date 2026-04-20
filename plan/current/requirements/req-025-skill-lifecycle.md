@@ -1,7 +1,7 @@
 ---
 title: "Requirement: REQ-025 - External skill manifest and lifecycle"
 summary: "Two-tier storage for external skills. Plan-scoped skills live under plan/current/ and are removed at P7. Preserved skills live in planifest-framework/ and persist across features. Single manifest tracks both."
-status: "draft"
+status: "done"
 version: "0.2.0"
 ---
 # Requirement: REQ-025 - External skill manifest and lifecycle

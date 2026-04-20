@@ -376,6 +376,34 @@ Before presenting the confirmed design for confirmation, verify every item:
 
 If any item cannot be checked, coach the human on that specific gap before proceeding.
 
+### Skill Discovery (REQ-026)
+
+After the gate checklist passes and before presenting the design for confirmation, assess whether any external capability skills would improve delivery quality for this feature's stack.
+
+**How to assess:**
+- Read the declared stack from the confirmed design
+- Check `planifest-framework/external-skills.json` (if it exists) for already-installed skills
+- Consider whether known capability skills are relevant: `frontend-design` (React UI), `webapp-testing` (web app tests), `mcp-builder` (MCP servers), `docx`/`pdf`/`xlsx` (document generation)
+
+**If relevant skills exist that are not installed:**
+
+Ask the human once — do not pressure:
+
+```
+P0: Before we proceed, I can install capability skills to improve output quality for this stack.
+
+Relevant skills for {declared stack}:
+  - {skill-name}: {one-line description of what it adds}
+
+Install any of these? (yes / no / list which ones)
+```
+
+**If human confirms:** Call `skill-sync.sh add {skill-name} {tool}` for each confirmed skill. Report installation result.
+
+**If human declines or no relevant skills exist:** Proceed silently — do not surface this again.
+
+This step is non-blocking. If skill installation fails (network error, skill not found), log the failure and proceed. Do not block the pipeline on an optional enhancement.
+
 ---
 
 ## Phase 1 - Requirements
