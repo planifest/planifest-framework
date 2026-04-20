@@ -594,7 +594,7 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. Do not emit if either fails.**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 

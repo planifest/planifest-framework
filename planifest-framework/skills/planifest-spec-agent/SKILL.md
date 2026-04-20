@@ -1,4 +1,4 @@
-﻿---
+---
 name: planifest-spec-agent
 description: Produces requirements artifacts (execution plan, OpenAPI spec (if applicable), scope, risk register, domain glossary) for a feature. Invoked by the orchestrator during the Requirements step.
 bundle_templates: [component.template.yml, component-guide.md, data-contract.template.md, data-contract-guide.md, requirement.template.md, execution-plan.template.md, scope.template.md, risk-register.template.md, domain-glossary.template.md]
@@ -117,9 +117,11 @@ When the confirmed design indicates `adoption_mode: retrofit`, read the existing
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. Do not emit if either fails.**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
+
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
 Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
