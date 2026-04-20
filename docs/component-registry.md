@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 2026-04-12
+**Last updated:** 2026-04-20
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -10,6 +10,7 @@
 | ID | Name | Type | Domain | Status | Summary | Docs |
 |----|------|------|--------|--------|---------|------|
 | `context-mode-hooks` | context-mode Enforcement Hook Scripts | component-pack | developer-tooling | active | Blocking PreToolUse hook scripts that enforce context-mode routing rules by intercepting Grep, Bash (pattern-matched), and WebFetch tool calls. | [purpose](../src/context-mode-hooks/docs/purpose.md) |
+| `setup-hook-integration` | Setup Hook Integration | component-pack | developer-tooling | active | setup.sh/ps1 and skill-sync.sh — installs enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project. | [purpose](../src/setup-hook-integration/docs/purpose.md) |
 
 ---
 

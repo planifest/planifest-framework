@@ -1,13 +1,13 @@
 # Planifest Component Manifest
 id: "setup-hook-integration"
 name: "Setup Hook Integration"
-feature: "0000001-context-mode-enforcement-hooks"
-version: "0.1.0"
+feature: "0000003-hook-based-enforcement"
+version: "0.2.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
-summary: "Changes to setup.sh, setup.ps1, and setup/claude-code.* that copy enforcement hook scripts and write settings.json PreToolUse wiring when --context-mode-mcp is passed."
-systemContext: "Part of the planifest-framework setup infrastructure. Activated when the user runs setup with --context-mode-mcp. Installs context-mode-hooks scripts to .claude/hooks/context-mode/ and writes hook entries to .claude/settings.json."
+summary: "setup.sh/ps1 and supporting scripts that install enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project."
+systemContext: "Core setup infrastructure. Runs once per tool target and on re-runs. Installs hooks to .claude/hooks/, wires settings.json, registers the advisory commit-msg hook, and syncs external skills via skill-sync.sh."
 
 responsibilities:
   - "Copy hook scripts from planifest-framework/hooks/context-mode/ to .claude/hooks/context-mode/ when --context-mode-mcp is passed"
