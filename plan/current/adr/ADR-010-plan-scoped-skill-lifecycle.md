@@ -1,37 +1,46 @@
 ---
 id: ADR-010
-title: Plan-scoped external skill lifecycle
+title: Two-tier external skill storage with plan-scoped lifecycle
 status: accepted
 date: 2026-04-20
 deciders: [human-on-the-loop]
 ---
-# ADR-010 — Plan-scoped external skill lifecycle
+# ADR-010 — Two-tier external skill storage with plan-scoped lifecycle
 
 ## Context
 
-REQ-025 defines the lifecycle of externally installed skills. Skills are fetched to support a specific feature; the question is when they should be cleaned up and what the default retention policy should be.
+REQ-025 defines where external skills are stored and when they are cleaned up. Skills installed for a feature should not accumulate indefinitely, but some skills are useful across features and should persist. Two storage locations and a preservation mechanism are needed.
 
 ## Decision
 
-External skills are **scoped to the active plan**. The default retention policy is `preserve: false` — skills are removed during P7 (ship/archive) unless the Human on the Loop explicitly opts to keep them.
+External skills use a **two-tier storage model**:
 
-Cleanup happens at P7 as part of the archive step: the ship-agent lists pending removals, prompts the human for any preservations, then removes all `preserve: false` skills.
+- **Plan-scoped (default):** `plan/current/external-skills/<name>/` — gitignored, removed at P7.
+- **Preserved:** `planifest-framework/external-skills/<name>/` — committed, survives P7 and persists across all future features.
+
+A **single manifest** at `planifest-framework/external-skills.yml` tracks both tiers via a `scope: plan | preserved` field.
+
+The ship-agent (P7) removes all `scope: plan` skills after prompting the human for any they want to preserve. Preserved skills are moved to `planifest-framework/external-skills/` and remain available to future plans.
+
+**The agent is the primary driver** of all install/remove/sync operations via `skill-sync.sh` (and `skill-sync.ps1` on Windows). `setup.sh add-skill` exists as a manual escape hatch only.
 
 ## Rationale
 
-1. **Skills are task-specific.** A skill fetched to implement a document-generation feature (e.g. `docx`) is unlikely to be needed after that feature ships. Default cleanup prevents accumulation.
-2. **Plan/current as the natural boundary.** `plan/current/` is cleared at P7. External skills follow the same lifecycle — they are a planning-time resource.
-3. **Human override for exceptions.** `preserve: true` handles the case where a skill is valuable long-term (e.g. a testing framework skill used across many features). The human decides, not the tool.
-4. **Manifest as audit trail.** The `external-skills.yml` manifest records every install with its source, date, and feature context. This is retained even after skills are removed (the manifest entry is deleted, but git history preserves it).
+1. **Plan/current as the natural ephemeral boundary.** `plan/current/` is already cleared at P7. Plan-scoped skills follow the same lifecycle with no extra machinery.
+2. **planifest-framework/ as the durable store.** The framework directory is committed and shared. Preserved skills committed there are available to every team member and every future feature without re-fetching.
+3. **Single manifest for observability.** One file shows all external skills regardless of tier. Scope field makes tier explicit without requiring two separate manifests.
+4. **Agent-driven keeps humans out of the shell.** The human answers questions in the conversation; the agent handles filesystem operations. This is consistent with the broader Planifest model.
+5. **Two scripts (sh + ps1) for cross-platform parity.** Same pattern established by setup.sh / setup.ps1.
 
 ## Alternatives considered
 
-- **Skills persist indefinitely by default:** Rejected. Skills accumulate; agent context bloats; outdated skill instructions could conflict with newer framework versions.
-- **Session-scoped (removed on session end):** Rejected. Skills installed for multi-session features would be lost between sessions, requiring re-install.
-- **User configures retention policy globally:** Rejected. Adds configuration surface without meaningful benefit over the simple per-skill preserve flag.
+- **Single tier (all in planifest-framework/):** Rejected. Every skill would be committed and accumulate permanently — no natural cleanup point.
+- **Single tier (all in plan/current/):** Rejected. No persistence mechanism for skills valuable across features.
+- **Human-run CLI only (no agent-driven path):** Rejected. Forces humans into the shell for routine operations the agent can handle.
 
 ## Consequences
 
-- The ship-agent (P7) must be updated to perform skill cleanup as part of its archive step.
-- If a human forgets to preserve a useful skill, they can re-install it with `add-skill`.
-- The `external-skills.yml` file will typically be empty or absent on a clean repo between features.
+- `plan/current/external-skills/` must be added to `.gitignore`.
+- `planifest-framework/external-skills/` and `external-skills.yml` are committed.
+- The ship-agent P7 step must be extended to perform skill cleanup (REQ-025).
+- `skill-sync.sh` and `skill-sync.ps1` must be aware of each tool's skills directory location — same tool-config pattern used by `setup.sh` (REQ-024).

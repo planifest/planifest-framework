@@ -1,8 +1,8 @@
 ---
 title: "Requirement: REQ-025 - External skill manifest and lifecycle"
-summary: "External skills are tracked in a manifest and auto-removed at P7 archive unless the human opts to preserve them."
+summary: "Two-tier storage for external skills. Plan-scoped skills live under plan/current/ and are removed at P7. Preserved skills live in planifest-framework/ and persist across features. Single manifest tracks both."
 status: "draft"
-version: "0.1.0"
+version: "0.2.0"
 ---
 # Requirement: REQ-025 - External skill manifest and lifecycle
 
@@ -14,38 +14,69 @@ version: "0.1.0"
 
 ## Functional Requirements
 
-### Manifest
+### Two-tier storage
 
-- A manifest file is maintained at `planifest-framework/external-skills.yml`.
-- Each entry records: `name`, `source` (URL), `trusted` (bool — true for Anthropic repo), `installedAt` (ISO 8601 date), `featureId` (active plan's feature ID at time of install), `preserve` (bool, default false).
-- The manifest is created on first `add-skill` call if it does not exist.
+| Tier | Path | Committed? | Survives P7? |
+|------|------|-----------|--------------|
+| Plan-scoped | `plan/current/external-skills/<name>/` | No (gitignored) | No |
+| Preserved | `planifest-framework/external-skills/<name>/` | Yes | Yes |
 
-### Remove command
+Skills are installed as plan-scoped by default. Preserving a skill moves it from `plan/current/external-skills/` to `planifest-framework/external-skills/` and updates its manifest entry.
 
-- `setup.sh remove-skill <skill-name>` removes the skill from the tool's skills directory and deletes its entry from the manifest.
-- If the skill is not installed, print a warning and exit 0 (idempotent).
+### Central manifest
 
-### Lifecycle — auto-cleanup at P7
+A single manifest at `planifest-framework/external-skills.yml` tracks all external skills across both tiers:
 
-- The `planifest-ship-agent` (P7) reads `planifest-framework/external-skills.yml` during the archive step.
-- Any skill with `preserve: false` is removed from the tool's skills directory and its entry is deleted from the manifest.
-- Before removing, the ship-agent lists the skills to be removed and asks the Human on the Loop whether any should be preserved. For each skill confirmed for preservation, `preserve` is set to `true` and it is not removed.
-- After cleanup, if the manifest is empty, the file is removed.
+```yaml
+skills:
+  - name: webapp-testing
+    source: https://github.com/anthropics/skills/tree/main/skills/webapp-testing
+    trusted: true
+    installedAt: "2026-04-20"
+    scope: preserved          # lives in planifest-framework/external-skills/
+  - name: some-temp-skill
+    source: https://github.com/anthropics/skills/tree/main/skills/some-temp-skill
+    trusted: true
+    installedAt: "2026-04-20"
+    featureId: "0000003"
+    scope: plan               # lives in plan/current/external-skills/
+```
 
-### Preserve command
+The manifest is created on first install if it does not exist. It is committed to the repository.
 
-- `setup.sh preserve-skill <skill-name>` sets `preserve: true` on a manifest entry, protecting it from P7 auto-cleanup.
-- `setup.sh unpreserve-skill <skill-name>` resets `preserve: false`.
+### P7 auto-cleanup
+
+During the P7 archive step, the ship-agent:
+
+1. Reads `planifest-framework/external-skills.yml`.
+2. Lists all `scope: plan` skills to the Human on the Loop.
+3. Asks the human which (if any) should be preserved before removal.
+4. For each skill confirmed for preservation: moves skill files from `plan/current/external-skills/<name>/` to `planifest-framework/external-skills/<name>/`, updates `scope` to `preserved` in the manifest.
+5. Removes all remaining `scope: plan` skill directories from `plan/current/external-skills/` and deletes their manifest entries.
+6. Calls `skill-sync.sh remove <name> <tool>` for each removed skill to clean up the tool's skills directory.
+7. If no preserved skills remain after cleanup, removes the manifest file.
+
+### Remove (on-demand)
+
+The agent removes a skill on human request by calling `skill-sync.sh remove <name> <tool>` and deleting the manifest entry and skill directory.
+
+### sync on setup re-run
+
+When `setup.sh` is re-run, it calls `skill-sync.sh sync <tool>` which re-installs all manifest entries to the tool's skills directory (re-fetching any plan-scoped skill files absent from `plan/current/external-skills/`).
 
 ## Acceptance Criteria
 
-- [ ] `planifest-framework/external-skills.yml` is created on first `add-skill` and contains the correct fields.
-- [ ] `setup.sh remove-skill <skill-name>` removes the skill directory and manifest entry.
-- [ ] P7 auto-cleanup removes all `preserve: false` skills and prompts before doing so.
-- [ ] `setup.sh preserve-skill <skill-name>` prevents P7 removal.
-- [ ] Empty manifest file is removed after final cleanup.
+- [ ] `planifest-framework/external-skills.yml` created on first install with correct fields.
+- [ ] Plan-scoped skills stored under `plan/current/external-skills/` (gitignored).
+- [ ] Preserved skills stored under `planifest-framework/external-skills/` (committed).
+- [ ] P7 ship-agent lists `scope: plan` skills and prompts for preservation before removal.
+- [ ] Preserving a skill moves files to `planifest-framework/external-skills/` and updates manifest.
+- [ ] Removed skills disappear from both the manifest and the tool's skills directory.
+- [ ] `skill-sync.sh sync` restores skills from manifest on setup re-run.
+- [ ] Empty manifest is removed after final cleanup.
 
 ## Dependencies
 
-- REQ-024 (`add-skill` command writes the manifest entries this requirement manages).
-- `planifest-ship-agent` P7 archive step (REQ-019) must be extended to invoke cleanup.
+- REQ-024 (`add-skill` writes manifest entries this requirement manages).
+- REQ-019 (ship-agent P7 archive step must be extended to invoke cleanup).
+- `plan/current/external-skills/` must be added to `.gitignore`.
