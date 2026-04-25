@@ -293,8 +293,43 @@ install_tier1_hooks() {
   fi
 
   echo "  [Planifest] Tier 1 adapter hooks installed."
-  echo "  Register the adapter in your tool's hook configuration:"
-  echo "    $adapter_dest_rel"
+}
+
+install_tier1_hook_registration() {
+  # Write PreToolUse hook registration pointing to the Tier 1 adapter (REQ-009, REQ-027).
+  # Writes in the same hooks JSON shape used by Claude Code so tooling stays consistent.
+  # Only gate-write is wired via PreToolUse; check-design requires UserPromptSubmit which
+  # Tier 1 tools do not expose.
+  local adapter_dest_rel="$1"  # e.g. .cursor/hooks/adapters/cursor.mjs
+  local settings_rel="$2"      # e.g. .cursor/settings.json
+
+  local settings="$PROJECT_ROOT/$settings_rel"
+  local adapter_cmd="node $adapter_dest_rel gate-write"
+
+  if command -v node >/dev/null 2>&1; then
+    PLANIFEST_ADAPTER_CMD="$adapter_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+      const fs = require("fs"), path = require("path");
+      const adapterCmd = process.env.PLANIFEST_ADAPTER_CMD;
+      const sf         = process.env.PLANIFEST_SETTINGS;
+      let s = {};
+      if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^﻿/,""));
+      s.hooks = s.hooks || {};
+      // PreToolUse: adapter for Write and Edit (idempotent — remove then re-add)
+      s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
+        .filter(h => !["Write","Edit"].includes(h.matcher) ||
+                     !(h.hooks||[]).some(e => (e.command||"").includes("gate-write")));
+      s.hooks.PreToolUse.push(
+        {matcher:"Write", hooks:[{type:"command",command:adapterCmd}]},
+        {matcher:"Edit",  hooks:[{type:"command",command:adapterCmd}]}
+      );
+      fs.mkdirSync(path.dirname(sf),{recursive:true});
+      fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
+    '
+    echo "  ~ $settings_rel (Tier 1 adapter hook registration written)"
+  else
+    echo "  ! Warning: node not found — skipping $settings_rel Tier 1 hook registration"
+    echo "  ! Manually register: node $adapter_dest_rel gate-write for Write/Edit PreToolUse"
+  fi
 }
 
 install_enforcement_hooks() {
@@ -795,13 +830,19 @@ setup_tool() {
 
   # Install Planifest enforcement hooks unconditionally (REQ-008)
   # Not gated on MCP flags — enforcement applies to all Planifest-enabled projects.
-  if [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
+  # Skipped for Tier 1 tools — they use the adapter path instead (REQ-027).
+  if [ -n "${TOOL_SETTINGS_FILE:-}" ] && ! [[ "${PLANIFEST_TIER:-}" =~ ^1 ]]; then
     install_enforcement_hooks "hooks/enforcement" ".claude/hooks/enforcement" "$TOOL_SETTINGS_FILE"
   fi
 
   # Tier 1 / 1b: copy adapter + shared hook scripts (REQ-009, REQ-010, REQ-013)
   if [[ "${PLANIFEST_TIER:-}" =~ ^1 ]] && [ -n "${TOOL_HOOK_ADAPTER_SRC:-}" ]; then
     install_tier1_hooks "$TOOL_HOOK_ADAPTER_SRC" "$TOOL_HOOK_ADAPTER_DEST" "$TOOL_HOOKS_INSTALL_DIR"
+  fi
+
+  # Tier 1: wire adapter registration into tool settings (REQ-027)
+  if [[ "${PLANIFEST_TIER:-}" =~ ^1 ]] && [ -n "${TOOL_HOOK_ADAPTER_DEST:-}" ] && [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
+    install_tier1_hook_registration "$TOOL_HOOK_ADAPTER_DEST" "$TOOL_SETTINGS_FILE"
   fi
 
   # Write telemetry opt-in sentinel so skills know emission is authorised (REQ-004)

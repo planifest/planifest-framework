@@ -93,4 +93,18 @@ Overall risk: **Low**
 1. Fix skill-sync.sh security findings F-001/002/003 (REC-001)
 2. Add `setup.ps1` skill subcommand routing for Windows parity (REC-002)
 
-See `plan/current/recommendations.md` for full list.
+See `plan/archive/0000003-hook-based-enforcement-2026-04-20/recommendations.md` for full list.
+
+---
+
+## Post-Ship Fix — REQ-027 (2026-04-25)
+
+**Gap:** REQ-009 AC not fully met. Tier 1 adapter scripts were installed by `install_tier1_hooks()` but the hook registration (the JSON entries that tell Cursor/Windsurf/Cline to invoke the adapter) was never written. Root cause: `TOOL_SETTINGS_FILE` was absent from all three Tier 1 setup configs and no `install_tier1_hook_registration()` function existed. `gate-write.mjs` never fired for these tools.
+
+**Fix:**
+- `setup.sh` — new `install_tier1_hook_registration()` function; called after `install_tier1_hooks` in `setup_tool()` when Tier 1 + `TOOL_SETTINGS_FILE` are set
+- `setup/cursor.sh` — added `TOOL_SETTINGS_FILE=".cursor/settings.json"`
+- `setup/windsurf.sh` — added `TOOL_SETTINGS_FILE=".windsurf/settings.json"`
+- `setup/cline.sh` — added `TOOL_SETTINGS_FILE=".clinerules/hooks.json"`
+
+**Requirement:** `plan/archive/0000003-hook-based-enforcement-2026-04-20/requirements/req-027-tier1-hook-registration.md`
