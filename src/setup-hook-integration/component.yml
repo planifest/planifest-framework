@@ -2,12 +2,12 @@
 id: "setup-hook-integration"
 name: "Setup Hook Integration"
 feature: "0000003-hook-based-enforcement"
-version: "0.2.0"
+version: "0.3.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
 summary: "setup.sh/ps1 and supporting scripts that install enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project."
-systemContext: "Core setup infrastructure. Runs once per tool target and on re-runs. Installs hooks to .claude/hooks/, wires settings.json, registers the advisory commit-msg hook, and syncs external skills via skill-sync.sh."
+systemContext: "Core setup infrastructure. Runs once per tool target and on re-runs. Installs hooks to .claude/hooks/, wires settings.json, registers the blocking commit-msg hook, writes Tier 1 adapter hook registrations for Cursor/Windsurf/Cline, and syncs external skills via skill-sync.sh."
 
 responsibilities:
   - "Copy hook scripts from planifest-framework/hooks/context-mode/ to .claude/hooks/context-mode/ when --context-mode-mcp is passed"
@@ -98,7 +98,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-04-12"
-  updatedAt: "2026-04-12"
+  updatedAt: "2026-04-25"
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"

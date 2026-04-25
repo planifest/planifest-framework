@@ -64,8 +64,8 @@ A blank line after the subject may be followed by a body explaining *why*, not *
 
 ---
 
-## Advisory hook
+## Enforcement hook
 
-`planifest-framework/hooks/commit-msg` checks messages against these rules and prints a warning on violation. It never blocks the commit (ADR-008).
+`planifest-framework/hooks/commit-msg` checks messages against these rules and **exits 1 (blocks the commit)** on any violation (ADR-008). Use `git commit --no-verify` to bypass intentionally.
 
 To install: run `./planifest-framework/setup.sh <tool>` — the hook is wired automatically via `git config core.hooksPath`.
