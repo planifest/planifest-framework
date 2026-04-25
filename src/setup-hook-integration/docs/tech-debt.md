@@ -4,22 +4,25 @@
 
 **File:** `planifest-framework/scripts/skill-sync.sh`
 **Severity:** Medium
-**Impact:** Skill name passed to `rm -rf "$dir/$name"` without sanitisation — path traversal possible via crafted name.
-**Fix:** Add `validate_skill_name()` guard: `[[ "$1" =~ ^[a-zA-Z0-9_-]+$ ]]`
+**Status:** ✅ Fixed 2026-04-25
+**Fix applied:** `validate_skill_name()` added; called in `cmd_add`, `cmd_remove`, `cmd_install`, `cmd_preserve`, `cmd_unpreserve`. Rejects names not matching `^[a-zA-Z0-9_-]+$`.
+**Tests:** `test-skill-sync-security.sh` — F-002 section (5 tests).
 
 ## TD-002 — `get_skill_scope()` interpolates `$name` into `node -e` string (Security F-001)
 
 **File:** `planifest-framework/scripts/skill-sync.sh:78`
 **Severity:** Medium
-**Impact:** Single quotes in skill name could inject arbitrary JS into the node -e subprocess.
-**Fix:** Pass `$name` as env var (`SKILL_NAME="$name" node -e "...process.env.SKILL_NAME..."`) consistent with all other manifest functions.
+**Status:** ✅ Fixed 2026-04-25
+**Fix applied:** `skill_in_manifest()` and `get_skill_scope()` now use `SKILL_NAME`/`SKILL_MANIFEST` env-var pattern. Injection vector removed.
+**Tests:** `test-skill-sync-security.sh` — F-001 section (2 tests). Also covered transitively by TD-001 fix (invalid chars blocked before JS is reached).
 
 ## TD-003 — `--from` URL scheme not validated (Security F-003)
 
 **File:** `planifest-framework/scripts/skill-sync.sh:218–220`
 **Severity:** Low-Medium
-**Impact:** `curl` would follow `file://` or `ftp://` schemes, enabling local file reads.
-**Fix:** `[[ "$from_url" != https://* ]] && die "--from URL must use https://"`.
+**Status:** ✅ Fixed 2026-04-25
+**Fix applied:** `cmd_add` rejects any `--from` URL not starting with `https://` before passing to curl.
+**Tests:** `test-skill-sync-security.sh` — F-003 section (5 tests).
 
 ## TD-004 — `test-setup-telemetry.sh` fails on Windows due to git safe.directory
 
@@ -39,5 +42,5 @@
 
 **File:** `planifest-framework/setup.ps1`
 **Severity:** Low
-**Impact:** `setup.ps1 add-skill` / `remove-skill` subcommands not implemented; Windows users must use `skill-sync.ps1` directly.
-**Fix:** Add equivalent subcommand routing at top of `setup.ps1` to delegate to `skill-sync.ps1`.
+**Status:** ✅ Fixed 2026-04-25
+**Fix applied:** Subcommand routing block added before the arg-parsing loop. `setup.ps1 add-skill <name> <tool>` now delegates to `skill-sync.ps1 -Operation add`; same for `remove-skill`, `preserve-skill`, `unpreserve-skill`.

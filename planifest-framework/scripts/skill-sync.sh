@@ -29,6 +29,14 @@ ANTHROPIC_RAW_BASE="https://raw.githubusercontent.com/anthropics/skills/main/ski
 die() { echo "  [skill-sync] Error: $*" >&2; exit 1; }
 info() { echo "  [skill-sync] $*"; }
 
+validate_skill_name() {
+  # F-002: reject names that could escape the skills directory via path traversal.
+  # Only a-z, A-Z, 0-9, hyphen, and underscore are permitted (REC-001).
+  local name="$1"
+  [[ "$name" =~ ^[a-zA-Z0-9_-]+$ ]] || \
+    die "Invalid skill name '$name': only letters, digits, hyphens, and underscores are allowed."
+}
+
 resolve_tool_skills_dir() {
   local tool="$1"
   local config="$SETUP_DIR/${tool}.sh"
@@ -63,20 +71,22 @@ ensure_manifest() {
 }
 
 skill_in_manifest() {
+  # F-001: use env-var pattern to avoid JS injection via $name.
   local name="$1"
-  node -e "
+  SKILL_NAME="$name" SKILL_MANIFEST="$MANIFEST" node -e "
     const fs = require('fs');
-    const m = JSON.parse(fs.readFileSync('$MANIFEST','utf8'));
-    process.exit(m.skills.some(s => s.name === '$name') ? 0 : 1);
+    const m = JSON.parse(fs.readFileSync(process.env.SKILL_MANIFEST,'utf8').replace(/^﻿/,''));
+    process.exit(m.skills.some(s => s.name === process.env.SKILL_NAME) ? 0 : 1);
   " 2>/dev/null
 }
 
 get_skill_scope() {
+  # F-001: use env-var pattern to avoid JS injection via $name.
   local name="$1"
-  node -e "
+  SKILL_NAME="$name" SKILL_MANIFEST="$MANIFEST" node -e "
     const fs = require('fs');
-    const m = JSON.parse(fs.readFileSync('$MANIFEST','utf8'));
-    const s = m.skills.find(s => s.name === '$name');
+    const m = JSON.parse(fs.readFileSync(process.env.SKILL_MANIFEST,'utf8').replace(/^﻿/,''));
+    const s = m.skills.find(s => s.name === process.env.SKILL_NAME);
     if (s) process.stdout.write(s.scope);
   " 2>/dev/null
 }
@@ -130,6 +140,7 @@ update_scope() {
 
 cmd_install() {
   local name="$1" tool="$2"
+  validate_skill_name "$name"  # F-002
   local tool_skills_dir; tool_skills_dir="$(resolve_tool_skills_dir "$tool")"
   local dest="$tool_skills_dir/$name"
 
@@ -150,6 +161,7 @@ cmd_install() {
 
 cmd_remove() {
   local name="$1" tool="$2"
+  validate_skill_name "$name"  # F-002
   local tool_skills_dir; tool_skills_dir="$(resolve_tool_skills_dir "$tool")"
   local dest="$tool_skills_dir/$name"
 
@@ -229,6 +241,7 @@ _fetch_skill() {
 
 cmd_add() {
   local name="$1" tool="$2" from_url="" authorized=false
+  validate_skill_name "$name"  # F-002
 
   # Parse flags
   shift 2
@@ -239,6 +252,11 @@ cmd_add() {
       *)            die "Unknown flag: $1" ;;
     esac
   done
+
+  # F-003: reject non-HTTPS URLs to prevent file:// / ftp:// local reads.
+  if [ -n "$from_url" ] && [[ "$from_url" != https://* ]]; then
+    die "--from URL must use https:// (got: $from_url)"
+  fi
 
   # Already installed?
   if skill_in_manifest "$name" 2>/dev/null; then
@@ -283,6 +301,7 @@ cmd_add() {
 
 cmd_preserve() {
   local name="$1" tool="$2"
+  validate_skill_name "$name"  # F-002
   skill_in_manifest "$name" || die "Skill '$name' not found in manifest."
 
   local scope; scope="$(get_skill_scope "$name")"
@@ -305,6 +324,7 @@ cmd_preserve() {
 
 cmd_unpreserve() {
   local name="$1" tool="$2"
+  validate_skill_name "$name"  # F-002
   skill_in_manifest "$name" || die "Skill '$name' not found in manifest."
 
   local scope; scope="$(get_skill_scope "$name")"
