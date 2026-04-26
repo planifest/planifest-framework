@@ -119,6 +119,42 @@ Write `plan/current/.feature-id` containing the feature ID (e.g. `0000003-hook-b
 
 This marker enables resume detection to identify stale artefacts from a failed archive (DD-012, ADR-006).
 
+### Step R — Regression confirmation (req-012)
+
+Before archiving, present agent-tagged regression candidates to the human for curation.
+
+1. Scan all test files produced during P3/P4 for the `# REGRESSION-CANDIDATE:` tag (written by `planifest-test-writer`).
+2. Present the tagged candidates to the human:
+   ```
+   Regression candidates for this feature:
+     [ ] {test-file-name} — {rationale from tag}
+     [ ] {test-file-name} — {rationale from tag}
+
+   Confirm each to promote (y/n per candidate, or 'all'/'none'):
+   ```
+3. For each confirmed candidate, run:
+   ```bash
+   bash planifest-framework/scripts/promote-to-regression.sh \
+     "{test-file-path}" "{feature-id}" "human"
+   ```
+4. Record the human's decisions — they will appear in the test report (Step T).
+5. If no candidates are tagged: note "No regression candidates for this feature" and continue.
+
+### Step T — Test report (req-013)
+
+Generate the test report artefact before archiving.
+
+1. Read `planifest-framework/templates/test-report.template.md`.
+2. Populate all sections:
+   - **Tests run (P4):** sourced from P4 validate-agent output — every test file run during validation, with req-ID and pass/fail status.
+   - **Regression pack state:** run `bash planifest-framework/tests/run-tests.sh` regression block output, or read the latest run summary. Record total / pass / fail counts and list any failures.
+   - **Newly promoted tests:** the confirmations from Step R above.
+3. Write the populated report to:
+   ```
+   plan/changelog/{feature-id}-test-report-{YYYY-MM-DD}.md
+   ```
+4. Confirm the report references every test file run in P4. If any are missing, add them with status "unknown — not captured in P4 output".
+
 ### Step 6 — Remove plan-scoped external skills (REQ-025)
 
 Before archiving, clean up plan-scoped skills that are ephemeral by design (ADR-010):
