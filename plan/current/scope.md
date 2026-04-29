@@ -1,42 +1,52 @@
-# Scope - 0000002-structured-telemetry-framework-integration
+---
+title: "Scope - 0000004-tdd-regression-test-quality"
+status: "active"
+version: "0.1.0"
+---
+# Scope - 0000004-tdd-regression-test-quality
+
+**Feature:** 0000004-tdd-regression-test-quality
+
+> All three sections are present. See design.md for full context.
 
 ---
 
 ## In Scope
 
-- `--structured-telemetry-mcp` flag added to `setup.sh` and `setup.ps1`
-- Optional `--backend-url <url>` argument overriding the default backend address (`http://localhost:3741`)
-- MCP server registered in tool configuration files using `command + args` stdio format:
-  - Claude Code: `~/.claude/settings.json`
-  - Claude Desktop: `claude_desktop_config.json`
-  - Cursor: `.cursor/mcp.json`
-- Telemetry sections added to 8 SKILL.md files:
-  - `planifest-orchestrator` — `phase_start`, `phase_end`, `spec_gap`
-  - `planifest-spec-agent` — `phase_start`, `phase_end`, `spec_gap`
-  - `planifest-adr-agent` — `phase_start`, `phase_end`
-  - `planifest-codegen-agent` — `phase_start`, `phase_end`, `deviation`, `migration_proposal`, `self_correction`
-  - `planifest-validate-agent` — `phase_start`, `phase_end`, `validation_failure`, `self_correction`
-  - `planifest-change-agent` — `phase_start`, `phase_end`, `deviation`, `migration_proposal`, `self_correction`
-  - `planifest-security-agent` — `phase_start`, `phase_end`, `deviation`
-  - `planifest-docs-agent` — `phase_start`, `phase_end`, `deviation`
-- `hooks/telemetry/context-pressure.mjs` — new hook installed to `.claude/hooks/telemetry/` and registered as `PostToolUse` in `.claude/settings.json` **only** when both `--structured-telemetry-mcp` and `--context-mode-mcp` are active
-- Claude Code support
+- **TDD inner loop protocol** added to `planifest-codegen-agent/SKILL.md`: per-requirement red→green→refactor sub-loop orchestrating three sub-agents in sequence.
+- **planifest-test-writer skill** (new): narrow skill; writes one failing test per requirement (red phase); `recommended_model: haiku`.
+- **planifest-implementer skill** (new): narrow skill; writes minimum code to pass the failing test (green phase); `recommended_model: haiku`.
+- **planifest-refactor skill** (new): narrow skill; improves code quality while keeping all tests green (refactor phase); `recommended_model: haiku`.
+- **Escalation protocol**: codegen-agent escalates to human after 3 failed red→green attempts on a single requirement.
+- **Sub-agent model tier convention**: `recommended_model` frontmatter field on each sub-agent SKILL.md; rationale documented.
+- **Regression pack directory**: `planifest-framework/tests/regression/` — long-term curated test suite distinct from feature-specific tests.
+- **regression-manifest.json**: tracks promoted tests with name, sourceFeature, promotionDate, promotedBy, filePath.
+- **promote-to-regression.sh**: idempotent bash script; copies test to regression dir, updates manifest.
+- **run-tests.sh update**: regression suite runs as a distinct labelled block; pass/fail counts included in summary.
+- **test-report template**: `planifest-framework/templates/test-report.template.md` covering plan tests, regression state, newly promoted tests.
+- **ship-agent Step R** (regression confirmation): presents agent-tagged candidates to human, records decisions, invokes promotion script.
+- **ship-agent Step T** (test report generation): generates `plan/changelog/{feature-id}-test-report-{YYYY-MM-DD}.md` before archiving.
+- **Tests for regression infrastructure**: `test-regression-pack.sh` covering promotion, idempotency, manifest validity, run-tests.sh integration.
+- **ADRs**: model tier selection, regression promotion criteria, TDD sub-loop protocol.
 
 ---
 
 ## Out of Scope
 
-- Building or modifying the Structured Telemetry MCP Server (owned by 0008a)
-- Auto-discovery of a running backend — explicit flag always required
-- Local schema copy or validation — server enforces schema at ingestion
-- Hook support for Cursor, Windsurf, Cline, Antigravity (no confirmed `PostToolUse` equivalent)
-- Telemetry dashboard or query tooling
+- OpenAPI specification — no HTTP API is introduced.
+- Data contracts — no data-owning component.
+- IaC, Dockerfiles, cloud deployment — local framework tooling only.
+- Retroactive regression promotion for features 0000001–0000003.
+- Changes to `planifest-validate-agent`, `planifest-spec-agent`, or `planifest-adr-agent`.
+- TDD loop for stacks beyond what existing stack capability skills cover.
+- External CI/CD test reporting integrations (e.g. Allure, Datadog Test Visibility).
+- Windows PowerShell equivalents of `promote-to-regression.sh` or `run-tests.sh` additions.
 
 ---
 
 ## Deferred
 
-- Cursor / other tool hook wiring — deferred until hook architectures are confirmed per tool
-- Configurable threshold for `context_pressure` hook (hardcoded at 70% for v1)
-- Retry or buffering for failed `emit_event` calls
-- Additional event types beyond those defined in the spec (e.g. `token_usage`, `cost_estimate`)
+- **ML-based automatic regression candidate scoring** — blocked until sufficient regression history exists to train a scoring model.
+- **Cross-feature regression trend dashboard** — blocked until regression pack has multi-feature history; deferred to a future framework feature.
+- **Regression flakiness detection** — blocked until regression pack runs enough times to establish flakiness baseline.
+- **PowerShell parity for regression scripts** — deferred; `skill-sync.ps1` parity work is a separate concern. Until resolved, Windows users must run regression scripts via WSL or Git Bash.

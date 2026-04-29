@@ -1,8 +1,10 @@
-﻿---
+---
 name: planifest-codegen-agent
 description: Generates the full implementation from the requirements set - application code, tests, infrastructure, configuration. Invoked during Phase 3.
 bundle_templates: [component.template.yml, data-contract.template.md]
 bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md]
+hooks:
+  phase: codegen
 ---
 
 # Planifest - codegen-agent
@@ -113,11 +115,48 @@ Between components, verify:
 - Before writing any component that owns data, check whether a data contract exists at `src/{component-id}/docs/data-contract.md`. If one exists, implement against it. If none exists, create one there before writing any schema code.
 - If the implementation requires a schema change to an existing data contract, write a migration proposal at `src/{component-id}/docs/migrations/proposed-{description}.md` and stop. Do not modify the schema directly. This is a hard limit.
 
-**Write incrementally (Agentic TDD):**
-- Scaffold first, then define the domain models.
-- **Test-Driven Execution:** For every functional requirement, write the failing test case *first*. Next, write the implementation logic to make it pass. You are authorized to run test commands iteratively to verify semantic correctness.
-- Do not generate core application logic without a corresponding failing test.
-- Write to disk after each stage. Do not accumulate the entire implementation in memory.
+**TDD Inner Loop Protocol (ADR-001):**
+
+For each functional requirement, orchestrate three sub-agents in sequence before moving to the next requirement. This is the mandatory implementation discipline — not optional.
+
+```
+for each requirement in plan/current/requirements/:
+  attempt = 0
+  repeat:
+    attempt++
+    1. invoke planifest-test-writer  (+ stack capability skill if available)
+       → wait for RED confirmation (non-zero exit)
+    2. invoke planifest-implementer  (+ stack capability skill if available)
+       → wait for GREEN confirmation (zero exit)
+    if GREEN confirmed:
+      3. invoke planifest-refactor   (+ stack capability skill if available)
+         → wait for all-suite GREEN confirmation
+      break
+    else if attempt >= 3:
+      ESCALATE to human — do not proceed to next requirement
+      wait for human direction before continuing
+```
+
+**Sub-agent model tier (ADR-002):** Sub-agents declare `recommended_model: haiku` in their frontmatter. Invoke them at the cheaper model tier when the tool supports per-invocation model override. You (the codegen-agent) retain the full model for orchestration, synthesis, and cross-requirement coherence.
+
+**Escalation format** (after 3 failed red→green attempts on one requirement):
+```
+TDD LOOP BLOCKED — human intervention required
+
+Requirement: {req-id} ({slug})
+Test file: {path}
+Attempts: 3/3 exhausted
+
+Attempt summary:
+  1. {what implementer tried} → {why still RED}
+  2. {what implementer tried} → {why still RED}
+  3. {what implementer tried} → {why still RED}
+
+Root cause assessment: {test assumption wrong | implementation approach invalid | requirement ambiguous}
+Recommended action: {what the human should do}
+```
+
+**Write to disk after each sub-agent.** Do not accumulate implementation in memory across requirements.
 
 **Code quality:**
 - Follow the standards in [Code Quality Standards](../standards/code-quality-standards.md). These are non-negotiable.
@@ -159,20 +198,27 @@ Between components, verify:
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-codegen-agent"`, `phase: "codegen"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "codegen" }
-```
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
-**`phase_end`** — at task exit:
 ```json
-{ "phase_name": "codegen", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-codegen-agent",
+  "phase": "codegen",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
 ```
 
 **`deviation`** — when implementation diverges from the confirmed design:

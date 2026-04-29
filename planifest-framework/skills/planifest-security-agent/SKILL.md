@@ -3,6 +3,8 @@ name: planifest-security-agent
 description: Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5.
 bundle_templates: [security-report.template.md]
 bundle_standards: []
+hooks:
+  phase: security
 ---
 
 # Planifest - security-agent
@@ -116,20 +118,27 @@ If you identify a critical vulnerability that is trivially fixable (e.g., a hard
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-security-agent"`, `phase: "security"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "security" }
-```
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
-**`phase_end`** — at task exit:
 ```json
-{ "phase_name": "security", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-security-agent",
+  "phase": "security",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
 ```
 
 **`security_finding`** — for each vulnerability or risk identified:
@@ -141,6 +150,16 @@ Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-security-agent"
 **`deviation`** — if output diverges from the confirmed design (non-security divergence):
 ```json
 { "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+```
+
+**`self_correction`** — when retrying a failed check or analysis:
+```json
+{ "phase_name": "security", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
+```
+
+**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+```json
+{ "phase_name": "security", "action_id": "<action>", "attempt_count": 5 }
 ```
 
 ---

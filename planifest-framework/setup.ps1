@@ -13,6 +13,20 @@
     .\planifest-framework\setup.ps1 all
 #>
 
+# Skill subcommands — delegate to skill-sync.ps1 and exit immediately (TD-006, REQ-024)
+$_skillSubcmds = @('add-skill','remove-skill','preserve-skill','unpreserve-skill')
+if ($args.Count -ge 1 -and $args[0] -in $_skillSubcmds) {
+    $syncOp     = $args[0] -replace '-skill$',''   # add-skill→add, preserve-skill→preserve
+    $syncScript = Join-Path $PSScriptRoot 'scripts\skill-sync.ps1'
+    if (-not (Test-Path $syncScript)) {
+        Write-Host "Error: skill-sync.ps1 not found. Re-run setup.ps1 first."
+        exit 1
+    }
+    $restArgs = if ($args.Count -gt 1) { $args[1..($args.Count - 1)] } else { @() }
+    & $syncScript -Operation $syncOp @restArgs
+    exit $LASTEXITCODE
+}
+
 # Manual arg parsing — supports --flag style for cross-platform consistency
 $Tool = $null
 $ContextModeMcp = $false
@@ -333,6 +347,97 @@ function Install-TelemetryHooks {
     }
 
     Merge-TelemetryHookSettings -SettingsPath $settings -HooksDir $HooksDirRel -BackendUrl $BackendUrl
+}
+
+function Merge-EnforcementHookSettings {
+    # Merge gate-write (PreToolUse) and check-design (UserPromptSubmit) into settings.json.
+    # Idempotent: removes existing entries before re-adding.
+    param(
+        [string]$SettingsPath,
+        [string]$HooksDir
+    )
+
+    $preToolEntry = @{
+        matcher = 'Write|Edit'
+        hooks   = @(@{ type = 'command'; command = "node $HooksDir/gate-write.mjs" })
+    }
+    $userPromptEntry = @{
+        matcher = '.*'
+        hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-design.mjs" })
+    }
+
+    if (Test-Path $SettingsPath) {
+        $existing = Get-Content -Raw -Path $SettingsPath | ConvertFrom-Json
+
+        if (-not $existing.hooks) {
+            $existing | Add-Member -NotePropertyName 'hooks' -NotePropertyValue ([PSCustomObject]@{}) -Force
+        }
+
+        # Merge PreToolUse — remove stale gate-write entry, append fresh one
+        if (-not $existing.hooks.PreToolUse) {
+            $existing.hooks | Add-Member -NotePropertyName 'PreToolUse' -NotePropertyValue @() -Force
+        }
+        $filtered = @($existing.hooks.PreToolUse | Where-Object {
+            -not ($_.hooks | Where-Object { $_.command -match 'gate-write' })
+        })
+        $existing.hooks.PreToolUse = $filtered + $preToolEntry
+
+        # Merge UserPromptSubmit — remove stale check-design entry, append fresh one
+        if (-not $existing.hooks.UserPromptSubmit) {
+            $existing.hooks | Add-Member -NotePropertyName 'UserPromptSubmit' -NotePropertyValue @() -Force
+        }
+        $filtered = @($existing.hooks.UserPromptSubmit | Where-Object {
+            -not ($_.hooks | Where-Object { $_.command -match 'check-design' })
+        })
+        $existing.hooks.UserPromptSubmit = $filtered + $userPromptEntry
+
+        $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  ~ .claude/settings.json (enforcement hook entries merged)"
+    }
+    else {
+        $dir = Split-Path -Parent $SettingsPath
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+
+        $settings = [PSCustomObject]@{
+            hooks = [PSCustomObject]@{
+                PreToolUse       = @($preToolEntry)
+                UserPromptSubmit = @($userPromptEntry)
+            }
+        }
+        $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  + .claude/settings.json (created with enforcement hook entries)"
+    }
+}
+
+function Install-EnforcementHooks {
+    # Copy gate-write.mjs + check-design.mjs and wire settings.json. Always runs — no flag required.
+    param(
+        [string]$HooksSrcRel,
+        [string]$HooksDirRel,
+        [string]$SettingsRel
+    )
+
+    $src      = Join-Path $ScriptDir $HooksSrcRel
+    $dest     = Join-Path $ProjectRoot $HooksDirRel
+    $settings = Join-Path $ProjectRoot $SettingsRel
+
+    if (-not (Test-Path $src)) {
+        Write-Host "  ! Warning: enforcement hook scripts not found at $src — skipping"
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  Installing Planifest enforcement hooks"
+
+    New-Item -ItemType Directory -Path $dest -Force | Out-Null
+
+    Get-ChildItem -Path $src -Filter '*.mjs' | ForEach-Object {
+        $destFile = Join-Path $dest $_.Name
+        Copy-Item -Path $_.FullName -Destination $destFile -Force
+        Write-Host "  + $HooksDirRel/$($_.Name)"
+    }
+
+    Merge-EnforcementHookSettings -SettingsPath $settings -HooksDir $HooksDirRel
 }
 
 function Invoke-PlanifestGuardrails {
@@ -684,6 +789,14 @@ function Invoke-PlanifestSetup {
         $agentsContentPath = Join-Path $ProjectRoot $toolConfig.AgentsTemplate
         $agentsContent = Get-Content -Raw -Path $agentsContentPath
         Write-PlanifestBootFile -RelPath $toolConfig.AgentsFile -Content $agentsContent
+    }
+
+    # Install Planifest enforcement hooks unconditionally (gate-write, check-design)
+    if ($toolConfig.EnforcementHooksSrc -and $toolConfig.EnforcementHooksDir -and $toolConfig.SettingsFile) {
+        Install-EnforcementHooks `
+            -HooksSrcRel $toolConfig.EnforcementHooksSrc `
+            -HooksDirRel $toolConfig.EnforcementHooksDir `
+            -SettingsRel $toolConfig.SettingsFile
     }
 
     # Install context-mode enforcement hooks if --context-mode-mcp flag is set (REQ-004)

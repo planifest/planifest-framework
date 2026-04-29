@@ -1,8 +1,10 @@
-﻿---
+---
 name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
 bundle_templates: [iteration-log.template.md, recommendations.template.md]
 bundle_standards: []
+hooks:
+  phase: docs
 ---
 
 # Planifest - docs-agent
@@ -147,20 +149,27 @@ If a capability skill exists for document generation formats needed by the featu
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-docs-agent"`, `phase: "docs"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "docs" }
-```
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
-**`phase_end`** — at task exit:
 ```json
-{ "phase_name": "docs", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-docs-agent",
+  "phase": "docs",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
 ```
 
 **`doc_gap`** — when documentation is missing or incomplete for a component:
@@ -171,6 +180,16 @@ Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-docs-agent"`, `
 **`deviation`** — if output diverges from the confirmed design:
 ```json
 { "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
+```
+
+**`self_correction`** — when retrying a failed documentation action:
+```json
+{ "phase_name": "docs", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
+```
+
+**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+```json
+{ "phase_name": "docs", "action_id": "<action>", "attempt_count": 5 }
 ```
 
 ---

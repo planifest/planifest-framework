@@ -1,8 +1,10 @@
-﻿---
+---
 name: planifest-adr-agent
 description: Produces Architecture Decision Records for each significant decision in the requirements. Invoked by the orchestrator during Phase 2.
 bundle_templates: [adr.template.md]
 bundle_standards: []
+hooks:
+  phase: adr
 ---
 
 # Planifest - adr-agent
@@ -82,20 +84,27 @@ Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-adr-agent"`, `phase: "adr"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "adr" }
-```
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
-**`phase_end`** — at task exit:
 ```json
-{ "phase_name": "adr", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-adr-agent",
+  "phase": "adr",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
 ```
 
 **`adr_decision`** — after each ADR is written to disk:

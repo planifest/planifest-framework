@@ -1,276 +1,81 @@
-# Design - 0000002-structured-telemetry-framework-integration
-
-**Status:** draft
-**Version:** 0.1.0
-
----
+# Design - 0000004-tdd-regression-test-quality
 
 ## Feature
-
-- **Problem:** Agent behaviour across pipeline phases is unobservable. No structured telemetry is emitted by framework skills. Deviations, spec gaps, self-corrections, and validation failures are invisible unless printed to the conversation.
-- **Adoption mode:** retrofit (existing setup scripts + skill files)
-- **Feature ID:** 0000002-structured-telemetry-framework-integration
-
----
+- Problem: Planifest pipelines generate code and tests together in P3, with no structured red-green-refactor discipline, no distinction between long-term regression tests and feature-specific tests, and no consolidated test report showing regression health across features.
+- Adoption mode: retrofit
+- Feature ID: 0000004-tdd-regression-test-quality
 
 ## Product Layer
-
-- User stories: 3
-  1. As an operator, I want to see when each pipeline phase starts and ends so I can identify bottlenecks.
-  2. As an operator, I want to capture spec gaps and deviations so I can audit framework quality over time.
-  3. As an operator, I want context pressure events captured automatically so I can correlate context usage with agent behaviour.
-- Acceptance criteria: 5
-  1. `--structured-telemetry-mcp` flag installs telemetry hooks in the project folder and wires them in `.claude/settings.json`.
-  2. Each agent skill emits `phase_start` and `phase_end` events at task boundaries when `emit_event` is available.
-  3. No event is emitted when `emit_event` tool is absent — agent proceeds silently.
-  4. Context pressure hook is installed only when both `--structured-telemetry-mcp` and `--context-mode-mcp` flags are active.
-  5. All emitted payloads match the server's strict schema (`additionalProperties: false`).
-- Constraints: No local file fallbacks. No auto-discovery. Tool presence checked before every emission.
-- Integrations: Structured Telemetry MCP Server (0008a) via stdio proxy → HTTP backend at `http://localhost:3741`
-
----
+- User stories confirmed: 3
+  1. As a pipeline operator, I want each requirement implemented via a red-green-refactor sub-loop so that code is always test-driven and never written before a failing test exists.
+  2. As a framework maintainer, I want a curated regression pack that survives feature archives so that core framework behaviour is protected long-term.
+  3. As a reviewer, I want a test report at ship time showing all tests run for the plan, the full regression pack state, and which tests were newly promoted to regression.
+- Acceptance criteria confirmed: see requirements (P1 output)
+- Constraints:
+  - Must not break existing pipelines — codegen-agent change is additive
+  - Regression pack must survive P7 archive unchanged
+  - Sub-agents must be model-efficient (cheaper model tier where task is narrow)
+- Integrations: planifest-codegen-agent (inner loop), planifest-ship-agent (report + regression confirmation)
 
 ## Architecture Layer
-
-- Latency target: < 5ms per `emit_event` call (async fire-and-forget in MCP transport)
-- Availability target: not applicable — telemetry is best-effort; failures are silent
-- Security: no credentials, no sensitive data. Hook reads context fill % only. No tool input is logged.
-- Data privacy: no regulated data
-- Cost boundary: not constrained
-
----
+- Latency target: not applicable (offline pipeline tooling)
+- Availability target: not applicable
+- Scalability target: sub-agent loop runs per-requirement; scales linearly with requirement count
+- Security: no external data; no credentials involved; same trust model as existing skills
+- Data privacy: no PII; no regulated data
+- Observability: test report is the primary observability artifact; regression manifest tracks promotion history
+- Cost boundary: sub-agent token cost must be minimised — see Engineering Layer risk mitigation
 
 ## Engineering Layer
-
-- Stack: PowerShell + bash (setup scripts) / Markdown (SKILL.md updates) / JavaScript ESM (hook script) / JSON (settings wiring)
+- Stack: bash, node.js (consistent with existing framework)
 - Components:
-  - **`setup-telemetry-flag`** — changes to `setup.sh` and `setup.ps1` adding `--structured-telemetry-mcp` flag and optional `--backend-url` override. Installs telemetry hooks into `.claude/hooks/telemetry/` and wires them in `.claude/settings.json` for the workspace. MCP server registration is handled by the 0008a deploy/setup scripts.
-  - **`skill-telemetry-sections`** — Telemetry sections added to 8 SKILL.md files: orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, change-agent, security-agent, docs-agent.
-  - **`context-pressure-hook`** — new `hooks/telemetry/context-pressure.mjs`. Installed to `.claude/hooks/telemetry/` and registered as `PostToolUse` in `settings.json` only when both flags are active.
-- Data ownership: no data owned — framework emits events only; DuckDB is owned by 0008a
-- Deployment: local only — scripts run at setup time; hook files copied to `.claude/hooks/telemetry/`
+  - `planifest-test-writer` — new skill; writes one failing test per requirement (red phase); narrow and focused
+  - `planifest-implementer` — new skill; writes minimum code to make the failing test pass (green phase); narrow and focused
+  - `planifest-refactor` — new skill; improves code quality while keeping all tests passing (refactor phase); narrow and focused
+  - `planifest-codegen-agent` (updated) — gains inner TDD loop protocol: for each requirement, orchestrates test-writer → implementer → refactor sub-agents; loads stack capability skill alongside each sub-agent
+  - `regression-pack` — new infrastructure: `planifest-framework/tests/regression/` directory, `regression-manifest.json` tracking promoted tests by feature and date, `promote-to-regression.sh` tooling
+  - `planifest-ship-agent` (updated) — gains regression confirmation step (presents agent-suggested candidates to human, records human decisions) and test report generation step before archiving
+  - `test-report` — new output artifact template; written to `plan/changelog/` at P7
+- Data ownership: regression-manifest.json owned by regression-pack component
+- Deployment: local framework tooling — no cloud deployment
+- API versioning: not applicable
 
----
+## Sub-Agent Model Tier (Risk Mitigation)
+The three TDD sub-agents (test-writer, implementer, refactor) have narrow, well-defined tasks. They SHOULD be invoked with a cheaper/faster model tier (e.g. claude-haiku) to minimise token cost per requirement loop. The orchestrating codegen-agent retains the full model for planning, synthesis, and sub-agent coordination. Model tier selection is an ADR.
 
-## Event Envelope
+Each new skill MUST include a `recommended_model` frontmatter field and note the rationale in its SKILL.md.
 
-Every event shares this envelope:
+## Scope
+- In:
+  - 3 new skill files: planifest-test-writer, planifest-implementer, planifest-refactor
+  - planifest-codegen-agent SKILL.md updated with TDD inner loop protocol
+  - planifest-ship-agent SKILL.md updated with regression confirmation + test report steps
+  - regression-pack infrastructure (directory, manifest, promotion script)
+  - test-report template and ship-time generation
+- Out:
+  - Retroactive promotion of tests from completed features (0000001–0000003)
+  - Changes to planifest-validate-agent, planifest-spec-agent, planifest-adr-agent
+  - TDD loop for non-bash/node stacks beyond what existing stack skills cover
+  - External CI/test reporting integrations
+- Deferred:
+  - ML-based automatic regression candidate scoring
+  - Cross-feature regression trend dashboard
+  - Regression flakiness detection
 
-| Field | Source |
-|---|---|
-| `schema_version` | Always `"1.0"` |
-| `event` | Specific event type |
-| `session_id` | context-mode session ID if available; otherwise `crypto.randomUUID()` per run |
-| `initiative_id` | Feature ID from `plan/current/design.md` header; omit if not in a pipeline run |
-| `phase` | Current pipeline phase name |
-| `agent` | Skill name |
-| `tool` | Agentic tool: `claude-code`, `cursor`, etc. |
-| `model` | Model identifier, e.g. `claude-sonnet-4-6` |
-| `mcp_mode` | `none` \| `workspace` \| `context` \| `workspace+context` — determined at session start |
-| `timestamp` | ISO 8601 at point of emission |
-| `model_config` | Optional. Free-form object for tool-specific model settings, e.g. `{ "effort": "high" }` or `{ "thinking": true, "budget_tokens": 10000 }`. Omit if not relevant. |
-| `data` | Typed payload per event schema |
+## Assumptions
+- Stack capability skills (e.g. webapp-testing) are available for the declared stack at P3 time — impact if wrong: sub-agents proceed without capability skill, quality degrades but pipeline does not block
+- Claude Code Agent tool supports model override per sub-agent invocation — impact if wrong: all sub-agents run at default model tier, cost mitigation not realised
+- Existing tests in planifest-framework/tests/ are not retroactively classified — impact if wrong: regression pack starts empty; operators manually seed it post-ship
 
-### `mcp_mode` determination
-
-| Active setup flags | `mcp_mode` value |
-|---|---|
-| Neither `--mcp-workspace` nor `--context-mode-mcp` | `"none"` |
-| `--mcp-workspace` only | `"workspace"` |
-| `--context-mode-mcp` only | `"context"` |
-| Both | `"workspace+context"` |
-
----
-
-## Skill Telemetry Sections
-
-### planifest-orchestrator
-
-**phase_start** — emit before delegating to any phase skill:
-```json
-{ "phase_name": "<current phase name>" }
-```
-
-**phase_end** — emit after each phase skill returns:
-```json
-{ "phase_name": "<phase>", "status": "pass" | "fail", "duration_ms": <elapsed> }
-```
-
-**phase_skip** — emit when a phase is determined unnecessary and bypassed:
-```json
-{ "phase_name": "<skipped phase>", "reason": "<why it was skipped>" }
-```
-
-**spec_gap** — emit when human clarification is required before proceeding:
-```json
-{ "question": "<the question being asked>", "phase_name": "<current phase>" }
-```
-
-**mcp_impact** — emit once at the end of a complete pipeline run, after the final `phase_end`:
-```json
-{ "mcp_mode": "<active mode>", "avg_token_delta": <number>, "peak_fill_pct": <number> }
-```
-Query with `{ "mode": "mcp_impact" }` to compare token impact across MCP configurations. `group_by: "mcp_mode"` on bottleneck queries will also work once BUG-001 in 0008c is deployed.
-
----
-
-### planifest-spec-agent
-
-**phase_start** at task entry. **phase_end** at task exit.
-
-**spec_gap** when the spec cannot proceed without human input:
-```json
-{ "question": "<blocking question>", "phase_name": "spec" }
-```
-
----
-
-### planifest-adr-agent
-
-**phase_start** at task entry. **phase_end** at task exit.
-
-**adr_decision** after each ADR is written:
-```json
-{ "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<the option selected>" }
-```
-
----
-
-### planifest-codegen-agent, planifest-change-agent
-
-**phase_start** / **phase_end** at task boundaries.
-
-**deviation** when implementation diverges from the confirmed design:
-```json
-{ "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }
-```
-
-**migration_proposal** when a schema change is required (before writing the proposal file):
-```json
-{ "component_id": "<component>", "proposal_path": "src/<id>/docs/migrations/proposed-<desc>.md", "destructive": true | false }
-```
-
-**self_correction** when retrying a failed action:
-```json
-{ "phase_name": "<phase>", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
-```
-
-**retry_limit_exceeded** when the 5-attempt escalation ceiling is hit:
-```json
-{ "phase_name": "<phase>", "action_id": "<action>", "attempt_count": 5 }
-```
-
----
-
-### planifest-validate-agent
-
-**phase_start** / **phase_end** at task boundaries.
-
-**validation_failure** for each test or check failure:
-```json
-{ "failure_type": "<test|lint|type|build>", "phase_name": "validate", "attempt_number": <n>, "action_id": "<test suite or check name>" }
-```
-
-**self_correction** when retrying after a failure:
-```json
-{ "phase_name": "validate", "attempt_number": <n>, "action_id": "<action>", "correction_type": "fix_and_retry" }
-```
-
-**retry_limit_exceeded** when the 5-attempt escalation ceiling is hit:
-```json
-{ "phase_name": "validate", "action_id": "<action>", "attempt_count": 5 }
-```
-
----
-
-### planifest-security-agent
-
-**phase_start** / **phase_end** at task boundaries.
-
-**security_finding** for each vulnerability or risk identified:
-```json
-{ "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN — optional>" }
-```
-
-**deviation** if the output diverges from the confirmed design (non-security):
-```json
-{ "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
-```
-
----
-
-### planifest-docs-agent
-
-**phase_start** / **phase_end** at task boundaries.
-
-**doc_gap** when documentation is missing or incomplete for a component:
-```json
-{ "component_id": "<component>", "description": "<what is missing>" }
-```
-
-**deviation** if the output diverges from the confirmed design:
-```json
-{ "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
-```
-
----
-
-## Context Pressure Hook
-
-When both `--structured-telemetry-mcp` and `--context-mode-mcp` are active, setup installs a `PostToolUse` hook that reads the current context fill % after each tool call and emits `context_pressure` if it exceeds 70% (default threshold).
-
-```json
-{
-  "event": "context_pressure",
-  "data": {
-    "context_fill_pct": 78.5,
-    "unused_sources": ["design.md", "ADR-003"],
-    "trigger": "threshold_exceeded"
-  }
-}
-```
-
-Installed at: `.claude/hooks/telemetry/context-pressure.mjs`
-Registered in: `.claude/settings.json` as `PostToolUse`
-
----
-
-## Files Changed
-
-| File | Change |
-|---|---|
-| `planifest-framework/setup.sh` | Add `--structured-telemetry-mcp` flag; write sentinel; install hooks |
-| `planifest-framework/setup.ps1` | Same (PowerShell) |
-| `.claude/telemetry-enabled` | Sentinel written by setup; skills gate on this + `emit_event` presence |
-| `planifest-framework/hooks/telemetry/context-pressure.mjs` | New hook |
-| `skills/planifest-orchestrator/SKILL.md` | Add Telemetry section |
-| `skills/planifest-spec-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-adr-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-codegen-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-validate-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-change-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-security-agent/SKILL.md` | Add Telemetry section |
-| `skills/planifest-docs-agent/SKILL.md` | Add Telemetry section |
-
----
-
-## Resolved Questions
-
-1. **Auto-discovery:** The setup script does not auto-discover a running server. The `--structured-telemetry-mcp` flag is always required. ✅
-2. **Schema bundling:** The framework does not bundle a local copy of the schema. Validation is performed exclusively by the MCP server at ingestion time. ✅
-3. **MCP config format:** `command + args` (stdio proxy → HTTP backend). Not SSE URL. Works identically across Claude Code, Claude Desktop, and Cursor. ✅
-4. **New event types (`phase_skip`, `security_finding`, `retry_limit_exceeded`, `adr_decision`, `doc_gap`):** Not yet in the 0008a server schema. 0008c must be implemented and deployed before these events can be emitted. ✅ (tracked in `docs/0008c`)
-5. **`mcp_impact` and `model_config`:** Both are fully implemented and documented in the 0008a MCP repo. They were absent from 0008b — now corrected in this design. ✅
-
----
+## Risks
+- R-001: Sub-agent token cost — 3 sub-agents × N requirements may multiply context cost significantly. Mitigation: cheaper model tier for sub-agents; narrow skill prompts; capability skill loaded only when declared in stack.
+- R-002: Regression pack staleness — promoted tests may break as framework evolves. Mitigation: regression pack runs in full on every P4; failures block P7.
+- R-003: Sub-agent coordination failure — test-writer writes a test the implementer cannot satisfy. Mitigation: codegen-agent detects red→green failure after 3 attempts and escalates to human.
 
 ## Dependencies
-
-- Upstream: 0008a Structured Telemetry MCP Server (backend must be running before setup)
-- Upstream: **0008c** Structured Telemetry MCP Changes — new event types (`phase_skip`, `security_finding`, `retry_limit_exceeded`, `adr_decision`, `doc_gap`) require 0008c schema additions before they can be emitted
-- Upstream: 0006c context-mode MCP (required only for automated `context_pressure` events)
-- Downstream: none
+- Upstream: planifest-codegen-agent (reads), planifest-ship-agent (reads)
+- Downstream: test-report artifact (consumed by human reviewer)
 
 ## Confirmation
-
 Human confirmed this design before proceeding: yes
+Date confirmed: 2026-04-25

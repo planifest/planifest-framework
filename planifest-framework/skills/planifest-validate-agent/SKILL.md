@@ -1,8 +1,10 @@
-﻿---
+---
 name: planifest-validate-agent
 description: Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.
 bundle_templates: []
 bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-standards.md, database-standards.md]
+hooks:
+  phase: validate
 ---
 
 # Planifest - validate-agent
@@ -114,20 +116,27 @@ If a capability skill exists for the declared testing framework (e.g. `webapp-te
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-validate-agent"`, `phase: "validate"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "validate" }
-```
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
-**`phase_end`** — at task exit:
 ```json
-{ "phase_name": "validate", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-validate-agent",
+  "phase": "validate",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
 ```
 
 **`validation_failure`** — for each test or check failure:

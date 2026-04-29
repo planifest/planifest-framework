@@ -1,6 +1,6 @@
-﻿---
+---
 name: planifest-change-agent
-description: Handles modifications to existing features - loads domain context, implements the minimum change, validates, and updates documentation.
+description: Handles targeted modifications to existing features — loads domain context, implements the minimum change, validates, and updates documentation. Invoked via the Change Pipeline route.
 bundle_templates: [component.template.yml, change-summary.template.md]
 bundle_standards: [code-quality-standards.md]
 ---
@@ -114,6 +114,7 @@ Update every artifact affected by the change:
 
 Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md` as the audit trail for this change.
 
+
 ---
 
 ## New Component Handoff
@@ -160,20 +161,27 @@ If a relevant capability skill exists for the technology being modified (e.g. `f
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
+**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
 1. `emit_event` tool is present in this session.
 2. `.claude/telemetry-enabled` exists in the project root.
 
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-change-agent"`, `phase: "change"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
+**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
 
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "change" }
-```
+Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
 
-**`phase_end`** — at task exit:
 ```json
-{ "phase_name": "change", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
+{
+  "schema_version": "1.0",
+  "event": "<event_name>",
+  "agent": "planifest-change-agent",
+  "phase": "change",
+  "tool": "<tool e.g. claude-code>",
+  "model": "<active model id>",
+  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
+  "session_id": "<session id>",
+  "timestamp": "<ISO 8601 UTC>",
+  "data": { }
+}
 ```
 
 **`deviation`** — when implementation diverges from the confirmed design:
