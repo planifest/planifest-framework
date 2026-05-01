@@ -18,7 +18,8 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REGRESSION_DIR="$SCRIPT_DIR/../tests/regression"
+# Allow override for testing — defaults to canonical location relative to script
+REGRESSION_DIR="${PLANIFEST_REGRESSION_DIR:-$SCRIPT_DIR/../tests/regression}"
 MANIFEST="$REGRESSION_DIR/regression-manifest.json"
 
 die() { echo "ERROR: $*" >&2; exit 1; }
@@ -41,18 +42,19 @@ esac
 [ -f "$MANIFEST" ] || die "Manifest not found: $MANIFEST"
 
 # ── Idempotency check ─────────────────────────────────────────────────────────
+# cd into REGRESSION_DIR so node.js uses relative paths — avoids POSIX/Windows
+# path translation issues on Windows hosts.
 
 BASENAME="$(basename "$TEST_FILE")"
 DEST="$REGRESSION_DIR/$BASENAME"
 
-# Check if this test name is already in the manifest
 ALREADY_PROMOTED=false
-if node -e "
+if ( cd "$REGRESSION_DIR" && PLANIFEST_BASENAME="$BASENAME" node -e "
 const fs = require('fs');
-const m = JSON.parse(fs.readFileSync('$MANIFEST', 'utf8'));
-const found = (m.tests || []).some(t => t.name === '$BASENAME');
+const m = JSON.parse(fs.readFileSync('regression-manifest.json', 'utf8'));
+const found = (m.tests || []).some(t => t.name === process.env.PLANIFEST_BASENAME);
 process.exit(found ? 0 : 1);
-" 2>/dev/null; then
+" 2>/dev/null ); then
   ALREADY_PROMOTED=true
 fi
 
@@ -71,20 +73,26 @@ echo "  copied: $BASENAME → tests/regression/"
 PROMOTION_DATE="$(date +%Y-%m-%d)"
 RELATIVE_PATH="tests/regression/$BASENAME"
 
-node -e "
+( cd "$REGRESSION_DIR" && \
+  PLANIFEST_BASENAME="$BASENAME" \
+  PLANIFEST_SOURCE_FEATURE="$SOURCE_FEATURE" \
+  PLANIFEST_PROMOTION_DATE="$PROMOTION_DATE" \
+  PLANIFEST_PROMOTED_BY="$PROMOTED_BY" \
+  PLANIFEST_FILE_PATH="$RELATIVE_PATH" \
+  node -e "
 const fs = require('fs');
-const manifestPath = '$MANIFEST';
-const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const e = process.env;
+const manifest = JSON.parse(fs.readFileSync('regression-manifest.json', 'utf8'));
 if (!Array.isArray(manifest.tests)) { manifest.tests = []; }
 manifest.tests.push({
-  name: '$BASENAME',
-  sourceFeature: '$SOURCE_FEATURE',
-  promotionDate: '$PROMOTION_DATE',
-  promotedBy: '$PROMOTED_BY',
-  filePath: '$RELATIVE_PATH'
+  name: e.PLANIFEST_BASENAME,
+  sourceFeature: e.PLANIFEST_SOURCE_FEATURE,
+  promotionDate: e.PLANIFEST_PROMOTION_DATE,
+  promotedBy: e.PLANIFEST_PROMOTED_BY,
+  filePath: e.PLANIFEST_FILE_PATH
 });
-fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
-" || die "Failed to update regression manifest"
+fs.writeFileSync('regression-manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+" ) || die "Failed to update regression manifest"
 
 echo "  manifest updated: $BASENAME promoted by $PROMOTED_BY from $SOURCE_FEATURE on $PROMOTION_DATE"
 echo "Promotion complete: $BASENAME"
