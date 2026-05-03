@@ -58,7 +58,7 @@ Do not exhaust token limits by loading all files. Read top-down selectively:
    - **Shared type consumer** - imports types from the affected component's shared package
 3. Determine impact level per dependent component:
    - **Direct** - the change modifies an interface, schema, or type that this component uses
-   - **Indirect** - the change modifies internal behavior but the interface is unchanged
+   - **Indirect** - the change modifies internal behaviour but the interface is unchanged
    - **None** - no coupling to the changed surface area
 4. Only components with **Direct** impact require contract test updates and consumer notification
 5. Record the full blast radius in the Change Summary (Phase 2 output header)

@@ -745,6 +745,60 @@ getting-started.md
     }
 }
 
+function Sync-OverrideSkills {
+    # Scans planifest-overrides/capability-skills/ and rebuilds external-skills.json.
+    # No-op if planifest-overrides/ does not exist (ADR-002).
+    $overridesDir = Join-Path $ProjectRoot 'planifest-overrides'
+    $capSkillsDir = Join-Path $overridesDir 'capability-skills'
+    $externalJson = Join-Path $ScriptDir 'external-skills.json'
+
+    if (-not (Test-Path $capSkillsDir)) {
+        # No overrides directory — ensure external-skills.json is empty object
+        if (-not (Test-Path $externalJson)) {
+            Set-Content -Path $externalJson -Value '{}' -Encoding UTF8
+        }
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  Syncing capability skills from planifest-overrides/"
+
+    $skills = @()
+    Get-ChildItem -Path $capSkillsDir -Directory | ForEach-Object {
+        $skillMd = Join-Path $_.FullName 'SKILL.md'
+        if (Test-Path $skillMd) {
+            $raw = Get-Content -Path $skillMd -Raw
+            $name = $_.Name
+            if ($raw -match '(?m)^name:\s*(.+)$') { $name = $Matches[1].Trim() }
+            $skills += [PSCustomObject]@{
+                name  = $name
+                path  = "planifest-overrides/capability-skills/$($_.Name)"
+                scope = 'permanent'
+            }
+            Write-Host "  + capability-skill: $name"
+        }
+    }
+
+    $payload = [PSCustomObject]@{ skills = $skills }
+    $payload | ConvertTo-Json -Depth 5 | Set-Content -Path $externalJson -Encoding UTF8
+    Write-Host "  ~ external-skills.json updated ($($skills.Count) skill(s))"
+}
+
+function Install-CopilotAdapter {
+    # Copies the Copilot agent hooks adapter to .github/hooks/ (REQ-009).
+    $adapterSrc = Join-Path $ScriptDir 'hooks\adapters\copilot.mjs'
+    if (-not (Test-Path $adapterSrc)) {
+        Write-Host "  ! Warning: Copilot adapter not found at $adapterSrc — skipping"
+        return
+    }
+
+    $hooksDir = Join-Path $ProjectRoot '.github\hooks'
+    New-Item -ItemType Directory -Path $hooksDir -Force | Out-Null
+    $dest = Join-Path $hooksDir 'copilot.mjs'
+    Copy-Item -Path $adapterSrc -Destination $dest -Force
+    Write-Host "  + .github/hooks/copilot.mjs"
+}
+
 function Invoke-PlanifestSetup {
     param($ToolName)
 
@@ -830,6 +884,13 @@ function Invoke-PlanifestSetup {
             -BackendUrl   $BackendUrl
     }
 
+    # Install Copilot adapter when tool is copilot (REQ-009)
+    if ($ToolName -eq 'copilot') {
+        Write-Host ""
+        Write-Host "  Installing Copilot agent hooks adapter"
+        Install-CopilotAdapter
+    }
+
     Write-Host "  Done."
 }
 
@@ -865,6 +926,7 @@ Write-Host "Planifest Setup"
 Write-Host ("=" * 40)
 
 Initialize-PlanifestRepo
+Sync-OverrideSkills
 Invoke-PlanifestGuardrails
 
 $ToolLower = $Tool.ToLower()

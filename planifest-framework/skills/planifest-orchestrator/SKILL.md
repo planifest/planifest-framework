@@ -2,7 +2,7 @@
 name: planifest-orchestrator
 description: Guides a human from an initial idea to a complete set of requirements, then executes the confirmed design pipeline to build it. Use this for new features or full pipeline runs.
 bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.yml, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md]
-bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md]
+bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md, formatting-standards.md, library-standards/_version-policy.md]
 hooks:
   phase: orchestrator
 ---
@@ -68,11 +68,12 @@ Standard formats:
 
 On every session start, before taking any action:
 
-1. Check `plan/current/` for existing artefacts (`design.md`, `requirements/`, `adr/`, etc.)
-2. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
-3. Check for `.skips` file — if present, read and acknowledge skipped phases at the top of your response
-4. If artefacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
-5. If no artefacts: open with `P0:` and begin coaching
+1. **Scan for pending migrations** — check `planifest-framework/migrations/` for any `.md` files not in `_done/`. If found, invoke the `planifest-migrator` skill for each pending migration before any other phase work. Migrations take priority.
+2. Check `plan/current/` for existing artefacts (`design.md`, `requirements/`, `adr/`, etc.)
+3. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
+4. Check for `.skips` file — if present, read and acknowledge skipped phases at the top of your response
+5. If artefacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
+6. If no artefacts: open with `P0:` and begin coaching
 
 ---
 
@@ -295,9 +296,40 @@ Coach the human through this. If the brief describes something bigger than "a fe
 
 The [Feature Brief Template](../templates/feature-brief.template.md) guides the human through this before they reach you.
 
+### Phase 0 Start Actions
+
+At the very start of Phase 0 (before coaching begins), perform these actions in order:
+
+1. **Write the sentinel** — write `plan/.orchestrator-active` containing the feature-id (or `pending` if the feature-id is not yet known). This unlocks `plan/current/` writes for the duration of the pipeline run. Update the file with the confirmed feature-id once it is known.
+
+2. **Load repo instructions** — check `planifest-overrides/instructions/` (if the directory exists). Read all `.md` files. Write their contents to `plan/current/design.md` under `## Repo Instructions` once design.md is created. If the directory is absent or empty, write `## Repo Instructions: None`.
+
+3. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skill Intake protocol below before proceeding.
+
+Repeat the skills inbox check at the start of every phase transition (P0→P1, P1→P2, etc.).
+
+---
+
+### Capability Skill Intake
+
+When a SKILL.md file is detected in `planifest-framework/skills-inbox/`:
+
+1. Read its frontmatter — extract `name` and `description`
+2. Summarise what the skill does in one sentence
+3. Ask the human: `Use for this plan only, or add permanently for all future plans? (plan / permanent)`
+4. After the human answers:
+   - **plan**: move to `plan/current/capability-skills/{name}/`; update `plan/current/external-skills.json`
+   - **permanent**: move to `planifest-overrides/capability-skills/{name}/`; update `planifest-framework/external-skills.json`
+5. Clear the skill from `planifest-framework/skills-inbox/`
+6. Update `## Active Skills` in `plan/current/design.md`
+
+If the human defers, leave the skill in the inbox and re-present at the next phase transition.
+
+---
+
 ### What you produce at the end of Phase 0
 
-The **confirmed design** - the plan for what will be built and the manifest of what it builds against. This is the contract between you and the human before you begin building.
+The **confirmed design** — the plan for what will be built and the manifest of what it builds against. This is the contract between you and the human before you begin building.
 
 Write this to `plan/current/design.md`:
 
@@ -347,9 +379,15 @@ Write this to `plan/current/design.md`:
 - Upstream: {list}
 - Downstream: {list}
 
+## Active Skills
+{List of capability skills available for this run, or "None"}
+
+## Repo Instructions
+{Contents of planifest-overrides/instructions/ files, or "None"}
+
 ## Confirmation
 Human confirmed this design before proceeding: yes / no
-Date confirmed: {ISO-8601}
+Date confirmed: {DD MMM YYYY}
 ```
 
 **Field mutability:** After human confirmation, the confirmed design is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `Date confirmed` field records when the contract was locked.

@@ -50,6 +50,18 @@ try {
   const input = JSON.parse(raw);
   const cwd = input?.cwd ?? process.cwd();
 
+  // Hard STOP when no feature-brief and no orchestrator sentinel (REQ-008, ADR-003)
+  const featureBriefPath = join(cwd, "plan", "current", "feature-brief.md");
+  const sentinelPath = join(cwd, "plan", ".orchestrator-active");
+  if (!existsSync(featureBriefPath) && !existsSync(sentinelPath)) {
+    const additionalContext =
+      "[Planifest] STOP — No feature brief and no orchestrator sentinel detected. " +
+      "Before writing any code or plan artefacts, load the planifest-orchestrator " +
+      "skill and complete Phase 0 (Assess & Coach).";
+    process.stdout.write(JSON.stringify({ additionalContext }));
+    process.exit(0);
+  }
+
   const designPath = join(cwd, "plan", "current", "design.md");
   if (!existsSync(designPath)) process.exit(0);
 

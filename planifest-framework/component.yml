@@ -1,0 +1,108 @@
+id: "planifest-framework"
+name: "Planifest Framework"
+feature: "0000005-framework-governance"
+version: "0.5.0"
+status: "active"
+type: "component-pack"
+domain: "developer-tooling"
+summary: "Core standards, skills, hooks, and setup scripts that enforce the Planifest confirmed-design pipeline."
+systemContext: "Installed into any AI-assisted project via setup.ps1/setup.sh. Provides enforcement hooks, structured standards, and agent skills consumed by Claude Code, Cursor, Windsurf, and GitHub Copilot."
+
+responsibilities:
+  - "Enforce confirmed-design gate: block writes outside declared component scope"
+  - "Inject active scope context on every agent turn via check-design hook"
+  - "Emit structured telemetry for context pressure and pipeline phase events"
+  - "Declare preferred and avoided libraries per language via library-standards docs"
+  - "Provide formatting standards: date format (DD MMM YYYY), locale (British English), verbosity"
+  - "Supply migration files for propagating standards changes across existing repos"
+  - "Register and sync capability skills from planifest-overrides/"
+
+exceptions:
+  - "Does not write to planifest-overrides/ — that directory is user-owned"
+  - "Does not store or transmit credentials"
+  - "Does not modify application source code directly"
+
+stack:
+  language: "javascript"
+  runtime: "node"
+  framework: "none"
+  frontend: "none"
+  styling: "none"
+  componentLibrary: "none"
+  database: "none"
+  orm: "none"
+  testing: "bash (bespoke test harness)"
+  iac: "none"
+  cloud: "none"
+  compute: "none"
+  ci: "github-actions"
+
+contract:
+  inputs:
+    - name: "stdin (hook payload)"
+      type: "event"
+      description: "JSON hook payload from Claude Code / Copilot / Cursor lifecycle events"
+  outputs:
+    - name: "stdout (additionalContext or block message)"
+      type: "event"
+      description: "Gate-write block message or check-design scope injection"
+    - name: "PLANIFEST_TELEMETRY_URL /emit"
+      type: "http"
+      description: "context_pressure events posted to structured telemetry backend"
+  consumedBy: ["claude-code-hooks", "copilot-agent-hooks"]
+  consumes: []
+  breakingChangePolicy: "requires-adr"
+
+data:
+  ownsData: false
+  tables: []
+  schemaVersion: "0.0.0"
+  migrationPath: "planifest-framework/migrations/"
+
+scope:
+  inScope:
+    - "Library standards docs for TypeScript, Python, Go, Java, databases"
+    - "Formatting standards: date format, locale, verbosity"
+    - "gate-write and check-design enforcement hooks"
+    - "context-pressure telemetry hook"
+    - "GitHub Copilot adapter"
+    - "Orchestrator sentinel enforcement"
+    - "Capability skill intake via skills-inbox and external-skills.json"
+    - "Migration infrastructure for standards propagation"
+    - "setup.ps1 / setup.sh for tool registration"
+  outOfScope:
+    - "Application-level code generation (handled by planifest-codegen-agent)"
+    - "CI pipeline configuration for consumer projects"
+  deferred:
+    - "Windsurf native hook wiring (hooks API not yet stable)"
+    - "Roo-Code support (tool sunset 02 May 2026)"
+
+risk:
+  level: "low"
+  items:
+    - "Path translation on Windows/Git Bash requires cygpath guards in tests"
+    - "Telemetry backend URL is env-var controlled — misconfiguration sends events to wrong endpoint"
+
+quality:
+  testCoverage:
+    unit: 0
+    integration: 159
+    e2e: 0
+  techDebt: []
+  quirks:
+    - "context-pressure fill% is a proxy metric based on transcript file size, not actual token count"
+    - "gate-write component path matching is prefix-based; very short prefixes may over-permit"
+
+pipeline:
+  templateVersion: "1.0.0"
+  featureMode: "retrofit"
+  domainKnowledgePath: "plan/current"
+
+metadata:
+  createdAt: "2026-05-02"
+  updatedAt: "2026-05-02"
+  createdBy: "agent"
+  lastModifiedBy: "agent"
+  skill: "planifest-docs-agent"
+  tool: "claude-code"
+  model: "claude-sonnet-4-6"

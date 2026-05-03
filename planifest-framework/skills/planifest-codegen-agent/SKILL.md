@@ -2,7 +2,7 @@
 name: planifest-codegen-agent
 description: Generates the full implementation from the requirements set - application code, tests, infrastructure, configuration. Invoked during Phase 3.
 bundle_templates: [component.template.yml, data-contract.template.md]
-bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md]
+bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md, formatting-standards.md, library-standards/_version-policy.md]
 hooks:
   phase: codegen
 ---
@@ -89,6 +89,22 @@ Between components, verify:
 - Shared types are importable by the next component
 - API contracts match between producer and consumer
 - Data contracts are consistent across component boundaries
+
+---
+
+## Library Standards — Pre-Scaffold Check
+
+Before writing any dependency manifest (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `composer.json`, `pom.xml`, `build.gradle`, `pubspec.yaml`, or equivalent):
+
+1. Identify the declared stack language(s) from `plan/current/design.md`
+2. Check `planifest-overrides/library-standards/{language}/prefer-avoid.md` first (if `planifest-overrides/` exists)
+3. Fall back to `planifest-framework/standards/library-standards/{language}/prefer-avoid.md`
+4. Also check `planifest-framework/standards/library-standards/databases/prefer-avoid.md` if a database client is being added
+5. Cross-reference every dependency against the avoid list — substitute the preferred alternative for any match
+6. Follow `planifest-framework/standards/library-standards/_version-policy.md` for version pinning
+7. If an avoided library has no alternative for a specific requirement: record an exception in `src/{component-id}/docs/quirks.md` with justification and escalate — do not silently use the avoided library
+
+If `planifest-overrides/` does not exist or the language subdir is a stub (contains `TODO: populate`), skip the override check and use framework defaults. If the framework subdir is also a stub, skip the library audit for that language and proceed.
 
 ---
 

@@ -2,7 +2,7 @@
 name: planifest-ship-agent
 description: Phase 7 only — raises the PR, writes the changelog, handles skips, and archives plan/current/. Invoked by the orchestrator at the end of the feature pipeline.
 bundle_templates: [iteration-log.template.md]
-bundle_standards: []
+bundle_standards: [formatting-standards.md]
 hooks:
   phase: ship
 ---
@@ -71,10 +71,10 @@ Draft the PR description:
 
 ### Step 2 — Write changelog
 
-Write `plan/changelog/{feature-id}-{YYYY-MM-DD}.md` as the permanent audit trail:
+Write `plan/changelog/{feature-id}-{YYYY-MM-DD}.md` as the permanent audit trail (filename uses `YYYY-MM-DD`; body uses `DD MMM YYYY`):
 
 ```markdown
-# Changelog — {feature-id} — {YYYY-MM-DD}
+# Changelog — {feature-id} — {DD MMM YYYY}
 
 **Feature:** {feature name from brief}
 **Pipeline run:** {phases completed, phases skipped}
@@ -172,10 +172,11 @@ Before archiving, clean up plan-scoped skills that are ephemeral by design (ADR-
 
 1. Determine archive path: `plan/archive/{feature-id}-{YYYY-MM-DD}/`
 2. If path exists, use `{feature-id}-{YYYY-MM-DD}-2/`, `-3/`, etc.
-3. Recursively copy all files from `plan/current/` to the archive path
+3. Recursively copy all files from `plan/current/` to the archive path (including `capability-skills/` if present)
 4. Confirm the copy is complete before proceeding
-5. Delete `plan/current/` contents — including `.skips` (already processed), `.planifest-session`, `.feature-id`
+5. Delete `plan/current/` contents — including `.skips` (already processed), `.planifest-session`, `.feature-id`, `capability-skills/`
 6. Confirm `plan/current/` is empty
+7. Delete `plan/.orchestrator-active` — this sentinel must be removed last, after archive is confirmed complete
 
 ### Step 8 — Confirm to human
 

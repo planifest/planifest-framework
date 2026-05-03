@@ -92,9 +92,27 @@ try {
 
   // Resolve to a path relative to cwd for prefix matching
   const absTarget = resolve(cwd, rawTarget);
-  const relTarget = absTarget.startsWith(cwd)
-    ? absTarget.slice(cwd.length).replace(/^[/\\]/, "")
+  const cwdWithSep = cwd.endsWith("/") || cwd.endsWith("\\") ? cwd : cwd + "/";
+  const relTarget = absTarget.startsWith(cwdWithSep)
+    ? absTarget.slice(cwdWithSep.length)
     : rawTarget;
+
+  // Check 0 — sentinel enforcement for plan/current/** (REQ-007, ADR-003)
+  // plan/current/feature-brief.md is always writable so P0 can begin.
+  const normRel = norm(relTarget);
+  const isPlanCurrent = normRel.startsWith("plan/current/") || normRel === "plan/current";
+  const isFeatureBrief = normRel.endsWith("feature-brief.md");
+  if (isPlanCurrent && !isFeatureBrief) {
+    const sentinelPath = join(cwd, "plan", ".orchestrator-active");
+    if (!existsSync(sentinelPath)) {
+      process.stdout.write(
+        "[Planifest] No orchestrator sentinel at plan/.orchestrator-active. " +
+        "Load the planifest-orchestrator skill and complete Phase 0 before " +
+        "writing plan artefacts.\n"
+      );
+      process.exit(2);
+    }
+  }
 
   // Check 1 — always-permitted paths (ADR-004)
   if (isAlwaysPermitted(relTarget)) process.exit(0);

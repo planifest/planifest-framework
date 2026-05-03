@@ -496,8 +496,12 @@ activate_guardrails() {
   echo "  Activating Planifest Git Guardrails"
 
   # Point Git to the version-controlled hooks directory
-  git config core.hooksPath planifest-framework/hooks
-  echo "  + git config core.hooksPath planifest-framework/hooks"
+  # Degrade gracefully when not inside a git repository (e.g. test workspaces).
+  if git config core.hooksPath planifest-framework/hooks 2>/dev/null; then
+    echo "  + git config core.hooksPath planifest-framework/hooks"
+  else
+    echo "  ! Warning: not in a git repository — skipping core.hooksPath config"
+  fi
 
   # Ensure hook scripts are executable (critical for Unix systems)
   chmod +x "$SCRIPT_DIR/hooks/pre-commit"

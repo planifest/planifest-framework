@@ -2,7 +2,7 @@
 name: planifest-security-agent
 description: Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5.
 bundle_templates: [security-report.template.md]
-bundle_standards: []
+bundle_standards: [formatting-standards.md]
 hooks:
   phase: security
 ---

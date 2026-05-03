@@ -2,7 +2,7 @@
 name: planifest-validate-agent
 description: Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.
 bundle_templates: []
-bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-standards.md, database-standards.md]
+bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-standards.md, database-standards.md, formatting-standards.md, library-standards/_version-policy.md]
 hooks:
   phase: validate
 ---
@@ -36,6 +36,8 @@ hooks:
 > **Context-Mode Protocol:** When `ctx_execute` is available, run CI checks via `ctx_execute(language:"shell", code:"...")` so that large test/build output stays in the sandbox — only the failure summary enters context. Use `ctx_execute_file` to read failing source files for analysis without loading them into context.
 
 Run the project's CI checks in this strict order:
+
+0. **Library audit** — for the component's declared language, check `planifest-overrides/library-standards/{language}/prefer-avoid.md` (if exists) then `planifest-framework/standards/library-standards/{language}/prefer-avoid.md`. Scan the installed dependency manifest against the avoid list. If an avoided library is present: fail, name the library, name the preferred alternative, and report. Skip if the language subdir is a stub or absent.
 
 1. **Semantic Correctness** - Verify that every functional requirement from `plan/current/requirements/` has a mapped, executing test case identifiable by its req-ID. If logic exists without a covering test, semantic validation fails.
 2. **Lint** - code style and static analysis
