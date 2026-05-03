@@ -768,6 +768,45 @@ function Copy-CapabilitySkills {
     }
 }
 
+function Append-OverrideInstructions {
+    # Appends project-specific instructions from planifest-overrides/instructions/
+    # to the tool's boot file. Idempotent — strips and replaces the override block
+    # on every re-run so changes in planifest-overrides/ are always reflected.
+    param($BootFilePath)
+
+    $bootPath = Join-Path $ProjectRoot $BootFilePath
+    if (-not (Test-Path $bootPath)) { return }
+
+    $startMarker = '<!-- planifest-overrides:instructions:start -->'
+    $endMarker   = '<!-- planifest-overrides:instructions:end -->'
+
+    # Strip any existing override block from a previous run
+    $current = Get-Content -Path $bootPath -Raw
+    if ($current -match [regex]::Escape($startMarker)) {
+        $pattern = "(?s)\r?\n$([regex]::Escape($startMarker)).*?$([regex]::Escape($endMarker))\r?\n?"
+        $current = [regex]::Replace($current, $pattern, '')
+        Set-Content -Path $bootPath -Value $current.TrimEnd() -Encoding UTF8 -NoNewline
+    }
+
+    $instrDir = Join-Path $ProjectRoot 'planifest-overrides\instructions'
+    if (-not (Test-Path $instrDir)) { return }
+    $files = @(Get-ChildItem -Path $instrDir -File -Filter '*.md' | Sort-Object Name)
+    if ($files.Count -eq 0) { return }
+
+    Write-Host ""
+    Write-Host "  Appending override instructions from planifest-overrides/instructions/"
+
+    $block = "`n`n$startMarker`n"
+    foreach ($file in $files) {
+        $block += "`n" + (Get-Content -Path $file.FullName -Raw).TrimEnd() + "`n"
+        Write-Host "  + $($file.Name)"
+    }
+    $block += "`n$endMarker"
+
+    Add-Content -Path $bootPath -Value $block -Encoding UTF8
+    Write-Host "  ~ $BootFilePath updated with override instructions"
+}
+
 function Install-CopilotAdapter {
     # Copies the Copilot agent hooks adapter to .github/hooks/ (REQ-009).
     $adapterSrc = Join-Path $ScriptDir 'hooks\adapters\copilot.mjs'
@@ -823,6 +862,11 @@ function Invoke-PlanifestSetup {
             $bootContent = Get-Content -Raw -Path $bootContentPath
         }
         Write-PlanifestBootFile -RelPath $toolConfig.BootFile -Content $bootContent
+    }
+
+    # Append project-specific instructions to boot file (idempotent on re-run)
+    if ($toolConfig.BootFile) {
+        Append-OverrideInstructions -BootFilePath $toolConfig.BootFile
     }
 
     # Install context-mode MCP routing rules if --context-mode-mcp flag is set

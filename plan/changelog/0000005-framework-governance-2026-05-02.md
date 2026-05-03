@@ -58,3 +58,9 @@
 ## Skipped Phases
 
 None
+
+## Follow-on Changes (post-ship, same branch)
+
+- **external-skills.json removed** — redundant registry with no readers; `setup.ps1` now copies capability skills from `planifest-overrides/capability-skills/` directly into the tool's skill directory
+- **planifest-overrides/instructions/ wired** — `Append-OverrideInstructions` in `setup.ps1` appends `.md` files from this directory to the boot file on every setup run (idempotent, marker-delimited)
+- **planifest-overrides documented** — `getting-started.md` and `tool-setup-reference.md` updated with docs for all three override subdirectories

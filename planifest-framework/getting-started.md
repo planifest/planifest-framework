@@ -242,6 +242,51 @@ The **planifest-change-agent** handles it - no need to re-run the full Feature P
 
 ---
 
+## Customising with planifest-overrides
+
+`planifest-overrides/` is your team's customisation layer. It sits next to `planifest-framework/` in the repo root, is never overwritten by setup scripts, and is committed to share with the team.
+
+### library-standards/
+
+Override the framework's library preferences per language. Create files with the same structure as `planifest-framework/standards/library-standards/{language}/prefer-avoid.md` or `test-frameworks.md`:
+
+```
+planifest-overrides/
+└── library-standards/
+    └── typescript/
+        └── prefer-avoid.md    ← replaces the framework default for this project
+```
+
+Agents check `planifest-overrides/library-standards/` first. If a file exists there for the language in use, it takes precedence over the framework default.
+
+### instructions/
+
+Add project-specific instructions that every agent on this project should follow — coding conventions, context about the codebase, team norms, anything that belongs in `CLAUDE.md` but is project-specific rather than framework-level.
+
+Create `.md` files in `planifest-overrides/instructions/`. Files are sorted alphabetically and appended to the boot file (e.g. `CLAUDE.md`) each time setup runs:
+
+```
+planifest-overrides/
+└── instructions/
+    └── 01-project-context.md
+    └── 02-naming-conventions.md
+```
+
+The block is idempotent — re-running setup replaces the previous override block rather than appending duplicates.
+
+### capability-skills/
+
+Add permanent agent skills for this project. Each skill is a directory containing a `SKILL.md` with standard frontmatter (`name`, `description`). Setup copies them into the tool's skill directory alongside the built-in Planifest skills:
+
+```
+planifest-overrides/
+└── capability-skills/
+    └── my-project-skill/
+        └── SKILL.md
+```
+
+---
+
 ## Updating the Framework
 
 After updating any files in `planifest-framework/` (skills, templates, standards):
