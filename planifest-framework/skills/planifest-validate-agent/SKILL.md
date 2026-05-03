@@ -116,6 +116,20 @@ If a capability skill exists for the declared testing framework (e.g. `webapp-te
 
 ---
 
+## Parallelism Directive
+
+Independent CI checks MUST be run in parallel. Where the tool supports multiple simultaneous Bash calls, lint, typecheck, and test MUST be dispatched in a single parallel batch — not sequentially.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| Lint + typecheck (no shared state) | Test before typecheck passes (type errors cause spurious test failures) |
+| Library audit + semantic correctness check | Build before tests pass |
+| Independent component test suites | Self-correct cycle N+1 before N's fix is verified |
+
+**In practice:** Dispatch lint and typecheck together. If both pass, dispatch the test suite. Run the build last. Never run lint → wait → typecheck → wait as a serial chain.
+
+---
+
 ## Telemetry
 
 **Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**

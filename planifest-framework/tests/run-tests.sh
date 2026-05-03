@@ -27,6 +27,7 @@ run_suite "$SCRIPT_DIR/test-context-pressure.sh"
 run_suite "$SCRIPT_DIR/test-skill-telemetry.sh"
 run_suite "$SCRIPT_DIR/test-regression-pack.sh"
 run_suite "$SCRIPT_DIR/test-0000005-framework-governance.sh"
+run_suite "$SCRIPT_DIR/test-0000006-build-assessment.sh"
 
 # ── Regression Suite ──────────────────────────────────────────────────────────
 

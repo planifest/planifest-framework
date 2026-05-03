@@ -116,6 +116,20 @@ If you identify a critical vulnerability that is trivially fixable (e.g., a hard
 
 ---
 
+## Parallelism Directive
+
+Independent security review scans MUST be run in parallel. Where the feature has multiple components with no cross-dependency in the security analysis, review them simultaneously.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| STRIDE threat modelling + dependency audit (independent analyses) | Auth review before the OpenAPI spec is read |
+| Multi-component security reviews (components do not share secrets or auth logic) | IaC review before the component's network policy is understood |
+| Secrets scan + input validation scan (independent grep patterns) | Summary risk rating before all section findings are complete |
+
+**In practice:** Run STRIDE, dependency audit, and secrets scan as a parallel batch. Synthesise findings into the report sections after all scans complete.
+
+---
+
 ## Telemetry
 
 **Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**

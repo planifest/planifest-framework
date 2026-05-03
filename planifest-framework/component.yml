@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000005-framework-governance"
-version: "0.5.0"
+feature: "0000006-build-assessment-phase"
+version: "0.6.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -16,6 +16,9 @@ responsibilities:
   - "Provide formatting standards: date format (DD MMM YYYY), locale (British English), verbosity"
   - "Supply migration files for propagating standards changes across existing repos"
   - "Register and sync capability skills from planifest-overrides/"
+  - "Maintain build log throughout pipeline run for P8 build assessment"
+  - "Direct model tier selection (primary vs cheaper) for all spawned subagents"
+  - "Enforce parallelism directives across all phase skills"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -67,9 +70,12 @@ scope:
     - "context-pressure telemetry hook"
     - "GitHub Copilot adapter"
     - "Orchestrator sentinel enforcement"
-    - "Capability skill intake via skills-inbox and external-skills.json"
+    - "Capability skill intake via planifest-overrides/capability-skills/"
     - "Migration infrastructure for standards propagation"
     - "setup.ps1 / setup.sh for tool registration"
+    - "P8 Build Assessment phase and planifest-build-assessment-agent skill"
+    - "build-log.template.md and build log maintenance across pipeline phases"
+    - "Model tier decision table and parallelism directives in all phase skills"
   outOfScope:
     - "Application-level code generation (handled by planifest-codegen-agent)"
     - "CI pipeline configuration for consumer projects"
@@ -86,7 +92,7 @@ risk:
 quality:
   testCoverage:
     unit: 0
-    integration: 159
+    integration: 215
     e2e: 0
   techDebt: []
   quirks:
@@ -100,7 +106,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-05-02"
+  updatedAt: "2026-05-03"
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-docs-agent"

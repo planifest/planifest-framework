@@ -53,6 +53,7 @@ Every response you produce **must** begin with the phase prefix below. This is n
 | `P5:` | Security |
 | `P6:` | Docs |
 | `P7:` | Ship |
+| `P8:` | Build Assessment |
 | `PC:` | Change Pipeline |
 
 Standard formats:
@@ -99,6 +100,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
 | Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
 | Begin Phase 7 (ship) | Load the `planifest-ship-agent` skill |
+| Begin Phase 8 (build assessment) | Load the `planifest-build-assessment-agent` skill |
 | Handle a change request | Load the `planifest-change-agent` skill |
 | Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
 
@@ -173,7 +175,7 @@ When starting a new session (no resume detected), open with this structured brie
 ```
 P0: Starting
 
-Pipeline phases: P0 Assess → P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Ship
+Pipeline phases: P0 Assess → P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Ship → P8 Build Assessment
 
 Tool detected: {tool name or "unknown — checking..."}
 Hooks status:
@@ -302,7 +304,9 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
 1. **Write the sentinel** — write `plan/.orchestrator-active` containing the feature-id (or `pending` if the feature-id is not yet known). This unlocks `plan/current/` writes for the duration of the pipeline run. Update the file with the confirmed feature-id once it is known.
 
-2. **Load repo instructions** — check `planifest-overrides/instructions/` (if the directory exists). Read all `.md` files. Write their contents to `plan/current/design.md` under `## Repo Instructions` once design.md is created. If the directory is absent or empty, write `## Repo Instructions: None`.
+2. **Create build log** — copy `planifest-framework/templates/build-log.template.md` to `plan/current/build-log.md`. Fill in the header fields: feature-id, start timestamp (ISO 8601 UTC), tool name, primary model name, cheaper model name. If `plan/current/build-log.md` already exists (resume), do not overwrite — append to it. At the start of every phase (P0–P8), append a new phase block to the build log before doing any phase work. Record: model tier used, skills loaded, agent count, MCP call count, parallel task batch count. At P7 after archiving, fill in the Summary table with totals.
+
+3. **Load repo instructions** — check `planifest-overrides/instructions/` (if the directory exists). Read all `.md` files. Write their contents to `plan/current/design.md` under `## Repo Instructions` once design.md is created. If the directory is absent or empty, write `## Repo Instructions: None`.
 
 3. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skill Intake protocol below before proceeding.
 
@@ -542,7 +546,87 @@ Invoke the **ship-agent** skill.
 
 **What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `.skips` processed and deleted, `plan/current/` archived to `plan/archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
 
-**Gate:** PR URL returned, archive path confirmed, changelog confirmed.
+**Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. Wait for the ship-agent to report `P8: Complete` before delivering final confirmation to the human.
+
+---
+
+## Phase 8 - Build Assessment
+
+**Before acting:** Load the `planifest-build-assessment-agent` skill now. This phase is invoked by the ship-agent, not directly by you — but you must be aware of it for build log maintenance and the final gate.
+
+The ship-agent invokes the build-assessment-agent after the archive is confirmed. You own the final human-facing confirmation once P8 reports complete.
+
+**Input:** `plan/archive/{feature-id}-{date}/build-log.md` (the archived build log)
+
+**What it produces:** `plan/archive/{feature-id}-{date}/build-report.md`
+
+**Gate:** Confirm the build report exists in the archive. Report the archive path and any efficiency observations to the human.
+
+---
+
+## Model Tier Decision Table
+
+**Consult this table before spawning every subagent.** Resolve the tier to a concrete model name for the active tool, then pass it explicitly.
+
+| Task type | Tier | Rationale |
+|-----------|------|-----------|
+| Codebase discovery (grep, find, ls, file listing) | Cheaper | No synthesis required |
+| Single-file read with no synthesis | Cheaper | Mechanical retrieval |
+| Formatting / spelling / lint checks | Cheaper | Pattern matching, no reasoning |
+| Validation (lint, typecheck, test runner) | Cheaper | Tool execution, not reasoning |
+| Web research — fetching a single known reference doc | Cheaper | Retrieval, minimal synthesis |
+| Documentation writing (no novel decisions) | Cheaper | Structured output from known inputs |
+| Web research with synthesis across multiple sources | Primary | Reasoning across conflicting sources |
+| Code generation | Primary | Multi-file reasoning, correctness required |
+| Security review | Primary | Adversarial reasoning, high-stakes |
+| Architecture decisions (ADR writing) | Primary | Consequential, requires judgement |
+| Requirements writing (spec) | Primary | Ambiguity resolution, domain reasoning |
+| Phase 0 coaching | Primary | Dialogue, gap assessment |
+| Build assessment (P8) | Cheaper | Read-only summarisation from a structured log |
+
+**Tier-to-model mapping by tool** (update when tools release new models):
+
+| Tool | Primary tier | Cheaper tier |
+|------|-------------|-------------|
+| Claude Code | claude-sonnet-4-6 (or latest Sonnet) | claude-haiku-4-5 (or latest Haiku) |
+| Cursor | gpt-4o | gpt-4o-mini |
+| Codex (OpenAI) | o1 | o1-mini |
+| GitHub Copilot | gpt-4o | gpt-4o-mini |
+| Windsurf | claude-sonnet-4-6 | claude-haiku-4-5 |
+| Cline | (inherits from host tool) | (inherits from host tool) |
+
+**How to apply:** Before calling `Agent(...)`, look up the task in the table. Pass `model: {resolved model name}` as a parameter. Record the tier in the build log for P8.
+
+---
+
+## Parallelism Rules
+
+**Default posture: parallel.** Sequential dispatch requires an explicit dependency justification. If you cannot state why task B must wait for task A's output, dispatch them in parallel.
+
+**Dependency test:** Can task B start before task A's output is available? If yes — dispatch in parallel (single message, multiple Agent tool calls).
+
+### MUST parallelise
+
+| Pattern | Example |
+|---------|---------|
+| Multiple independent codebase searches | Grepping for hook files + scanning skill dirs simultaneously |
+| Web research across independent tools/sources | Hook support for Windsurf + Hook support for Cline — same request, different sources |
+| Independent document reads | Reading 3 skill files that do not reference each other |
+| Background test runner while writing docs | Run `run-tests.sh` in background while docs-agent produces output |
+| Multi-component security reviews (no shared state) | Reviewing component A and component B in parallel |
+| Independent requirement files (no cross-references) | Writing req-001 through req-008 in a single parallel batch |
+
+### Cannot parallelise
+
+| Pattern | Reason |
+|---------|--------|
+| Phase N work before Phase N-1 artefacts exist | Hard phase dependency |
+| ADR writing before requirements are complete | ADR content depends on spec output |
+| Codegen before ADRs are accepted | ADRs may constrain implementation choices |
+| P8 before P7 archive is confirmed | Report needs the archive path |
+| Tasks where B reads A's output | Sequential by definition |
+
+**Record in build log:** After each phase, record the parallel task batch count. If it is 0 for a phase where parallelism was possible, the P8 efficiency observation will flag it.
 
 ---
 
@@ -626,7 +710,7 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 - [Component Manifest](../templates/component.template.yml) - codegen-agent output ([guide](../templates/component-guide.md))
 - [Iteration Log](../templates/iteration-log.template.md) - written at end of every Agentic Iteration Loop
 
-**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-change-agent`
+**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`
 
 ---
 

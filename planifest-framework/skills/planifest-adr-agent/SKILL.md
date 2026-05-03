@@ -82,6 +82,19 @@ Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
 ---
 
+## Parallelism Directive
+
+Independent ADRs MUST be written in parallel. Apply the dependency test: does ADR-B reference or depend on a decision in ADR-A? If no — write them in the same parallel batch.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| ADRs for stack choices that do not reference each other | ADR-B that says "given the decision in ADR-A, we choose..." |
+| ADRs for independent components (no shared decisions) | ADR for data ownership after component boundaries are settled |
+
+**In practice:** Assess all required ADRs upfront. Group independent ones and write them in a single parallel batch. Write cross-referencing ADRs sequentially after their dependencies.
+
+---
+
 ## Telemetry
 
 **Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**

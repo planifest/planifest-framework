@@ -115,6 +115,20 @@ When the confirmed design indicates `adoption_mode: retrofit`, read the existing
 
 ---
 
+## Parallelism Directive
+
+Independent spec artefacts MUST be written in parallel. Apply the dependency test: "Can I start writing artefact B before artefact A is complete?" If yes, dispatch in parallel.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| Requirement files for independent features | Requirements that reference each other |
+| Scope, Risk Register, and Domain Glossary (all independent) | Execution Plan summary before requirements are drafted |
+| Multiple component manifest drafts | Data contract before data ownership is confirmed |
+
+**In practice:** Write all independent requirement files in a single pass. Write scope, risk register, and glossary together in a single parallel batch.
+
+---
+
 ## Telemetry
 
 **Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**

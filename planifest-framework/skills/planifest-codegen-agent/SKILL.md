@@ -212,6 +212,21 @@ Recommended action: {what the human should do}
 
 ---
 
+## Parallelism Directive
+
+Independent implementation work MUST be parallelised. Components with no shared state or cross-dependencies MUST be generated in parallel.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| Independent component implementations (no imports between them) | Component B that imports types from Component A |
+| Test file and implementation file for a single component (write together in one pass, not sequentially) | Implementation before its ADRs are accepted |
+| TDD sub-agents for independent requirements (planifest-test-writer + planifest-implementer for req-001 while req-002 is being reviewed) | Next requirement before current RED→GREEN cycle completes |
+| Codebase discovery searches across different areas | Code that depends on shared type resolution |
+
+**In practice:** When implementing a multi-component feature, check the dependency graph. All leaf components (no dependencies on siblings) MUST be built in a single parallel batch before building components that depend on them.
+
+---
+
 ## Telemetry
 
 **Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**

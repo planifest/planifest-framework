@@ -178,7 +178,16 @@ Before archiving, clean up plan-scoped skills that are ephemeral by design (ADR-
 6. Confirm `plan/current/` is empty
 7. Delete `plan/.orchestrator-active` — this sentinel must be removed last, after archive is confirmed complete
 
-### Step 8 — Confirm to human
+### Step 8 — Invoke P8 Build Assessment
+
+**Before acting:** Load the `planifest-build-assessment-agent` skill now.
+
+1. Confirm the archive path from Step 7 exists
+2. Invoke the build-assessment-agent, passing the archive path: `plan/archive/{feature-id}-{YYYY-MM-DD}/`
+3. The build-assessment-agent reads `build-log.md` from the archive and writes `build-report.md` to the same directory
+4. Wait for `P8: Complete` before proceeding
+
+### Step 9 — Confirm to human
 
 ```
 P7: Ship complete.
@@ -186,6 +195,7 @@ P7: Ship complete.
 PR: {URL}
 Archive: plan/archive/{feature-id}-{YYYY-MM-DD}/
 Changelog: plan/changelog/{feature-id}-{YYYY-MM-DD}.md
+Build report: plan/archive/{feature-id}-{YYYY-MM-DD}/build-report.md
 {If skips: "Skipped phases recorded in changelog."}
 
 plan/current/ is empty and ready for the next feature.

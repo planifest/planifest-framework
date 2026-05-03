@@ -147,6 +147,20 @@ If a capability skill exists for document generation formats needed by the featu
 
 ---
 
+## Parallelism Directive
+
+Independent documentation artefacts MUST be written in parallel. Per-component docs for components that have no cross-references MUST be produced in a single parallel batch.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| Per-component docs for independent components (purpose, interface, risk, scope) | Dependency graph before all component dependency files exist |
+| Drift checks across independent areas (API endpoints, domain terms, data ownership) | Component registry before all component purpose.md files exist |
+| Recommendations + iteration log (independent documents) | Consistency check before individual artefacts are written |
+
+**In practice:** Produce all per-component doc files for each component in one parallel batch. Run all drift checks as a single parallel `ctx_batch_execute` call. Write the registry and dependency graph after all component docs are confirmed present.
+
+---
+
 ## Telemetry
 
 **Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
