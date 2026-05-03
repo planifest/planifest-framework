@@ -127,6 +127,21 @@ The hooks live in `planifest-framework/hooks/` and are wired via `git config cor
 
 The CI workflow is copied to `.github/workflows/planifest.yml` on first setup.
 
+### 3b. Orchestrator Sentinel (activated automatically)
+
+When the orchestrator starts Phase 0, it creates a **sentinel file** at `plan/.orchestrator-active`. This is a zero-byte marker — no content, just existence — that tells the enforcement hooks an active pipeline run is in progress.
+
+Two hooks check for it on every turn:
+
+| Hook | What it does |
+|------|-------------|
+| **gate-write** (PreToolUse) | Blocks any write to `plan/current/**` unless the sentinel exists — prevents stray edits to plan artefacts outside of a sanctioned pipeline run |
+| **check-design** (UserPromptSubmit) | If neither the sentinel nor a `feature-brief.md` is present, injects a hard STOP message before the agent can act |
+
+The sentinel is deleted **last** at Phase 7, after the archive is confirmed complete. This means enforcement is active for the entire lifetime of a feature — from first P0 response to final archive.
+
+You never need to create or delete it manually. If a pipeline run is interrupted and you want to start fresh, delete `plan/.orchestrator-active` and `plan/current/feature-brief.md`, then reload the orchestrator.
+
 ### 4. Write your first feature brief
 
 Use the template:
