@@ -1,6 +1,7 @@
 # Getting Started with Planifest
 
 > Step-by-step instructions for humans setting up a Planifest project.
+> For deep pipeline mechanics, see [pipeline-reference.md](pipeline-reference.md).
 
 ---
 
@@ -27,12 +28,13 @@ These are the core working directories:
 - `plan/` - The current change being planned.
   - `plan/current/design.md` - Confirmed design and build plan.
   - `plan/current/feature-brief.md` - The initiating human-authored brief.
+  - `plan/current/build-log.md` - Working telemetry file maintained throughout the pipeline run (created at P0, read by P8 Build Assessment).
   - `plan/current/iteration-log.md` - Audit trail of the pipeline run.
   - `plan/archive/` - Historical plans filed here after merge.
   - `plan/changelog/` - A record of all changes ({feature-id}-{YYYY-MM-DD}.md).
 - `src/` - Component source code, tests, and component manifests (`component.yml`).
 - `docs/` - Living repository documentation (always current). Includes component registry and dependency graph.
-- `planifest-overrides/` - Your team's customisations: override library standards per language, add permanent capability skills, or add project-specific instructions. Never overwritten by setup scripts.
+- `planifest-overrides/` - Your team's customisations: override library standards, add permanent capability skills, or add project-specific instructions. Never overwritten by setup scripts. See [pipeline-reference.md](pipeline-reference.md#customising-with-planifest-overrides).
 
 See [feature-structure.md](../plan/feature-structure.md) for the full layout.
 
@@ -63,15 +65,12 @@ The agent uses native tools (`Grep`, `Bash`, `WebFetch`) directly. No context wi
 
 #### Option: Context-Mode (recommended)
 
-Follow the guidance above around the tool, then consider the option to use the Context Mode MCP service.
-
 [context-mode](https://github.com/mksglu/context-mode) routes large output — search results, file analysis, web fetches — into a sandboxed knowledge base. Only summaries enter the context window, so the agent stays fast and focused on large codebases.
 
 Install context-mode first, then pass `--context-mode-mcp` during setup, after the tool selection argument:
 
 ```bash
 # macOS / Linux
-chmod +x planifest-framework/setup.sh
 ./planifest-framework/setup.sh claude-code --context-mode-mcp
 ```
 
@@ -91,31 +90,18 @@ Emit structured events from skills and hooks into a local telemetry backend for 
 Requires the [structured-telemetry-mcp](https://github.com/anthropics/structured-telemetry-mcp) server to be running, then pass `--structured-telemetry-mcp` during setup:
 
 ```bash
-# macOS / Linux
 ./planifest-framework/setup.sh claude-code --structured-telemetry-mcp
 ```
 
 ```powershell
-# Windows (PowerShell)
 .\planifest-framework\setup.ps1 claude-code --structured-telemetry-mcp
-```
-
-Installs everything in Basic setup, plus:
-- `.claude/telemetry-enabled` sentinel — opt-in gate that authorises skills to emit events
-
-When combined with `--context-mode-mcp`, also installs the `context-pressure.mjs` PostToolUse hook, which emits a telemetry event whenever context window pressure exceeds the configured threshold.
-
-The default backend URL is `http://localhost:3741`. Override it with `--backend-url`:
-
-```bash
-./planifest-framework/setup.sh claude-code --structured-telemetry-mcp --backend-url http://myhost:4000
 ```
 
 See [tool-setup-reference.md](tool-setup-reference.md) for what each tool expects.
 
 ### 3a. Git Guardrails (activated automatically)
 
-The setup script also activates Planifest's **Progressive Guardrail System** - a three-tier enforcement model that protects `main` without blocking atomic commits:
+The setup script activates Planifest's **Progressive Guardrail System** - a three-tier enforcement model that protects `main` without blocking atomic commits:
 
 | Tier | When | What happens |
 |------|------|--------------|
@@ -135,10 +121,10 @@ Two hooks check for it on every turn:
 
 | Hook | What it does |
 |------|-------------|
-| **gate-write** (PreToolUse) | Blocks any write to `plan/current/**` unless the sentinel exists — prevents stray edits to plan artefacts outside of a sanctioned pipeline run |
+| **gate-write** (PreToolUse) | Blocks any write outside always-permitted paths unless `plan/current/design.md` exists and the target path is a declared component |
 | **check-design** (UserPromptSubmit) | If neither the sentinel nor a `feature-brief.md` is present, injects a hard STOP message before the agent can act |
 
-The sentinel is deleted **last** at Phase 7, after the archive is confirmed complete. This means enforcement is active for the entire lifetime of a feature — from first P0 response to final archive.
+The sentinel is deleted **last** at Phase 7, after the archive is confirmed complete.
 
 You never need to create or delete it manually. If a pipeline run is interrupted and you want to start fresh, delete `plan/.orchestrator-active` and `plan/current/feature-brief.md`, then reload the orchestrator.
 
@@ -151,23 +137,24 @@ cp planifest-framework/templates/feature-brief.template.md plan/current/feature-
 
 Fill it in. The [feature brief guide](templates/feature-brief-guide.md) walks you through each section.
 
-### 4a. Understanding phase indicators (REQ-018)
+### 4a. Phase indicators
 
-Every agent response begins with a phase prefix so you always know where you are in the pipeline:
+Every agent response begins with a phase prefix so you always know where you are. At the start of P0, the orchestrator asks whether you want to review after each phase or authorise a continuous run.
 
-| Prefix | Phase | What the agent is doing |
-|--------|-------|-------------------------|
-| `P0:` | Assess & Coach | Reviewing the brief; asking gap questions |
-| `P1:` | Spec | Writing requirements, scope, glossary, risk register |
-| `P2:` | ADRs | Documenting architecture decisions |
-| `P3:` | Codegen | Generating implementation |
-| `P4:` | Validate | Running CI checks; self-correcting |
-| `P5:` | Security | Security review |
-| `P6:` | Docs | Documentation artifacts |
-| `P7:` | Ship | PR, changelog, archive |
-| `PC:` | Change | Change pipeline (existing feature modification) |
+| Prefix | Phase |
+|--------|-------|
+| `P0:` | Assess & Coach |
+| `P1:` | Spec |
+| `P2:` | ADRs |
+| `P3:` | Codegen |
+| `P4:` | Validate |
+| `P5:` | Security |
+| `P6:` | Docs |
+| `P7:` | Ship |
+| `P8:` | Build Assessment |
+| `PC:` | Change Pipeline |
 
-If you see `Px: Resuming…` at the start of a session, the orchestrator detected existing artefacts in `plan/current/` and is continuing where it left off — no P0 briefing.
+See [pipeline-reference.md](pipeline-reference.md) for what each phase does, phase gate behaviour, the P8 build report, and model tier routing.
 
 ### 5. Start the orchestrator
 
@@ -178,15 +165,7 @@ Execute the confirmed design Agentic Iteration Loop.
 Feature brief: plan/current/feature-brief.md
 ```
 
-The orchestrator will:
-1. Assess your brief against the three layers:
-   - **Product**: Functional Requirements. What the system must do and why.
-   - **Architecture**: Standards. The cross-cutting rules and non-functional requirements.
-   - **Engineering**: Implementation. How the system was actually built.
-2. Coach you through any gaps - one question at a time
-3. Produce the **confirmed design** at `plan/current/design.md` (**Design confirmed**)
-4. Execute the **Agentic Iteration Loop** (Phases 1-6): Requirements → ADRs → Code → Validate → Security → Docs
-   (Executing: planifest-spec-agent → planifest-adr-agent → planifest-codegen-agent → ...)
+The orchestrator will assess your brief, coach you through any gaps, produce a confirmed design, then ask whether you want per-phase confirmation or a continuous run before executing the pipeline.
 
 ---
 
@@ -202,88 +181,17 @@ Execute the confirmed design Agentic Iteration Loop in retrofit mode.
 Feature brief: plan/current/feature-brief.md
 ```
 
-The orchestrator will read your codebase, infer the existing architecture, and reconcile the brief against reality.
-
 ---
 
-## Trivial Fixes (Fast Path)
+## Trivial Fixes and Changes
 
-For trivial changes - styling tweaks, copy corrections, isolated pure-function bugs - the orchestrator can route to the Fast Path, bypassing the requirements and ADR overhead:
-
-```
-fix(fast-path): updated button colour to match brand guidelines
-```
-
-The orchestrator evaluates four criteria before allowing Fast Path:
-1. No new external dependencies
-2. No schema or data model changes
-3. No changes to security, auth, or routing logic
-4. Change is confined to UI styling, copy, or isolated pure-function bugs
-
-If all criteria pass: implement → validate → update `component.yml` (patch bump) → log in `plan/changelog/`.
-If any criterion fails: route to Change Pipeline instead.
-
-Fast Path commits use the `fix(fast-path):` prefix - the pre-push hook and CI recognise this and only require `component.yml` or a changelog update, not full `plan/` or `docs/` changes.
-
----
-
-## Making Changes
-
-For modifications to an existing feature:
-
-```
-Execute the confirmed design Change Pipeline.
-Feature ID: my-feature
-Component ID: auth-service
-Change request: Add refresh token rotation
-```
-
-The **planifest-change-agent** handles it - no need to re-run the full Feature Pipeline.
+For small, isolated fixes use the **Fast Path**; for targeted changes to existing features use the **Change Pipeline**. See [pipeline-reference.md](pipeline-reference.md) for criteria and full execution details.
 
 ---
 
 ## Customising with planifest-overrides
 
-`planifest-overrides/` is your team's customisation layer. It sits next to `planifest-framework/` in the repo root, is never overwritten by setup scripts, and is committed to share with the team.
-
-### library-standards/
-
-Override the framework's library preferences per language. Create files with the same structure as `planifest-framework/standards/library-standards/{language}/prefer-avoid.md` or `test-frameworks.md`:
-
-```
-planifest-overrides/
-└── library-standards/
-    └── typescript/
-        └── prefer-avoid.md    ← replaces the framework default for this project
-```
-
-Agents check `planifest-overrides/library-standards/` first. If a file exists there for the language in use, it takes precedence over the framework default.
-
-### instructions/
-
-Add project-specific instructions that every agent on this project should follow — coding conventions, context about the codebase, team norms, anything that belongs in `CLAUDE.md` but is project-specific rather than framework-level.
-
-Create `.md` files in `planifest-overrides/instructions/`. Files are sorted alphabetically and appended to the boot file (e.g. `CLAUDE.md`) each time setup runs:
-
-```
-planifest-overrides/
-└── instructions/
-    └── 01-project-context.md
-    └── 02-naming-conventions.md
-```
-
-The block is idempotent — re-running setup replaces the previous override block rather than appending duplicates.
-
-### capability-skills/
-
-Add permanent agent skills for this project. Each skill is a directory containing a `SKILL.md` with standard frontmatter (`name`, `description`). Setup copies them into the tool's skill directory alongside the built-in Planifest skills:
-
-```
-planifest-overrides/
-└── capability-skills/
-    └── my-project-skill/
-        └── SKILL.md
-```
+`planifest-overrides/` lets your team override library standards, add project-specific agent instructions, and install permanent capability skills — all committed to the repo and never overwritten by setup scripts. See [pipeline-reference.md](pipeline-reference.md#customising-with-planifest-overrides).
 
 ---
 
@@ -292,20 +200,16 @@ planifest-overrides/
 After updating any files in `planifest-framework/` (skills, templates, standards):
 
 ```bash
-# Re-run setup to sync changes to your tool's directory
 ./planifest-framework/setup.sh claude-code                                                        # macOS / Linux
 ./planifest-framework/setup.sh claude-code --context-mode-mcp                                    # include if context-mode is installed
 ./planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp         # include if both MCPs are installed
 ```
 
-
 ```powershell
 .\planifest-framework\setup.ps1 claude-code                                                       # Windows (PowerShell)
 .\planifest-framework\setup.ps1 claude-code --context-mode-mcp                                    # include if context-mode is installed
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp --structured-telemetry-mcp         # include if both MCPs are installed#
+.\planifest-framework\setup.ps1 claude-code --context-mode-mcp --structured-telemetry-mcp         # include if both MCPs are installed
 ```
-
-The setup script overwrites the generated copies. The source of truth is always `planifest-framework/`.
 
 ---
 
@@ -314,15 +218,12 @@ The setup script overwrites the generated copies. The source of truth is always 
 | Path | Commit? | Why |
 |------|:-------:|-----|
 | `planifest-framework/` | ✅ | Source of truth - shared with team |
-| `planifest-framework/hooks/` | ✅ | Git hooks and CI workflow - applied by `setup.sh` / `setup.ps1` |
-| `.github/workflows/planifest.yml` | ✅ | CI/CD strict gate - deployed by setup, must be committed to take effect |
+| `planifest-framework/hooks/` | ✅ | Git hooks and CI workflow - applied by setup scripts |
+| `.github/workflows/planifest.yml` | ✅ | CI/CD strict gate - must be committed to take effect |
 | `plan/` | ✅ | Feature briefs, execution plans, ADRs, scope docs |
 | `src/` | ✅ | Component code and manifests |
 | `docs/` | ✅ | Repo-wide registry and dependency graph |
 | `.claude/`, `.cursor/`, `.agents/`, `.gemini/`, `.github/skills/` | Optional | Generated copies - can be `.gitignore`d and regenerated |
 | `CLAUDE.md`, `AGENTS.md` | Optional | Boot files - tool-specific |
-| `.claude/telemetry-enabled` | Optional | Telemetry opt-in sentinel - commit if the whole team uses structured telemetry |
-| `planifest-overrides/` | ✅ | Your team's library standard overrides, permanent capability skills, and project instructions — commit to share with the team |
-
-If your team all uses the same tool, commit the generated files. If different team members use different tools, `.gitignore` them and let each person run the setup script.
-
+| `.claude/telemetry-enabled` | Optional | Telemetry opt-in sentinel |
+| `planifest-overrides/` | ✅ | Team customisations — commit to share with the team |

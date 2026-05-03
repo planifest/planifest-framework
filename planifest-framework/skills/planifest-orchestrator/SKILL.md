@@ -398,6 +398,20 @@ Date confirmed: {DD MMM YYYY}
 
 **Do not proceed to Phase 1 until the human has confirmed the Design.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, the pipeline begins.
 
+**Before asking for design confirmation, ask:**
+
+```
+Do you want to review and confirm after each phase completes, or authorise a
+continuous run for this session (I will proceed through all phases without
+stopping)?
+
+  [1] Check after each phase
+  [2] Continuous run — proceed without phase confirmations
+```
+
+Record their answer. If [2], set `continuous_run: true` for this session and do
+not stop at per-phase gates. If [1], honour every STOP gate below.
+
 ### Phase 0 → Phase 1 Gate Checklist
 
 Before presenting the confirmed design for confirmation, verify every item:
@@ -460,6 +474,11 @@ Invoke the **spec-agent** skill.
 
 **Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec (if applicable) covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
 
+**STOP** — present to the human: number of requirements, key scope decisions, any deferred items. Wait for confirmation before proceeding to P2.
+Exceptions — proceed without confirmation if either:
+- `continuous_run: true` was set at P0
+- Not applicable: requirements are always consequential
+
 ---
 
 ## Phase 2 - Architecture Decisions
@@ -473,6 +492,11 @@ Invoke the **adr-agent** skill.
 **What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
 
 **Gate:** Confirm an ADR exists for every significant decision - stack choice, database selection, auth strategy, deployment topology, component boundaries. If a decision was made but not recorded, invoke the adr-agent for the missing ADR.
+
+**STOP** — present to the human: list of ADRs produced with one-line decision summaries. Wait for confirmation before proceeding to P3.
+Exceptions — proceed without confirmation if either:
+- `continuous_run: true` was set at P0
+- Not applicable: ADRs record consequential decisions and always warrant review
 
 ---
 
@@ -492,6 +516,11 @@ Invoke the **codegen-agent** skill.
 
 **Gate:** Confirm the implementation exists and the file structure matches what the spec describes. If the codegen-agent halted due to an Escalation (Stop-and-Ask) protocol because of an architectural blocker, review the blocker with the human before updating the plan or proceeding.
 
+**STOP** — present to the human: components built, test files produced, any deviations or escalations. Wait for confirmation before proceeding to P4.
+Exceptions — proceed without confirmation if either:
+- `continuous_run: true` was set at P0
+- Not applicable: code changes always warrant review
+
 ---
 
 ## Phase 4 - Validate
@@ -505,6 +534,11 @@ Invoke the **validate-agent** skill.
 **What it does:** Runs CI checks (lint, typecheck, test, build). Self-corrects up to 5 times. Halts if the issue persists.
 
 **Gate:** CI passes. If halted, report the failure to the human with full context.
+
+**STOP** — present to the human: checks run, pass/fail per check, self-correction count. Wait for confirmation before proceeding to P5.
+Exceptions — proceed without confirmation if either:
+- `continuous_run: true` was set at P0
+- All checks passed on the first attempt with zero self-corrections (genuinely nothing to review)
 
 ---
 
@@ -520,6 +554,11 @@ Invoke the **security-agent** skill.
 
 **Gate:** Report is produced with specific findings. Critical and high findings are flagged for human attention at the PR gate.
 
+**STOP** — present to the human: overall risk rating and any critical/high/medium findings. Wait for confirmation before proceeding to P6.
+Exceptions — proceed without confirmation if either:
+- `continuous_run: true` was set at P0
+- Overall risk rating is Low AND zero findings at critical, high, or medium severity (genuinely nothing to review)
+
 ---
 
 ## Phase 6 - Documentation
@@ -534,6 +573,11 @@ Invoke the **docs-agent** skill.
 
 **Gate:** Every living artifact has been produced and is consistent. The active plan is complete and ready for human review.
 
+**STOP** — present to the human: docs artifacts produced, any drift found. Wait for confirmation before proceeding to P7.
+Exceptions — proceed without confirmation if either:
+- `continuous_run: true` was set at P0
+- Zero drift found and all expected artifacts are present (genuinely nothing to review)
+
 ---
 
 ## Phase 7 - Ship
@@ -547,6 +591,9 @@ Invoke the **ship-agent** skill.
 **What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `.skips` processed and deleted, `plan/current/` archived to `plan/archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
 
 **Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. Wait for the ship-agent to report `P8: Complete` before delivering final confirmation to the human.
+
+**STOP** — present to the human: PR URL, archive path, changelog path, build report path. This is always a confirmation stop — ship actions are external and irreversible.
+Exception: `continuous_run: true` does NOT bypass this gate. Raising a PR is always confirmed with the human first.
 
 ---
 
