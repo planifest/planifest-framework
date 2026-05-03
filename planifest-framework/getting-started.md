@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, Cline, Roo Code, or OpenCode
+- An agentic coding tool: Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, Windsurf, Cline, or OpenCode
 - A terminal with Bash (macOS/Linux) or PowerShell (Windows)
 
 ---
@@ -32,6 +32,7 @@ These are the core working directories:
   - `plan/changelog/` - A record of all changes ({feature-id}-{YYYY-MM-DD}.md).
 - `src/` - Component source code, tests, and component manifests (`component.yml`).
 - `docs/` - Living repository documentation (always current). Includes component registry and dependency graph.
+- `planifest-overrides/` - Your team's customisations: override library standards per language, add permanent capability skills, or add project-specific instructions. Never overwritten by setup scripts.
 
 See [feature-structure.md](../plan/feature-structure.md) for the full layout.
 
@@ -44,12 +45,12 @@ This copies skills into the directory your agentic tool expects.
 ```bash
 # macOS / Linux
 chmod +x planifest-framework/setup.sh
-./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, roo-code, opencode, all
+./planifest-framework/setup.sh claude-code      # or cursor, codex, antigravity, copilot, windsurf, cline, opencode, all
 ```
 
 ```powershell
 # Windows (PowerShell)
-.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, roo-code, opencode, all
+.\planifest-framework\setup.ps1 claude-code     # or cursor, codex, antigravity, copilot, windsurf, cline, opencode, all
 ```
 
 Installs:
@@ -261,6 +262,7 @@ The setup script overwrites the generated copies. The source of truth is always 
 | `.claude/`, `.cursor/`, `.agents/`, `.gemini/`, `.github/skills/` | Optional | Generated copies - can be `.gitignore`d and regenerated |
 | `CLAUDE.md`, `AGENTS.md` | Optional | Boot files - tool-specific |
 | `.claude/telemetry-enabled` | Optional | Telemetry opt-in sentinel - commit if the whole team uses structured telemetry |
+| `planifest-overrides/` | ✅ | Your team's library standard overrides, permanent capability skills, and project instructions — commit to share with the team |
 
 If your team all uses the same tool, commit the generated files. If different team members use different tools, `.gitignore` them and let each person run the setup script.
 
