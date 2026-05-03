@@ -39,7 +39,7 @@ For each tool, the script:
 3. **Copies supporting files** (templates, standards, schemas) into the skill directory as `_planifest-*` folders
 4. **Copies workflows** (feature-pipeline, change-pipeline, retrofit) into the tool's workflow directory
 5. **Creates a boot file** (e.g., `CLAUDE.md`) if one doesn't already exist
-6. **Syncs capability skills** from `planifest-overrides/capability-skills/` — any skill directories found there are registered in `planifest-framework/external-skills.json` with `scope: "permanent"` and made available to the agent
+6. **Copies capability skills** from `planifest-overrides/capability-skills/` directly into the tool's skill directory — no separate registry file needed; the tool discovers them the same way it discovers built-in skills
 
 ---
 

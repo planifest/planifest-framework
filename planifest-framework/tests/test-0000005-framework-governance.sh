@@ -130,12 +130,9 @@ assert_file_exists "$FRAMEWORK/skills-inbox/.gitkeep" "req-010: skills-inbox dir
 echo ""
 echo "=== req-011: skill registries ==="
 
-assert_file_exists "$FRAMEWORK/external-skills.json" "req-011: external-skills.json exists"
-# Validate it contains at least an opening brace (valid JSON object)
-EXT=$(cat "$FRAMEWORK/external-skills.json")
-assert_contains "{"  "$EXT" "req-011: external-skills.json contains JSON object"
-
-assert_contains "Sync-OverrideSkills"           "$(cat "$FRAMEWORK/setup.ps1")" "req-011: setup.ps1 has Sync-OverrideSkills"
+assert_file_exists "$FRAMEWORK/../planifest-overrides/capability-skills/.gitkeep" "req-011: planifest-overrides/capability-skills/ exists"
+assert_contains "Copy-CapabilitySkills"          "$(cat "$FRAMEWORK/setup.ps1")" "req-011: setup.ps1 has Copy-CapabilitySkills"
+assert_contains "capability-skills"              "$(cat "$FRAMEWORK/setup.ps1")" "req-011: setup.ps1 copies from capability-skills"
 
 # -----------------------------------------------------------------------
 
