@@ -1,24 +1,15 @@
-﻿---
+---
 name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
 bundle_templates: [iteration-log.template.md, recommendations.template.md]
-bundle_standards: []
+bundle_standards: [formatting-standards.md, telemetry-standards.md]
+hooks:
+  phase: docs
 ---
 
 # Planifest - docs-agent
 
 > You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the iteration log audit trail.
-
----
-
-## Hard Limits
-
-1. Specification must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
 
 ---
 
@@ -75,34 +66,7 @@ Confirm the following exist at `plan/` and are consistent:
 
 ### Audit trail
 
-Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md`:
-
-```markdown
-# Iteration Log - {feature-id}
-
-Date: {timestamp}
-Tool: {agent tool used}
-
-## Iteration Steps completed
-- [x] Specification
-- [x] Architecture Decisions ({n} ADRs)
-- [x] Code Generation
-- [x] Validation ({n} self-correct cycles)
-- [x] Security Assessment
-- [x] Documentation
-
-## Assumptions made
-(any assumptions documented in the Risk Register)
-
-## Quirks
-(anything unusual discovered during the run)
-
-## Recommendations
-(what should be reviewed before merging)
-
-## Self-correct log
-(what failed during validation and how it was fixed)
-```
+Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md`. Read `planifest-framework/templates/iteration-log.template.md` now before producing the audit trail.
 
 ---
 
@@ -145,23 +109,23 @@ If a capability skill exists for document generation formats needed by the featu
 
 ---
 
+## Parallelism Directive
+
+Independent documentation artifacts MUST be written in parallel. Per-component docs for components that have no cross-references MUST be produced in a single parallel batch.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| Per-component docs for independent components (purpose, interface, risk, scope) | Dependency graph before all component dependency files exist |
+| Drift checks across independent areas (API endpoints, domain terms, data ownership) | Component registry before all component purpose.md files exist |
+| Recommendations + iteration log (independent documents) | Consistency check before individual artifacts are written |
+
+**In practice:** Produce all per-component doc files for each component in one parallel batch. Run all drift checks as a single parallel `ctx_batch_execute` call. Write the registry and dependency graph after all component docs are confirmed present.
+
+---
+
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-docs-agent"`, `phase: "docs"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
-
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "docs" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "docs", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`doc_gap`** — when documentation is missing or incomplete for a component:
 ```json
@@ -173,7 +137,12 @@ Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-docs-agent"`, `
 { "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
 ```
 
----
+**`self_correction`** — when retrying a failed documentation action:
+```json
+{ "phase_name": "docs", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
+```
 
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-
+**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+```json
+{ "phase_name": "docs", "action_id": "<action>", "attempt_count": 5 }
+```

@@ -1,85 +1,85 @@
-# Feature Brief - Structured Telemetry Framework Integration
+---
+title: "Feature Brief - agent-optimisation"
+summary: "Two optimisations: explicit Docker build target awareness in the pipeline, and an on-demand skill that identifies superfluous content in Planifest skill files."
+status: "approved"
+version: "0.1.0"
+---
+# Feature Brief - agent-optimisation
 
-**Feature ID:** 0000002-structured-telemetry-framework-integration
-**Source:** Roadmap Item 0008b — Planifest Framework Review (April 2026) → Section 4: The Tooling Ecosystem & Observability
-**Requested by:** Martin Mayer — April 2026
-**Planifest Rating:** 🟠 Developing
+**Feature ID:** 0000007-agent-optimisation
 
 ---
 
-## Observation
+## Business Goal
 
-Once the Structured Telemetry MCP Server (0008a) is deployed, the Planifest framework must be wired to use it. This requires an explicit opt-in mechanism in the setup scripts and precise telemetry sections in each agent skill so that events are emitted consistently and with the correct data shape.
-
-## Recommendation
-
-Wire the Planifest framework to the telemetry service via an explicit `--structured-telemetry-mcp` setup flag. Update agent skills with structured Telemetry sections specifying exact event types and required data fields. Install a combined context-pressure hook when both `--structured-telemetry-mcp` and `--context-mode-mcp` are active.
+Agents waste time checking host-installed runtimes when the build target is Docker — those checks are irrelevant and can cause false failures or wrong decisions. Separately, Planifest skill files contain content that is already implicit model knowledge, already enforced by hooks, or repeated verbatim across files — every token loaded needlessly increases cost and context pressure. Both problems are fixed by making intent explicit and removing dead weight.
 
 ---
 
-## Design Goals
+## Features
 
-1. **Explicit opt-in.** Telemetry is disabled by default. Only activated when `--structured-telemetry-mcp` is passed to the setup script.
-2. **Zero fallback.** If the MCP server is not provisioned, no telemetry is emitted. No local file fallbacks.
-3. **Tool-presence gating.** Agents check for the `emit_event` tool before any emission attempt. If absent, skip silently.
-4. **Schema-strict payloads.** Skill Telemetry sections specify exact required fields to match the server's `additionalProperties: false` schema.
-5. **Context-mode ready.** When both flags are active, a hook captures `context_pressure` events automatically.
-
----
-
-## Prerequisites
-
-The HTTP backend service (0008a) must be running before setup is executed. The service owns the single DuckDB connection that all MCP stdio sessions write through.
-
-```powershell
-# Windows — run once as administrator
-.\scripts\deploy.ps1
-```
-
-```bash
-# macOS / Linux — run once
-./scripts/deploy.sh
-```
-
-Verify:
-```
-curl http://127.0.0.1:3741/health   # → {"ok":true,"version":"0.1.0"}
-```
+| Feature | User Stories | Priority | Phase |
+|---------|-------------|----------|-------|
+| Build target field | As a developer, I declare `Build target: docker` in my stack so agents never check host runtimes when building in Docker | must-have | 1 |
+| Build target agent guidance | As an agent, I read `Build target` from the design and adjust my environment assumptions accordingly | must-have | 1 |
+| Optimise agent | As a developer, I invoke `planifest-optimise-agent` on demand and receive one suggestion at a time for removing superfluous content from Planifest skill files; I confirm or reject each; confirmed items become requirements | must-have | 1 |
 
 ---
 
-## Setup Flag
+## Target Architecture
 
-The framework `setup.ps1` / `setup.sh` scripts accept `--structured-telemetry-mcp` after the tool argument:
+### Components
 
-```powershell
-.\planifest-framework\setup.ps1 claude-code --structured-telemetry-mcp
-.\planifest-framework\setup.ps1 claude-code --context-mode-mcp --structured-telemetry-mcp
-```
-
-```bash
-./planifest-framework/setup.sh claude-code --structured-telemetry-mcp
-./planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp
-```
-
-Optional `--backend-url` override:
-
-```powershell
-.\planifest-framework\setup.ps1 claude-code --structured-telemetry-mcp --backend-url http://localhost:3741
-```
-
-### What the flag does
-
-1. **Installs telemetry hooks in the project folder.** MCP server registration is handled by the deploy and setup scripts in the 0008a MCP repo — not here. This flag installs the telemetry hooks into `.claude/hooks/telemetry/` and wires them in `.claude/settings.json` for this workspace.
-
-2. **Does not restart the tool.** The user must restart their agentic tool after setup.
-3. **Does not register a hook by itself.** The `context_pressure` hook is only installed when `--context-mode-mcp` is also present.
+| Component | Type | New or Existing | Responsibility |
+|-----------|------|-----------------|---------------|
+| planifest-framework | component-pack | existing | Skills, templates, standards |
 
 ---
 
-## Dependencies
+## Stack
 
-| Dependency | Required for |
-|---|---|
-| **0008a** — Structured Telemetry MCP Server | The ingestion backend. Must be deployed and running before setup. |
-| **0006c** — context-mode MCP | Automated `context_pressure` events via `PostToolUse` hook. Without it, pressure data requires manual emission. |
+| Concern | Decision |
+|---------|----------|
+| Language | Markdown (skills/templates/standards), Bash |
+| Testing | Bash assert (existing harness) |
+
+---
+
+## Scope Boundaries
+
+### In Scope
+- New `Build target: local \| docker \| ci-only` row in `feature-brief.template.md` stack table
+- Orchestrator P0 coaching: prompt human to set Build target when compute/IaC implies Docker
+- Codegen-agent guidance: when `Build target: docker` — never check host runtimes; scaffold Dockerfile-first; run checks via `docker build`/`docker run`
+- Validate-agent guidance: when `Build target: docker` — run CI checks inside container, not against host
+- New `standards/build-target-standards.md` defining all three tiers and per-tier agent behaviour
+- New `planifest-optimise-agent` skill:
+  - Targets Planifest framework skill files only (`planifest-framework/skills/`)
+  - Identifies: implicit model knowledge stated explicitly; instructions duplicated from hook enforcement; boilerplate repeated verbatim across skills; sections with no unique signal
+  - Presents one suggestion at a time in chat; human confirms or rejects
+  - Accumulates confirmed items into a numbered list
+  - At the end: produces a summary of confirmed changes as input to a Change Pipeline run
+- Tests covering all new requirements
+
+### Out of Scope
+- Applying confirmed optimisations (that is a separate Change Pipeline run)
+- Reviewing `planifest-overrides/capability-skills/` (user-owned)
+- Automated removal of content without human confirmation
+- Reviewing workflow files (`.claude/commands/`, `.github/copilot-workflows/`) — skills only
+
+### Deferred
+- Optimise-agent reviewing workflow files (can be added in a later change)
+
+---
+
+## Acceptance Criteria
+
+- [ ] `feature-brief.template.md` stack table includes `Build target` row with options `local | docker | ci-only`
+- [ ] Orchestrator skill coaches human to declare Build target at P0
+- [ ] Codegen-agent skill has explicit `Build target: docker` behaviour section
+- [ ] Validate-agent skill has explicit `Build target: docker` behaviour section
+- [ ] `standards/build-target-standards.md` exists with all three tier definitions
+- [ ] `planifest-optimise-agent/SKILL.md` exists with correct frontmatter
+- [ ] Optimise-agent presents one suggestion at a time and waits for human confirm/reject
+- [ ] Optimise-agent produces a confirmed-changes summary at the end
+- [ ] Tests cover all requirements

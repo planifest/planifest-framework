@@ -20,4 +20,7 @@
     # structured telemetry hooks — installed when both flags are passed
     TelemetryHooksSrc = 'hooks/telemetry'
     TelemetryHooksDir = '.claude/hooks/telemetry'
+    # planifest enforcement hooks — always installed (gate-write, check-design)
+    EnforcementHooksSrc = 'hooks/enforcement'
+    EnforcementHooksDir = '.claude/hooks/enforcement'
 }

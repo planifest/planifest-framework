@@ -26,6 +26,7 @@ Two setup scripts are provided - use whichever matches your OS:
 | Flag | Purpose |
 |------|---------|
 | `--context-mode-mcp` | Installs [context-mode](https://github.com/mksglu/context-mode) routing rules (`AGENTS.md`) and enforcement hooks (Claude Code only). |
+| `--structured-telemetry-mcp` | Installs `.claude/telemetry-enabled` sentinel and (with `--context-mode-mcp`) the `context-pressure.mjs` PostToolUse hook. |
 
 ---
 
@@ -38,6 +39,8 @@ For each tool, the script:
 3. **Copies supporting files** (templates, standards, schemas) into the skill directory as `_planifest-*` folders
 4. **Copies workflows** (feature-pipeline, change-pipeline, retrofit) into the tool's workflow directory
 5. **Creates a boot file** (e.g., `CLAUDE.md`) if one doesn't already exist
+6. **Copies capability skills** from `planifest-overrides/capability-skills/` directly into the tool's skill directory — no separate registry file needed; the tool discovers them the same way it discovers built-in skills
+7. **Appends override instructions** from `planifest-overrides/instructions/*.md` to the boot file — idempotent, replaces the previous block on re-run
 
 ---
 
@@ -204,6 +207,8 @@ GEMINI.md
 │   ├── feature-pipeline.md
 │   ├── change-pipeline.md
 │   └── retrofit.md
+├── hooks/
+│   └── copilot.mjs          ← gate-write + check-design adapter
 └── copilot-instructions.md
 ```
 
@@ -235,7 +240,9 @@ GEMINI.md
 
 ---
 
-### Cline / Roo Code
+### Cline
+
+> **Note:** Roo Code support has been dropped. Roo Code was sunset on 02 May 2026 and had no hook API. Use `cline` for Cline-based setups.
 
 | Item | Detail |
 |------|--------|

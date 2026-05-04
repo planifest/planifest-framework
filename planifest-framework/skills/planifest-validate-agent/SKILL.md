@@ -1,8 +1,10 @@
-﻿---
+---
 name: planifest-validate-agent
 description: Runs CI checks (lint, typecheck, test, build) and self-corrects up to 5 times. Invoked during Phase 4.
 bundle_templates: []
-bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-standards.md, database-standards.md]
+bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-standards.md, database-standards.md, formatting-standards.md, library-standards/_version-policy.md, build-target-standards.md, telemetry-standards.md]
+hooks:
+  phase: validate
 ---
 
 # Planifest - validate-agent
@@ -11,14 +13,17 @@ bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-s
 
 ---
 
-## Hard Limits
+## Build Target: docker
 
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
+When `Build target: docker` is declared in `plan/current/design.md`:
+- **Never** run lint, typecheck, test, or build commands directly against the host toolchain
+- Run all CI checks inside the container:
+  ```bash
+  docker build -t {image} .
+  docker run --rm {image} {check-command}
+  ```
+- Do not fail or warn because a runtime is absent on the host — it is expected to be absent
+- Report check results from container output, not host output
 
 ---
 
@@ -34,6 +39,8 @@ bundle_standards: [code-quality-standards.md, testing-standards.md, api-design-s
 > **Context-Mode Protocol:** When `ctx_execute` is available, run CI checks via `ctx_execute(language:"shell", code:"...")` so that large test/build output stays in the sandbox — only the failure summary enters context. Use `ctx_execute_file` to read failing source files for analysis without loading them into context.
 
 Run the project's CI checks in this strict order:
+
+0. **Library audit** — for the component's declared language, check `planifest-overrides/library-standards/{language}/prefer-avoid.md` (if exists) then `planifest-framework/standards/library-standards/{language}/prefer-avoid.md`. Scan the installed dependency manifest against the avoid list. If an avoided library is present: fail, name the library, name the preferred alternative, and report. Skip if the language subdir is a stub or absent.
 
 1. **Semantic Correctness** - Verify that every functional requirement from `plan/current/requirements/` has a mapped, executing test case identifiable by its req-ID. If logic exists without a covering test, semantic validation fails.
 2. **Lint** - code style and static analysis
@@ -89,18 +96,11 @@ Do NOT proceed to the next pipeline phase if any check is failing. The pipeline 
 - **Fix the actual bug.** Do not suppress linting rules, skip failing tests, or weaken type checks to make errors go away.
 - **Do not widen scope.** Fix the failure. Do not refactor adjacent code, improve test coverage beyond what failed, or restructure the project.
 - **If a test failure reveals a requirements ambiguity**, record it in `src/{component-id}/docs/quirks.md` and note it for the human. Fix the test to match your best interpretation of the requirements, but flag the ambiguity.
-- **Track every cycle.** Record what failed and how you fixed it - this goes into `pipeline-run.md`.
+- **Track every cycle.** Record what failed and how you fixed it - this goes into `plan/current/build-log.md`.
 
 ---
 
 ## Standards References
-
-When validating, check fixes against these standards:
-
-- [Code Quality Standards](../standards/code-quality-standards.md) - module structure, naming, error handling
-- [Testing Standards](../standards/testing-standards.md) - test structure, coverage, mocking rules
-- [API Design Standards](../standards/api-design-standards.md) - endpoint naming, error responses, status codes
-- [Database Standards](../standards/database-standards.md) - query patterns, connection management
 
 Do not refactor code to meet standards during validation - only fix actual failures. If you notice a standards violation that isn't causing a test/lint/build failure, record it in recommendations for the docs-agent.
 
@@ -112,23 +112,23 @@ If a capability skill exists for the declared testing framework (e.g. `webapp-te
 
 ---
 
+## Parallelism Directive
+
+Independent CI checks MUST be run in parallel. Where the tool supports multiple simultaneous Bash calls, lint, typecheck, and test MUST be dispatched in a single parallel batch — not sequentially.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| Lint + typecheck (no shared state) | Test before typecheck passes (type errors cause spurious test failures) |
+| Library audit + semantic correctness check | Build before tests pass |
+| Independent component test suites | Self-correct cycle N+1 before N's fix is verified |
+
+**In practice:** Dispatch lint and typecheck together. If both pass, dispatch the test suite. Run the build last. Never run lint → wait → typecheck → wait as a serial chain.
+
+---
+
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-validate-agent"`, `phase: "validate"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
-
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "validate" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "validate", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`validation_failure`** — for each test or check failure:
 ```json
@@ -144,8 +144,3 @@ Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-validate-agent"
 ```json
 { "phase_name": "validate", "action_id": "<action>", "attempt_count": 5 }
 ```
-
----
-
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

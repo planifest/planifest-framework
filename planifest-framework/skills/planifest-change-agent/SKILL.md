@@ -1,24 +1,13 @@
-﻿---
+---
 name: planifest-change-agent
-description: Handles modifications to existing features - loads domain context, implements the minimum change, validates, and updates documentation.
+description: Handles targeted modifications to existing features — loads domain context, implements the minimum change, validates, and updates documentation. Invoked via the Change Pipeline route.
 bundle_templates: [component.template.yml, change-summary.template.md]
-bundle_standards: [code-quality-standards.md]
+bundle_standards: [code-quality-standards.md, telemetry-standards.md]
 ---
 
 # Planifest - change-agent
 
 > You make targeted changes to existing features. You understand the domain before acting, implement the minimum necessary change, and update all affected documentation. You do not refactor beyond scope.
-
----
-
-## Hard Limits
-
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
 
 ---
 
@@ -58,7 +47,7 @@ Do not exhaust token limits by loading all files. Read top-down selectively:
    - **Shared type consumer** - imports types from the affected component's shared package
 3. Determine impact level per dependent component:
    - **Direct** - the change modifies an interface, schema, or type that this component uses
-   - **Indirect** - the change modifies internal behavior but the interface is unchanged
+   - **Indirect** - the change modifies internal behaviour but the interface is unchanged
    - **None** - no coupling to the changed surface area
 4. Only components with **Direct** impact require contract test updates and consumer notification
 5. Record the full blast radius in the Change Summary (Phase 2 output header)
@@ -160,21 +149,7 @@ If a relevant capability skill exists for the technology being modified (e.g. `f
 
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-change-agent"`, `phase: "change"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
-
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "change" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "change", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`deviation`** — when implementation diverges from the confirmed design:
 ```json
@@ -195,8 +170,3 @@ Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-change-agent"`,
 ```json
 { "phase_name": "change", "action_id": "<action>", "attempt_count": 5 }
 ```
-
----
-
-*This skill is invoked by the orchestrator for change requests. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

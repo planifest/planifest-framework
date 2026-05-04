@@ -1,42 +1,39 @@
-# Scope - 0000002-structured-telemetry-framework-integration
-
 ---
+title: "Scope - 0000007-agent-optimisation"
+status: "active"
+version: "0.1.0"
+---
+# Scope — 0000007-agent-optimisation
 
 ## In Scope
 
-- `--structured-telemetry-mcp` flag added to `setup.sh` and `setup.ps1`
-- Optional `--backend-url <url>` argument overriding the default backend address (`http://localhost:3741`)
-- MCP server registered in tool configuration files using `command + args` stdio format:
-  - Claude Code: `~/.claude/settings.json`
-  - Claude Desktop: `claude_desktop_config.json`
-  - Cursor: `.cursor/mcp.json`
-- Telemetry sections added to 8 SKILL.md files:
-  - `planifest-orchestrator` — `phase_start`, `phase_end`, `spec_gap`
-  - `planifest-spec-agent` — `phase_start`, `phase_end`, `spec_gap`
-  - `planifest-adr-agent` — `phase_start`, `phase_end`
-  - `planifest-codegen-agent` — `phase_start`, `phase_end`, `deviation`, `migration_proposal`, `self_correction`
-  - `planifest-validate-agent` — `phase_start`, `phase_end`, `validation_failure`, `self_correction`
-  - `planifest-change-agent` — `phase_start`, `phase_end`, `deviation`, `migration_proposal`, `self_correction`
-  - `planifest-security-agent` — `phase_start`, `phase_end`, `deviation`
-  - `planifest-docs-agent` — `phase_start`, `phase_end`, `deviation`
-- `hooks/telemetry/context-pressure.mjs` — new hook installed to `.claude/hooks/telemetry/` and registered as `PostToolUse` in `.claude/settings.json` **only** when both `--structured-telemetry-mcp` and `--context-mode-mcp` are active
-- Claude Code support
-
----
+- New `Build target: local | docker | ci-only` row in `feature-brief.template.md` stack table
+- Orchestrator P0 coaching: prompt human to set Build target when compute/IaC implies Docker
+- Codegen-agent guidance: when `Build target: docker` — never check host runtimes; scaffold Dockerfile-first; run checks via `docker build`/`docker run`
+- Validate-agent guidance: when `Build target: docker` — run CI checks inside container, not against host
+- New `planifest-framework/standards/build-target-standards.md`
+- New `planifest-framework/skills/planifest-optimise-agent/SKILL.md`
+- New `planifest-framework/standards/telemetry-standards.md`
+- New `planifest-framework/templates/design.template.md`
+- New `planifest-framework/standards/language-quirks-en-gb.md`
+- Boilerplate removal from skill files (Hard Limits, footers, Role Boundary) — req-004
+- Telemetry extraction from 9 skills — req-005
+- Stale reference cleanup across skill files — req-006
+- Template extractions and setup manifest — req-007
+- Global `artefact` → `artifact` replacement — req-008
+- Tests covering all new requirements
 
 ## Out of Scope
 
-- Building or modifying the Structured Telemetry MCP Server (owned by 0008a)
-- Auto-discovery of a running backend — explicit flag always required
-- Local schema copy or validation — server enforces schema at ingestion
-- Hook support for Cursor, Windsurf, Cline, Antigravity (no confirmed `PostToolUse` equivalent)
-- Telemetry dashboard or query tooling
-
----
+- Applying confirmed optimisations automatically without human confirmation
+- Reviewing `planifest-overrides/capability-skills/` (user-owned)
+- Automated removal of content without human confirmation
+- Reviewing workflow files (`.claude/commands/`, `.github/copilot-workflows/`)
+- Multi-locale support beyond `en-GB` (other locales can add their own `language-quirks-{locale}.md`)
+- CI/CD changes for consumer projects
 
 ## Deferred
 
-- Cursor / other tool hook wiring — deferred until hook architectures are confirmed per tool
-- Configurable threshold for `context_pressure` hook (hardcoded at 70% for v1)
-- Retry or buffering for failed `emit_event` calls
-- Additional event types beyond those defined in the spec (e.g. `token_usage`, `cost_estimate`)
+- Optimise-agent reviewing workflow files (can be added in a later change)
+- `language-quirks-{locale}.md` files for other locales (structure is ready; content deferred)
+- Windsurf native hook wiring (blocked: hooks API not yet stable)
