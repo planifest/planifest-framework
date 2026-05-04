@@ -3,7 +3,7 @@ title: "Language Quirks - en-GB"
 locale: "en-GB"
 version: "1.0.0"
 ---
-# Language Quirks — en-GB
+# Language Quirks: en-GB
 
 The framework default is **British English**. This file documents deliberate exceptions — cases where a different convention is used, and why. Agents and humans consult this file before writing or correcting framework content.
 
@@ -78,3 +78,16 @@ In code (variable names, config keys), follow the casing convention of the langu
 - ✗ "the data are stored"
 - ✓ "the metadata is missing"
 - ✗ "the metadata are missing"
+
+---
+
+## Category 7 — Prohibited punctuation
+
+**Em dashes (`—`) must not be used** in any framework prose, headings, or documentation unless the syntax of the output format strictly requires one. They carry no meaning that a colon, comma, or full stop cannot convey more cleanly, and are strongly associated with AI-generated text.
+
+- ✓ "Build Assessment: results and findings"
+- ✗ "Build Assessment — results and findings"
+- ✓ "Three tiers: local, docker, ci-only"
+- ✗ "Three tiers — local, docker, ci-only"
+
+In code (Category 1) em dashes are not corrected if they appear as literal string content.

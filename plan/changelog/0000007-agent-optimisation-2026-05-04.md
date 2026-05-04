@@ -102,3 +102,12 @@ git push origin feature/0000007-agent-optimisation
 ---
 
 *Written by the agent at the end of every Agentic Iteration Loop. This is the audit trail.*
+
+---
+
+## Fast-path amendment — 2026-05-04
+
+**Change:** Added Category 7 (prohibited punctuation) to `language-quirks-en-gb.md`. Em dashes must not be used in framework prose or headings. Fixed the em dash in the file's own heading as the first application of the rule.
+
+**Files changed:**
+- `planifest-framework/standards/language-quirks-en-gb.md` — Category 7 added; heading em dash removed
