@@ -28,7 +28,7 @@ Standard response formats:
 - Blocked: `P0: Blocked — {specific gap}`
 - Skipped: `Px: Skipped — {reason}`
 
-If you see `Px: Resuming…` at the start of a session, the orchestrator detected existing artefacts in `plan/current/` and is continuing where it left off.
+If you see `Px: Resuming…` at the start of a session, the orchestrator detected existing artifacts in `plan/current/` and is continuing where it left off.
 
 ---
 
@@ -54,7 +54,7 @@ Per-phase exceptions — the orchestrator may skip the stop if **both** conditio
 
 ## Phase 8 — Build Assessment
 
-P8 runs automatically after P7 archives the plan. The `planifest-build-assessment-agent` reads `plan/current/build-log.md` (archived alongside the plan artefacts) and produces a structured efficiency report at `plan/archive/{feature-id}-{date}/build-report.md`.
+P8 runs automatically after P7 archives the plan. The `planifest-build-assessment-agent` reads `plan/current/build-log.md` (archived alongside the plan artifacts) and produces a structured efficiency report at `plan/archive/{feature-id}-{date}/build-report.md`.
 
 ### Build Log
 

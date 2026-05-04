@@ -1,8 +1,8 @@
 ﻿---
 name: planifest-orchestrator
 description: Guides a human from an initial idea to a complete set of requirements, then executes the confirmed design pipeline to build it. Use this for new features or full pipeline runs.
-bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.yml, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md]
-bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md, formatting-standards.md, library-standards/_version-policy.md]
+bundle_templates: [feature-brief.template.md, execution-plan.template.md, requirement.template.md, component.template.yml, component-guide.md, adr.template.md, domain-glossary.template.md, risk-register.template.md, scope.template.md, data-contract.template.md, iteration-log.template.md, design.template.md]
+bundle_standards: [stack-summary.md, monorepo-standards.md, api-design-standards.md, observability-standards.md, formatting-standards.md, library-standards/_version-policy.md, telemetry-standards.md, build-target-standards.md]
 hooks:
   phase: orchestrator
 ---
@@ -70,11 +70,11 @@ Standard formats:
 On every session start, before taking any action:
 
 1. **Scan for pending migrations** — check `planifest-framework/migrations/` for any `.md` files not in `_done/`. If found, invoke the `planifest-migrator` skill for each pending migration before any other phase work. Migrations take priority.
-2. Check `plan/current/` for existing artefacts (`design.md`, `requirements/`, `adr/`, etc.)
+2. Check `plan/current/` for existing artifacts (`design.md`, `requirements/`, `adr/`, etc.)
 3. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
 4. Check for `.skips` file — if present, read and acknowledge skipped phases at the top of your response
-5. If artefacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
-6. If no artefacts: open with `P0:` and begin coaching
+5. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
+6. If no artifacts: open with `P0:` and begin coaching
 
 ---
 
@@ -103,6 +103,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Begin Phase 8 (build assessment) | Load the `planifest-build-assessment-agent` skill |
 | Handle a change request | Load the `planifest-change-agent` skill |
 | Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
+| Write confirmed design to `plan/current/design.md` | `planifest-framework/templates/design.template.md` |
 
 Load each file at the moment you need it - not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
 
@@ -249,7 +250,7 @@ Planifest describes three layers of every feature. Each must be covered.
 1. Problem statement and user stories - if these are unclear, nothing downstream is derivable
 2. Acceptance criteria - these become the test cases; vagueness here propagates everywhere
 3. **Feature decomposition** - is this feature small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big features into features and phases before proceeding.
-4. Stack declaration - the codegen-agent cannot begin without this. Draw the human's attention to the [Stack Summary](../standards/stack-summary.md) - not all stacks are equal for agent-generated code. For deep evaluation, see [Backend Stack Evaluation](../standards/reference/backend-stack-evaluation.md) and [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md).
+4. Stack declaration - the codegen-agent cannot begin without this. When `compute: docker` or `iac: dockerfile` appears in the stack, coach the human: "Your stack implies a Docker build. Set `Build target: docker` in the stack table so agents never check host runtimes." Draw the human's attention to the [Stack Summary](../standards/stack-summary.md) - not all stacks are equal for agent-generated code. For deep evaluation, see [Backend Stack Evaluation](../standards/reference/backend-stack-evaluation.md) and [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md).
 4. Scope boundaries - what's out is as important as what's in
 5. Non-functional requirements - performance, availability, scalability, security
 6. Component design and data ownership - these inform the architecture
@@ -322,8 +323,8 @@ When a SKILL.md file is detected in `planifest-framework/skills-inbox/`:
 2. Summarise what the skill does in one sentence
 3. Ask the human: `Use for this plan only, or add permanently for all future plans? (plan / permanent)`
 4. After the human answers:
-   - **plan**: move to `plan/current/capability-skills/{name}/`; update `plan/current/external-skills.json`
-   - **permanent**: move to `planifest-overrides/capability-skills/{name}/`; update `planifest-framework/external-skills.json`
+   - **plan**: move to `plan/current/capability-skills/{name}/`
+   - **permanent**: move to `planifest-overrides/capability-skills/{name}/`
 5. Clear the skill from `planifest-framework/skills-inbox/`
 6. Update `## Active Skills` in `plan/current/design.md`
 
@@ -335,64 +336,7 @@ If the human defers, leave the skill in the inbox and re-present at the next pha
 
 The **confirmed design** — the plan for what will be built and the manifest of what it builds against. This is the contract between you and the human before you begin building.
 
-Write this to `plan/current/design.md`:
-
-```markdown
-# Design - {feature-id}
-
-## Feature
-- Problem: {one-line problem statement}
-- Adoption mode: greenfield | retrofit | agent-interface
-- Feature ID: {0000000}-{kebab-case-name}
-
-## Product Layer
-- User stories confirmed: {count}
-- Acceptance criteria confirmed: {count}
-- Constraints: {list}
-- Integrations: {list or "none"}
-
-## Architecture Layer
-- Latency target: {value or "deferred - recorded in scope"}
-- Availability target: {value or "deferred - recorded in scope"}
-- Scalability target: {value or "deferred - recorded in scope"}
-- Security: {auth strategy, authz model, data classification}
-- Data privacy: {regulations, PII handling, retention policy or "no regulated data"}
-- Observability: {logging/metrics/tracing strategy or "standard defaults"}
-- Cost boundary: {value or "not constrained"}
-
-## Engineering Layer
-- Stack: {frontend / backend / database / ORM / IaC / cloud / compute / CI}
-- Components: {list with one-liner per component}
-- Data ownership: {component -> dataset mapping}
-- Deployment: {topology summary}
-- API versioning: {strategy or "not applicable"}
-
-## Scope
-- In: {list}
-- Out: {list}
-- Deferred: {list - with notes on what is blocked until resolved}
-
-## Assumptions
-- {assumption} - impact if wrong: {what breaks}
-- {assumption} - impact if wrong: {what breaks}
-
-## Risks
-- {list with likelihood/impact}
-
-## Dependencies
-- Upstream: {list}
-- Downstream: {list}
-
-## Active Skills
-{List of capability skills available for this run, or "None"}
-
-## Repo Instructions
-{Contents of planifest-overrides/instructions/ files, or "None"}
-
-## Confirmation
-Human confirmed this design before proceeding: yes / no
-Date confirmed: {DD MMM YYYY}
-```
+Write this to `plan/current/design.md`. **Read `planifest-framework/templates/design.template.md` now** to get the exact format before writing.
 
 **Field mutability:** After human confirmation, the confirmed design is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `Date confirmed` field records when the contract was locked.
 
@@ -438,7 +382,6 @@ After the gate checklist passes and before presenting the design for confirmatio
 
 **How to assess:**
 - Read the declared stack from the confirmed design
-- Check `planifest-framework/external-skills.json` (if it exists) for already-installed skills
 - Consider whether known capability skills are relevant: `frontend-design` (React UI), `webapp-testing` (web app tests), `mcp-builder` (MCP servers), `docx`/`pdf`/`xlsx` (document generation)
 
 **If relevant skills exist that are not installed:**
@@ -454,7 +397,7 @@ Relevant skills for {declared stack}:
 Install any of these? (yes / no / list which ones)
 ```
 
-**If human confirms:** Call `skill-sync.sh add {skill-name} {tool}` for each confirmed skill. Report installation result.
+**If human confirms:** Copy the skill directory to `planifest-overrides/capability-skills/{name}/` (permanent) or `plan/current/capability-skills/{name}/` (plan-scoped). Re-run `setup.sh` / `setup.ps1` to register permanent installs with your tool. Report installation result.
 
 **If human declines or no relevant skills exist:** Proceed silently — do not surface this again.
 
@@ -667,7 +610,7 @@ The ship-agent invokes the build-assessment-agent after the archive is confirmed
 
 | Pattern | Reason |
 |---------|--------|
-| Phase N work before Phase N-1 artefacts exist | Hard phase dependency |
+| Phase N work before Phase N-1 artifacts exist | Hard phase dependency |
 | ADR writing before requirements are complete | ADR content depends on spec output |
 | Codegen before ADRs are accepted | ADRs may constrain implementation choices |
 | P8 before P7 archive is confirmed | Report needs the archive path |
@@ -691,7 +634,7 @@ If the human requests a change to requirements while the pipeline is in progress
    - Re-running Phase 3 requires re-running Phase 4 (validation) at minimum.
    - Never patch generated code to match a spec change - regenerate from the updated spec.
 
-3. **Record the change:** Add a "Requirement Change" entry to `pipeline-run.md` noting what changed, which phase was active, and what was re-run.
+3. **Record the change:** Add a "Requirement Change" entry to `plan/current/build-log.md` noting what changed, which phase was active, and what was re-run.
 
 If the human asks for a change that would fundamentally alter the feature (different problem, different users, different domain), recommend starting a new feature instead.
 
@@ -746,43 +689,13 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 - Artifact Types: Distinct and independently versioned (Brief, Spec, ADR, etc.).
 - Three Layers: Product, Architecture, Engineering.
 
-**Templates** (agents should follow these for all output artifacts):
-- [Feature Brief](../templates/feature-brief.template.md) - human input
-- [Execution Plan](../templates/execution-plan.template.md) - spec-agent output
-- [ADR](../templates/adr.template.md) - adr-agent output
-- [Scope](../templates/scope.template.md) - spec-agent output
-- [Risk Register](../templates/risk-register.template.md) - spec-agent output, updated by any agent
-- [Domain Glossary](../templates/domain-glossary.template.md) - spec-agent output, updated by any agent
-- [Data Contract](../templates/data-contract.template.md) - codegen-agent output
-- [Component Manifest](../templates/component.template.yml) - codegen-agent output ([guide](../templates/component-guide.md))
-- [Iteration Log](../templates/iteration-log.template.md) - written at end of every Agentic Iteration Loop
-
 **Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`
 
 ---
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-orchestrator",
-  "phase": "orchestrator",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope and emission conditions. The snippets below show the `data` field only.
 
 **Event type reference** (14 types as of v0.2.0):
 

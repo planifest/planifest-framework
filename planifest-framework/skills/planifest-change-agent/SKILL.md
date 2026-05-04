@@ -2,23 +2,12 @@
 name: planifest-change-agent
 description: Handles targeted modifications to existing features — loads domain context, implements the minimum change, validates, and updates documentation. Invoked via the Change Pipeline route.
 bundle_templates: [component.template.yml, change-summary.template.md]
-bundle_standards: [code-quality-standards.md]
+bundle_standards: [code-quality-standards.md, telemetry-standards.md]
 ---
 
 # Planifest - change-agent
 
 > You make targeted changes to existing features. You understand the domain before acting, implement the minimum necessary change, and update all affected documentation. You do not refactor beyond scope.
-
----
-
-## Hard Limits
-
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
 
 ---
 
@@ -114,7 +103,6 @@ Update every artifact affected by the change:
 
 Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md` as the audit trail for this change.
 
-
 ---
 
 ## New Component Handoff
@@ -161,28 +149,7 @@ If a relevant capability skill exists for the technology being modified (e.g. `f
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
-
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-change-agent",
-  "phase": "change",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`deviation`** — when implementation diverges from the confirmed design:
 ```json
@@ -203,8 +170,3 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 ```json
 { "phase_name": "change", "action_id": "<action>", "attempt_count": 5 }
 ```
-
----
-
-*This skill is invoked by the orchestrator for change requests. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

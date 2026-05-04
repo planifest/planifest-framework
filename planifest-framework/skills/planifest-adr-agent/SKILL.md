@@ -2,7 +2,7 @@
 name: planifest-adr-agent
 description: Produces Architecture Decision Records for each significant decision in the requirements. Invoked by the orchestrator during Phase 2.
 bundle_templates: [adr.template.md]
-bundle_standards: [formatting-standards.md]
+bundle_standards: [formatting-standards.md, telemetry-standards.md]
 hooks:
   phase: adr
 ---
@@ -13,22 +13,10 @@ hooks:
 
 ---
 
-## Hard Limits
-
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
-
----
-
 ## Input
 
-- Design Requirements at `plan/current/design-requirements.md`
+- Design at `plan/current/design.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml`
-- design at `plan/current/design.md` (for stack declaration)
 
 ---
 
@@ -97,35 +85,9 @@ Independent ADRs MUST be written in parallel. Apply the dependency test: does AD
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
-
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-adr-agent",
-  "phase": "adr",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`adr_decision`** — after each ADR is written to disk:
 ```json
 { "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }
 ```
-
----
-
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

@@ -87,5 +87,3 @@ Implementation code:
 - Do not move to the next requirement
 
 ---
-
-*This skill is invoked by planifest-codegen-agent. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*

@@ -1,8 +1,8 @@
-﻿---
+---
 name: planifest-security-agent
 description: Performs a security review of the implementation, producing a security report with specific findings. Invoked during Phase 5.
 bundle_templates: [security-report.template.md]
-bundle_standards: [formatting-standards.md]
+bundle_standards: [formatting-standards.md, telemetry-standards.md]
 hooks:
   phase: security
 ---
@@ -13,24 +13,13 @@ hooks:
 
 ---
 
-## Hard Limits
-
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
-
----
-
 ## Input
 
 > **Context-Mode Protocol:** When `ctx_batch_execute` is available, use it for the full security scan — pass grep/find commands targeting auth patterns, input handling, secrets, and IaC in `commands`; pass your STRIDE threat questions in `queries`. Use `ctx_execute_file` to analyse specific files flagged for review. Raw code never enters context — only your findings do.
 
 - The validated implementation at `src/{component-id}/` (all components in the feature)
 - Infrastructure as Code at `src/{component-id}/` (Terraform, Pulumi, CDK, etc. - if declared in the stack)
-- Design Requirements at `plan/current/design-requirements.md`
+- Design at `plan/current/design.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
 - Risk Register at `plan/current/risk-register.md`
 
@@ -97,14 +86,6 @@ Top actions before production:
 
 ---
 
-## Role Boundary
-
-**You are report-only.** You do not modify code, configuration, or infrastructure. You produce a security report with findings and recommendations. The human decides which findings to act on and who implements the fixes.
-
-If you identify a critical vulnerability that is trivially fixable (e.g., a hardcoded credential), you still only report it - you do not fix it. The fix goes through the change-agent with proper documentation and audit trail.
-
----
-
 ## Rules
 
 - **Be specific.** Every finding must reference a specific file, endpoint, or configuration in the implementation. "SQL injection is a risk" is not a finding. "The `/api/orders` endpoint at `apps/api/src/routes/orders.ts:42` accepts a `sortBy` parameter that is interpolated into a query without sanitisation" is.
@@ -132,28 +113,7 @@ Independent security review scans MUST be run in parallel. Where the feature has
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
-
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-security-agent",
-  "phase": "security",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`security_finding`** — for each vulnerability or risk identified:
 ```json
@@ -175,8 +135,3 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 ```json
 { "phase_name": "security", "action_id": "<action>", "attempt_count": 5 }
 ```
-
----
-
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

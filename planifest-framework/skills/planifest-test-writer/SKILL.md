@@ -91,5 +91,3 @@ This is advisory. The ship-agent will present tagged tests to the human at Step 
 - Do not modify existing tests
 
 ---
-
-*This skill is invoked by planifest-codegen-agent. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*

@@ -2,7 +2,7 @@
 name: planifest-ship-agent
 description: Phase 7 only — raises the PR, writes the changelog, handles skips, and archives plan/current/. Invoked by the orchestrator at the end of the feature pipeline.
 bundle_templates: [iteration-log.template.md]
-bundle_standards: [formatting-standards.md]
+bundle_standards: [formatting-standards.md, telemetry-standards.md]
 hooks:
   phase: ship
 ---
@@ -29,7 +29,7 @@ Every response begins with `P7:`. No exceptions. Including single-line acknowled
 
 ## Input
 
-- All artefacts at `plan/current/`
+- All artifacts at `plan/current/`
 - PR branch already exists (created during codegen/validate phases)
 - `.skips` file at `plan/current/.skips` (if any phases were skipped)
 
@@ -37,7 +37,7 @@ Every response begins with `P7:`. No exceptions. Including single-line acknowled
 
 ## Ship Process
 
-Work through these steps in order. Write each artefact to disk before proceeding to the next step.
+Work through these steps in order. Write each artifact to disk before proceeding to the next step.
 
 ### Step 1 — Produce PR description
 
@@ -83,8 +83,8 @@ Write `plan/changelog/{feature-id}-{YYYY-MM-DD}.md` as the permanent audit trail
 ## What Was Built
 {Summary from feature brief}
 
-## Artefacts Produced
-{List of plan/current/ artefacts written}
+## Artifacts Produced
+{List of plan/current/ artifacts written}
 
 ## Decisions
 {One-liner per ADR}
@@ -117,9 +117,9 @@ Capture and confirm the PR URL. Include it in the changelog (`## PR` field).
 
 Write `plan/current/.feature-id` containing the feature ID (e.g. `0000003-hook-based-enforcement`).
 
-This marker enables resume detection to identify stale artefacts from a failed archive (DD-012, ADR-006).
+This marker enables resume detection to identify stale artifacts from a failed archive (DD-012, ADR-006).
 
-### Step R — Regression confirmation (req-012)
+### Step R — Regression confirmation
 
 Before archiving, present agent-tagged regression candidates to the human for curation.
 
@@ -140,9 +140,9 @@ Before archiving, present agent-tagged regression candidates to the human for cu
 4. Record the human's decisions — they will appear in the test report (Step T).
 5. If no candidates are tagged: note "No regression candidates for this feature" and continue.
 
-### Step T — Test report (req-013)
+### Step T — Test report
 
-Generate the test report artefact before archiving.
+Generate the test report artifact before archiving.
 
 1. Read `planifest-framework/templates/test-report.template.md`.
 2. Populate all sections:
@@ -154,17 +154,6 @@ Generate the test report artefact before archiving.
    plan/changelog/{feature-id}-test-report-{YYYY-MM-DD}.md
    ```
 4. Confirm the report references every test file run in P4. If any are missing, add them with status "unknown — not captured in P4 output".
-
-### Step 6 — Remove plan-scoped external skills (REQ-025)
-
-Before archiving, clean up plan-scoped skills that are ephemeral by design (ADR-010):
-
-1. Check `planifest-framework/external-skills.json` — if it exists, read the `skills` array
-2. For each entry where `scope == "plan"`:
-   - Remove the tool-installed copy: run `skill-sync.sh remove {name} {tool}`
-   - Remove from `plan/current/external-skills/{name}/` if present
-3. Remove plan-scoped entries from `external-skills.json`; if no entries remain, delete the file
-4. Skills with `scope == "preserved"` are left in place — they survive archive
 
 ### Step 7 — Archive plan/current/
 
@@ -205,24 +194,7 @@ plan/current/ is empty and ready for the next feature.
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. Do not emit if either fails.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-ship-agent",
-  "phase": "ship",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope and emission conditions. This skill emits its own `phase_start` and `phase_end` (unlike other phase skills where the orchestrator emits these).
 
 **`phase_start`** — before Step 1:
 ```json
@@ -233,7 +205,3 @@ plan/current/ is empty and ready for the next feature.
 ```json
 { "phase_name": "ship", "status": "pass", "duration_ms": <elapsed> }
 ```
-
----
-
-*This skill is invoked by the orchestrator at Phase 7. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*

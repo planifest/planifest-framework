@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000006-build-assessment-phase"
-version: "0.6.0"
+feature: "0000007-agent-optimisation"
+version: "0.7.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -19,6 +19,11 @@ responsibilities:
   - "Maintain build log throughout pipeline run for P8 build assessment"
   - "Direct model tier selection (primary vs cheaper) for all spawned subagents"
   - "Enforce parallelism directives across all phase skills"
+  - "Declare build target tier (local/docker/ci-only) in feature brief and design; enforce per-tier agent behaviour in codegen and validate phases"
+  - "Centralise telemetry envelope and emission gate in telemetry-standards.md"
+  - "Provide language quirks reference (language-quirks-en-gb.md) for British English with documented American exceptions"
+  - "Track installed skill directories via .planifest-manifest for safe re-runs"
+  - "Present one-at-a-time skill optimisation suggestions via planifest-optimise-agent (never modifies files)"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -76,6 +81,11 @@ scope:
     - "P8 Build Assessment phase and planifest-build-assessment-agent skill"
     - "build-log.template.md and build log maintenance across pipeline phases"
     - "Model tier decision table and parallelism directives in all phase skills"
+    - "Build target field in feature-brief and design templates"
+    - "telemetry-standards.md, build-target-standards.md, language-quirks-en-gb.md standards files"
+    - "planifest-optimise-agent skill for interactive skill file review"
+    - "design.template.md extracted from orchestrator inline block"
+    - "setup.sh/.ps1 .planifest-manifest tracking for idempotent re-runs"
   outOfScope:
     - "Application-level code generation (handled by planifest-codegen-agent)"
     - "CI pipeline configuration for consumer projects"
@@ -92,7 +102,7 @@ risk:
 quality:
   testCoverage:
     unit: 0
-    integration: 215
+    integration: 316
     e2e: 0
   techDebt: []
   quirks:
@@ -106,7 +116,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-05-03"
+  updatedAt: "2026-05-04"
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-docs-agent"

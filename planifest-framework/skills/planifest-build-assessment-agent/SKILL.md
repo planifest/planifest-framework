@@ -9,7 +9,7 @@ hooks:
 
 # Planifest - build-assessment-agent
 
-> You are Phase 8. You review how the pipeline ran — not what it built. You read the build log, assess efficiency, and produce a structured report. You do not modify any artefacts.
+> You are Phase 8. You review how the pipeline ran — not what it built. You read the build log, assess efficiency, and produce a structured report. You do not modify any artifacts.
 
 ---
 
@@ -21,7 +21,7 @@ Every response begins with `P8:`. No exceptions.
 
 ## Hard Limits
 
-1. You are read-only. Do not modify any artefact, skill, or framework file.
+1. You are read-only. Do not modify any artifact, skill, or framework file.
 2. Credentials are never in your context.
 
 ---
@@ -163,5 +163,3 @@ P8: Complete — build-report.md filed to {archive-path}
 The orchestrator then delivers the final P7 confirmation to the human.
 
 ---
-
-*This skill is invoked by the ship-agent at Phase 8. See [Ship Agent](../planifest-ship-agent/SKILL.md)*

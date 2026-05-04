@@ -6,7 +6,7 @@
 
 ## 1. Date Format
 
-Two formats are used across all Planifest artefacts. No others are permitted in document body text.
+Two formats are used across all Planifest artifacts. No others are permitted in document body text.
 
 ### Body text — DD MMM YYYY
 
@@ -48,12 +48,11 @@ All Planifest prose, labels, comments, template text, and documentation use **Br
 | organise | organize |
 | licence (noun) | license (noun) |
 | behaviour | behavior |
-| artefact | artifact |
 | analyse | analyze |
 | centre | center |
 | recognise | recognize |
-| initialise | initialize |
-| serialise | serialize |
+
+> **Exceptions:** `artifact`, `initialize`, `serialize`, `disk`, and `program` use American spelling in all contexts. See `planifest-framework/standards/language-quirks-en-gb.md` for the full exception list.
 
 ### Code identifier exception
 

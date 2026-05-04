@@ -801,6 +801,19 @@ setup_tool() {
   echo "  Setting up $tool"
   echo "  Skills directory: $TOOL_SKILLS_DIR/"
 
+  # Manifest cleanup — remove only previously installed directories on re-run
+  local manifest="$skills_dir/.planifest-manifest"
+  if [ -f "$manifest" ]; then
+    echo "  Re-run detected — removing previously installed directories"
+    while IFS= read -r dir_path; do
+      if [ -n "$dir_path" ] && [ -d "$dir_path" ]; then
+        rm -rf "$dir_path"
+        echo "  - removed: $(basename "$dir_path")"
+      fi
+    done < "$manifest"
+    rm -f "$manifest"
+  fi
+
   # Copy skills (now automatically bundles supporting files)
   copy_skills "$skills_dir"
 
@@ -918,6 +931,16 @@ TOML
     echo "  ⚠  [Planifest] Note: Codex CLI hooks are Bash-only."
     echo "     Write interception works in shell environments."
     echo "     Windows is not supported."
+  fi
+
+  # Write manifest listing all installed skill directories (enables safe re-run cleanup)
+  local installed_dirs=()
+  for dir in "$skills_dir"/*/; do
+    [ -d "$dir" ] && installed_dirs+=("${dir%/}")
+  done
+  if [ ${#installed_dirs[@]} -gt 0 ]; then
+    printf '%s\n' "${installed_dirs[@]}" > "$manifest"
+    echo "  + .planifest-manifest (${#installed_dirs[@]} entries)"
   fi
 
   echo "  Done."

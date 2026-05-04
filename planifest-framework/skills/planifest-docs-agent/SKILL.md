@@ -2,7 +2,7 @@
 name: planifest-docs-agent
 description: Produces complete per-component documentation, system-wide registry, dependency graph, and iteration log audit trail. Invoked during the Documentation step.
 bundle_templates: [iteration-log.template.md, recommendations.template.md]
-bundle_standards: [formatting-standards.md]
+bundle_standards: [formatting-standards.md, telemetry-standards.md]
 hooks:
   phase: docs
 ---
@@ -10,17 +10,6 @@ hooks:
 # Planifest - docs-agent
 
 > You ensure every artifact defined by Planifest has been produced, is consistent, and is complete. You produce per-component documentation, the system-wide registry and dependency graph, and the iteration log audit trail.
-
----
-
-## Hard Limits
-
-1. Specification must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
 
 ---
 
@@ -77,34 +66,7 @@ Confirm the following exist at `plan/` and are consistent:
 
 ### Audit trail
 
-Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md`:
-
-```markdown
-# Iteration Log - {feature-id}
-
-Date: {timestamp}
-Tool: {agent tool used}
-
-## Iteration Steps completed
-- [x] Specification
-- [x] Architecture Decisions ({n} ADRs)
-- [x] Code Generation
-- [x] Validation ({n} self-correct cycles)
-- [x] Security Assessment
-- [x] Documentation
-
-## Assumptions made
-(any assumptions documented in the Risk Register)
-
-## Quirks
-(anything unusual discovered during the run)
-
-## Recommendations
-(what should be reviewed before merging)
-
-## Self-correct log
-(what failed during validation and how it was fixed)
-```
+Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md`. Read `planifest-framework/templates/iteration-log.template.md` now before producing the audit trail.
 
 ---
 
@@ -149,13 +111,13 @@ If a capability skill exists for document generation formats needed by the featu
 
 ## Parallelism Directive
 
-Independent documentation artefacts MUST be written in parallel. Per-component docs for components that have no cross-references MUST be produced in a single parallel batch.
+Independent documentation artifacts MUST be written in parallel. Per-component docs for components that have no cross-references MUST be produced in a single parallel batch.
 
 | MUST parallelise | Cannot parallelise |
 |------------------|--------------------|
 | Per-component docs for independent components (purpose, interface, risk, scope) | Dependency graph before all component dependency files exist |
 | Drift checks across independent areas (API endpoints, domain terms, data ownership) | Component registry before all component purpose.md files exist |
-| Recommendations + iteration log (independent documents) | Consistency check before individual artefacts are written |
+| Recommendations + iteration log (independent documents) | Consistency check before individual artifacts are written |
 
 **In practice:** Produce all per-component doc files for each component in one parallel batch. Run all drift checks as a single parallel `ctx_batch_execute` call. Write the registry and dependency graph after all component docs are confirmed present.
 
@@ -163,28 +125,7 @@ Independent documentation artefacts MUST be written in parallel. Per-component d
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
-
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-docs-agent",
-  "phase": "docs",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`doc_gap`** — when documentation is missing or incomplete for a component:
 ```json
@@ -205,8 +146,3 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 ```json
 { "phase_name": "docs", "action_id": "<action>", "attempt_count": 5 }
 ```
-
----
-
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

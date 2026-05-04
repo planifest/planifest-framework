@@ -840,6 +840,19 @@ function Invoke-PlanifestSetup {
     Write-Host "  Setting up $ToolName"
     Write-Host "  Skills directory: $($toolConfig.SkillsDir)/"
 
+    # Manifest cleanup — remove only previously installed directories on re-run
+    $manifest = Join-Path $skillsDir ".planifest-manifest"
+    if (Test-Path $manifest) {
+        Write-Host "  Re-run detected — removing previously installed directories"
+        Get-Content -Path $manifest | Where-Object { $_ -ne '' } | ForEach-Object {
+            if (Test-Path $_) {
+                Remove-Item -Path $_ -Recurse -Force
+                Write-Host "  - removed: $(Split-Path -Leaf $_)"
+            }
+        }
+        Remove-Item -Path $manifest -Force
+    }
+
     # Copy skills (now automatically bundles supporting files)
     Copy-PlanifestSkills -TargetDir $skillsDir
 
@@ -920,6 +933,14 @@ function Invoke-PlanifestSetup {
         Write-Host ""
         Write-Host "  Installing Copilot agent hooks adapter"
         Install-CopilotAdapter
+    }
+
+    # Write manifest listing all installed skill directories (enables safe re-run cleanup)
+    New-Item -ItemType Directory -Path $skillsDir -Force | Out-Null
+    $installedDirs = @(Get-ChildItem -Path $skillsDir -Directory | ForEach-Object { $_.FullName })
+    if ($installedDirs.Count -gt 0) {
+        $installedDirs | Set-Content -Path $manifest -Encoding UTF8
+        Write-Host "  + .planifest-manifest ($($installedDirs.Count) entries)"
     }
 
     Write-Host "  Done."

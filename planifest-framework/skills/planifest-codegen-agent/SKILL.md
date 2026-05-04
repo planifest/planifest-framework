@@ -2,7 +2,7 @@
 name: planifest-codegen-agent
 description: Generates the full implementation from the requirements set - application code, tests, infrastructure, configuration. Invoked during Phase 3.
 bundle_templates: [component.template.yml, data-contract.template.md]
-bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md, formatting-standards.md, library-standards/_version-policy.md]
+bundle_standards: [code-quality-standards.md, testing-standards.md, stack-summary.md, formatting-standards.md, library-standards/_version-policy.md, build-target-standards.md, telemetry-standards.md]
 hooks:
   phase: codegen
 ---
@@ -13,14 +13,14 @@ hooks:
 
 ---
 
-## Hard Limits
+## Build Target: docker
 
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
+When `Build target: docker` is declared in `plan/current/design.md`:
+- **Never** check host-installed runtimes or tools (do not run `node`, `dotnet`, `python`, `go`, `ruby`, `java`, or equivalent CLI commands against the host)
+- **Never** fail or warn because a runtime is absent on the host — it is expected to be absent
+- Scaffold Dockerfile-first: a working `Dockerfile` (multi-stage where applicable) is the primary build artifact
+- Generate `Dockerfile` and `docker-compose.yml` (or equivalent) before any source code
+- All validation runs via `docker build` and `docker run`, not via host toolchain
 
 ---
 
@@ -131,7 +131,7 @@ If `planifest-overrides/` does not exist or the language subdir is a stub (conta
 - Before writing any component that owns data, check whether a data contract exists at `src/{component-id}/docs/data-contract.md`. If one exists, implement against it. If none exists, create one there before writing any schema code.
 - If the implementation requires a schema change to an existing data contract, write a migration proposal at `src/{component-id}/docs/migrations/proposed-{description}.md` and stop. Do not modify the schema directly. This is a hard limit.
 
-**TDD Inner Loop Protocol (ADR-001):**
+**TDD Inner Loop Protocol:**
 
 For each functional requirement, orchestrate three sub-agents in sequence before moving to the next requirement. This is the mandatory implementation discipline — not optional.
 
@@ -153,7 +153,7 @@ for each requirement in plan/current/requirements/:
       wait for human direction before continuing
 ```
 
-**Sub-agent model tier (ADR-002):** Sub-agents declare `recommended_model: haiku` in their frontmatter. Invoke them at the cheaper model tier when the tool supports per-invocation model override. You (the codegen-agent) retain the full model for orchestration, synthesis, and cross-requirement coherence.
+**Sub-agent model tier:** Sub-agents declare `recommended_model: haiku` in their frontmatter. Invoke them at the cheaper model tier when the tool supports per-invocation model override. You (the codegen-agent) retain the full model for orchestration, synthesis, and cross-requirement coherence.
 
 **Escalation format** (after 3 failed red→green attempts on one requirement):
 ```
@@ -229,28 +229,7 @@ Independent implementation work MUST be parallelised. Components with no shared 
 
 ## Telemetry
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-**`phase_start` and `phase_end`** are emitted by the orchestrator, not this skill. The orchestrator emits `phase_start` before invoking this skill and `phase_end` after it completes.
-
-Each `emit_event` call must use the full envelope. The snippets below show the `data` field only:
-
-```json
-{
-  "schema_version": "1.0",
-  "event": "<event_name>",
-  "agent": "planifest-codegen-agent",
-  "phase": "codegen",
-  "tool": "<tool e.g. claude-code>",
-  "model": "<active model id>",
-  "mcp_mode": "none" | "workspace" | "context" | "workspace+context",
-  "session_id": "<session id>",
-  "timestamp": "<ISO 8601 UTC>",
-  "data": { }
-}
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`deviation`** — when implementation diverges from the confirmed design:
 ```json
@@ -271,8 +250,3 @@ Each `emit_event` call must use the full envelope. The snippets below show the `
 ```json
 { "phase_name": "codegen", "action_id": "<action>", "attempt_count": 5 }
 ```
-
----
-
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-

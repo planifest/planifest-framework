@@ -87,5 +87,3 @@ Quality improvements out of scope:
 - Do not run only the current requirement's test — you must run the full suite
 
 ---
-
-*This skill is invoked by planifest-codegen-agent. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
