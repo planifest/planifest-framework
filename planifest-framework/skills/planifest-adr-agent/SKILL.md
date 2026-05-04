@@ -1,8 +1,10 @@
-﻿---
+---
 name: planifest-adr-agent
 description: Produces Architecture Decision Records for each significant decision in the requirements. Invoked by the orchestrator during Phase 2.
 bundle_templates: [adr.template.md]
-bundle_standards: []
+bundle_standards: [formatting-standards.md, telemetry-standards.md]
+hooks:
+  phase: adr
 ---
 
 # Planifest - adr-agent
@@ -11,22 +13,10 @@ bundle_standards: []
 
 ---
 
-## Hard Limits
-
-1. Requirements must be complete before code generation begins.
-2. No direct schema modification - write a migration proposal and stop.
-3. Destructive schema operations require human approval - no exceptions.
-4. Data is owned by one component - never write to data owned by another.
-5. Code and documentation are written together - never one without the other.
-6. Credentials are never in your context.
-
----
-
 ## Input
 
-- Design Requirements at `plan/current/design-requirements.md`
+- Design at `plan/current/design.md`
 - OpenAPI Specification at `plan/current/openapi-spec.yaml`
-- design at `plan/current/design.md` (for stack declaration)
 
 ---
 
@@ -80,30 +70,24 @@ Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
 ---
 
+## Parallelism Directive
+
+Independent ADRs MUST be written in parallel. Apply the dependency test: does ADR-B reference or depend on a decision in ADR-A? If no — write them in the same parallel batch.
+
+| MUST parallelise | Cannot parallelise |
+|------------------|--------------------|
+| ADRs for stack choices that do not reference each other | ADR-B that says "given the decision in ADR-A, we choose..." |
+| ADRs for independent components (no shared decisions) | ADR for data ownership after component boundaries are settled |
+
+**In practice:** Assess all required ADRs upfront. Group independent ones and write them in a single parallel batch. Write cross-referencing ADRs sequentially after their dependencies.
+
+---
+
 ## Telemetry
 
-**Gate — check both before every emission. If either is false, skip silently:**
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
-
-Use envelope fields: `schema_version: "1.0"`, `agent: "planifest-adr-agent"`, `phase: "adr"`, `tool`, `model`, `mcp_mode`, `session_id`, `timestamp`.
-
-**`phase_start`** — at task entry:
-```json
-{ "phase_name": "adr" }
-```
-
-**`phase_end`** — at task exit:
-```json
-{ "phase_name": "adr", "status": "pass" | "fail", "duration_ms": <elapsed ms> }
-```
+See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
 **`adr_decision`** — after each ADR is written to disk:
 ```json
 { "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }
 ```
-
----
-
-*This skill is invoked by the orchestrator. See [Orchestrator Skill](../planifest-orchestrator/SKILL.md)*
-
