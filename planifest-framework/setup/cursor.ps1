@@ -10,7 +10,4 @@
     WorkflowsDir = ''
     BootFile     = '.cursor\rules\planifest.mdc'
     BootTemplate   = "planifest-framework/templates/cursor-boot.md"
-    # context-mode MCP routing rules — installed when --context-mode-mcp is passed
-    AgentsFile     = '.cursor\rules\context-mode.mdc'
-    AgentsTemplate = "planifest-framework/templates/context-mode-agents.md"
 }

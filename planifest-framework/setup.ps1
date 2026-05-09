@@ -882,13 +882,6 @@ function Invoke-PlanifestSetup {
         Append-OverrideInstructions -BootFilePath $toolConfig.BootFile
     }
 
-    # Install context-mode MCP routing rules if --context-mode-mcp flag is set
-    if ($ContextModeMcp -and $toolConfig.AgentsFile -and $toolConfig.AgentsTemplate) {
-        $agentsContentPath = Join-Path $ProjectRoot $toolConfig.AgentsTemplate
-        $agentsContent = Get-Content -Raw -Path $agentsContentPath
-        Write-PlanifestBootFile -RelPath $toolConfig.AgentsFile -Content $agentsContent
-    }
-
     # Install Planifest enforcement hooks unconditionally (gate-write, check-design)
     if ($toolConfig.EnforcementHooksSrc -and $toolConfig.EnforcementHooksDir -and $toolConfig.SettingsFile) {
         Install-EnforcementHooks `
@@ -961,7 +954,7 @@ if (-not $Tool) {
     Write-Host "  all"
     Write-Host ""
     Write-Host "Flags:"
-    Write-Host "  --context-mode-mcp           Install context-mode MCP routing rules file"
+    Write-Host "  --context-mode-mcp           Install context-mode enforcement hooks (Claude Code only)"
     Write-Host "                               (only needed if context-mode MCP plugin is installed)"
     Write-Host "                               See: https://github.com/mksglu/context-mode"
     Write-Host "  --structured-telemetry-mcp   Install structured telemetry hooks"

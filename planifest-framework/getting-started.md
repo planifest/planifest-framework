@@ -79,7 +79,7 @@ Install context-mode first, then pass `--context-mode-mcp` during setup, after t
 .\planifest-framework\setup.ps1 claude-code --context-mode-mcp
 ```
 
-Installs everything above, plus routing rules (`AGENTS.md`) and (for Claude Code) enforcement hooks that physically block native tool use (`Grep`, `Bash` web/grep patterns, `WebFetch`) to prevent the agent from bypassing context-mode.
+Installs everything above, plus (for Claude Code) enforcement hooks that physically block native tool use (`Grep`, `Bash` web/grep patterns, `WebFetch`) to prevent the agent from bypassing context-mode. Routing rules are injected automatically by the plugin's system prompt.
 
 See [docs/context-mode.md](../docs/context-mode.md) for how it works and prerequisites.
 

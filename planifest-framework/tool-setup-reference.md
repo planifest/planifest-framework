@@ -25,7 +25,7 @@ Two setup scripts are provided - use whichever matches your OS:
 
 | Flag | Purpose |
 |------|---------|
-| `--context-mode-mcp` | Installs [context-mode](https://github.com/mksglu/context-mode) routing rules (`AGENTS.md`) and enforcement hooks (Claude Code only). |
+| `--context-mode-mcp` | Installs [context-mode](https://github.com/mksglu/context-mode) enforcement hooks (Claude Code only). Routing rules are provided by the plugin's system prompt. |
 | `--structured-telemetry-mcp` | Installs `.claude/telemetry-enabled` sentinel and (with `--context-mode-mcp`) the `context-pressure.mjs` PostToolUse hook. |
 
 ---
@@ -82,7 +82,6 @@ For each tool, the script:
     ├── block-grep.sh
     └── block-webfetch.sh
 CLAUDE.md
-AGENTS.md (if --context-mode-mcp)
 ```
 
 ---
@@ -296,13 +295,9 @@ All seven tools share these conventions:
 
 ## Context-Mode Integration
 
-When the `--context-mode-mcp` flag is passed, the setup script performs additional integration steps to protect the agent's context window.
+When the `--context-mode-mcp` flag is passed, the setup script installs enforcement hooks for Claude Code. Routing rules are provided automatically by the context-mode plugin's system prompt — no separate file is needed.
 
-### 1. Routing Rules (All Tools)
-
-A `context-mode-agents.md` template is copied to the project root as `AGENTS.md`. This file contains instructions for the agent to prefer `ctx_*` tools (provided by the context-mode MCP server) over native tools like `Grep` or `Bash`.
-
-### 2. Enforcement Hooks (Claude Code Only)
+### Enforcement Hooks (Claude Code Only)
 
 For Claude Code, the script installs physical guardrails that prevent the agent from bypassing the routing rules.
 
