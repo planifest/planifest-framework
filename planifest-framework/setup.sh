@@ -20,6 +20,7 @@ VALID_TOOLS="claude-code cursor codex antigravity copilot windsurf cline roo-cod
 CONTEXT_MODE_MCP=false
 STRUCTURED_TELEMETRY_MCP=false
 BACKEND_URL="http://localhost:3741"
+INCLUDE_FULL_SKILL_LIBRARY=false
 
 # --- Shared functions ---
 
@@ -108,6 +109,48 @@ copy_skills() {
       fi
     fi
   done
+}
+
+copy_external_skills() {
+  # Copies all skills from planifest-framework/external-skills/ into the tool's
+  # skill directory. Only run when --include-full-skill-library is passed (ADR-001).
+  # Each skill directory must contain SKILL.md and attribution.txt (ADR-002).
+  local target_dir="$1"
+  local external_dir="$SCRIPT_DIR/external-skills"
+
+  if [ ! -d "$external_dir" ]; then
+    echo "  [external-skills] directory not found — skipping"
+    return 0
+  fi
+
+  local count=0
+  for skill_dir in "$external_dir"/*/; do
+    [ -d "$skill_dir" ] || continue
+    local skill_name
+    skill_name="$(basename "$skill_dir")"
+
+    if [ ! -f "$skill_dir/SKILL.md" ]; then
+      echo "  [external-skills] $skill_name — SKILL.md missing, skipping"
+      continue
+    fi
+    if [ ! -f "$skill_dir/attribution.txt" ]; then
+      echo "  [external-skills] $skill_name — attribution.txt missing, skipping"
+      continue
+    fi
+
+    local dest_dir="$target_dir/$skill_name"
+    mkdir -p "$dest_dir"
+    cp "$skill_dir/SKILL.md" "$dest_dir/SKILL.md"
+    cp "$skill_dir/attribution.txt" "$dest_dir/attribution.txt"
+    echo "  + [external] $skill_name/SKILL.md"
+    ((count++)) || true
+  done
+
+  if [ "$count" -eq 0 ]; then
+    echo "  [external-skills] no valid skills found (each needs SKILL.md + attribution.txt)"
+  else
+    echo "  [external-skills] $count skill(s) installed"
+  fi
 }
 
 write_boot_file() {
@@ -817,6 +860,11 @@ setup_tool() {
   # Copy skills (now automatically bundles supporting files)
   copy_skills "$skills_dir"
 
+  # Copy external skills if --include-full-skill-library flag is set (REQ-004, ADR-001)
+  if [ "$INCLUDE_FULL_SKILL_LIBRARY" = true ]; then
+    copy_external_skills "$skills_dir"
+  fi
+
   # Copy workflows (if tool defines a workflow dir)
   if [ -n "${TOOL_WORKFLOWS_DIR:-}" ] && [ -d "$WORKFLOWS_SRC" ]; then
     local workflows_dir="$PROJECT_ROOT/$TOOL_WORKFLOWS_DIR"
@@ -957,6 +1005,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --context-mode-mcp) CONTEXT_MODE_MCP=true; shift ;;
     --structured-telemetry-mcp) STRUCTURED_TELEMETRY_MCP=true; shift ;;
+    --include-full-skill-library) INCLUDE_FULL_SKILL_LIBRARY=true; shift ;;
     --backend-url)
       if [[ -z "${2:-}" ]] || [[ "${2:-}" == -* ]]; then
         echo "Error: --backend-url requires a value"; exit 1
@@ -987,6 +1036,10 @@ if [ -z "$TOOL" ]; then
   echo "                               Requires --context-mode-mcp to also be set."
   echo "                               Context-pressure hook installed when both flags are active."
   echo "  --backend-url <url>          Override telemetry backend URL (default: http://localhost:3741)"
+  echo "  --include-full-skill-library Copy curated open-source skills from external-skills/"
+  echo "                               to the tool's skill directory. Each skill carries an"
+  echo "                               attribution.txt with license and copyright details."
+  echo "                               Skills are MIT-licensed. Opt-in only (ADR-001)."
   echo ""
   echo "Run from the repository root."
   echo "Each tool's config: planifest-framework/setup/<tool>.sh"

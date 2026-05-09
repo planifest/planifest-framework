@@ -35,6 +35,34 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-09T23:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 2 (req files batch; scope+risk+glossary batch) |
+| Notes | 7 Phase 1 requirements written. Scope, risk register, domain glossary produced. No OpenAPI spec (no API component). |
+
+---
+
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-09T23:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 2 (ADR-001–004 batch; ADR-005–006 batch) |
+| Notes | 6 ADRs written. Decisions: opt-in skill library flag, attribution.txt format, auto-trigger hook+fallback, skill map in design.md, gate-write path normalisation, pause.md file format. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}

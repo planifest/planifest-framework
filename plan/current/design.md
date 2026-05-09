@@ -27,13 +27,17 @@
 - Deployment: file changes committed to local feat/ branch; human pushes and raises PR
 - API versioning: not applicable
 
+## Component Paths
+- planifest-framework/
+- .claude/
+
 ## Scope
 - In:
   - REQ-1: fix bare `.skips` refs in orchestrator SKILL.md → `plan/current/.skips`
   - REQ-2: auto-trigger orchestrator via UserPromptSubmit hook + CLAUDE.md fallback
   - REQ-3a: orchestrator instructs phase agents to decompose into subagents with skill-library lookup and model-tier selection
   - REQ-3b: skill-to-requirement mapping from P0; re-evaluated at each gate; human confirms
-  - REQ-4: curated open-source skill library in `planifest-framework/external-skills/`; `--include-full-skill-library` flag; permissive-license only; each skill directory contains `attribution.txt` with license type, copyright holder, source URL, and any required attribution text; library populated during this pipeline run via web search
+  - REQ-4: curated open-source skill library in `planifest-framework/external-skills/`; `--include-full-skill-library` flag; permissive-license only; each skill directory contains `attribution.txt` with license type, copyright holder, source URL, required attribution text, and full license text appended at the bottom; library populated during this pipeline run via web search
   - REQ-5: pause.md written on command; resume detection restores from exact pause point
   - REQ-6: setup.ps1 and setup.sh inject planifest-overrides/instructions/ into orchestrator SKILL.md and copied workflow files; sentinel-marker idempotency
   - REQ-7: setup.sh Append-OverrideInstructions parity with PS1
@@ -64,6 +68,18 @@
 ## Dependencies
 - Upstream: context-mode plugin (routing, not enforcement — no direct code dependency)
 - Downstream: none
+
+## Skill Map
+| Requirement | Best-fit Skill | Rationale |
+|-------------|----------------|-----------|
+| REQ-001 - skips-path-fix | planifest-codegen-agent | Text substitution in Markdown SKILL.md |
+| REQ-002 - auto-trigger-orchestrator | planifest-codegen-agent | New JS hook file + settings.json + CLAUDE.md |
+| REQ-003a - subagent-decomposition | planifest-codegen-agent | Orchestrator SKILL.md prose update |
+| REQ-003b - skill-requirement-mapping | planifest-codegen-agent | Orchestrator SKILL.md + design.template.md update |
+| REQ-004 - open-source-skill-library | planifest-codegen-agent | Web search + external-skills/ dir + setup script flag |
+| REQ-005 - attribution-validation | planifest-codegen-agent | Bash test script for attribution.txt completeness |
+| REQ-006 - pause-resume | planifest-codegen-agent | pause.template.md + orchestrator SKILL.md updates |
+| REQ-007 - gate-write-windows-fix | planifest-codegen-agent | JS path normalisation fix + bash regression test |
 
 ## Active Skills
 None

@@ -15,7 +15,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import { join, normalize, resolve } from "node:path";
+import { basename, join, normalize, resolve } from "node:path";
 
 // Always-permitted: planning/doc artefacts and Planifest internal files
 const ALWAYS_PERMITTED_PREFIXES = ["plan/", "plan\\", "docs/", "docs\\"];
@@ -23,6 +23,7 @@ const ALWAYS_PERMITTED_FILES = [
   "claude.md", "agents.md", ".planifest-session", ".skips", ".feature-id",
   ".gitignore", ".gitattributes", ".claudeignore", ".cursorignore",
   ".windsurfignore", ".clineignore", ".cursorindexingignore",
+  "pause.md",
 ];
 
 // Headings that introduce the component paths list in design.md (ADR-004)
@@ -90,19 +91,25 @@ try {
   // No target path = pass (not a file-writing tool call)
   if (!rawTarget) process.exit(0);
 
-  // Resolve to a path relative to cwd for prefix matching
+  // Resolve to a path relative to cwd for prefix matching.
+  // Normalise both paths to forward-slash form before comparison to avoid
+  // mixed-separator failures on Windows (ADR-005, REQ-012).
   const absTarget = resolve(cwd, rawTarget);
-  const cwdWithSep = cwd.endsWith("/") || cwd.endsWith("\\") ? cwd : cwd + "/";
-  const relTarget = absTarget.startsWith(cwdWithSep)
-    ? absTarget.slice(cwdWithSep.length)
-    : rawTarget;
+  const normCwd = norm(cwd);
+  const normAbs = norm(absTarget);
+  const cwdPrefix = normCwd.endsWith("/") ? normCwd : normCwd + "/";
+  const relTarget = normAbs.startsWith(cwdPrefix)
+    ? normAbs.slice(cwdPrefix.length)
+    : norm(rawTarget);
 
   // Check 0 — sentinel enforcement for plan/current/** (REQ-007, ADR-003)
-  // plan/current/feature-brief.md is always writable so P0 can begin.
+  // feature-brief.md and ALWAYS_PERMITTED_FILES (e.g. pause.md) bypass sentinel so
+  // P0 can begin and pause/resume works at any pipeline phase.
   const normRel = norm(relTarget);
   const isPlanCurrent = normRel.startsWith("plan/current/") || normRel === "plan/current";
   const isFeatureBrief = normRel.endsWith("feature-brief.md");
-  if (isPlanCurrent && !isFeatureBrief) {
+  const isAlwaysPermittedBasename = ALWAYS_PERMITTED_FILES.includes(basename(relTarget));
+  if (isPlanCurrent && !isFeatureBrief && !isAlwaysPermittedBasename) {
     const sentinelPath = join(cwd, "plan", ".orchestrator-active");
     if (!existsSync(sentinelPath)) {
       process.stdout.write(

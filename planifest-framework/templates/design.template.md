@@ -45,6 +45,11 @@
 ## Active Skills
 {List of capability skills available for this run, or "None"}
 
+## Skill Map
+| Requirement | Best-fit Skill | Rationale |
+|-------------|----------------|-----------|
+| {REQ-NNN} - {slug} | planifest-{skill-name} | {one-line reason} |
+
 ## Repo Instructions
 {Contents of planifest-overrides/instructions/ files, or "None"}
 

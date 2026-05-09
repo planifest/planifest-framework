@@ -17,7 +17,7 @@ version: "0.1.0"
 - Each skill occupies its own subdirectory: `planifest-framework/external-skills/{skill-name}/`
 - Each skill directory contains:
   - `SKILL.md` — the skill content (unchanged from source, or minimally adapted for SKILL.md format)
-  - `attribution.txt` — containing: license type, copyright holder, source URL, and any required attribution text from the original license
+  - `attribution.txt` — containing: license type, copyright holder, source URL, any required attribution text from the original license, and the full text of the license appended at the bottom of the file
 - Only skills with permissive licenses (MIT, Apache 2.0, ISC, BSD-2-Clause, BSD-3-Clause, or equivalent) are included; skills with GPL, AGPL, or unknown licenses are excluded
 - `setup.sh` and `setup.ps1` accept a new flag `--include-full-skill-library`; when set, all skills in `external-skills/` are copied to the tool's skill directory alongside the built-in skills
 - Without the flag, external skills are not copied (opt-in)
@@ -28,7 +28,7 @@ version: "0.1.0"
 
 - [ ] `planifest-framework/external-skills/` exists with at least 3 skill subdirectories
 - [ ] Every skill subdirectory contains both `SKILL.md` and `attribution.txt`
-- [ ] `attribution.txt` in each skill contains: license type, copyright holder, source URL, required attribution text
+- [ ] `attribution.txt` in each skill contains: license type, copyright holder, source URL, required attribution text, and full license text appended at the bottom
 - [ ] No skill with a GPL, AGPL, or unknown license is included
 - [ ] `setup.sh --include-full-skill-library` copies all external skills to the tool's skill dir
 - [ ] `setup.ps1 --include-full-skill-library` does the same (PS1 parity)

@@ -72,9 +72,10 @@ On every session start, before taking any action:
 1. **Scan for pending migrations** — check `planifest-framework/migrations/` for any `.md` files not in `_done/`. If found, invoke the `planifest-migrator` skill for each pending migration before any other phase work. Migrations take priority.
 2. Check `plan/current/` for existing artifacts (`design.md`, `requirements/`, `adr/`, etc.)
 3. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
-4. Check for `.skips` file — if present, read and acknowledge skipped phases at the top of your response
-5. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
-6. If no artifacts: open with `P0:` and begin coaching
+4. Check for `plan/current/.skips` file — if present, read and acknowledge skipped phases at the top of your response
+5. Check for `plan/current/pause.md` file — if present, open with `Px: Resuming — {active_task from pause.md}`, restore in-progress state from the file, delete `plan/current/pause.md`, and continue from where the session paused
+6. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
+7. If no artifacts: open with `P0:` and begin coaching
 
 ---
 
@@ -158,12 +159,37 @@ The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and rel
 When a human explicitly requests to skip a phase (e.g. "skip security", "we don't need ADRs"):
 
 1. **Acknowledge the skip immediately** — do not argue, do not ask for justification
-2. **Write the skip record** to `.skips` in the same turn (append if file exists):
+2. **Write the skip record** to `plan/current/.skips` in the same turn (append if file exists):
    ```
    {phase}: skipped by human on {ISO-8601 date} — {reason if given, or "no reason given"}
    ```
 3. **Continue** to the next phase
-4. The ship-agent will read `.skips` and include it in the changelog when archiving
+4. The ship-agent will read `plan/current/.skips` and include it in the changelog when archiving
+
+---
+
+## Pause Command
+
+When the human says "pause", "pause session", or similar:
+
+1. **Identify the current state** — note the active phase, the task in progress, and the last artifact written.
+
+2. **Write `plan/current/pause.md`** — read `planifest-framework/templates/pause.template.md` for the exact format. Populate:
+   - `phase`: current phase identifier (e.g. `P3`)
+   - `active_task`: the task in progress at pause time
+   - `last_artefact`: path to the last file written
+   - Body: detailed in-progress state sufficient for exact-point resume
+
+3. **Confirm to the human:**
+   ```
+   Px: Paused — {active_task}
+   Pause record written to plan/current/pause.md.
+   Resume in a new session by loading the planifest-orchestrator skill.
+   ```
+
+4. **Stop all pipeline work.** Do not proceed to the next phase or task.
+
+**Resume:** On next session start, resume detection (step 5 in Resume Detection) reads `plan/current/pause.md` and restores from the exact pause point. The file is deleted once the interrupted task has been re-engaged.
 
 ---
 
@@ -309,6 +335,17 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
 3. **Load repo instructions** — check `planifest-overrides/instructions/` (if the directory exists). Read all `.md` files. Write their contents to `plan/current/design.md` under `## Repo Instructions` once design.md is created. If the directory is absent or empty, write `## Repo Instructions: None`.
 
+4. **Produce Skill Map** — after the confirmed design is written and before presenting it for human confirmation, produce a `## Skill Map` section in `plan/current/design.md`. For each functional requirement, identify the best-fit Planifest skill from `planifest-framework/skills/`. Format:
+
+   ```markdown
+   ## Skill Map
+   | Requirement | Best-fit Skill | Rationale |
+   |-------------|----------------|-----------|
+   | REQ-001 - {slug} | planifest-{skill-name} | {one-line reason} |
+   ```
+
+   Present the Skill Map to the human as part of the design confirmation. Re-evaluate and update the `## Skill Map` section at each phase gate before proceeding to the next phase — requirements or skills may have changed.
+
 3. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skill Intake protocol below before proceeding.
 
 Repeat the skills inbox check at the start of every phase transition (P0→P1, P1→P2, etc.).
@@ -451,6 +488,15 @@ Before invoking the codegen-agent, check whether relevant **capability skills** 
 
 Check the team's available skill set (Anthropic's published library, team custom skills, third-party skills) against the stack declaration. If relevant skills exist, recommend loading them alongside the codegen-agent. The human confirms which to load.
 
+**Subagent Decomposition Directive:** For hard or multi-step tasks within a phase, the codegen-agent (and other phase agents) MUST decompose work into subagents rather than attempting it inline. Apply this rule for every requirement:
+
+1. **Consult the Skill Map** — read `## Skill Map` in `plan/current/design.md`. The map records which Planifest skill is best suited to implement or verify each requirement.
+2. **Select the best-fit skill** — use the skill named in the map for that requirement. If the map is absent or the requirement is new, select from the available skill library using the Model Tier Decision Table.
+3. **Select model tier** — use the Model Tier Decision Table below. Pass the resolved model name explicitly when invoking the subagent.
+4. **Dispatch** — invoke the subagent with a self-contained prompt including the requirement file path, relevant ADRs, and the stack declaration. Do not pass the full conversation history.
+
+The codegen-agent owns subagent orchestration within Phase 3. Phase agents for P4–P6 apply the same decomposition rule for their own hard tasks.
+
 Invoke the **codegen-agent** skill.
 
 **Input:** Full requirements artifact set from Phases 1 and 2, stack declaration from the confirmed design
@@ -529,9 +575,9 @@ Exceptions — proceed without confirmation if either:
 
 Invoke the **ship-agent** skill.
 
-**Input:** All artifacts from all phases; `.skips` file (if any)
+**Input:** All artifacts from all phases; `plan/current/.skips` file (if any)
 
-**What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `.skips` processed and deleted, `plan/current/` archived to `plan/archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
+**What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
 
 **Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. Wait for the ship-agent to report `P8: Complete` before delivering final confirmation to the human.
 
