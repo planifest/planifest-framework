@@ -376,7 +376,8 @@ install_tier1_hook_registration() {
 }
 
 install_enforcement_hooks() {
-  # Copy gate-write.mjs + check-design.mjs and wire PreToolUse/UserPromptSubmit (REQ-006, REQ-008).
+  # Copy enforcement hooks and wire PreToolUse/UserPromptSubmit (REQ-002, REQ-006, REQ-008).
+  # Includes auto-trigger-orchestrator.mjs (REQ-002), gate-write.mjs, check-design.mjs.
   # Always installed, regardless of MCP flags.
   local hooks_src_rel="$1"   # e.g. hooks/enforcement
   local hooks_dir_rel="$2"   # e.g. .claude/hooks/enforcement
@@ -405,14 +406,16 @@ install_enforcement_hooks() {
 
   # Wire into settings.json (requires node; jq fallback not needed — node is always available)
   local gate_cmd="$hooks_dir_rel/gate-write.mjs"
+  local trigger_cmd="$hooks_dir_rel/auto-trigger-orchestrator.mjs"
   local design_cmd="$hooks_dir_rel/check-design.mjs"
 
   if command -v node >/dev/null 2>&1; then
-    PLANIFEST_GATE="$gate_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+    PLANIFEST_GATE="$gate_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
       const fs = require("fs"), path = require("path");
-      const gate   = process.env.PLANIFEST_GATE;
-      const design = process.env.PLANIFEST_DESIGN;
-      const sf     = process.env.PLANIFEST_SETTINGS;
+      const gate    = process.env.PLANIFEST_GATE;
+      const trigger = process.env.PLANIFEST_TRIGGER;
+      const design  = process.env.PLANIFEST_DESIGN;
+      const sf      = process.env.PLANIFEST_SETTINGS;
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
       s.hooks = s.hooks || {};
@@ -424,10 +427,13 @@ install_enforcement_hooks() {
         {matcher:"Write", hooks:[{type:"command",command:gate}]},
         {matcher:"Edit",  hooks:[{type:"command",command:gate}]}
       );
-      // UserPromptSubmit: check-design (idempotent)
+      // UserPromptSubmit: auto-trigger-orchestrator first, then check-design (REQ-002, idempotent)
       s.hooks.UserPromptSubmit = (s.hooks.UserPromptSubmit || [])
-        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("check-design")));
+        .filter(h => !(h.hooks||[]).some(e =>
+          (e.command||"").includes("auto-trigger-orchestrator") ||
+          (e.command||"").includes("check-design")));
       s.hooks.UserPromptSubmit.push(
+        {matcher:".*", hooks:[{type:"command",command:trigger}]},
         {matcher:".*", hooks:[{type:"command",command:design}]}
       );
       fs.mkdirSync(path.dirname(sf),{recursive:true});
@@ -436,7 +442,7 @@ install_enforcement_hooks() {
     echo "  ~ $settings_rel (enforcement hooks wired)"
   else
     echo "  ! Warning: node not found — skipping settings.json enforcement hook wiring"
-    echo "  ! Manually add gate-write (Write/Edit PreToolUse) and check-design (UserPromptSubmit) to $settings_rel"
+    echo "  ! Manually add gate-write (Write/Edit PreToolUse), auto-trigger-orchestrator and check-design (UserPromptSubmit) to $settings_rel"
   fi
 }
 
