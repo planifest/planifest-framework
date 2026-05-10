@@ -166,6 +166,94 @@ write_boot_file() {
   fi
 }
 
+copy_capability_skills() {
+  # Copies permanent capability skills from planifest-overrides/capability-skills/
+  # to the tool's skills directory (REQ-008, parity with setup.ps1 Copy-CapabilitySkills).
+  local target_dir="$1"
+  local cap_skills_dir="$PROJECT_ROOT/planifest-overrides/capability-skills"
+
+  if [ ! -d "$cap_skills_dir" ]; then
+    return
+  fi
+
+  local found=false
+  for skill_dir in "$cap_skills_dir"/*/; do
+    [ -d "$skill_dir" ] || continue
+    local skill_name
+    skill_name="$(basename "$skill_dir")"
+    local skill_md="$skill_dir/SKILL.md"
+
+    if [ ! -f "$skill_md" ]; then
+      echo "  ! Warning: capability skill '$skill_name' missing SKILL.md — skipping"
+      continue
+    fi
+
+    local dest_dir="$target_dir/$skill_name"
+    mkdir -p "$dest_dir"
+    cp "$skill_md" "$dest_dir/SKILL.md"
+    echo "  + capability-skill: $skill_name"
+    found=true
+  done
+
+  if [ "$found" = true ]; then
+    echo "  Syncing capability skills from planifest-overrides/capability-skills/"
+  fi
+}
+
+append_override_instructions() {
+  # Appends project-specific instructions from planifest-overrides/instructions/
+  # into the boot file between sentinel markers (idempotent). (REQ-006, REQ-007,
+  # parity with setup.ps1 Append-OverrideInstructions).
+  local boot_file="$PROJECT_ROOT/$1"
+  local instr_dir="$PROJECT_ROOT/planifest-overrides/instructions"
+  local start_marker="<!-- planifest-overrides:instructions:start -->"
+  local end_marker="<!-- planifest-overrides:instructions:end -->"
+
+  if [ ! -d "$instr_dir" ]; then
+    return
+  fi
+
+  # Collect .md files (sorted)
+  local files=()
+  while IFS= read -r f; do
+    files+=("$f")
+  done < <(find "$instr_dir" -maxdepth 1 -name "*.md" 2>/dev/null | sort)
+
+  if [ "${#files[@]}" -eq 0 ]; then
+    return
+  fi
+
+  # Idempotent: strip existing override block before re-appending
+  if [ -f "$boot_file" ] && command -v node >/dev/null 2>&1; then
+    PLANIFEST_BOOT="$boot_file" node -e '
+      const fs = require("fs");
+      const b = process.env.PLANIFEST_BOOT;
+      if (!fs.existsSync(b)) process.exit(0);
+      let c = fs.readFileSync(b, "utf8");
+      const s = "<!-- planifest-overrides:instructions:start -->";
+      const e = "<!-- planifest-overrides:instructions:end -->";
+      const re = new RegExp("\\n?" + s.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\$&") +
+        "[\\s\\S]*?" + e.replace(/[.*+?^${}()|[\\]\\\\]/g,"\\\\$&") + "\\n?", "g");
+      fs.writeFileSync(b, c.replace(re, ""), "utf8");
+    '
+  fi
+
+  # Append fresh block
+  {
+    echo ""
+    echo "$start_marker"
+    for f in "${files[@]}"; do
+      echo ""
+      cat "$f"
+    done
+    echo ""
+    echo "$end_marker"
+  } >> "$boot_file"
+
+  echo "  Appending override instructions from planifest-overrides/instructions/"
+}
+
+
 copy_workflow() {
   local workflow_file="$1"
   local target_dir="$2"
@@ -871,6 +959,9 @@ setup_tool() {
     copy_external_skills "$skills_dir"
   fi
 
+  # Copy permanent capability skills from planifest-overrides/ (REQ-008)
+  copy_capability_skills "$skills_dir"
+
   # Copy workflows (if tool defines a workflow dir)
   if [ -n "${TOOL_WORKFLOWS_DIR:-}" ] && [ -d "$WORKFLOWS_SRC" ]; then
     local workflows_dir="$PROJECT_ROOT/$TOOL_WORKFLOWS_DIR"
@@ -885,6 +976,11 @@ setup_tool() {
       TOOL_BOOT_CONTENT=$(cat "$SCRIPT_DIR/../$TOOL_BOOT_TEMPLATE")
     fi
     write_boot_file "$PROJECT_ROOT/$TOOL_BOOT_FILE" "$TOOL_BOOT_CONTENT"
+  fi
+
+  # Append project-specific override instructions to boot file (REQ-006, REQ-007)
+  if [ -n "${TOOL_BOOT_FILE:-}" ]; then
+    append_override_instructions "$TOOL_BOOT_FILE"
   fi
 
   # Install context-mode enforcement hooks if --context-mode-mcp flag is set (REQ-004)

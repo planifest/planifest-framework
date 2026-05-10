@@ -57,7 +57,7 @@ $SkillsSrc = Join-Path $ScriptDir 'skills'
 $WorkflowsSrc = Join-Path $ScriptDir 'workflows'
 $SetupDir = Join-Path $ScriptDir 'setup'
 
-$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot', 'windsurf', 'cline')
+$ValidTools = @('claude-code', 'cursor', 'codex', 'antigravity', 'copilot', 'windsurf', 'cline', 'opencode')
 
 # --- Shared functions ---
 
@@ -438,6 +438,89 @@ function Install-EnforcementHooks {
     }
 
     Merge-EnforcementHookSettings -SettingsPath $settings -HooksDir $HooksDirRel
+}
+
+function Install-Tier1Hooks {
+    # Copies the Tier 1 adapter + shared enforcement/telemetry scripts (REQ-009).
+    param(
+        [string]$AdapterSrcRel,   # e.g. hooks\adapters\cursor.mjs
+        [string]$AdapterDestRel,  # e.g. .cursor\hooks\adapters\cursor.mjs
+        [string]$HooksInstallDir  # e.g. .cursor\hooks
+    )
+
+    $adapterSrc  = Join-Path $ScriptDir $AdapterSrcRel
+    $adapterDest = Join-Path $ProjectRoot $AdapterDestRel
+    $hooksDir    = Join-Path $ProjectRoot $HooksInstallDir
+
+    if (-not (Test-Path $adapterSrc)) {
+        Write-Host "  ! Warning: Tier 1 adapter not found at $adapterSrc — skipping"
+        return
+    }
+
+    Write-Host ""
+    Write-Host "  Installing Planifest Tier 1 adapter hooks (REQ-009)"
+
+    # Copy adapter
+    $adapterDir = Split-Path -Parent $adapterDest
+    New-Item -ItemType Directory -Path $adapterDir -Force | Out-Null
+    Copy-Item -Path $adapterSrc -Destination $adapterDest -Force
+    Write-Host "  + $AdapterDestRel"
+
+    # Copy enforcement scripts (gate-write, check-design, auto-trigger-orchestrator)
+    $enfSrc  = Join-Path $ScriptDir 'hooks\enforcement'
+    $enfDest = Join-Path $hooksDir 'enforcement'
+    if (Test-Path $enfSrc) {
+        New-Item -ItemType Directory -Path $enfDest -Force | Out-Null
+        Get-ChildItem -Path $enfSrc -Filter '*.mjs' | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination (Join-Path $enfDest $_.Name) -Force
+            Write-Host "  + $HooksInstallDir\enforcement\$($_.Name)"
+        }
+    }
+
+    # Copy telemetry scripts (emit-phase-start, emit-phase-end)
+    $telemSrc  = Join-Path $ScriptDir 'hooks\telemetry'
+    $telemDest = Join-Path $hooksDir 'telemetry'
+    if (Test-Path $telemSrc) {
+        New-Item -ItemType Directory -Path $telemDest -Force | Out-Null
+        Get-ChildItem -Path $telemSrc -Filter 'emit-phase-*.mjs' | ForEach-Object {
+            Copy-Item -Path $_.FullName -Destination (Join-Path $telemDest $_.Name) -Force
+            Write-Host "  + $HooksInstallDir\telemetry\$($_.Name)"
+        }
+    }
+
+    Write-Host "  [Planifest] Tier 1 adapter hooks installed."
+}
+
+function Install-Tier1HookRegistration {
+    # Writes PreToolUse hook registration pointing to the Tier 1 adapter (REQ-009).
+    param(
+        [string]$AdapterDestRel,  # e.g. .cursor\hooks\adapters\cursor.mjs
+        [string]$SettingsRel      # e.g. .cursor\settings.json
+    )
+
+    $settings    = Join-Path $ProjectRoot $SettingsRel
+    $adapterCmd  = "node $AdapterDestRel gate-write"
+
+    $js = @"
+const fs = require('fs'), path = require('path');
+const adapterCmd = '$($adapterCmd.Replace('','\'))';
+const sf = '$($settings.Replace('','\'))';
+let s = {};
+if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,'utf8').replace(/^﻿/,''));
+s.hooks = s.hooks || {};
+s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
+  .filter(h => !['Write','Edit'].includes(h.matcher) ||
+               !(h.hooks||[]).some(e => (e.command||'').includes('gate-write')));
+s.hooks.PreToolUse.push(
+  {matcher:'Write', hooks:[{type:'command',command:adapterCmd}]},
+  {matcher:'Edit',  hooks:[{type:'command',command:adapterCmd}]}
+);
+fs.mkdirSync(path.dirname(sf),{recursive:true});
+fs.writeFileSync(sf, JSON.stringify(s,null,2)+'
+');
+"@
+    node -e $js
+    Write-Host "  ~ $SettingsRel (Tier 1 adapter hook registration written)"
 }
 
 function Invoke-PlanifestGuardrails {
@@ -926,6 +1009,17 @@ function Invoke-PlanifestSetup {
         Write-Host ""
         Write-Host "  Installing Copilot agent hooks adapter"
         Install-CopilotAdapter
+    }
+
+    # Install Tier 1 adapter for tools with native hook support (REQ-009)
+    if ($toolConfig.Tier -eq 1 -and $toolConfig.HookAdapterSrc) {
+        Install-Tier1Hooks `
+            -AdapterSrcRel  $toolConfig.HookAdapterSrc `
+            -AdapterDestRel $toolConfig.HookAdapterDest `
+            -HooksInstallDir $toolConfig.HooksInstallDir
+        Install-Tier1HookRegistration `
+            -AdapterDestRel $toolConfig.HookAdapterDest `
+            -SettingsRel    $toolConfig.SettingsFile
     }
 
     # Write manifest listing all installed skill directories (enables safe re-run cleanup)
