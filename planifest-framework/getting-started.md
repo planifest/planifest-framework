@@ -115,18 +115,35 @@ The CI workflow is copied to `.github/workflows/planifest.yml` on first setup.
 
 ### 3b. Orchestrator Sentinel (activated automatically)
 
-When the orchestrator starts Phase 0, it creates a **sentinel file** at `plan/.orchestrator-active`. This is a zero-byte marker — no content, just existence — that tells the enforcement hooks an active pipeline run is in progress.
+When the orchestrator starts Phase 0, it creates a **sentinel file** at `plan/.orchestrator-active` containing the active feature-id. This tells the enforcement hooks a pipeline run is in progress.
 
-Two hooks check for it on every turn:
+Three hooks check for it on every turn:
 
 | Hook | What it does |
 |------|-------------|
 | **gate-write** (PreToolUse) | Blocks any write outside always-permitted paths unless `plan/current/design.md` exists and the target path is a declared component |
+| **check-orchestrator-presence** (UserPromptSubmit) | While a pipeline is active, injects a reminder banner on every prompt so the orchestrator skill is reloaded after context compaction or a session resume |
 | **check-design** (UserPromptSubmit) | If neither the sentinel nor a `feature-brief.md` is present, injects a hard STOP message before the agent can act |
 
 The sentinel is deleted **last** at Phase 7, after the archive is confirmed complete.
 
 You never need to create or delete it manually. If a pipeline run is interrupted and you want to start fresh, delete `plan/.orchestrator-active` and `plan/current/feature-brief.md`, then reload the orchestrator.
+
+#### Option: Strict Orchestrator Mode
+
+By default `check-orchestrator-presence` is advisory — it injects a reminder banner but never blocks. For stronger enforcement, enable **strict mode** at setup time:
+
+```bash
+# macOS / Linux
+./planifest-framework/setup.sh claude-code --strict-orchestrator
+```
+
+```powershell
+# Windows (PowerShell)
+.\planifest-framework\setup.ps1 claude-code --strict-orchestrator
+```
+
+This writes `plan/.orchestrator-strict`. When that file is present, the hook injects a hard-block banner on every new session until the orchestrator skill loads and writes a session acknowledgement to `plan/.orchestrator-ack`. Subsequent prompts in the same session pass silently. The ack file is deleted at Phase 7 so each new pipeline starts clean.
 
 ### 4. Write your first feature brief
 

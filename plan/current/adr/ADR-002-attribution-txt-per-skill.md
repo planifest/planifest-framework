@@ -12,16 +12,16 @@ version: "0.1.0"
 **Feature:** 0000009-framework-rail-tightening
 **Component:** planifest-framework
 **Status:** accepted
-**Date:** 2026-05-09
+**Date:** 09 May 2026
 
 ---
 
 ## Context
 
-Every skill in `planifest-framework/external-skills/` is sourced from a third-party repository under a third-party license. Planifest must record license and attribution information so that:
-1. Users who copy these skills know the license terms
+Every skill in `planifest-framework/external-skills/` is sourced from a third-party repository under a third-party licence. Planifest must record licence and attribution information so that:
+1. Users who copy these skills know the licence terms
 2. Framework maintainers can verify compliance before adding a skill
-3. The full license text travels with the skill even if the source URL becomes unavailable
+3. The full licence text travels with the skill even if the source URL becomes unavailable
 
 Three questions needed answering:
 - What information must be recorded?
@@ -33,13 +33,13 @@ Three questions needed answering:
 ## Decision
 
 Each external skill directory contains an `attribution.txt` file. The file holds:
-- **License type** (e.g. MIT, Apache 2.0)
-- **Copyright holder** (as stated in the original license)
+- **Licence type** (e.g. MIT, Apache 2.0)
+- **Copyright holder** (as stated in the original licence)
 - **Source URL** (the GitHub repo or file URL the skill was sourced from)
-- **Required attribution text** (any text the license requires to appear in redistributions)
-- **Full license text** appended at the bottom (the complete, unmodified license as retrieved from the source)
+- **Required attribution text** (any text the licence requires to appear in redistributions)
+- **Full licence text** appended at the bottom (the complete, unmodified licence as retrieved from the source)
 
-The file is plain text, not YAML or JSON, because its primary consumers are humans reading it directly — not machines parsing it. The full license text is included so the terms survive even if the upstream repo changes or disappears.
+The file is plain text, not YAML or JSON, because its primary consumers are humans reading it directly — not machines parsing it. The full licence text is included so the terms survive even if the upstream repo changes or disappears.
 
 ---
 
@@ -47,10 +47,10 @@ The file is plain text, not YAML or JSON, because its primary consumers are huma
 
 | Alternative | Pros | Cons | Why Rejected |
 |-------------|------|------|-------------|
-| SKILL.md frontmatter fields (license, source, copyright) | Single file; no extra file per skill | SKILL.md frontmatter is read by setup scripts for bundling logic; adding license fields risks parsing conflicts; full license text in YAML frontmatter is unwieldy | Conflates agent instructions with legal metadata |
-| Central registry file (`external-skills/registry.json`) | Single place to audit all licenses; machine-readable | Registry can go out of sync with the skills on disk; adding a skill requires editing two places; doesn't travel with the skill when copied to the tool dir | Two sources of truth; sync risk |
-| No attribution file — just a link to the source in README.md | Minimal overhead | Legal compliance requires the full license text to accompany the code in redistributions; a link is not sufficient | Fails license compliance for many permissive licenses |
-| attribution.md (Markdown instead of .txt) | Human-friendly formatting | Markdown is unnecessary for plain license text; .txt is the conventional format for license files | Unnecessary format complexity |
+| SKILL.md frontmatter fields (licence, source, copyright) | Single file; no extra file per skill | SKILL.md frontmatter is read by setup scripts for bundling logic; adding licence fields risks parsing conflicts; full licence text in YAML frontmatter is unwieldy | Conflates agent instructions with legal metadata |
+| Central registry file (`external-skills/registry.json`) | Single place to audit all licences; machine-readable | Registry can go out of sync with the skills on disk; adding a skill requires editing two places; doesn't travel with the skill when copied to the tool dir | Two sources of truth; sync risk |
+| No attribution file — just a link to the source in README.md | Minimal overhead | Legal compliance requires the full licence text to accompany the code in redistributions; a link is not sufficient | Fails licence compliance for many permissive licences |
+| attribution.md (Markdown instead of .txt) | Human-friendly formatting | Markdown is unnecessary for plain licence text; .txt is the conventional format for licence files | Unnecessary format complexity |
 
 ---
 
@@ -65,14 +65,14 @@ The file is plain text, not YAML or JSON, because its primary consumers are huma
 ## Consequences
 
 **Positive:**
-- License terms and full text travel with the skill wherever it is copied
+- Licence terms and full text travel with the skill wherever it is copied
 - Human-readable format requires no tooling to inspect
 - Framework maintainers have a clear checklist item when adding a new skill: "does attribution.txt exist and is it complete?"
-- Legal compliance for permissive licenses is straightforward — the full text is present
+- Legal compliance for permissive licences is straightforward — the full text is present
 
 **Negative:**
 - Every skill requires a manually-created `attribution.txt`; no automation verifies completeness until a test is written
-- Full license text adds a few KB per skill directory (negligible but non-zero)
+- Full licence text adds a few KB per skill directory (negligible but non-zero)
 
 **Risks:**
 - Attribution.txt is incomplete or inaccurate if the person adding the skill copies it carelessly; mitigated by a validation test that checks for required fields

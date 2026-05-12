@@ -16,7 +16,7 @@ version: "0.1.0"
 - On explicit human command (e.g. "pause", "save state", "write pause file"), the orchestrator writes `plan/current/pause.md` capturing:
   - Current phase (e.g. `P3`)
   - Active task or step within the phase (e.g. "writing req-003")
-  - Last completed artefact (path)
+  - Last completed artifact (path)
   - In-progress state (what was being done when paused, enough to resume without re-asking the human)
   - Timestamp (ISO 8601)
 - On session start, resume detection (already present in orchestrator SKILL.md) is extended to also read `plan/current/pause.md` if it exists

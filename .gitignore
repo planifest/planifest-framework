@@ -10,3 +10,7 @@
 CLAUDE.md
 AGENTS.md
 GEMINI.md
+
+# Temporary local dirs
+_temp/*
+!_temp/.gitkeep

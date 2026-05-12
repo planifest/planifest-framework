@@ -24,7 +24,7 @@ status: paused by human
 
 **REQ-4** — A curated library of open source Claude Code `SKILL.md`-format skills in a separate directory. `--include-full-skill-library` setup flag controls whether they are copied to the tool skill directory. Each skill includes attribution and a link to its source GitHub repo. Web search for highly reviewed open source skills to populate the initial library.
 
-**REQ-5** — On explicit human command, the orchestrator writes `plan/current/pause.md` capturing current phase, active task, last completed artefact, and in-progress state. Resume detection reads this file and restores from the exact pause point.
+**REQ-5** — On explicit human command, the orchestrator writes `plan/current/pause.md` capturing current phase, active task, last completed artifact, and in-progress state. Resume detection reads this file and restores from the exact pause point.
 
 ## Next Steps on Resume
 

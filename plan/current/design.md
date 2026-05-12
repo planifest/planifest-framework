@@ -37,7 +37,7 @@
   - REQ-2: auto-trigger orchestrator via UserPromptSubmit hook + CLAUDE.md fallback
   - REQ-3a: orchestrator instructs phase agents to decompose into subagents with skill-library lookup and model-tier selection
   - REQ-3b: skill-to-requirement mapping from P0; re-evaluated at each gate; human confirms
-  - REQ-4: curated open-source skill library in `planifest-framework/external-skills/`; `--include-full-skill-library` flag; permissive-license only; each skill directory contains `attribution.txt` with license type, copyright holder, source URL, required attribution text, and full license text appended at the bottom; library populated during this pipeline run via web search
+  - REQ-4: curated open-source skill library in `planifest-framework/external-skills/`; `--include-full-skill-library` flag; permissive-licence only; each skill directory contains `attribution.txt` with licence type, copyright holder, source URL, required attribution text, and full licence text appended at the bottom; library populated during this pipeline run via web search
   - REQ-5: pause.md written on command; resume detection restores from exact pause point
   - REQ-6: setup.ps1 and setup.sh inject planifest-overrides/instructions/ into orchestrator SKILL.md and copied workflow files; sentinel-marker idempotency
   - REQ-7: setup.sh Append-OverrideInstructions parity with PS1
@@ -61,7 +61,7 @@
 - Existing bash Tier 1 adapter scripts (cursor.mjs, windsurf.mjs, cline.mjs) reusable as-is for PS1 wiring — impact if wrong: adapters need Windows-specific variants
 
 ## Risks
-- Open-source skill licenses may be ambiguous or mixed — likelihood: medium; impact: low (non-permissive skills simply excluded; library ships smaller)
+- Open-source skill licences may be ambiguous or mixed — likelihood: medium; impact: low (non-permissive skills simply excluded; library ships smaller)
 - Windsurf hook config format undocumented — likelihood: medium; impact: low (conditional scope; document gap and ship without Windsurf if unresolvable)
 - opencode/KiloCode plugin API changes between discovery and implementation — likelihood: low; impact: medium (adapter needs rework)
 

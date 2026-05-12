@@ -11,7 +11,7 @@ phase: 1
 - REQ-002: Auto-trigger hook script + CLAUDE.md fallback for orchestrator session-start; installed by setup.sh and setup.ps1 for Claude Code
 - REQ-003: Subagent Decomposition Protocol section added to orchestrator SKILL.md
 - REQ-004: Skill-to-requirement mapping in design.md (`## Skill Map`); orchestrator SKILL.md updated with map protocol at P0 and gate checkpoints
-- REQ-005: `planifest-framework/external-skills/` directory; `--include-full-skill-library` flag in setup.sh and setup.ps1; minimum 3 curated permissive-license skills with attribution.txt; external-skills/README.md
+- REQ-005: `planifest-framework/external-skills/` directory; `--include-full-skill-library` flag in setup.sh and setup.ps1; minimum 3 curated permissive-licence skills with attribution.txt; external-skills/README.md
 - REQ-006: `plan/current/pause.md` written on command; orchestrator SKILL.md resume detection extended to read pause.md; pause.md deleted on confirmed resume
 - REQ-007: gate-write.mjs Windows path fix in source (`planifest-framework/hooks/enforcement/`) and deployed (`.claude/hooks/enforcement/`); `pause.md` added to ALWAYS_PERMITTED_FILES; regression tests
 

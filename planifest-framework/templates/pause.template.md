@@ -1,7 +1,7 @@
 ---
 phase: "{phase-id}"
 active_task: "{short description of the task in progress at pause time}"
-last_artefact: "{path to the last file written or action completed}"
+last_artifact: "{path to the last file written or action completed}"
 ---
 # Pause Record - {feature-id}
 

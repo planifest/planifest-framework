@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 20 Apr 2026
+**Last updated:** 12 May 2026
 **Maintained by:** planifest-docs-agent
 
 ---

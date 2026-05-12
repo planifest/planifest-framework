@@ -11,11 +11,14 @@ FRAMEWORK="$SCRIPT_DIR/.."
 SETUP_SH="$FRAMEWORK/setup.sh"
 SETUP_PS1="$FRAMEWORK/setup.ps1"
 ORCHESTRATOR="$FRAMEWORK/skills/planifest-orchestrator/SKILL.md"
+SHIP_AGENT="$FRAMEWORK/skills/planifest-ship-agent/SKILL.md"
 GATE_WRITE="$FRAMEWORK/hooks/enforcement/gate-write.mjs"
 AUTO_TRIGGER="$FRAMEWORK/hooks/enforcement/auto-trigger-orchestrator.mjs"
+PRESENCE_CHECK="$FRAMEWORK/hooks/enforcement/check-orchestrator-presence.mjs"
 DESIGN_TPL="$FRAMEWORK/templates/design.template.md"
 PAUSE_TPL="$FRAMEWORK/templates/pause.template.md"
 STANDARD_BOOT="$FRAMEWORK/templates/standard-boot.md"
+GETTING_STARTED="$FRAMEWORK/getting-started.md"
 
 file_exists() { [ -f "$1" ] && echo "yes" || echo "no"; }
 grep_has()    { grep -q "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
@@ -214,5 +217,64 @@ assert_equals "no" "$(grep_has "cwdWithSep" "$GATE_WRITE")" \
 
 assert_equals "yes" "$(file_exists "$FRAMEWORK/tests/test-gate-write-windows.mjs")" \
   "REQ-012: Node.js regression test exists"
+
+# ── REQ-008 (mid-pipeline): orchestrator-presence-check hook ─────────────────
+
+echo ""
+echo "=== REQ-008 (mid-pipeline): check-orchestrator-presence hook ==="
+
+assert_equals "yes" "$(file_exists "$PRESENCE_CHECK")" \
+  "REQ-008p: check-orchestrator-presence.mjs exists"
+
+assert_equals "yes" "$(grep_has "orchestrator-active" "$PRESENCE_CHECK")" \
+  "REQ-008p: hook checks .orchestrator-active sentinel"
+
+assert_equals "yes" "$(grep_has "PLANIFEST PIPELINE ACTIVE" "$PRESENCE_CHECK")" \
+  "REQ-008p: advisory mode banner present"
+
+assert_equals "yes" "$(grep_has "orchestrator-strict" "$PRESENCE_CHECK")" \
+  "REQ-008p: hook reads .orchestrator-strict for strict mode"
+
+assert_equals "yes" "$(grep_has "orchestrator-ack" "$PRESENCE_CHECK")" \
+  "REQ-008p: hook reads/compares .orchestrator-ack"
+
+assert_equals "yes" "$(grep_has "session_id" "$PRESENCE_CHECK")" \
+  "REQ-008p: hook uses session_id for ack"
+
+assert_equals "yes" "$(grep_has "PLANIFEST STRICT MODE\|STRICT MODE" "$PRESENCE_CHECK")" \
+  "REQ-008p: strict mode hard-block banner present"
+
+assert_equals "yes" "$(grep_has "check-orchestrator-presence" "$SETUP_SH")" \
+  "REQ-008p: setup.sh wires check-orchestrator-presence"
+
+assert_equals "yes" "$(grep_has "PLANIFEST_PRESENCE" "$SETUP_SH")" \
+  "REQ-008p: setup.sh passes presence cmd to UserPromptSubmit wiring"
+
+assert_equals "yes" "$(grep_has "strict-orchestrator" "$SETUP_SH")" \
+  "REQ-008p: setup.sh has --strict-orchestrator flag"
+
+assert_equals "yes" "$(grep_has "orchestrator-strict" "$SETUP_SH")" \
+  "REQ-008p: setup.sh writes plan/.orchestrator-strict sentinel"
+
+assert_equals "yes" "$(grep_has "check-orchestrator-presence\|presenceEntry" "$SETUP_PS1")" \
+  "REQ-008p: setup.ps1 wires check-orchestrator-presence"
+
+assert_equals "yes" "$(grep_has "strict-orchestrator\|StrictOrchestrator" "$SETUP_PS1")" \
+  "REQ-008p: setup.ps1 has --strict-orchestrator flag"
+
+assert_equals "yes" "$(grep_has "orchestrator-strict" "$SETUP_PS1")" \
+  "REQ-008p: setup.ps1 writes plan/.orchestrator-strict sentinel"
+
+assert_equals "yes" "$(grep_has "orchestrator-ack" "$ORCHESTRATOR")" \
+  "REQ-008p: orchestrator SKILL.md writes .orchestrator-ack on P0 start"
+
+assert_equals "yes" "$(grep_has "orchestrator-ack" "$SHIP_AGENT")" \
+  "REQ-008p: ship-agent deletes .orchestrator-ack at P7"
+
+assert_equals "yes" "$(grep_has "check-orchestrator-presence\|orchestrator-presence" "$GETTING_STARTED")" \
+  "REQ-008p: getting-started.md documents presence check hook"
+
+assert_equals "yes" "$(grep_has "strict-orchestrator" "$GETTING_STARTED")" \
+  "REQ-008p: getting-started.md documents --strict-orchestrator flag"
 
 print_summary

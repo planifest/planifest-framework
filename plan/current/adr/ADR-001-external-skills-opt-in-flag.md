@@ -12,13 +12,13 @@ version: "0.1.0"
 **Feature:** 0000009-framework-rail-tightening
 **Component:** planifest-framework
 **Status:** accepted
-**Date:** 2026-05-09
+**Date:** 09 May 2026
 
 ---
 
 ## Context
 
-Planifest is adding a curated library of open-source Claude Code SKILL.md-format skills to `planifest-framework/external-skills/`. These skills are sourced from third-party repos and carry their own licenses. A decision is needed: should these skills be copied to the tool's skill directory by default on every setup run, or should they be opt-in?
+Planifest is adding a curated library of open-source Claude Code SKILL.md-format skills to `planifest-framework/external-skills/`. These skills are sourced from third-party repos and carry their own licences. A decision is needed: should these skills be copied to the tool's skill directory by default on every setup run, or should they be opt-in?
 
 The key tensions are:
 - **Discovery vs noise:** Shipping all skills by default maximises discoverability but pollutes the tool's skill picker with skills the user may never want.

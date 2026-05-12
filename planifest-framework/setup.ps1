@@ -32,11 +32,13 @@ $Tool = $null
 $ContextModeMcp = $false
 $StructuredTelemetryMcp = $false
 $BackendUrl = 'http://localhost:3741'
+$StrictOrchestrator = $false
 $i = 0
 while ($i -lt $args.Count) {
     switch ($args[$i]) {
         '--context-mode-mcp'          { $ContextModeMcp = $true; $i++ }
         '--structured-telemetry-mcp'  { $StructuredTelemetryMcp = $true; $i++ }
+        '--strict-orchestrator'       { $StrictOrchestrator = $true; $i++ }
         '--backend-url' {
             $i++
             if ($i -ge $args.Count) { Write-Host "Error: --backend-url requires a value"; exit 1 }
@@ -350,8 +352,8 @@ function Install-TelemetryHooks {
 }
 
 function Merge-EnforcementHookSettings {
-    # Merge gate-write (PreToolUse) and check-design (UserPromptSubmit) into settings.json.
-    # Idempotent: removes existing entries before re-adding.
+    # Merge gate-write (PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence,
+    # and check-design (UserPromptSubmit) into settings.json. Idempotent.
     param(
         [string]$SettingsPath,
         [string]$HooksDir
@@ -360,6 +362,14 @@ function Merge-EnforcementHookSettings {
     $preToolEntry = @{
         matcher = 'Write|Edit'
         hooks   = @(@{ type = 'command'; command = "node $HooksDir/gate-write.mjs" })
+    }
+    $autoTriggerEntry = @{
+        matcher = '.*'
+        hooks   = @(@{ type = 'command'; command = "node $HooksDir/auto-trigger-orchestrator.mjs" })
+    }
+    $presenceEntry = @{
+        matcher = '.*'
+        hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-orchestrator-presence.mjs" })
     }
     $userPromptEntry = @{
         matcher = '.*'
@@ -382,14 +392,18 @@ function Merge-EnforcementHookSettings {
         })
         $existing.hooks.PreToolUse = $filtered + $preToolEntry
 
-        # Merge UserPromptSubmit — remove stale check-design entry, append fresh one
+        # Merge UserPromptSubmit — remove stale entries, append fresh ones in order
         if (-not $existing.hooks.UserPromptSubmit) {
             $existing.hooks | Add-Member -NotePropertyName 'UserPromptSubmit' -NotePropertyValue @() -Force
         }
         $filtered = @($existing.hooks.UserPromptSubmit | Where-Object {
-            -not ($_.hooks | Where-Object { $_.command -match 'check-design' })
+            -not ($_.hooks | Where-Object {
+                $_.command -match 'auto-trigger-orchestrator' -or
+                $_.command -match 'check-orchestrator-presence' -or
+                $_.command -match 'check-design'
+            })
         })
-        $existing.hooks.UserPromptSubmit = $filtered + $userPromptEntry
+        $existing.hooks.UserPromptSubmit = $filtered + $autoTriggerEntry + $presenceEntry + $userPromptEntry
 
         $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
         Write-Host "  ~ .claude/settings.json (enforcement hook entries merged)"
@@ -401,7 +415,7 @@ function Merge-EnforcementHookSettings {
         $settings = [PSCustomObject]@{
             hooks = [PSCustomObject]@{
                 PreToolUse       = @($preToolEntry)
-                UserPromptSubmit = @($userPromptEntry)
+                UserPromptSubmit = @($autoTriggerEntry, $presenceEntry, $userPromptEntry)
             }
         }
         $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
@@ -1055,6 +1069,9 @@ if (-not $Tool) {
     Write-Host "                               Requires --context-mode-mcp to also be set."
     Write-Host "                               Context-pressure hook installed when both flags are active."
     Write-Host "  --backend-url <url>          Override telemetry backend URL (default: http://localhost:3741)"
+    Write-Host "  --strict-orchestrator        Write plan/.orchestrator-strict to enable strict mode."
+    Write-Host "                               The check-orchestrator-presence hook will require the"
+    Write-Host "                               orchestrator to ack each new session before proceeding."
     Write-Host ""
     Write-Host "Run from the repository root."
     Write-Host "Each tool's config: planifest-framework\setup\[tool].ps1"
@@ -1066,6 +1083,15 @@ Write-Host ("=" * 40)
 
 Initialize-PlanifestRepo
 Invoke-PlanifestGuardrails
+
+# Write strict-mode sentinel if --strict-orchestrator flag was passed (REQ-008)
+if ($StrictOrchestrator) {
+    $planDir = Join-Path $ProjectRoot 'plan'
+    New-Item -ItemType Directory -Path $planDir -Force | Out-Null
+    $strictPath = Join-Path $planDir '.orchestrator-strict'
+    New-Item -ItemType File -Path $strictPath -Force | Out-Null
+    Write-Host "  + plan/.orchestrator-strict (strict orchestrator mode enabled)"
+}
 
 $ToolLower = $Tool.ToLower()
 

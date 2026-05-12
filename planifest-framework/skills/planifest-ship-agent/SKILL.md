@@ -166,6 +166,7 @@ Generate the test report artifact before archiving.
 5. Delete `plan/current/` contents — including `.skips` (already processed), `.planifest-session`, `.feature-id`, `capability-skills/`
 6. Confirm `plan/current/` is empty
 7. Delete `plan/.orchestrator-active` — this sentinel must be removed last, after archive is confirmed complete
+8. Delete `plan/.orchestrator-ack` if it exists — removes the strict-mode session ack so the next pipeline starts clean
 
 ### Step 8 — Invoke P8 Build Assessment
 

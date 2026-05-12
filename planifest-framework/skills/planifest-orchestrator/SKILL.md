@@ -177,7 +177,7 @@ When the human says "pause", "pause session", or similar:
 2. **Write `plan/current/pause.md`** — read `planifest-framework/templates/pause.template.md` for the exact format. Populate:
    - `phase`: current phase identifier (e.g. `P3`)
    - `active_task`: the task in progress at pause time
-   - `last_artefact`: path to the last file written
+   - `last_artifact`: path to the last file written
    - Body: detailed in-progress state sufficient for exact-point resume
 
 3. **Confirm to the human:**
@@ -346,7 +346,9 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
    Present the Skill Map to the human as part of the design confirmation. Re-evaluate and update the `## Skill Map` section at each phase gate before proceeding to the next phase — requirements or skills may have changed.
 
-3. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skill Intake protocol below before proceeding.
+5. **Write strict-mode ack** — if `plan/.orchestrator-strict` exists, check whether the current prompt context contains a `session_id` value (injected by the `check-orchestrator-presence.mjs` hook banner). If a session_id is present, write it verbatim to `plan/.orchestrator-ack`. This silences the strict-mode banner for the remainder of this session. If no session_id is available in context, write the current UTC timestamp (ISO 8601) instead. Skip this step if `plan/.orchestrator-strict` does not exist.
+
+6. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skill Intake protocol below before proceeding.
 
 Repeat the skills inbox check at the start of every phase transition (P0→P1, P1→P2, etc.).
 

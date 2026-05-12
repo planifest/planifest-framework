@@ -12,7 +12,7 @@ version: "0.1.0"
 **Feature:** 0000009-framework-rail-tightening
 **Component:** planifest-framework
 **Status:** accepted
-**Date:** 2026-05-09
+**Date:** 09 May 2026
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: "ADR-006: Pause and resume via plan/current/pause.md file"
-summary: "The orchestrator's pause/resume mechanism uses a single file at plan/current/pause.md containing phase, active task, last artefact, and in-progress state. Presence of the file signals a paused session; its content is the resume instruction."
+summary: "The orchestrator's pause/resume mechanism uses a single file at plan/current/pause.md containing phase, active task, last artifact, and in-progress state. Presence of the file signals a paused session; its content is the resume instruction."
 status: "accepted"
 version: "0.1.0"
 ---
@@ -12,7 +12,7 @@ version: "0.1.0"
 **Feature:** 0000009-framework-rail-tightening
 **Component:** planifest-framework
 **Status:** accepted
-**Date:** 2026-05-09
+**Date:** 09 May 2026
 
 ---
 
@@ -36,10 +36,10 @@ A file `plan/current/pause.md` is written when the human issues a pause command.
 
 - **phase** — the current phase identifier (e.g. `P3`)
 - **active_task** — the task in progress at pause time (e.g. "implementing REQ-003 subagent decomposition")
-- **last_artefact** — the last file written or action completed before pause
+- **last_artifact** — the last file written or action completed before pause
 - **in_progress_state** — a free-text description of what was partially completed and what remains, sufficient for the orchestrator to reconstruct the execution context
 
-The file is YAML frontmatter plus a Markdown body. The frontmatter carries machine-readable fields (phase, active_task, last_artefact); the body carries the human-readable in-progress state narrative.
+The file is YAML frontmatter plus a Markdown body. The frontmatter carries machine-readable fields (phase, active_task, last_artifact); the body carries the human-readable in-progress state narrative.
 
 On resume, the orchestrator's existing `plan/current/` scan detects `pause.md`. If found, it opens with `Px: Resuming — {active_task}` and reads the in-progress state to restore context. After the session is fully resumed and the interrupted task is re-engaged, `pause.md` is deleted.
 

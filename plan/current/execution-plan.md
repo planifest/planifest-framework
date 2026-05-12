@@ -63,7 +63,7 @@ See `plan/current/requirements/` for individual feature requirements.
 | NFR-001 | Correctness | gate-write.mjs always-permitted check passes for `plan/` and `plan/archive/` paths on Windows | Zero blocked writes to always-permitted paths | Regression test: write to plan/archive/ with no design.md present → expect exit 0 |
 | NFR-002 | Idempotency | setup.sh re-run produces no duplicate entries in boot file or skill files | Diff shows no change on second run | Re-run test in test suite |
 | NFR-003 | Consistency | All bare `.skips` references in orchestrator SKILL.md replaced | Zero matches for `^\.skips` or `\s\.skips` not preceded by `plan/current/` | Grep audit post-implementation |
-| NFR-004 | Attribution | Every skill in external-skills/ has an attribution.txt; no skill without permissive license | 100% attribution coverage; zero non-permissive licenses | Pre-ship grep + license check |
+| NFR-004 | Attribution | Every skill in external-skills/ has an attribution.txt; no skill without permissive licence | 100% attribution coverage; zero non-permissive licences | Pre-ship grep + licence check |
 
 ---
 
@@ -95,7 +95,7 @@ gate-write.mjs → plan/archive/ write → pass (Windows path normalised)
 
 | ID | Assumption | Impact if Wrong |
 |----|-----------|----------------|
-| A-001 | Curated open-source skills found via web search have identifiable permissive licenses (MIT, Apache 2.0, ISC, BSD) | Library ships with fewer skills; none without confirmed license |
+| A-001 | Curated open-source skills found via web search have identifiable permissive licences (MIT, Apache 2.0, ISC, BSD) | Library ships with fewer skills; none without confirmed licence |
 | A-002 | The orchestrator SKILL.md source file is the canonical location; setup copies it to tool dirs — so editing source propagates on next setup run | If setup doesn't re-copy the orchestrator SKILL.md, injected instructions won't appear in the tool's copy |
 | A-003 | Claude Code UserPromptSubmit hook fires reliably on every session start | If hook is unreliable, CLAUDE.md fallback catches it; no hard failure |
 

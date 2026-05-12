@@ -136,8 +136,8 @@ The framework has accumulated gaps across three areas: (1) the orchestrator spec
 - [ ] Orchestrator auto-triggers on `UserPromptSubmit` hook in Claude Code; CLAUDE.md instruction present as fallback (REQ-2)
 - [ ] Orchestrator SKILL.md instructs phase agents to decompose tasks into subagents with skill-library lookup and model-tier selection (REQ-3a)
 - [ ] Orchestrator produces skill-to-requirement map at P0; re-evaluates at each phase gate; human confirms before each phase (REQ-3b)
-- [ ] `--include-full-skill-library` flag copies curated open-source skills to tool skill dir; each skill directory contains `attribution.txt` with license type, copyright holder, source URL, and required attribution text (REQ-4)
-- [ ] On command, orchestrator writes `plan/current/pause.md` with phase, active task, last artefact, in-progress state; resume reads and restores (REQ-5)
+- [ ] `--include-full-skill-library` flag copies curated open-source skills to tool skill dir; each skill directory contains `attribution.txt` with licence type, copyright holder, source URL, required attribution text, and full licence text at the bottom (REQ-4)
+- [ ] On command, orchestrator writes `plan/current/pause.md` with phase, active task, last artifact, in-progress state; resume reads and restores (REQ-5)
 - [ ] `setup.ps1` and `setup.sh` inject `planifest-overrides/instructions/` into orchestrator SKILL.md and workflow files with sentinel markers; idempotent on re-run (REQ-6)
 - [ ] `setup.sh` appends `planifest-overrides/instructions/` to boot file with sentinel markers; strip-and-replace on re-run (REQ-7)
 - [ ] `setup.sh` copies `planifest-overrides/capability-skills/` into tool's skill dir after `copy_skills` (REQ-8)
@@ -145,6 +145,7 @@ The framework has accumulated gaps across three areas: (1) the orchestrator spec
 - [ ] `setup.ps1 opencode` runs without error; opencode in `$ValidTools` with corresponding `setup/opencode.ps1` (REQ-10)
 - [ ] TypeScript adapter enforces gate-write/check-design via `tool.execute.before` on opencode and kilocode; blocks write when design.md absent (REQ-11)
 - [ ] `planifest-framework/hooks/enforcement/gate-write.mjs` uses normalised path comparison; `plan/` and `plan/archive/` writes pass on Windows without design.md (REQ-12)
+- [ ] `planifest-framework/hooks/enforcement/check-orchestrator-presence.mjs` injects a presence-check banner on every `UserPromptSubmit` when `plan/.orchestrator-active` exists; exits 0 silently when absent; registered in setup.sh and setup.ps1 (REQ-008)
 
 ---
 

@@ -21,6 +21,7 @@ CONTEXT_MODE_MCP=false
 STRUCTURED_TELEMETRY_MCP=false
 BACKEND_URL="http://localhost:3741"
 INCLUDE_FULL_SKILL_LIBRARY=false
+STRICT_ORCHESTRATOR=false
 
 # --- Shared functions ---
 
@@ -495,15 +496,17 @@ install_enforcement_hooks() {
   # Wire into settings.json (requires node; jq fallback not needed — node is always available)
   local gate_cmd="$hooks_dir_rel/gate-write.mjs"
   local trigger_cmd="$hooks_dir_rel/auto-trigger-orchestrator.mjs"
+  local presence_cmd="$hooks_dir_rel/check-orchestrator-presence.mjs"
   local design_cmd="$hooks_dir_rel/check-design.mjs"
 
   if command -v node >/dev/null 2>&1; then
-    PLANIFEST_GATE="$gate_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+    PLANIFEST_GATE="$gate_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
       const fs = require("fs"), path = require("path");
-      const gate    = process.env.PLANIFEST_GATE;
-      const trigger = process.env.PLANIFEST_TRIGGER;
-      const design  = process.env.PLANIFEST_DESIGN;
-      const sf      = process.env.PLANIFEST_SETTINGS;
+      const gate     = process.env.PLANIFEST_GATE;
+      const trigger  = process.env.PLANIFEST_TRIGGER;
+      const presence = process.env.PLANIFEST_PRESENCE;
+      const design   = process.env.PLANIFEST_DESIGN;
+      const sf       = process.env.PLANIFEST_SETTINGS;
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
       s.hooks = s.hooks || {};
@@ -515,13 +518,15 @@ install_enforcement_hooks() {
         {matcher:"Write", hooks:[{type:"command",command:gate}]},
         {matcher:"Edit",  hooks:[{type:"command",command:gate}]}
       );
-      // UserPromptSubmit: auto-trigger-orchestrator first, then check-design (REQ-002, idempotent)
+      // UserPromptSubmit: auto-trigger first, then presence check, then check-design (REQ-002, REQ-008, idempotent)
       s.hooks.UserPromptSubmit = (s.hooks.UserPromptSubmit || [])
         .filter(h => !(h.hooks||[]).some(e =>
           (e.command||"").includes("auto-trigger-orchestrator") ||
+          (e.command||"").includes("check-orchestrator-presence") ||
           (e.command||"").includes("check-design")));
       s.hooks.UserPromptSubmit.push(
         {matcher:".*", hooks:[{type:"command",command:trigger}]},
+        {matcher:".*", hooks:[{type:"command",command:presence}]},
         {matcher:".*", hooks:[{type:"command",command:design}]}
       );
       fs.mkdirSync(path.dirname(sf),{recursive:true});
@@ -530,7 +535,7 @@ install_enforcement_hooks() {
     echo "  ~ $settings_rel (enforcement hooks wired)"
   else
     echo "  ! Warning: node not found — skipping settings.json enforcement hook wiring"
-    echo "  ! Manually add gate-write (Write/Edit PreToolUse), auto-trigger-orchestrator and check-design (UserPromptSubmit) to $settings_rel"
+    echo "  ! Manually add gate-write (Write/Edit PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence and check-design (UserPromptSubmit) to $settings_rel"
   fi
 }
 
@@ -1108,6 +1113,7 @@ while [[ $# -gt 0 ]]; do
     --context-mode-mcp) CONTEXT_MODE_MCP=true; shift ;;
     --structured-telemetry-mcp) STRUCTURED_TELEMETRY_MCP=true; shift ;;
     --include-full-skill-library) INCLUDE_FULL_SKILL_LIBRARY=true; shift ;;
+    --strict-orchestrator) STRICT_ORCHESTRATOR=true; shift ;;
     --backend-url)
       if [[ -z "${2:-}" ]] || [[ "${2:-}" == -* ]]; then
         echo "Error: --backend-url requires a value"; exit 1
@@ -1142,6 +1148,9 @@ if [ -z "$TOOL" ]; then
   echo "                               to the tool's skill directory. Each skill carries an"
   echo "                               attribution.txt with license and copyright details."
   echo "                               Skills are MIT-licensed. Opt-in only (ADR-001)."
+  echo "  --strict-orchestrator        Write plan/.orchestrator-strict to enable strict mode."
+  echo "                               The check-orchestrator-presence hook will require the"
+  echo "                               orchestrator to ack each new session before proceeding."
   echo ""
   echo "Run from the repository root."
   echo "Each tool's config: planifest-framework/setup/<tool>.sh"
@@ -1153,6 +1162,13 @@ echo "Ã¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢ÂÃ¢â€¢Â�
 
 initialize_repo
 activate_guardrails
+
+# Write strict-mode sentinel if --strict-orchestrator flag was passed (REQ-008)
+if [ "$STRICT_ORCHESTRATOR" = true ]; then
+  mkdir -p "$PROJECT_ROOT/plan"
+  touch "$PROJECT_ROOT/plan/.orchestrator-strict"
+  echo "  + plan/.orchestrator-strict (strict orchestrator mode enabled)"
+fi
 
 run_tool_setup() {
   local t="$1"
