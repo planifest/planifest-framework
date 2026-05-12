@@ -2,7 +2,7 @@
 
 **Skill:** security-agent
 **Feature:** 0000001-context-mode-enforcement-hooks
-**Date:** 2026-04-12
+**Date:** 12 Apr 2026
 **Reviewer:** planifest-security-agent
 **Overall Risk Rating:** Low
 

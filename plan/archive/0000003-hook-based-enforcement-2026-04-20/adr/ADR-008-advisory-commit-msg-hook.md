@@ -10,7 +10,7 @@ deciders: [human-on-the-loop]
 
 ## Context
 
-REQ-023 requires a commit message standard enforced via a `commit-msg` Git hook. The original decision (2026-04-20) made the hook advisory (exit 0). This was amended after AI agents were observed appending `Co-Authored-By` attribution lines that violate the standard — advisory warnings were insufficient to change agent behavior.
+REQ-023 requires a commit message standard enforced via a `commit-msg` Git hook. The original decision (20 Apr 2026) made the hook advisory (exit 0). This was amended after AI agents were observed appending `Co-Authored-By` attribution lines that violate the standard — advisory warnings were insufficient to change agent behavior.
 
 ## Decision
 

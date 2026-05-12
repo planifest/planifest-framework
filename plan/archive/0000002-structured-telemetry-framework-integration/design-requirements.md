@@ -40,7 +40,7 @@ Each skill MUST emit only the event types defined in its Telemetry section. No s
 - **security-agent:** `phase_start`, `phase_end`, `security_finding`, `deviation`
 - **docs-agent:** `phase_start`, `phase_end`, `doc_gap`, `deviation`
 
-> **Note:** All 14 event types are live (0008c deployed and verified 2026-04-14).
+> **Note:** All 14 event types are live (0008c deployed and verified 14 Apr 2026).
 
 ### REQ-007 — Schema-strict payloads
 **Priority:** Must
@@ -56,7 +56,7 @@ The setup script MUST NOT restart the agentic tool. The user is responsible for 
 
 ### REQ-009b — mcp_impact event (orchestrator, end of run)
 **Priority:** Should
-`planifest-orchestrator` SHOULD emit `mcp_impact` once at the end of a complete pipeline run, after the final `phase_end`. Required fields: `mcp_mode`, `avg_token_delta`, `peak_fill_pct`. Fully implemented in the 0008a server schema and documented in the MCP README — confirmed via live exploration 2026-04-14.
+`planifest-orchestrator` SHOULD emit `mcp_impact` once at the end of a complete pipeline run, after the final `phase_end`. Required fields: `mcp_mode`, `avg_token_delta`, `peak_fill_pct`. Fully implemented in the 0008a server schema and documented in the MCP README — confirmed via live exploration 14 Apr 2026.
 
 ### REQ-009c — model_config envelope field
 **Priority:** May

@@ -21,8 +21,8 @@ Dates in document body text matching any of:
 | `YYYY-MM-DD` in prose (not in frontmatter `date:` or filename) | `2026-05-02` | `02 May 2026` |
 | `DD/MM/YYYY` | `02/05/2026` | `02 May 2026` |
 | `MM/DD/YYYY` | `05/02/2026` | `02 May 2026` |
-| `Month DD, YYYY` | `May 2, 2026` | `02 May 2026` |
-| `DD Month YYYY` with full month name | `2 May 2026` | `02 May 2026` (zero-pad day) |
+| `Month DD, YYYY` | `02 May 2026` | `02 May 2026` |
+| `DD Month YYYY` with full month name | `02 May 2026` | `02 May 2026` (zero-pad day) |
 
 ---
 

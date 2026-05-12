@@ -1,4 +1,4 @@
-# Changelog — 0000004-tdd-regression-test-quality — 2026-05-01
+# Changelog — 0000004-tdd-regression-test-quality — 01 May 2026
 
 **Feature:** TDD Sub-Loop, Regression Pack, and Test Reporting
 **Pipeline run:** P0 Assess → P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Ship

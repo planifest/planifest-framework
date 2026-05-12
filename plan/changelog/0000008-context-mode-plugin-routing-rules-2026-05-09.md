@@ -7,7 +7,7 @@ version: "1.0.0"
 # Iteration Log - 0000008-context-mode-plugin-routing-rules
 
 **Skill:** planifest-orchestrator → spec-agent → adr-agent → validate-agent → docs-agent
-**Date:** 2026-05-09
+**Date:** 09 May 2026
 **Tool:** Claude Code (local)
 **Model:** claude-sonnet-4-6
 

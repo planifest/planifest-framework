@@ -1,4 +1,4 @@
-# Test Report — 0000005-framework-governance — 2026-05-02
+# Test Report — 0000005-framework-governance — 02 May 2026
 
 **Feature:** Framework Governance
 **Plan date:** 02 May 2026

@@ -5,11 +5,11 @@
 **Requested by:** Martin Mayer — April 2026
 **Planifest Rating:** 🟡 Defined
 
-> **Scope addition (2026-04-18):** opencode added as a supported tool on this release. Hook support to be researched and wired alongside Track A and Track B where the tool supports it.
+> **Scope addition (18 Apr 2026):** opencode added as a supported tool on this release. Hook support to be researched and wired alongside Track A and Track B where the tool supports it.
 >
-> **Scope addition (2026-04-18, revised):** research completed across all 8 non-Claude supported tools. Design updated to include multi-tool hook support across three enforcement tiers (native shell hooks, plugin shim, MCP+instructions fallback). See `design.md` → "Track C — Multi-tool hook support".
+> **Scope addition (18 Apr 2026, revised):** research completed across all 8 non-Claude supported tools. Design updated to include multi-tool hook support across three enforcement tiers (native shell hooks, plugin shim, MCP+instructions fallback). See `design.md` → "Track C — Multi-tool hook support".
 >
-> **Scope addition (2026-04-18, final):** Track D expanded with tool detection mechanism, `.skips` file for mid-run skip tracking, date-stamped archive paths with collision handling, and `planifest-ship-agent` as a distinct new skill for Phase 7. Structured-telemetry-mcp `"ship"` enum addition moved in-scope (coordinated deploy required).
+> **Scope addition (18 Apr 2026, final):** Track D expanded with tool detection mechanism, `.skips` file for mid-run skip tracking, date-stamped archive paths with collision handling, and `planifest-ship-agent` as a distinct new skill for Phase 7. Structured-telemetry-mcp `"ship"` enum addition moved in-scope (coordinated deploy required).
 
 ---
 

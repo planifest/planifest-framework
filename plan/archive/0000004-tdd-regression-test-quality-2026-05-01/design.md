@@ -78,4 +78,4 @@ Each new skill MUST include a `recommended_model` frontmatter field and note the
 
 ## Confirmation
 Human confirmed this design before proceeding: yes
-Date confirmed: 2026-04-25
+Date confirmed: 25 Apr 2026

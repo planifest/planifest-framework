@@ -1,7 +1,7 @@
-# Test Report — 0000007-agent-optimisation — 2026-05-04
+# Test Report — 0000007-agent-optimisation — 04 May 2026
 
 **Feature:** Agent Optimisation — build target awareness, skill optimisation, language standards
-**Plan date:** 2026-05-04
+**Plan date:** 04 May 2026
 **Pipeline run:** P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Ship
 
 ---

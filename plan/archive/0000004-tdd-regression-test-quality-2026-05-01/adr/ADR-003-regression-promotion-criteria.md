@@ -8,7 +8,7 @@ version: "0.1.0"
 
 **Feature:** 0000004-tdd-regression-test-quality
 **Status:** accepted
-**Date:** 2026-04-26
+**Date:** 26 Apr 2026
 
 ---
 

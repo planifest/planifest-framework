@@ -5,7 +5,7 @@ version: "0.1.0"
 ---
 # Requirement: req-009 - Em dash prohibition
 
-**Feature:** 0000007-agent-optimisation (fast-path amendment 2026-05-04)
+**Feature:** 0000007-agent-optimisation (fast-path amendment 04 May 2026)
 **Source:** Post-ship human review
 **Priority:** must-have
 

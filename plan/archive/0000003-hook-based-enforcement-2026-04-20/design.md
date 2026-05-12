@@ -2,7 +2,7 @@
 
 **Status:** Design confirmed
 **Feature ID:** 0000003-hook-based-enforcement
-**Date:** 2026-04-18
+**Date:** 18 Apr 2026
 
 ---
 

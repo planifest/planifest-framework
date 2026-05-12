@@ -1,7 +1,7 @@
 # Execution Plan — 0000004-tdd-regression-test-quality
 
 **Feature:** TDD Sub-Loop, Regression Pack, and Test Reporting
-**Date:** 2026-04-25
+**Date:** 25 Apr 2026
 **Adoption mode:** Retrofit
 **Components affected:** planifest-codegen-agent (update), planifest-ship-agent (update), 3 new skills, regression-pack infrastructure
 

@@ -1,7 +1,7 @@
-# Test Report — 0000008-context-mode-plugin-routing-rules — 2026-05-09
+# Test Report — 0000008-context-mode-plugin-routing-rules — 09 May 2026
 
 **Feature:** context-mode plugin routing rules removal
-**Plan date:** 2026-05-09
+**Plan date:** 09 May 2026
 **Pipeline run:** P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security (skipped) → P6 Docs → P7 Ship
 
 ---

@@ -1,6 +1,6 @@
 # MCP Exploration — Structured Telemetry MCP
 
-**Explored:** 2026-04-14
+**Explored:** 14 Apr 2026
 **Session:** test-explore-001
 
 ---
@@ -91,7 +91,7 @@ Every query response includes a raw sample of the most recent `phase_end` events
 
 ## Existing data in store
 
-The store already contains events from a prior session (`session_id: "e2e-001"`, 2026-04-13) with `agent: "claude-sonnet-4-6"` — indicating e2e tests were run against the server before this exploration.
+The store already contains events from a prior session (`session_id: "e2e-001"`, 13 Apr 2026) with `agent: "claude-sonnet-4-6"` — indicating e2e tests were run against the server before this exploration.
 
 ---
 

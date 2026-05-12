@@ -137,7 +137,7 @@ Continuous run was pre-authorised at P0 (human selected option 2). P7 stopped as
 
 ---
 
-## Fast-path Amendment — 2026-05-04
+## Fast-path Amendment — 04 May 2026
 
 **Commit:** `64a7b5c`
 

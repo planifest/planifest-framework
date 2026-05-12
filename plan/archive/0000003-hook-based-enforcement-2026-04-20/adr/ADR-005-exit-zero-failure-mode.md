@@ -12,7 +12,7 @@ version: "0.1.0"
 **Feature:** 0000003-hook-based-enforcement
 **Component:** planifest-framework/hooks/
 **Status:** accepted
-**Date:** 2026-04-18
+**Date:** 18 Apr 2026
 
 ---
 

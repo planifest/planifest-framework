@@ -2,7 +2,7 @@
 
 **Feature:** Hook-Based Enforcement: Telemetry & Plan Compliance
 **Phase:** Spec (P1)
-**Date:** 2026-04-18
+**Date:** 18 Apr 2026
 
 ---
 

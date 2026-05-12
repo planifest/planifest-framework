@@ -61,7 +61,7 @@ From risk-register.md:
 - Q-001: `block-bash.sh` context-mode hook fires on `https://` in commit message bodies — affects git commit with URL in body (workaround: keep URLs out of commit body)
 - Q-002: `jq` not available on Windows; all JSON operations use `node` with BOM stripping
 - Q-003: `${#SUBJECT}` in `commit-msg` hook counts bytes, not Unicode chars — em-dash triggers false advisory
-- Q-005: `mktemp` dirs on Windows not recognized as valid git repos — blocks 9 telemetry integration tests
+- Q-005: `mktemp` dirs on Windows not recognised as valid git repos — blocks 9 telemetry integration tests
 
 ---
 
@@ -97,7 +97,7 @@ See `plan/archive/0000003-hook-based-enforcement-2026-04-20/recommendations.md` 
 
 ---
 
-## Post-Ship Fix — REQ-027 (2026-04-25)
+## Post-Ship Fix — REQ-027 (25 Apr 2026)
 
 **Gap:** REQ-009 AC not fully met. Tier 1 adapter scripts were installed by `install_tier1_hooks()` but the hook registration (the JSON entries that tell Cursor/Windsurf/Cline to invoke the adapter) was never written. Root cause: `TOOL_SETTINGS_FILE` was absent from all three Tier 1 setup configs and no `install_tier1_hook_registration()` function existed. `gate-write.mjs` never fired for these tools.
 

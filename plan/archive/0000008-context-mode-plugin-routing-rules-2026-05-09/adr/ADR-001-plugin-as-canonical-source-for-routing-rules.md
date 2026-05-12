@@ -12,7 +12,7 @@ version: "0.1.0"
 **Feature:** 0000008-context-mode-plugin-routing-rules
 **Component:** planifest-framework
 **Status:** accepted
-**Date:** 2026-05-08
+**Date:** 08 May 2026
 
 ---
 

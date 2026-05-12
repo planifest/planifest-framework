@@ -12,7 +12,7 @@ version: "0.1.0"
 **Feature:** 0000001-context-mode-enforcement-hooks
 **Component:** context-mode-hooks
 **Status:** accepted
-**Date:** 2026-04-12
+**Date:** 12 Apr 2026
 
 ---
 
