@@ -1,53 +1,168 @@
 ---
-name: terraform
-description: Terraform IaC covering module design, state management, workspace strategy, testing, and drift detection; use when authoring, refactoring, or operating Terraform-managed infrastructure.
+name: terraform-infrastructure
+description: "Terraform infrastructure as code workflow for provisioning cloud resources, creating reusable modules, and managing infrastructure at scale."
+category: granular-workflow-bundle
+risk: safe
+source: personal
+date_added: "2026-02-27"
 ---
 
-# Terraform Engineer
+# Terraform Infrastructure Workflow
 
-You are a senior Terraform engineer who designs maintainable, testable, and safe infrastructure-as-code at scale.
+## Overview
 
-## When to Use
+Specialized workflow for infrastructure as code using Terraform including resource provisioning, module creation, state management, and multi-environment deployments.
 
-- Designing module structure for a new platform or environment
-- Managing state backends, locking, and workspace strategy across environments
-- Implementing drift detection and preventing configuration rot
-- Writing Terratest or Checkov tests for infrastructure code
+## When to Use This Workflow
 
-## Core Principles
+Use this workflow when:
+- Provisioning cloud infrastructure
+- Creating Terraform modules
+- Managing multi-environment infra
+- Implementing IaC best practices
+- Setting up Terraform workflows
 
-**State is the source of truth.** The state file maps resource IDs to HCL declarations. Corrupt or lost state means Terraform cannot manage those resources safely. Remote state in S3 + DynamoDB locking (or Terraform Cloud) with versioning and encryption is non-negotiable for production.
+## Workflow Phases
 
-**Modules encapsulate, not abstract.** A good module hides implementation complexity (IAM role, policies, instance profile as one unit) but exposes all meaningful knobs as variables. A module that hides too much forces forks; a module that exposes too little is useless.
+### Phase 1: Terraform Setup
 
-**Plan before apply, always.** `terraform plan -out=tfplan` saves a binary plan. `terraform apply tfplan` applies exactly that plan, no surprises. In CI, post the plan as a PR comment (via `terraform show -json tfplan | jq` or Atlantis). Never `terraform apply` interactively in production.
+#### Skills to Invoke
+- `terraform-skill` - Terraform basics
+- `terraform-specialist` - Advanced Terraform
 
-**Blast radius scoping.** State files should be scoped to limit the blast radius of a bad apply. A single state file for the entire platform means a mistyped `count` can destroy production databases. Split by: environment, then by service tier (networking, data, compute).
+#### Actions
+1. Initialize Terraform
+2. Configure backend
+3. Set up providers
+4. Configure variables
+5. Create outputs
 
-**Idempotency and immutability.** Resources that cannot be updated in-place (e.g., RDS instance class, EKS node group AMI) require replacement. Know your `create_before_destroy` vs `prevent_destroy` lifecycle options. Use `lifecycle { ignore_changes = [tags] }` sparingly and document why.
+#### Copy-Paste Prompts
+```
+Use @terraform-skill to set up Terraform project
+```
 
-## Approach
+### Phase 2: Resource Provisioning
 
-**Module design:** Use the standard layout: `main.tf`, `variables.tf`, `outputs.tf`, `versions.tf`. Pin provider and Terraform versions in `versions.tf` with `required_version` and `required_providers`. Never use `>= x.0` without an upper bound in shared modules — provider major versions break APIs. Publish modules to a private Terraform registry (Spacelift, TFC, or a Git tag convention) for versioned consumption.
+#### Skills to Invoke
+- `terraform-module-library` - Terraform modules
+- `cloud-architect` - Cloud architecture
 
-**Workspace strategy:** Workspaces share a backend and state path prefix. Use workspaces for ephemeral environments (feature branches, PR previews). Use separate state files (different backend keys) for permanent environments (staging, production) — this prevents accidental `terraform destroy` of production when targeting staging workspace. Never use the `default` workspace for real infrastructure.
+#### Actions
+1. Design infrastructure
+2. Create resource definitions
+3. Configure networking
+4. Set up compute
+5. Add storage
 
-**State management:** Import existing resources with `terraform import` before writing HCL, not after. Use `terraform state mv` to refactor state without destroying resources. Use `terraform state rm` followed by re-import when a resource drifted beyond what Terraform can reconcile. Always back up state before surgery: `terraform state pull > backup.tfstate`.
+#### Copy-Paste Prompts
+```
+Use @terraform-module-library to provision cloud resources
+```
 
-**Drift detection:** Schedule `terraform plan` in CI on a cron (daily at minimum). Parse the exit code: 0 = no changes, 1 = error, 2 = changes detected. Alert on exit code 2. Tools: `driftctl`, `infracost` (for cost drift), or native Terraform Cloud drift detection. Drift usually comes from console changes — enforce least-privilege IAM so humans cannot make changes outside Terraform.
+### Phase 3: Module Creation
 
-**Testing:** Unit tests with `terraform validate` and `tflint`. Policy tests with Checkov (`checkov -d .`) or OPA/Conftest for custom policies. Integration tests with Terratest (Go): provision real infrastructure, assert, destroy. Test in a dedicated test account with a budget alarm. Terratest patterns: use `t.Parallel()`, retry with backoff for eventually-consistent resources, always `defer terraform.Destroy(t, terraformOptions)`.
+#### Skills to Invoke
+- `terraform-module-library` - Module creation
 
-**Secrets:** Never store secrets in tfvars or state. Use `data "aws_secretsmanager_secret_version"` or `data "vault_generic_secret"` to read at apply time. The state file will still contain sensitive outputs — encrypt the backend and restrict access.
+#### Actions
+1. Design module interface
+2. Create module structure
+3. Define variables/outputs
+4. Add documentation
+5. Test module
 
-## Common Mistakes to Avoid
+#### Copy-Paste Prompts
+```
+Use @terraform-module-library to create reusable Terraform module
+```
 
-- **Committing `.terraform/` or `*.tfstate` to git.** State contains secrets in plaintext. Add both to `.gitignore` immediately.
-- **Using `count` for resource variants instead of `for_each`.** `count` assigns ordinal keys; removing element 1 of 3 destroys and recreates element 3. `for_each` uses stable string keys — removals are safe.
-- **Skipping provider version pinning in modules.** An unpinned `hashicorp/aws` module breaks when AWS releases a breaking provider version. Pin to a minor range: `~> 5.0`.
-- **Monolithic root modules.** A single root module with 500 resources means every plan touches everything. Decompose into layers: networking, data, compute, application — each with its own state.
-- **Not testing `destroy`.** A module that provisions cleanly but leaves orphaned resources on destroy causes cost leakage and security exposure. Terratest `Destroy` in tests catches this.
+### Phase 4: State Management
 
-## Output
+#### Skills to Invoke
+- `terraform-specialist` - State management
 
-HCL with inline comments explaining lifecycle choices, dependency edges, and non-obvious variable constraints. Workspace/state layout diagrams for multi-environment strategies. Plan output annotated with risk levels (creates, updates, replacements, destroys). Testing scaffolding with Terratest go files and Checkov policies for critical resources.
+#### Actions
+1. Configure remote backend
+2. Set up state locking
+3. Implement workspaces
+4. Configure state access
+5. Set up backup
+
+#### Copy-Paste Prompts
+```
+Use @terraform-specialist to configure Terraform state
+```
+
+### Phase 5: Multi-Environment
+
+#### Skills to Invoke
+- `terraform-specialist` - Multi-environment
+
+#### Actions
+1. Design environment structure
+2. Create environment configs
+3. Set up variable files
+4. Configure isolation
+5. Test deployments
+
+#### Copy-Paste Prompts
+```
+Use @terraform-specialist to set up multi-environment Terraform
+```
+
+### Phase 6: CI/CD Integration
+
+#### Skills to Invoke
+- `cicd-automation-workflow-automate` - CI/CD
+- `github-actions-templates` - GitHub Actions
+
+#### Actions
+1. Create CI pipeline
+2. Configure plan/apply
+3. Set up approvals
+4. Add validation
+5. Test pipeline
+
+#### Copy-Paste Prompts
+```
+Use @cicd-automation-workflow-automate to create Terraform CI/CD
+```
+
+### Phase 7: Security
+
+#### Skills to Invoke
+- `secrets-management` - Secrets management
+- `terraform-specialist` - Security
+
+#### Actions
+1. Configure secrets
+2. Set up encryption
+3. Implement policies
+4. Add compliance
+5. Audit access
+
+#### Copy-Paste Prompts
+```
+Use @secrets-management to secure Terraform secrets
+```
+
+## Quality Gates
+
+- [ ] Resources provisioned
+- [ ] Modules working
+- [ ] State configured
+- [ ] Multi-env tested
+- [ ] CI/CD working
+- [ ] Security verified
+
+## Related Workflow Bundles
+
+- `cloud-devops` - Cloud/DevOps
+- `kubernetes-deployment` - Kubernetes
+- `aws-infrastructure` - AWS specific
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

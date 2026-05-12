@@ -1,52 +1,194 @@
 ---
-name: information-architecture
-description: Information architecture — taxonomy, navigation design, labelling, findability, and card sorting; use when organising content and navigation for clarity and discoverability.
+name: source-driven-development
+description: Grounds every implementation decision in official documentation. Use when you want authoritative, source-cited code free from outdated patterns. Use when building with any framework or library where correctness matters.
 ---
 
-# Information Architecture
+# Source-Driven Development
 
-You design information architectures that match users' mental models — organising, labelling, and structuring content so that people find what they need without thinking hard about where to look.
+## Overview
+
+Every framework-specific code decision must be backed by official documentation. Don't implement from memory — verify, cite, and let the user see your sources. Training data goes stale, APIs get deprecated, best practices evolve. This skill ensures the user gets code they can trust because every pattern traces back to an authoritative source they can check.
 
 ## When to Use
 
-- Redesigning navigation for a product that has grown organically into a confusing structure
-- Designing the IA for a new product area with many content types and user tasks
-- Evaluating findability: how well can users locate content or features in the current structure?
+- The user wants code that follows current best practices for a given framework
+- Building boilerplate, starter code, or patterns that will be copied across a project
+- The user explicitly asks for documented, verified, or "correct" implementation
+- Implementing features where the framework's recommended approach matters (forms, routing, data fetching, state management, auth)
+- Reviewing or improving code that uses framework-specific patterns
+- Any time you are about to write framework-specific code from memory
 
-## Core Principles
+**When NOT to use:**
 
-**Organisation reveals assumptions.** Every IA decision reflects a mental model — of what belongs together, what users are trying to do, and how they think about your domain. Explicit analysis of these assumptions is the first step; implicit assumptions become findability failures.
+- Correctness does not depend on a specific version (renaming variables, fixing typos, moving files)
+- Pure logic that works the same across all versions (loops, conditionals, data structures)
+- The user explicitly wants speed over verification ("just do it quickly")
 
-**Users navigate by recognition, not recall.** Navigation labels must trigger instant recognition of where clicking will lead. Clever, branded, or category-internal labels fail users. Plain, task-oriented labels succeed.
+## The Process
 
-**Multiple classification schemes serve multiple needs.** A library has topical classification, author indexes, and a new-arrivals section. Your product may need similar redundancy: category-based navigation, search, recent items, and contextual related links. Users find things through different paths; provide all the useful ones.
+```
+DETECT ──→ FETCH ──→ IMPLEMENT ──→ CITE
+  │          │           │            │
+  ▼          ▼           ▼            ▼
+ What       Get the    Follow the   Show your
+ stack?     relevant   documented   sources
+            docs       patterns
+```
 
-**Findability and browsability are different.** Findability: "I know what I'm looking for and need to find it." Browsability: "I'm exploring; show me what's available." Good IA supports both. Search supports findability; clear hierarchical navigation supports browsability.
+### Step 1: Detect Stack and Versions
 
-**IA is testable before it is buildable.** Card sorting and tree testing validate structure with real users before a line of code is written. Use them.
+Read the project's dependency file to identify exact versions:
 
-## Approach
+```
+package.json    → Node/React/Vue/Angular/Svelte
+composer.json   → PHP/Symfony/Laravel
+requirements.txt / pyproject.toml → Python/Django/Flask
+go.mod          → Go
+Cargo.toml      → Rust
+Gemfile         → Ruby/Rails
+```
 
-**Content audit:** Inventory all content and features in the existing product or design. For each item: type, user task it supports, current location, usage frequency. Identify: orphaned content (exists but hard to find), duplicated content (same thing in two places), and missing content (users need it but it doesn't exist). The audit is the source material for IA design.
+State what you found explicitly:
 
-**Card sorting:** Open card sort — participants group items without a predefined structure, then label the groups — reveals how users naturally categorise your content. Run with 15-30 participants for quantitative clustering. Use: Optimal Workshop, Maze, or physical cards + spreadsheet. Analyse: similarity matrix (how often were two items grouped together?), cluster dendrogram, and category label patterns. Card sort results inform your proposed taxonomy.
+```
+STACK DETECTED:
+- React 19.1.0 (from package.json)
+- Vite 6.2.0
+- Tailwind CSS 4.0.3
+→ Fetching official docs for the relevant patterns.
+```
 
-**Taxonomy design:** Organise content into a hierarchy using card sort data and business logic. Evaluate each level against: (1) exhaustiveness (every item has a home), (2) exclusivity (items don't obviously belong in multiple places — if they do, add a cross-link, not a copy), (3) label clarity (do labels communicate what's inside without clicking?). Optimal taxonomy: 4-7 top-level categories, 2-3 levels deep before reaching content. Deeper hierarchies increase cognitive load.
+If versions are missing or ambiguous, **ask the user**. Don't guess — the version determines which patterns are correct.
 
-**Tree testing:** Test the proposed taxonomy by asking users to find specific items in a text-only tree (no visual design). Tools: Optimal Workshop TreeJack, Maze. Measure: success rate, directness (went straight to correct location), and first-click accuracy. Targets: 80%+ success rate for primary tasks. Items with <60% success rate need IA redesign, not better visual design.
+### Step 2: Fetch Official Documentation
 
-**Navigation labelling:** Test labels in isolation — show the label, ask users what they expect to find behind it. Ideal labels are: specific (not "Resources"), task-oriented (where useful — "Manage Account" not "Account"), user-language (use words from user research, not internal product language), and short (1-3 words for primary navigation). Avoid: jargon, clever wordplay, and generic terms that could mean anything.
+Fetch the specific documentation page for the feature you're implementing. Not the homepage, not the full docs — the relevant page.
 
-**Wayfinding:** Beyond navigation labels, users need cues about where they are (breadcrumbs, active states in navigation, page titles) and where they can go (contextual links to related content, "next steps" prompts, search within a section). Design wayfinding as part of IA, not as a CSS detail.
+**Source hierarchy (in order of authority):**
 
-**Search integration:** Define the relationship between navigation and search for your product. When navigation is comprehensive (bounded content), search supplements navigation. When content is vast (knowledge bases, e-commerce), search is the primary findability mechanism and navigation is a fallback. Design both; test which users prefer in which contexts.
+| Priority | Source | Example |
+|----------|--------|---------|
+| 1 | Official documentation | react.dev, docs.djangoproject.com, symfony.com/doc |
+| 2 | Official blog / changelog | react.dev/blog, nextjs.org/blog |
+| 3 | Web standards references | MDN, web.dev, html.spec.whatwg.org |
+| 4 | Browser/runtime compatibility | caniuse.com, node.green |
 
-## Common Mistakes to Avoid
+**Not authoritative — never cite as primary sources:**
 
-- Designing navigation around internal team structure rather than user tasks — "Marketing," "Product," "Engineering" makes sense to the company org chart; it makes no sense to users
-- Skipping validation (card sort, tree testing) and trusting intuition about what belongs together — intuition is a good starting point, not a sufficient endpoint
-- Confusing navigation with IA — navigation is the interface; IA is the underlying structure. Good IA can be navigated in multiple ways; navigation is one expression of it
+- Stack Overflow answers
+- Blog posts or tutorials (even popular ones)
+- AI-generated documentation or summaries
+- Your own training data (that is the whole point — verify it)
 
-## Output
+**Be precise with what you fetch:**
 
-IA deliverables: (1) content audit spreadsheet; (2) card sort results with analysis (similarity matrix, clustering); (3) proposed taxonomy with rationale; (4) tree test results with problem areas identified; (5) navigation design with labelling rationale; (6) sitemap (visual hierarchy of all content areas). Delivered before any visual design begins.
+```
+BAD:  Fetch the React homepage
+GOOD: Fetch react.dev/reference/react/useActionState
+
+BAD:  Search "django authentication best practices"
+GOOD: Fetch docs.djangoproject.com/en/6.0/topics/auth/
+```
+
+After fetching, extract the key patterns and note any deprecation warnings or migration guidance.
+
+When official sources conflict with each other (e.g. a migration guide contradicts the API reference), surface the discrepancy to the user and verify which pattern actually works against the detected version.
+
+### Step 3: Implement Following Documented Patterns
+
+Write code that matches what the documentation shows:
+
+- Use the API signatures from the docs, not from memory
+- If the docs show a new way to do something, use the new way
+- If the docs deprecate a pattern, don't use the deprecated version
+- If the docs don't cover something, flag it as unverified
+
+**When docs conflict with existing project code:**
+
+```
+CONFLICT DETECTED:
+The existing codebase uses useState for form loading state,
+but React 19 docs recommend useActionState for this pattern.
+(Source: react.dev/reference/react/useActionState)
+
+Options:
+A) Use the modern pattern (useActionState) — consistent with current docs
+B) Match existing code (useState) — consistent with codebase
+→ Which approach do you prefer?
+```
+
+Surface the conflict. Don't silently pick one.
+
+### Step 4: Cite Your Sources
+
+Every framework-specific pattern gets a citation. The user must be able to verify every decision.
+
+**In code comments:**
+
+```typescript
+// React 19 form handling with useActionState
+// Source: https://react.dev/reference/react/useActionState#usage
+const [state, formAction, isPending] = useActionState(submitOrder, initialState);
+```
+
+**In conversation:**
+
+```
+I'm using useActionState instead of manual useState for the
+form submission state. React 19 replaced the manual
+isPending/setIsPending pattern with this hook.
+
+Source: https://react.dev/blog/2024/12/05/react-19#actions
+"useTransition now supports async functions [...] to handle
+pending states automatically"
+```
+
+**Citation rules:**
+
+- Full URLs, not shortened
+- Prefer deep links with anchors where possible (e.g. `/useActionState#usage` over `/useActionState`) — anchors survive doc restructuring better than top-level pages
+- Quote the relevant passage when it supports a non-obvious decision
+- Include browser/runtime support data when recommending platform features
+- If you cannot find documentation for a pattern, say so explicitly:
+
+```
+UNVERIFIED: I could not find official documentation for this
+pattern. This is based on training data and may be outdated.
+Verify before using in production.
+```
+
+Honesty about what you couldn't verify is more valuable than false confidence.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "I'm confident about this API" | Confidence is not evidence. Training data contains outdated patterns that look correct but break against current versions. Verify. |
+| "Fetching docs wastes tokens" | Hallucinating an API wastes more. The user debugs for an hour, then discovers the function signature changed. One fetch prevents hours of rework. |
+| "The docs won't have what I need" | If the docs don't cover it, that's valuable information — the pattern may not be officially recommended. |
+| "I'll just mention it might be outdated" | A disclaimer doesn't help. Either verify and cite, or clearly flag it as unverified. Hedging is the worst option. |
+| "This is a simple task, no need to check" | Simple tasks with wrong patterns become templates. The user copies your deprecated form handler into ten components before discovering the modern approach exists. |
+
+## Red Flags
+
+- Writing framework-specific code without checking the docs for that version
+- Using "I believe" or "I think" about an API instead of citing the source
+- Implementing a pattern without knowing which version it applies to
+- Citing Stack Overflow or blog posts instead of official documentation
+- Using deprecated APIs because they appear in training data
+- Not reading `package.json` / dependency files before implementing
+- Delivering code without source citations for framework-specific decisions
+- Fetching an entire docs site when only one page is relevant
+
+## Verification
+
+After implementing with source-driven development:
+
+- [ ] Framework and library versions were identified from the dependency file
+- [ ] Official documentation was fetched for framework-specific patterns
+- [ ] All sources are official documentation, not blog posts or training data
+- [ ] Code follows the patterns shown in the current version's documentation
+- [ ] Non-trivial decisions include source citations with full URLs
+- [ ] No deprecated APIs are used (checked against migration guides)
+- [ ] Conflicts between docs and existing code were surfaced to the user
+- [ ] Anything that could not be verified is explicitly flagged as unverified

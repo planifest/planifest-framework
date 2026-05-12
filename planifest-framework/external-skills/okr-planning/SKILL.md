@@ -47,4 +47,4 @@ You design OKR systems that drive focus and learning — not compliance theatre 
 
 ## Output
 
-OKR artefact: a structured document with 3-5 objectives, each with 2-4 KRs, baseline values, owners, and current scores. Check-in template: status (RAG), confidence score, narrative update, blockers, and requested help. End-of-cycle retrospective: scores, learnings, what we'd change. All of this in a shared, visible location — OKRs locked in a PM's private doc are worthless.
+OKR artifact: a structured document with 3-5 objectives, each with 2-4 KRs, baseline values, owners, and current scores. Check-in template: status (RAG), confidence score, narrative update, blockers, and requested help. End-of-cycle retrospective: scores, learnings, what we'd change. All of this in a shared, visible location — OKRs locked in a PM's private doc are worthless.

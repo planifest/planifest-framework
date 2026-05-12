@@ -1,60 +1,343 @@
 ---
-name: nodejs-expert
-description: Expert Node.js engineering — event loop mastery, async patterns, HTTP servers, and production-grade service design
-version: 1.0.0
-author: Planifest Contributors
-license: MIT
+name: nodejs-best-practices
+description: "Node.js development principles and decision-making. Framework selection, async patterns, security, and architecture. Teaches thinking, not copying."
+risk: unknown
+source: community
+date_added: "2026-02-27"
 ---
 
-# Node.js Expert
+# Node.js Best Practices
 
-> I am a Node.js expert who understands the event loop deeply enough to write non-blocking code that performs under load, designs HTTP servers that handle errors correctly, and builds production services that are observable and operable.
+> Principles and decision-making for Node.js development in 2025.
+> **Learn to THINK, not memorize code patterns.**
 
-## Core Principles
+## When to Use
+Use this skill when making Node.js architecture decisions, choosing frameworks, designing async patterns, or applying security and deployment best practices.
 
-- **Never block the event loop.** CPU-intensive work belongs in worker threads or a separate process. The event loop must stay free for I/O.
-- **`async`/`await` over callbacks and raw Promises.** Sequential async code is readable; callback pyramids and `.then` chains are not.
-- **Error handling is not optional.** Unhandled promise rejections crash processes in modern Node. Every `await` is wrapped or the caller handles it.
-- **Graceful shutdown is a feature.** On `SIGTERM`, stop accepting new connections, drain in-flight requests, then exit. Kubernetes requires this.
-- **Environment configuration via `process.env` validated at startup.** Fail loud if required config is missing — not silently at runtime.
-- **Structured logging, not `console.log`.** `pino` for high-throughput JSON logging with request ID correlation.
-- **`esm` modules over `require`.** ES Modules are the standard. `import`/`export` syntax, `.js` extensions in imports, `"type": "module"` in `package.json`.
+---
 
-## Approach
+## ⚠️ How to Use This Skill
 
-Node.js service design begins with understanding the single-threaded event loop. I/O operations (`fs.readFile`, `http.request`, database queries) are non-blocking — they register a callback and return immediately, allowing the event loop to process other events. CPU-intensive work (image processing, cryptography, heavy computation) must be offloaded to `worker_threads` or a worker process pool. Blocking the event loop even for 100ms causes visible latency spikes.
+This skill teaches **decision-making principles**, not fixed code to copy.
 
-HTTP servers use `fastify` or `express` with structured route organisation. Routes are thin — they validate input, call service functions, and format responses. Business logic lives in service modules, not route handlers. Middleware handles cross-cutting concerns: authentication, request ID injection, rate limiting, and error normalisation. I define an error handler middleware that converts domain errors to HTTP responses with consistent JSON shape.
+- ASK user for preferences when unclear
+- Choose framework/pattern based on CONTEXT
+- Don't default to same solution every time
 
-Process management handles signals correctly. I register `process.on("SIGTERM", gracefulShutdown)` and `process.on("SIGINT", gracefulShutdown)`. The shutdown function stops the HTTP server from accepting new connections (`server.close()`), waits for in-flight requests to complete, closes database connections, and exits with code 0. This enables zero-downtime deploys in Kubernetes.
+---
 
-Database access uses connection pools sized to the database's connection limit, not the Node process count. I use `pg` (postgres), `ioredis`, or an ORM like `prisma` with explicit transaction management. Queries that need to be atomic run inside a transaction. N+1 query patterns are eliminated with `JOIN` or `DataLoader` for batching.
+## 1. Framework Selection (2025)
 
-## Key Patterns
+### Decision Tree
 
-- **`fastify` plugin architecture.** Register plugins for database, auth, and validation. Encapsulate related routes in plugins with a common prefix.
-- **`zod` for request validation.** Parse and validate request body, query params, and path params at the route level. Reject invalid input before it reaches business logic.
-- **`pino` for structured logging.** JSON logs with `requestId`, `userId`, `duration`, and `level`. Child loggers bind context for the request lifecycle.
-- **`worker_threads` for CPU work.** Offload JSON parsing of large payloads, image resizing, or encryption to worker threads.
-- **`DataLoader` for batching.** Batch and deduplicate database lookups in a single event loop tick — eliminates N+1 in GraphQL resolvers.
-- **`AsyncLocalStorage` for request context.** Thread-local-like storage for request IDs, user context, and correlation IDs without passing through every function.
-- **Health check endpoints.** `/health/live` returns 200 immediately; `/health/ready` checks database and dependencies before responding.
-- **Circuit breaker for external calls.** `opossum` or manual implementation — fail fast when a downstream service is degraded.
+```
+What are you building?
+│
+├── Edge/Serverless (Cloudflare, Vercel)
+│   └── Hono (zero-dependency, ultra-fast cold starts)
+│
+├── High Performance API
+│   └── Fastify (2-3x faster than Express)
+│
+├── Enterprise/Team familiarity
+│   └── NestJS (structured, DI, decorators)
+│
+├── Legacy/Stable/Maximum ecosystem
+│   └── Express (mature, most middleware)
+│
+└── Full-stack with frontend
+    └── Next.js API Routes or tRPC
+```
 
-## Anti-Patterns
+### Comparison Principles
 
-- **`JSON.parse` on large payloads in the event loop.** Blocks for hundreds of milliseconds. Use streaming JSON parsers or worker threads.
-- **`setTimeout` for flow control.** An indication of a missing await or a race condition. Fix the root cause.
-- **Synchronous file operations (`fs.readFileSync`) in request handlers.** Blocks the event loop for all concurrent requests. Use `fs.promises.readFile`.
-- **Not handling `unhandledRejection`.** In Node 15+, this crashes the process. In earlier versions, it silently swallows errors.
-- **`require` cycles.** Circular dependencies with CommonJS `require` cause one module to receive an incomplete `exports` object. Restructure.
-- **Storing session state in process memory.** Breaks in multi-process or multi-host deployments. Use Redis.
-- **`process.exit(0)` without graceful shutdown.** Drops in-flight database transactions and HTTP responses. Always drain first.
+| Factor | Hono | Fastify | Express |
+|--------|------|---------|---------|
+| **Best for** | Edge, serverless | Performance | Legacy, learning |
+| **Cold start** | Fastest | Fast | Moderate |
+| **Ecosystem** | Growing | Good | Largest |
+| **TypeScript** | Native | Excellent | Good |
+| **Learning curve** | Low | Medium | Low |
 
-## Output Format
+### Selection Questions to Ask:
+1. What's the deployment target?
+2. Is cold start time critical?
+3. Does team have existing experience?
+4. Is there legacy code to maintain?
 
-- TypeScript Node.js services with `tsconfig.json` targeting Node LTS
-- `fastify` or `express` server with route registration, middleware, and error handling
-- `Dockerfile` with multi-stage build and non-root user
-- `pino` logging configuration with request serialiser
-- `vitest` or `jest` unit and integration tests
+---
+
+## 2. Runtime Considerations (2025)
+
+### Native TypeScript
+
+```
+Node.js 22+: --experimental-strip-types
+├── Run .ts files directly
+├── No build step needed for simple projects
+└── Consider for: scripts, simple APIs
+```
+
+### Module System Decision
+
+```
+ESM (import/export)
+├── Modern standard
+├── Better tree-shaking
+├── Async module loading
+└── Use for: new projects
+
+CommonJS (require)
+├── Legacy compatibility
+├── More npm packages support
+└── Use for: existing codebases, some edge cases
+```
+
+### Runtime Selection
+
+| Runtime | Best For |
+|---------|----------|
+| **Node.js** | General purpose, largest ecosystem |
+| **Bun** | Performance, built-in bundler |
+| **Deno** | Security-first, built-in TypeScript |
+
+---
+
+## 3. Architecture Principles
+
+### Layered Structure Concept
+
+```
+Request Flow:
+│
+├── Controller/Route Layer
+│   ├── Handles HTTP specifics
+│   ├── Input validation at boundary
+│   └── Calls service layer
+│
+├── Service Layer
+│   ├── Business logic
+│   ├── Framework-agnostic
+│   └── Calls repository layer
+│
+└── Repository Layer
+    ├── Data access only
+    ├── Database queries
+    └── ORM interactions
+```
+
+### Why This Matters:
+- **Testability**: Mock layers independently
+- **Flexibility**: Swap database without touching business logic
+- **Clarity**: Each layer has single responsibility
+
+### When to Simplify:
+- Small scripts → Single file OK
+- Prototypes → Less structure acceptable
+- Always ask: "Will this grow?"
+
+---
+
+## 4. Error Handling Principles
+
+### Centralized Error Handling
+
+```
+Pattern:
+├── Create custom error classes
+├── Throw from any layer
+├── Catch at top level (middleware)
+└── Format consistent response
+```
+
+### Error Response Philosophy
+
+```
+Client gets:
+├── Appropriate HTTP status
+├── Error code for programmatic handling
+├── User-friendly message
+└── NO internal details (security!)
+
+Logs get:
+├── Full stack trace
+├── Request context
+├── User ID (if applicable)
+└── Timestamp
+```
+
+### Status Code Selection
+
+| Situation | Status | When |
+|-----------|--------|------|
+| Bad input | 400 | Client sent invalid data |
+| No auth | 401 | Missing or invalid credentials |
+| No permission | 403 | Valid auth, but not allowed |
+| Not found | 404 | Resource doesn't exist |
+| Conflict | 409 | Duplicate or state conflict |
+| Validation | 422 | Schema valid but business rules fail |
+| Server error | 500 | Our fault, log everything |
+
+---
+
+## 5. Async Patterns Principles
+
+### When to Use Each
+
+| Pattern | Use When |
+|---------|----------|
+| `async/await` | Sequential async operations |
+| `Promise.all` | Parallel independent operations |
+| `Promise.allSettled` | Parallel where some can fail |
+| `Promise.race` | Timeout or first response wins |
+
+### Event Loop Awareness
+
+```
+I/O-bound (async helps):
+├── Database queries
+├── HTTP requests
+├── File system
+└── Network operations
+
+CPU-bound (async doesn't help):
+├── Crypto operations
+├── Image processing
+├── Complex calculations
+└── → Use worker threads or offload
+```
+
+### Avoiding Event Loop Blocking
+
+- Never use sync methods in production (fs.readFileSync, etc.)
+- Offload CPU-intensive work
+- Use streaming for large data
+
+---
+
+## 6. Validation Principles
+
+### Validate at Boundaries
+
+```
+Where to validate:
+├── API entry point (request body/params)
+├── Before database operations
+├── External data (API responses, file uploads)
+└── Environment variables (startup)
+```
+
+### Validation Library Selection
+
+| Library | Best For |
+|---------|----------|
+| **Zod** | TypeScript first, inference |
+| **Valibot** | Smaller bundle (tree-shakeable) |
+| **ArkType** | Performance critical |
+| **Yup** | Existing React Form usage |
+
+### Validation Philosophy
+
+- Fail fast: Validate early
+- Be specific: Clear error messages
+- Don't trust: Even "internal" data
+
+---
+
+## 7. Security Principles
+
+### Security Checklist (Not Code)
+
+- [ ] **Input validation**: All inputs validated
+- [ ] **Parameterized queries**: No string concatenation for SQL
+- [ ] **Password hashing**: bcrypt or argon2
+- [ ] **JWT verification**: Always verify signature and expiry
+- [ ] **Rate limiting**: Protect from abuse
+- [ ] **Security headers**: Helmet.js or equivalent
+- [ ] **HTTPS**: Everywhere in production
+- [ ] **CORS**: Properly configured
+- [ ] **Secrets**: Environment variables only
+- [ ] **Dependencies**: Regularly audited
+
+### Security Mindset
+
+```
+Trust nothing:
+├── Query params → validate
+├── Request body → validate
+├── Headers → verify
+├── Cookies → validate
+├── File uploads → scan
+└── External APIs → validate response
+```
+
+---
+
+## 8. Testing Principles
+
+### Test Strategy Selection
+
+| Type | Purpose | Tools |
+|------|---------|-------|
+| **Unit** | Business logic | node:test, Vitest |
+| **Integration** | API endpoints | Supertest |
+| **E2E** | Full flows | Playwright |
+
+### What to Test (Priorities)
+
+1. **Critical paths**: Auth, payments, core business
+2. **Edge cases**: Empty inputs, boundaries
+3. **Error handling**: What happens when things fail?
+4. **Not worth testing**: Framework code, trivial getters
+
+### Built-in Test Runner (Node.js 22+)
+
+```
+node --test src/**/*.test.ts
+├── No external dependency
+├── Good coverage reporting
+└── Watch mode available
+```
+
+---
+
+## 9. Anti-Patterns to Avoid
+
+### ❌ DON'T:
+- Use Express for new edge projects (use Hono)
+- Use sync methods in production code
+- Put business logic in controllers
+- Skip input validation
+- Hardcode secrets
+- Trust external data without validation
+- Block event loop with CPU work
+
+### ✅ DO:
+- Choose framework based on context
+- Ask user for preferences when unclear
+- Use layered architecture for growing projects
+- Validate all inputs
+- Use environment variables for secrets
+- Profile before optimizing
+
+---
+
+## 10. Decision Checklist
+
+Before implementing:
+
+- [ ] **Asked user about stack preference?**
+- [ ] **Chosen framework for THIS context?** (not just default)
+- [ ] **Considered deployment target?**
+- [ ] **Planned error handling strategy?**
+- [ ] **Identified validation points?**
+- [ ] **Considered security requirements?**
+
+---
+
+> **Remember**: Node.js best practices are about decision-making, not memorizing patterns. Every project deserves fresh consideration based on its requirements.
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

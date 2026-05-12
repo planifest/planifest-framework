@@ -1,101 +1,215 @@
 ---
-name: monorepo-expert
-description: Architects and operates monorepos with appropriate tooling — use when migrating to a monorepo, scaling an existing one, or resolving build performance and dependency management problems.
+name: using-git-worktrees
+description: Use when starting feature work that needs isolation from current workspace or before executing implementation plans - ensures an isolated workspace exists via native tools or git worktree fallback
 ---
 
-# Monorepo Architect
+# Using Git Worktrees
 
-You are a monorepo specialist who designs repository structures, selects tooling, and establishes conventions that scale to large teams.
+## Overview
 
-## When to Use
+Ensure work happens in an isolated workspace. Prefer your platform's native worktree tools. Fall back to manual git worktrees only when no native tool is available.
 
-- Deciding whether to adopt a monorepo for a multi-package or multi-service codebase
-- Migrating multiple repos into a monorepo
-- Diagnosing slow CI or broken cross-package dependency management in an existing monorepo
-- Choosing between Nx, Turborepo, Bazel, or Pants
+**Core principle:** Detect existing isolation first. Then use native tools. Then fall back to git. Never fight the harness.
 
-## Core Principles
+**Announce at start:** "I'm using the using-git-worktrees skill to set up an isolated workspace."
 
-**Tooling Determines Feasibility** — A monorepo without task orchestration, caching, and affected-computation is a polyrepo in a trench coat: all the pain, none of the benefits. The tool choice is not cosmetic — it determines whether the monorepo scales.
+## Step 0: Detect Existing Isolation
 
-**Code Sharing Without Coupling** — The monorepo's value is shared code and atomic cross-package changes. The risk is inappropriate coupling: business-logic packages importing UI utilities because "it's all in the same repo." Enforce module boundaries explicitly.
+**Before creating anything, check if you are already in an isolated workspace.**
 
-**Affected Computation is the Scaling Key** — As the repo grows, running all tests on every commit becomes untenable. Affected computation (derive which packages are affected by the changed files via the dependency graph) and task caching (skip tasks whose inputs haven't changed) are the primary scaling mechanisms.
-
-**Ownership Must Be Explicit** — In a monorepo with many teams, CODEOWNERS and module ownership configuration prevent the "everyone owns everything, nobody owns anything" failure mode. Every package has an owner who reviews changes.
-
-**Version Strategy Requires a Decision** — Fixed versioning (all packages share one version, released together) vs independent versioning (each package has its own version). Fixed is simpler but ties all packages to the same release cadence. Independent is more flexible but requires dependency management discipline.
-
-## Approach
-
-**Tooling Comparison:**
-
-*Turborepo (Vercel):*
-- JavaScript/TypeScript native; wraps npm/yarn/pnpm workspaces
-- Task graph caching (local and remote via Vercel or self-hosted)
-- Minimal config: `turbo.json` defines pipeline and dependencies
-- No code generation, no project graph analysis beyond task caching
-- Best for: small-to-medium JS/TS monorepos prioritising simplicity
-
-*Nx (Nrwl):*
-- Language-agnostic (JS/TS first but Go, Python, Java plugins exist)
-- Project graph with dependency constraints (enforce module boundaries)
-- Code generation (`nx generate`), migrations, executor plugins
-- Distributed task execution (Nx Cloud)
-- Best for: multi-team monorepos with cross-cutting concerns, code generation needs
-
-*Bazel (Google):*
-- Hermetic, reproducible builds with remote execution and caching
-- Polyglot: Java, C++, Python, Go, JS (rules_nodejs)
-- Steep learning curve; requires writing BUILD files and Starlark rules
-- Best for: large polyglot monorepos (500+ packages) where hermetic correctness is required
-
-*Pants (Toolchain):*
-- Python-first, also Go, Java, Scala
-- Hermetic, dependency inference (reduces BUILD file boilerplate vs Bazel)
-- Better ergonomics than Bazel for Python teams
-
-**Repository Structure:**
-
-```
-/apps           — deployable applications
-/packages       — shared libraries and utilities
-/tools          — build scripts, generators, tooling configs
-/infra          — infrastructure as code
+```bash
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+BRANCH=$(git branch --show-current)
 ```
 
-Each package has: `package.json` (or equivalent), its own `README`, CODEOWNERS entry, and clear public API (only export what consumers should use).
+**Submodule guard:** `GIT_DIR != GIT_COMMON` is also true inside git submodules. Before concluding "already in a worktree," verify you are not in a submodule:
 
-**Dependency Constraints (Nx example):**
-```json
-{
-  "depConstraints": [
-    { "sourceTag": "scope:app", "onlyDependOnLibsWithTags": ["scope:lib", "scope:shared"] },
-    { "sourceTag": "scope:lib", "onlyDependOnLibsWithTags": ["scope:shared"] }
-  ]
-}
+```bash
+# If this returns a path, you're in a submodule, not a worktree — treat as normal repo
+git rev-parse --show-superproject-working-tree 2>/dev/null
 ```
-Enforce: apps can import libs; libs cannot import apps; shared can be imported by anyone.
 
-**CI Pipeline Design:**
-1. Compute affected packages from the PR diff
-2. Run lint + build + test only for affected packages (and their dependents)
-3. Use remote cache to skip tasks whose inputs haven't changed
-4. Parallelize across CI agents using distributed task execution (Nx Cloud, Bazel RBE)
+**If `GIT_DIR != GIT_COMMON` (and not a submodule):** You are already in a linked worktree. Skip to Step 3 (Project Setup). Do NOT create another worktree.
 
-**Migration from Polyrepo:**
-1. Create the monorepo with the target tooling
-2. Import repos one by one using `git subtree add` or `git filter-repo` (preserves history)
-3. Establish module boundaries before cross-importing starts
-4. Set CODEOWNERS from day one
+Report with branch state:
+- On a branch: "Already in isolated workspace at `<path>` on branch `<name>`."
+- Detached HEAD: "Already in isolated workspace at `<path>` (detached HEAD, externally managed). Branch creation needed at finish time."
 
-## Common Mistakes to Avoid
+**If `GIT_DIR == GIT_COMMON` (or in a submodule):** You are in a normal repo checkout.
 
-- Not configuring remote caching — without it, CI cold-starts rebuild everything on every run
-- Allowing circular dependencies between packages — they prevent correct affected-computation and indicate a design flaw
-- Importing across module boundary constraints and then trying to enforce them later — enforce from the first day
-- Using `*` as a version for internal dependencies — it prevents reliable dependency graph computation
+Has the user already indicated their worktree preference in your instructions? If not, ask for consent before creating a worktree:
 
-## Output
+> "Would you like me to set up an isolated worktree? It protects your current branch from changes."
 
-A monorepo architecture document: tool selection with rationale, directory structure, module boundary rules, ownership model, CI pipeline design with affected computation and caching, and a migration plan if converting from polyrepo.
+Honor any existing declared preference without asking. If the user declines consent, work in place and skip to Step 3.
+
+## Step 1: Create Isolated Workspace
+
+**You have two mechanisms. Try them in this order.**
+
+### 1a. Native Worktree Tools (preferred)
+
+The user has asked for an isolated workspace (Step 0 consent). Do you already have a way to create a worktree? It might be a tool with a name like `EnterWorktree`, `WorktreeCreate`, a `/worktree` command, or a `--worktree` flag. If you do, use it and skip to Step 3.
+
+Native tools handle directory placement, branch creation, and cleanup automatically. Using `git worktree add` when you have a native tool creates phantom state your harness can't see or manage.
+
+Only proceed to Step 1b if you have no native worktree tool available.
+
+### 1b. Git Worktree Fallback
+
+**Only use this if Step 1a does not apply** — you have no native worktree tool available. Create a worktree manually using git.
+
+#### Directory Selection
+
+Follow this priority order. Explicit user preference always beats observed filesystem state.
+
+1. **Check your instructions for a declared worktree directory preference.** If the user has already specified one, use it without asking.
+
+2. **Check for an existing project-local worktree directory:**
+   ```bash
+   ls -d .worktrees 2>/dev/null     # Preferred (hidden)
+   ls -d worktrees 2>/dev/null      # Alternative
+   ```
+   If found, use it. If both exist, `.worktrees` wins.
+
+3. **Check for an existing global directory:**
+   ```bash
+   project=$(basename "$(git rev-parse --show-toplevel)")
+   ls -d ~/.config/superpowers/worktrees/$project 2>/dev/null
+   ```
+   If found, use it (backward compatibility with legacy global path).
+
+4. **If there is no other guidance available**, default to `.worktrees/` at the project root.
+
+#### Safety Verification (project-local directories only)
+
+**MUST verify directory is ignored before creating worktree:**
+
+```bash
+git check-ignore -q .worktrees 2>/dev/null || git check-ignore -q worktrees 2>/dev/null
+```
+
+**If NOT ignored:** Add to .gitignore, commit the change, then proceed.
+
+**Why critical:** Prevents accidentally committing worktree contents to repository.
+
+Global directories (`~/.config/superpowers/worktrees/`) need no verification.
+
+#### Create the Worktree
+
+```bash
+project=$(basename "$(git rev-parse --show-toplevel)")
+
+# Determine path based on chosen location
+# For project-local: path="$LOCATION/$BRANCH_NAME"
+# For global: path="~/.config/superpowers/worktrees/$project/$BRANCH_NAME"
+
+git worktree add "$path" -b "$BRANCH_NAME"
+cd "$path"
+```
+
+**Sandbox fallback:** If `git worktree add` fails with a permission error (sandbox denial), tell the user the sandbox blocked worktree creation and you're working in the current directory instead. Then run setup and baseline tests in place.
+
+## Step 3: Project Setup
+
+Auto-detect and run appropriate setup:
+
+```bash
+# Node.js
+if [ -f package.json ]; then npm install; fi
+
+# Rust
+if [ -f Cargo.toml ]; then cargo build; fi
+
+# Python
+if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+if [ -f pyproject.toml ]; then poetry install; fi
+
+# Go
+if [ -f go.mod ]; then go mod download; fi
+```
+
+## Step 4: Verify Clean Baseline
+
+Run tests to ensure workspace starts clean:
+
+```bash
+# Use project-appropriate command
+npm test / cargo test / pytest / go test ./...
+```
+
+**If tests fail:** Report failures, ask whether to proceed or investigate.
+
+**If tests pass:** Report ready.
+
+### Report
+
+```
+Worktree ready at <full-path>
+Tests passing (<N> tests, 0 failures)
+Ready to implement <feature-name>
+```
+
+## Quick Reference
+
+| Situation | Action |
+|-----------|--------|
+| Already in linked worktree | Skip creation (Step 0) |
+| In a submodule | Treat as normal repo (Step 0 guard) |
+| Native worktree tool available | Use it (Step 1a) |
+| No native tool | Git worktree fallback (Step 1b) |
+| `.worktrees/` exists | Use it (verify ignored) |
+| `worktrees/` exists | Use it (verify ignored) |
+| Both exist | Use `.worktrees/` |
+| Neither exists | Check instruction file, then default `.worktrees/` |
+| Global path exists | Use it (backward compat) |
+| Directory not ignored | Add to .gitignore + commit |
+| Permission error on create | Sandbox fallback, work in place |
+| Tests fail during baseline | Report failures + ask |
+| No package.json/Cargo.toml | Skip dependency install |
+
+## Common Mistakes
+
+### Fighting the harness
+
+- **Problem:** Using `git worktree add` when the platform already provides isolation
+- **Fix:** Step 0 detects existing isolation. Step 1a defers to native tools.
+
+### Skipping detection
+
+- **Problem:** Creating a nested worktree inside an existing one
+- **Fix:** Always run Step 0 before creating anything
+
+### Skipping ignore verification
+
+- **Problem:** Worktree contents get tracked, pollute git status
+- **Fix:** Always use `git check-ignore` before creating project-local worktree
+
+### Assuming directory location
+
+- **Problem:** Creates inconsistency, violates project conventions
+- **Fix:** Follow priority: existing > global legacy > instruction file > default
+
+### Proceeding with failing tests
+
+- **Problem:** Can't distinguish new bugs from pre-existing issues
+- **Fix:** Report failures, get explicit permission to proceed
+
+## Red Flags
+
+**Never:**
+- Create a worktree when Step 0 detects existing isolation
+- Use `git worktree add` when you have a native worktree tool (e.g., `EnterWorktree`). This is the #1 mistake — if you have it, use it.
+- Skip Step 1a by jumping straight to Step 1b's git commands
+- Create worktree without verifying it's ignored (project-local)
+- Skip baseline test verification
+- Proceed with failing tests without asking
+
+**Always:**
+- Run Step 0 detection first
+- Prefer native tools over git fallback
+- Follow directory priority: existing > global legacy > instruction file > default
+- Verify directory is ignored for project-local
+- Auto-detect and run project setup
+- Verify clean test baseline

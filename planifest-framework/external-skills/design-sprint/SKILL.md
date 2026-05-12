@@ -1,50 +1,164 @@
 ---
-name: design-sprint
-description: Google Design Sprint facilitation — phase sequencing, exercises, decision-making, and when to use sprints vs. other methods; use when rapidly exploring and validating a critical product challenge.
+name: brainstorming
+description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
 ---
 
-# Design Sprint
+# Brainstorming Ideas Into Designs
 
-You facilitate Design Sprints as a structured 5-day process for answering critical product questions through rapid design and realistic prototyping — compressing months of work into a week by making decisions, not deferring them.
+Help turn ideas into fully formed designs and specs through natural collaborative dialogue.
 
-## When to Use
+Start by understanding the current project context, then ask questions one at a time to refine the idea. Once you understand what you're building, present the design and get user approval.
 
-- A critical product challenge with no clear solution and multiple competing directions
-- Kicking off a new product area with a cross-functional team that needs alignment
-- A high-stakes decision (major redesign, new business model, entering a new market) where the cost of being wrong is high enough to justify a week of focused team time
+<HARD-GATE>
+Do NOT invoke any implementation skill, write any code, scaffold any project, or take any implementation action until you have presented a design and the user has approved it. This applies to EVERY project regardless of perceived simplicity.
+</HARD-GATE>
 
-## Core Principles
+## Anti-Pattern: "This Is Too Simple To Need A Design"
 
-**The sprint is a decision-making process, not a brainstorming session.** The Design Sprint's distinguishing feature is its structured decision-making at every phase — the Decider has explicit authority to make calls, the Lightning Decision Jam prevents groupthink, and the prototype is built around a specific hypothesis, not a collection of everyone's favourite ideas.
+Every project goes through this process. A todo list, a single-function utility, a config change — all of them. "Simple" projects are where unexamined assumptions cause the most wasted work. The design can be short (a few sentences for truly simple projects), but you MUST present it and get approval.
 
-**Realistic prototype, not perfect prototype.** The goal of the sprint prototype is to look and feel real enough that test participants suspend disbelief and respond authentically. It does not need to be buildable or complete. A Figma prototype or even a staged video demo is sufficient. Perfecting the prototype at the cost of testing is a sprint failure mode.
+## Checklist
 
-**Test to invalidate, not to confirm.** Five test participants on Friday will surface fundamental problems with the prototype. If the sprint team spends Thursday building the prototype their gut told them was right, Friday's test is validation theatre. Build the riskiest assumptions into the prototype specifically to test whether they hold.
+You MUST create a task for each of these items and complete them in order:
 
-**Sprint master ≠ content expert.** The facilitator's job is to run the process, not to contribute design ideas. The best sprint masters are strong process facilitators who can redirect conversations, maintain energy, and make time trade-offs. Combining the facilitator role with expert contributor leads to facilitation failures.
+1. **Explore project context** — check files, docs, recent commits
+2. **Offer visual companion** (if topic will involve visual questions) — this is its own message, not combined with a clarifying question. See the Visual Companion section below.
+3. **Ask clarifying questions** — one at a time, understand purpose/constraints/success criteria
+4. **Propose 2-3 approaches** — with trade-offs and your recommendation
+5. **Present design** — in sections scaled to their complexity, get user approval after each section
+6. **Write design doc** — save to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and commit
+7. **Spec self-review** — quick inline check for placeholders, contradictions, ambiguity, scope (see below)
+8. **User reviews written spec** — ask user to review the spec file before proceeding
+9. **Transition to implementation** — invoke writing-plans skill to create implementation plan
 
-**The Decider role is non-negotiable.** Every sprint requires one person with decision authority who can break ties and commit the team. Without a clear Decider, sprints produce consensus minimums instead of bold bets.
+## Process Flow
 
-## Approach
+```dot
+digraph brainstorming {
+    "Explore project context" [shape=box];
+    "Visual questions ahead?" [shape=diamond];
+    "Offer Visual Companion\n(own message, no other content)" [shape=box];
+    "Ask clarifying questions" [shape=box];
+    "Propose 2-3 approaches" [shape=box];
+    "Present design sections" [shape=box];
+    "User approves design?" [shape=diamond];
+    "Write design doc" [shape=box];
+    "Spec self-review\n(fix inline)" [shape=box];
+    "User reviews spec?" [shape=diamond];
+    "Invoke writing-plans skill" [shape=doublecircle];
 
-**Day 1 — Understand:** Map the challenge. The long-term goal: where do you want to be in 2 years? The sprint questions: what questions could you answer this week to make progress toward that goal? Expert interviews (rotating lightning talks from internal experts — engineering, CS, sales, research — to surface knowledge the team doesn't share). How Might We (HMW) note-taking during interviews. End of day: vote on HMWs and map them to a journey map; the Decider picks the target for the sprint.
+    "Explore project context" -> "Visual questions ahead?";
+    "Visual questions ahead?" -> "Offer Visual Companion\n(own message, no other content)" [label="yes"];
+    "Visual questions ahead?" -> "Ask clarifying questions" [label="no"];
+    "Offer Visual Companion\n(own message, no other content)" -> "Ask clarifying questions";
+    "Ask clarifying questions" -> "Propose 2-3 approaches";
+    "Propose 2-3 approaches" -> "Present design sections";
+    "Present design sections" -> "User approves design?";
+    "User approves design?" -> "Present design sections" [label="no, revise"];
+    "User approves design?" -> "Write design doc" [label="yes"];
+    "Write design doc" -> "Spec self-review\n(fix inline)";
+    "Spec self-review\n(fix inline)" -> "User reviews spec?";
+    "User reviews spec?" -> "Write design doc" [label="changes requested"];
+    "User reviews spec?" -> "Invoke writing-plans skill" [label="approved"];
+}
+```
 
-**Day 2 — Sketch:** Lightning demos (15 minutes): each team member finds and presents 2-3 examples of products — inside or outside the domain — that solve similar problems. The goal is to build a diverse inspiration library. Note and vote (15 minutes): capture the most interesting ideas. Sketching (4-part method): Notes → Ideas (rough sketches) → Crazy Eights (8 variations in 8 minutes, forcing fluency) → Solution sketch (3-panel comic of the key moments in the user experience). Solution sketches are anonymous; they're detailed enough to communicate, rough enough to stay fast.
+**The terminal state is invoking writing-plans.** Do NOT invoke frontend-design, mcp-builder, or any other implementation skill. The ONLY skill you invoke after brainstorming is writing-plans.
 
-**Day 3 — Decide:** The Art Museum: post solution sketches on the wall; team does a silent gallery walk with dot stickers for interesting elements. Speed critique: 3 minutes per sketch, team identifies interesting moments, creator stays silent. Straw poll, then the Decider makes the final call. Rumble (if two competing ideas are worth testing) vs. single winner. Storyboard: the team creates a step-by-step storyboard (15-20 scenes) of the prototype experience, starting from the "door" (how the user arrives) and ending with the target moment.
+## The Process
 
-**Day 4 — Prototype:** Divide roles: Maker(s) build in Figma (or Keynote, or any tool that produces clickable flows), Writer handles all copy and labels, Asset collector gathers images and content, Stitcher assembles screens into a flow, Interviewer prepares the test script. The Stitcher's job is critical: the prototype must flow realistically from the user's perspective even if individual screens are incomplete. End of day: trial run of the prototype as an interviewer watching the team use it.
+**Understanding the idea:**
 
-**Day 5 — Test:** Five 1-hour interviews. Interview structure: friendly opening, context-setting scenario, prototype interaction (think-aloud), debrief questions. Observation room: all sprint team members watch via video; each person has a sticky note pad divided into positive/negative/questions. After each interview, 5-minute debrief to note patterns emerging. At the end: team synthesises across 5 participants; what patterns appeared? What surprised us? What does this mean for our sprint question?
+- Check out the current project state first (files, docs, recent commits)
+- Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
+- If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
+- For appropriately-scoped projects, ask questions one at a time to refine the idea
+- Prefer multiple choice questions when possible, but open-ended is fine too
+- Only one question per message - if a topic needs more exploration, break it into multiple questions
+- Focus on understanding: purpose, constraints, success criteria
 
-**After the sprint:** The sprint produces a decision-ready learning package, not a finished design. Options: (1) build (the prototype tested well; refine and spec for engineering); (2) iterate (specific elements failed; redesign and re-test); (3) pivot (the sprint question was wrong; reframe and run another sprint); (4) kill (the prototype revealed that the challenge doesn't have a viable solution in this direction).
+**Exploring approaches:**
 
-## Common Mistakes to Avoid
+- Propose 2-3 different approaches with trade-offs
+- Present options conversationally with your recommendation and reasoning
+- Lead with your recommended option and explain why
 
-- Inviting too many people — sprint size should be 5-7 people; larger groups slow decision-making and reduce individual accountability
-- Skipping the Decider role or having a Decider who is too junior to commit — the sprint's decisions need to stick after the week ends
-- Testing with existing enthusiastic users rather than representative potential users — enthusiastic users will make the prototype work regardless of its quality
+**Presenting the design:**
 
-## Output
+- Once you believe you understand what you're building, present the design
+- Scale each section to its complexity: a few sentences if straightforward, up to 200-300 words if nuanced
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+- Be ready to go back and clarify if something doesn't make sense
 
-Sprint deliverables: (1) sprint brief (long-term goal, sprint questions, target moment), (2) storyboard, (3) prototype (Figma file or equivalent), (4) test findings (patterns from 5 interviews, illustrated with quotes), (5) decision and rationale (build / iterate / pivot / kill). Typically 1-2 pages of documentation; the prototype is the primary artefact.
+**Design for isolation and clarity:**
+
+- Break the system into smaller units that each have one clear purpose, communicate through well-defined interfaces, and can be understood and tested independently
+- For each unit, you should be able to answer: what does it do, how do you use it, and what does it depend on?
+- Can someone understand what a unit does without reading its internals? Can you change the internals without breaking consumers? If not, the boundaries need work.
+- Smaller, well-bounded units are also easier for you to work with - you reason better about code you can hold in context at once, and your edits are more reliable when files are focused. When a file grows large, that's often a signal that it's doing too much.
+
+**Working in existing codebases:**
+
+- Explore the current structure before proposing changes. Follow existing patterns.
+- Where existing code has problems that affect the work (e.g., a file that's grown too large, unclear boundaries, tangled responsibilities), include targeted improvements as part of the design - the way a good developer improves code they're working in.
+- Don't propose unrelated refactoring. Stay focused on what serves the current goal.
+
+## After the Design
+
+**Documentation:**
+
+- Write the validated design (spec) to `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md`
+  - (User preferences for spec location override this default)
+- Use elements-of-style:writing-clearly-and-concisely skill if available
+- Commit the design document to git
+
+**Spec Self-Review:**
+After writing the spec document, look at it with fresh eyes:
+
+1. **Placeholder scan:** Any "TBD", "TODO", incomplete sections, or vague requirements? Fix them.
+2. **Internal consistency:** Do any sections contradict each other? Does the architecture match the feature descriptions?
+3. **Scope check:** Is this focused enough for a single implementation plan, or does it need decomposition?
+4. **Ambiguity check:** Could any requirement be interpreted two different ways? If so, pick one and make it explicit.
+
+Fix any issues inline. No need to re-review — just fix and move on.
+
+**User Review Gate:**
+After the spec review loop passes, ask the user to review the written spec before proceeding:
+
+> "Spec written and committed to `<path>`. Please review it and let me know if you want to make any changes before we start writing out the implementation plan."
+
+Wait for the user's response. If they request changes, make them and re-run the spec review loop. Only proceed once the user approves.
+
+**Implementation:**
+
+- Invoke the writing-plans skill to create a detailed implementation plan
+- Do NOT invoke any other skill. writing-plans is the next step.
+
+## Key Principles
+
+- **One question at a time** - Don't overwhelm with multiple questions
+- **Multiple choice preferred** - Easier to answer than open-ended when possible
+- **YAGNI ruthlessly** - Remove unnecessary features from all designs
+- **Explore alternatives** - Always propose 2-3 approaches before settling
+- **Incremental validation** - Present design, get approval before moving on
+- **Be flexible** - Go back and clarify when something doesn't make sense
+
+## Visual Companion
+
+A browser-based companion for showing mockups, diagrams, and visual options during brainstorming. Available as a tool — not a mode. Accepting the companion means it's available for questions that benefit from visual treatment; it does NOT mean every question goes through the browser.
+
+**Offering the companion:** When you anticipate that upcoming questions will involve visual content (mockups, layouts, diagrams), offer it once for consent:
+> "Some of what we're working on might be easier to explain if I can show it to you in a web browser. I can put together mockups, diagrams, comparisons, and other visuals as we go. This feature is still new and can be token-intensive. Want to try it? (Requires opening a local URL)"
+
+**This offer MUST be its own message.** Do not combine it with clarifying questions, context summaries, or any other content. The message should contain ONLY the offer above and nothing else. Wait for the user's response before continuing. If they decline, proceed with text-only brainstorming.
+
+**Per-question decision:** Even after the user accepts, decide FOR EACH QUESTION whether to use the browser or the terminal. The test: **would the user understand this better by seeing it than reading it?**
+
+- **Use the browser** for content that IS visual — mockups, wireframes, layout comparisons, architecture diagrams, side-by-side visual designs
+- **Use the terminal** for content that is text — requirements questions, conceptual choices, tradeoff lists, A/B/C/D text options, scope decisions
+
+A question about a UI topic is not automatically a visual question. "What does personality mean in this context?" is a conceptual question — use the terminal. "Which wizard layout works better?" is a visual question — use the browser.
+
+If they agree to the companion, read the detailed guide before proceeding:
+`skills/brainstorming/visual-companion.md`

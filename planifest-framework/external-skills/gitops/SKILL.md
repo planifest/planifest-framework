@@ -1,53 +1,251 @@
 ---
-name: gitops
-description: GitOps covering declarative infrastructure, reconciliation loops, ArgoCD/Flux, secrets handling, and rollback strategies; use when designing or operating GitOps delivery pipelines and cluster configuration management.
+name: finishing-a-development-branch
+description: Use when implementation is complete, all tests pass, and you need to decide how to integrate the work - guides completion of development work by presenting structured options for merge, PR, or cleanup
 ---
 
-# GitOps Engineer
+# Finishing a Development Branch
 
-You are a senior engineer who implements GitOps principles to make cluster state auditable, reproducible, and safe to change.
+## Overview
 
-## When to Use
+Guide completion of development work by presenting clear options and handling chosen workflow.
 
-- Designing a GitOps delivery model for Kubernetes workloads
-- Configuring ArgoCD or Flux for multi-cluster, multi-environment deployments
-- Managing secrets in a GitOps workflow without storing plaintext in Git
-- Implementing progressive delivery (canary, blue/green) through GitOps tooling
+**Core principle:** Verify tests → Detect environment → Present options → Execute choice → Clean up.
 
-## Core Principles
+**Announce at start:** "I'm using the finishing-a-development-branch skill to complete this work."
 
-**Git is the single source of truth.** The desired state of every cluster lives in Git. An operator that queries the cluster to determine state is a GitOps antipattern. If it is not in Git, it does not exist — or it will be reconciled away.
+## The Process
 
-**Reconciliation is pull, not push.** GitOps agents (ArgoCD, Flux) pull from Git and apply to clusters. CI pushes to Git, not to clusters. This eliminates the need for CI to have cluster credentials, which is a significant security improvement.
+### Step 1: Verify Tests
 
-**Drift is a bug, not a feature.** Any cluster state that diverges from Git is drift. Drift must be detected (ArgoCD sync status, Flux events) and reconciled automatically or flagged for human review. Manual `kubectl apply` in production is a drift-creation event.
+**Before presenting options, verify tests pass:**
 
-**Repository structure mirrors environment hierarchy.** A flat repository with one directory per service does not scale past 5 services. Use app-of-apps (ArgoCD) or Kustomize overlays to express environment-specific configuration without duplicating base manifests.
+```bash
+# Run project's test suite
+npm test / cargo test / pytest / go test ./...
+```
 
-**Secrets never touch Git.** The only exception is encrypted secrets (Sealed Secrets, SOPS). Plaintext secrets in Git, even in private repositories, are a security incident waiting to happen. Secrets must be injected at reconciliation time from an external store.
+**If tests fail:**
+```
+Tests failing (<N> failures). Must fix before completing:
 
-## Approach
+[Show failures]
 
-**Repository layout (two-repo model):** Repository 1 (app repo): application source code and Dockerfile. CI builds, tags, and pushes the image. Repository 2 (config repo): Kubernetes manifests, Helm values, Kustomize overlays. CI updates the image tag in the config repo via a PR or direct commit. The GitOps agent reconciles from the config repo. Separation of concerns: developers own the app repo; platform team owns the config repo structure and policies.
+Cannot proceed with merge/PR until tests pass.
+```
 
-**ArgoCD setup:** Deploy ArgoCD in its own namespace with RBAC that limits sync permissions by project. Use ArgoCD Projects to scope which repos and clusters each team can target. Use ApplicationSets with the `cluster` generator for multi-cluster deployments — one ApplicationSet template generates Applications for each registered cluster. Enable automated sync with `selfHeal: true` (reconcile drift) and `prune: false` (do not delete resources not in Git — too dangerous for initial adoption) until the team is confident.
+Stop. Don't proceed to Step 2.
 
-**Flux setup:** Bootstrap with `flux bootstrap github` to create the GitOps toolkit in the cluster and a flux-system directory in the config repo. Use Flux Kustomizations with `dependsOn` to sequence infrastructure (cert-manager, ingress) before applications. Use ImageUpdateAutomation to update image tags in Git automatically when new images are pushed to the registry (implement with a policy: `semver:>=1.0.0`).
+**If tests pass:** Continue to Step 2.
 
-**Secrets management:** Option 1 — Sealed Secrets: `kubeseal --fetch-cert` encrypts a Secret manifest with the cluster's public key; only the in-cluster controller can decrypt. The sealed secret is safe to commit. Rotate by re-encrypting with `kubeseal --re-encrypt`. Option 2 — External Secrets Operator (ESO): defines an `ExternalSecret` resource that references AWS Secrets Manager, Vault, or GCP Secret Manager. ESO syncs the value into a native Kubernetes Secret. Preferred for secrets that rotate frequently or are shared across clusters.
+### Step 2: Detect Environment
 
-**Rollback strategy:** In GitOps, rollback = reverting the Git commit that changed the desired state. ArgoCD and Flux will reconcile to the previous commit's state automatically. For image rollbacks: revert the image tag commit in the config repo. For Helm chart rollbacks: revert the chart version in values. Do not use `kubectl rollout undo` — it bypasses Git and creates drift.
+**Determine workspace state before presenting options:**
 
-**Progressive delivery:** Integrate Argo Rollouts with ArgoCD for canary and blue/green strategies declared in Git. The Rollout resource replaces Deployment and defines the strategy in spec. Flagger works with Flux and uses Deployment resources, automatically creating a Canary resource and managing the traffic split via a service mesh (Istio, Linkerd) or ingress controller (NGINX, Traefik).
+```bash
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+```
 
-## Common Mistakes to Avoid
+This determines which menu to show and how cleanup works:
 
-- **Storing plaintext secrets in the config repo.** Even in private repositories. Secrets leak through git history, forks, and access log exports. Use Sealed Secrets or ESO.
-- **Using ArgoCD sync with `prune: true` before the team understands it.** Prune deletes cluster resources not present in Git. If the Git repository is incomplete or the sync scope is misconfigured, prune can delete production workloads.
-- **One Application per service in ArgoCD without Projects.** Without Projects, all Applications share the same RBAC. Use Projects to scope team access to their applications and target clusters.
-- **Putting environment-specific config in the app repo.** Config repo contains cluster configuration; app repo contains application code. Mixing them makes it impossible to promote a verified artifact from staging to production without a code change.
-- **Not monitoring reconciliation lag.** A reconciliation loop that is stuck (Git pull failure, webhook failure, OOM on the GitOps controller) means cluster state diverges silently. Alert on `argocd_app_sync_status` or Flux `gotk_reconcile_duration_seconds` latency.
+| State | Menu | Cleanup |
+|-------|------|---------|
+| `GIT_DIR == GIT_COMMON` (normal repo) | Standard 4 options | No worktree to clean up |
+| `GIT_DIR != GIT_COMMON`, named branch | Standard 4 options | Provenance-based (see Step 6) |
+| `GIT_DIR != GIT_COMMON`, detached HEAD | Reduced 3 options (no merge) | No cleanup (externally managed) |
 
-## Output
+### Step 3: Determine Base Branch
 
-Repository structure diagram with directory layout for the two-repo model. ArgoCD ApplicationSet YAML for multi-cluster deployment. Kustomize base + overlay structure for multi-environment configuration. ExternalSecret manifest with ESO backend configuration. Rollback runbook with the exact Git commands and expected reconciliation timeline.
+```bash
+# Try common base branches
+git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+```
+
+Or ask: "This branch split from main - is that correct?"
+
+### Step 4: Present Options
+
+**Normal repo and named-branch worktree — present exactly these 4 options:**
+
+```
+Implementation complete. What would you like to do?
+
+1. Merge back to <base-branch> locally
+2. Push and create a Pull Request
+3. Keep the branch as-is (I'll handle it later)
+4. Discard this work
+
+Which option?
+```
+
+**Detached HEAD — present exactly these 3 options:**
+
+```
+Implementation complete. You're on a detached HEAD (externally managed workspace).
+
+1. Push as new branch and create a Pull Request
+2. Keep as-is (I'll handle it later)
+3. Discard this work
+
+Which option?
+```
+
+**Don't add explanation** - keep options concise.
+
+### Step 5: Execute Choice
+
+#### Option 1: Merge Locally
+
+```bash
+# Get main repo root for CWD safety
+MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
+cd "$MAIN_ROOT"
+
+# Merge first — verify success before removing anything
+git checkout <base-branch>
+git pull
+git merge <feature-branch>
+
+# Verify tests on merged result
+<test command>
+
+# Only after merge succeeds: cleanup worktree (Step 6), then delete branch
+```
+
+Then: Cleanup worktree (Step 6), then delete branch:
+
+```bash
+git branch -d <feature-branch>
+```
+
+#### Option 2: Push and Create PR
+
+```bash
+# Push branch
+git push -u origin <feature-branch>
+
+# Create PR
+gh pr create --title "<title>" --body "$(cat <<'EOF'
+## Summary
+<2-3 bullets of what changed>
+
+## Test Plan
+- [ ] <verification steps>
+EOF
+)"
+```
+
+**Do NOT clean up worktree** — user needs it alive to iterate on PR feedback.
+
+#### Option 3: Keep As-Is
+
+Report: "Keeping branch <name>. Worktree preserved at <path>."
+
+**Don't cleanup worktree.**
+
+#### Option 4: Discard
+
+**Confirm first:**
+```
+This will permanently delete:
+- Branch <name>
+- All commits: <commit-list>
+- Worktree at <path>
+
+Type 'discard' to confirm.
+```
+
+Wait for exact confirmation.
+
+If confirmed:
+```bash
+MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
+cd "$MAIN_ROOT"
+```
+
+Then: Cleanup worktree (Step 6), then force-delete branch:
+```bash
+git branch -D <feature-branch>
+```
+
+### Step 6: Cleanup Workspace
+
+**Only runs for Options 1 and 4.** Options 2 and 3 always preserve the worktree.
+
+```bash
+GIT_DIR=$(cd "$(git rev-parse --git-dir)" 2>/dev/null && pwd -P)
+GIT_COMMON=$(cd "$(git rev-parse --git-common-dir)" 2>/dev/null && pwd -P)
+WORKTREE_PATH=$(git rev-parse --show-toplevel)
+```
+
+**If `GIT_DIR == GIT_COMMON`:** Normal repo, no worktree to clean up. Done.
+
+**If worktree path is under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`:** Superpowers created this worktree — we own cleanup.
+
+```bash
+MAIN_ROOT=$(git -C "$(git rev-parse --git-common-dir)/.." rev-parse --show-toplevel)
+cd "$MAIN_ROOT"
+git worktree remove "$WORKTREE_PATH"
+git worktree prune  # Self-healing: clean up any stale registrations
+```
+
+**Otherwise:** The host environment (harness) owns this workspace. Do NOT remove it. If your platform provides a workspace-exit tool, use it. Otherwise, leave the workspace in place.
+
+## Quick Reference
+
+| Option | Merge | Push | Keep Worktree | Cleanup Branch |
+|--------|-------|------|---------------|----------------|
+| 1. Merge locally | yes | - | - | yes |
+| 2. Create PR | - | yes | yes | - |
+| 3. Keep as-is | - | - | yes | - |
+| 4. Discard | - | - | - | yes (force) |
+
+## Common Mistakes
+
+**Skipping test verification**
+- **Problem:** Merge broken code, create failing PR
+- **Fix:** Always verify tests before offering options
+
+**Open-ended questions**
+- **Problem:** "What should I do next?" is ambiguous
+- **Fix:** Present exactly 4 structured options (or 3 for detached HEAD)
+
+**Cleaning up worktree for Option 2**
+- **Problem:** Remove worktree user needs for PR iteration
+- **Fix:** Only cleanup for Options 1 and 4
+
+**Deleting branch before removing worktree**
+- **Problem:** `git branch -d` fails because worktree still references the branch
+- **Fix:** Merge first, remove worktree, then delete branch
+
+**Running git worktree remove from inside the worktree**
+- **Problem:** Command fails silently when CWD is inside the worktree being removed
+- **Fix:** Always `cd` to main repo root before `git worktree remove`
+
+**Cleaning up harness-owned worktrees**
+- **Problem:** Removing a worktree the harness created causes phantom state
+- **Fix:** Only clean up worktrees under `.worktrees/`, `worktrees/`, or `~/.config/superpowers/worktrees/`
+
+**No confirmation for discard**
+- **Problem:** Accidentally delete work
+- **Fix:** Require typed "discard" confirmation
+
+## Red Flags
+
+**Never:**
+- Proceed with failing tests
+- Merge without verifying tests on result
+- Delete work without confirmation
+- Force-push without explicit request
+- Remove a worktree before confirming merge success
+- Clean up worktrees you didn't create (provenance check)
+- Run `git worktree remove` from inside the worktree
+
+**Always:**
+- Verify tests before offering options
+- Detect environment before presenting menu
+- Present exactly 4 options (or 3 for detached HEAD)
+- Get typed confirmation for Option 4
+- Clean up worktree for Options 1 & 4 only
+- `cd` to main repo root before worktree removal
+- Run `git worktree prune` after removal

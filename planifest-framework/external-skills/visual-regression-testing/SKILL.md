@@ -1,89 +1,96 @@
 ---
-name: visual-regression-testing
-description: Implement visual regression testing with screenshot diffing at component and page level using Percy, Chromatic, or Playwright snapshots — covering baseline management, diff thresholds, and CI review workflows.
+name: webapp-testing
+description: Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs.
+license: Complete terms in LICENSE.txt
 ---
 
-# Visual Regression Testing
+# Web Application Testing
 
-You are a senior SDET implementing visual regression testing to catch unintended UI changes before they reach production.
+To test local web applications, write native Python Playwright scripts.
 
-## When to Use
+**Helper Scripts Available**:
+- `scripts/with_server.py` - Manages server lifecycle (supports multiple servers)
 
-- Protecting a component library or design system against unintended visual regressions
-- Catching layout breakages caused by CSS refactoring or dependency upgrades
-- Validating that a Storybook component renders correctly across all its stories
-- Replacing manual visual QA checks on every release
+**Always run scripts with `--help` first** to see usage. DO NOT read the source until you try running the script first and find that a customized solution is abslutely necessary. These scripts can be very large and thus pollute your context window. They exist to be called directly as black-box scripts rather than ingested into your context window.
 
-## Core Principles
+## Decision Tree: Choosing Your Approach
 
-**Screenshot Diffing, Not DOM Diffing:** Visual regression tests compare pixel-by-pixel (or perceptual hash) screenshots against approved baselines. DOM diffing misses rendering differences — a `display: flex` vs `display: grid` change may produce identical DOM but different visual output.
-
-**Component Level Before Page Level:** Full-page screenshots are sensitive to content changes everywhere on the page. A new product in a product grid changes every page screenshot that includes it. Test at component/story level first — it narrows the diff scope and reduces false positives. Page-level snapshots are for critical layouts only.
-
-**Baselines Are the Source of Truth:** A baseline is an approved screenshot. A diff is a change from baseline — it is either an intentional change (accept the new baseline) or a regression (reject). The review workflow must be fast or teams skip it. Tool-assisted review (Chromatic's UI, Percy's review queue) is essential.
-
-**Dynamic Content Masks:** Dates, prices, user names, timestamps, and ads change between test runs. Mask them before snapshotting. Tools provide region masking: mark a bounding box as ignored in the diff. Without masking, every run with dynamic content produces false positives.
-
-**Anti-Aliasing and Sub-Pixel Tolerance:** Screenshots taken on different OS or GPU configurations can differ by sub-pixel rendering. Configure a pixel difference threshold (Playwright: `maxDiffPixelRatio: 0.01`). This tolerates rendering noise without masking real regressions.
-
-## Approach
-
-**Tool selection:**
-- *Chromatic*: Best for Storybook-based component libraries. Reviews every story automatically. Integrates with CI. Hosted baseline storage. Best-in-class for design systems.
-- *Percy*: SaaS platform for full-page and component snapshots. Works with Playwright, Cypress, and Storybook. Cross-browser snapshot comparison.
-- *Playwright snapshots*: Built-in, no SaaS required. `expect(page).toHaveScreenshot()`. Stored locally or in CI artifacts. Good for teams not using Storybook.
-- *Storybook Chromatic*: If you have Storybook, Chromatic is the path of least resistance.
-
-**Playwright visual regression:**
-```typescript
-test('checkout button renders correctly', async ({ page }) => {
-  await page.goto('/checkout');
-  // Mask dynamic price element
-  await expect(page.getByTestId('checkout-summary')).toHaveScreenshot(
-    'checkout-summary.png',
-    {
-      maxDiffPixelRatio: 0.01,
-      mask: [page.getByTestId('live-price')],
-    }
-  );
-});
+```
+User task → Is it static HTML?
+    ├─ Yes → Read HTML file directly to identify selectors
+    │         ├─ Success → Write Playwright script using selectors
+    │         └─ Fails/Incomplete → Treat as dynamic (below)
+    │
+    └─ No (dynamic webapp) → Is the server already running?
+        ├─ No → Run: python scripts/with_server.py --help
+        │        Then use the helper + write simplified Playwright script
+        │
+        └─ Yes → Reconnaissance-then-action:
+            1. Navigate and wait for networkidle
+            2. Take screenshot or inspect DOM
+            3. Identify selectors from rendered state
+            4. Execute actions with discovered selectors
 ```
 
-**Chromatic with Storybook.**
+## Example: Using with_server.py
+
+To start a server, run `--help` first, then use the helper:
+
+**Single server:**
 ```bash
-npx chromatic --project-token=<token> --auto-accept-changes=main
-```
-On every PR: Chromatic detects changed stories, renders them, diffs against baselines, and posts a review link to the PR. Reviewers approve or reject changes in Chromatic's UI. On merge to main: baselines are updated.
-
-**Baseline management strategy:**
-- Baselines are locked to the `main` branch. PRs diff against `main` baseline.
-- After intentional visual changes (design system update), bulk-accept new baselines with `--auto-accept-changes` on the release commit.
-- Tag baseline snapshots with the component name and viewport (e.g. `button-primary--desktop`, `button-primary--mobile`).
-
-**Viewport and breakpoint coverage.** Test at minimum: 375px (mobile), 768px (tablet), 1440px (desktop). Configure Playwright to run each visual test across viewports:
-```typescript
-// playwright.config.ts
-projects: [
-  { name: 'mobile', use: { viewport: { width: 375, height: 812 } } },
-  { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
-]
+python scripts/with_server.py --server "npm run dev" --port 5173 -- python your_automation.py
 ```
 
-**Reducing false positives.** Common sources:
-- *Animations*: Disable CSS animations in test mode (`* { animation: none !important; }`)
-- *Fonts*: Use `fonts.google.com` loaded fonts that vary by connection; use `page.waitForLoadState('networkidle')` before snapshotting
-- *Dynamic dates*: Mask with `mask: [page.getByText(/\d{4}-\d{2}-\d{2}/)]`
-- *Scrollbars*: Set `page.setViewportSize` explicitly; avoid OS-dependent scrollbar rendering
+**Multiple servers (e.g., backend + frontend):**
+```bash
+python scripts/with_server.py \
+  --server "cd backend && python server.py" --port 3000 \
+  --server "cd frontend && npm run dev" --port 5173 \
+  -- python your_automation.py
+```
 
-**Review workflow.** A PR with visual diffs must block merge until a human approves each diff. Integrations: Chromatic posts a GitHub status check that requires approval; Percy similarly blocks CI. Do not auto-approve diffs on feature branches — that removes the detection value entirely.
+To create an automation script, include only Playwright logic (servers are managed automatically):
+```python
+from playwright.sync_api import sync_playwright
 
-## Common Mistakes to Avoid
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True) # Always launch chromium in headless mode
+    page = browser.new_page()
+    page.goto('http://localhost:5173') # Server already running and ready
+    page.wait_for_load_state('networkidle') # CRITICAL: Wait for JS to execute
+    # ... your automation logic
+    browser.close()
+```
 
-- **Full-page screenshots for everything:** A full-page snapshot of the homepage fails every time a blog post title changes. Scope screenshots to stable components, not dynamic pages.
-- **No diff threshold:** Zero-tolerance pixel matching fails on sub-pixel font rendering differences across operating systems. Set a 1-2% pixel ratio tolerance.
-- **Never reviewing diffs:** If the team bulk-approves diffs without looking, the tool provides no value. Treat unapproved visual diffs as build failures. Keep review time fast by keeping screenshot scope small.
-- **Not disabling animations:** A button hover animation captured mid-transition will always diff against a static baseline. Disable animations for all visual regression test runs.
+## Reconnaissance-Then-Action Pattern
 
-## Output
+1. **Inspect rendered DOM**:
+   ```python
+   page.screenshot(path='/tmp/inspect.png', full_page=True)
+   content = page.content()
+   page.locator('button').all()
+   ```
 
-Visual regression coverage for: all Storybook stories (component level), critical page layouts at key breakpoints, and any page with a custom design not covered by the component library. A CI workflow that blocks PR merge on unapproved diffs, with a link to the visual review queue in the PR comment.
+2. **Identify selectors** from inspection results
+
+3. **Execute actions** using discovered selectors
+
+## Common Pitfall
+
+❌ **Don't** inspect the DOM before waiting for `networkidle` on dynamic apps
+✅ **Do** wait for `page.wait_for_load_state('networkidle')` before inspection
+
+## Best Practices
+
+- **Use bundled scripts as black boxes** - To accomplish a task, consider whether one of the scripts available in `scripts/` can help. These scripts handle common, complex workflows reliably without cluttering the context window. Use `--help` to see usage, then invoke directly. 
+- Use `sync_playwright()` for synchronous scripts
+- Always close the browser when done
+- Use descriptive selectors: `text=`, `role=`, CSS selectors, or IDs
+- Add appropriate waits: `page.wait_for_selector()` or `page.wait_for_timeout()`
+
+## Reference Files
+
+- **examples/** - Examples showing common patterns:
+  - `element_discovery.py` - Discovering buttons, links, and inputs on a page
+  - `static_html_automation.py` - Using file:// URLs for local HTML
+  - `console_logging.py` - Capturing console logs during automation

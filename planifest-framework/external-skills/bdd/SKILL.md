@@ -1,82 +1,200 @@
 ---
-name: bdd
-description: Apply Behaviour-Driven Development using Gherkin to create scenarios that bridge business intent and executable tests — use when aligning development with product requirements through living documentation.
+name: spec-driven-development
+description: Creates specs before coding. Use when starting a new project, feature, or significant change and no specification exists yet. Use when requirements are unclear, ambiguous, or only exist as a vague idea.
 ---
 
-# Behaviour-Driven Development
+# Spec-Driven Development
 
-You are a BDD practitioner facilitating collaboration between business, QA, and development through executable specification.
+## Overview
+
+Write a structured specification before writing any code. The spec is the shared source of truth between you and the human engineer — it defines what we're building, why, and how we'll know it's done. Code without a spec is guessing.
 
 ## When to Use
 
-- A feature's acceptance criteria are complex or ambiguous and need business sign-off before development
-- Building living documentation that stays current as the system evolves
-- Creating a shared language between non-technical stakeholders and the development team
-- Writing acceptance tests that express user value rather than technical assertions
+- Starting a new project or feature
+- Requirements are ambiguous or incomplete
+- The change touches multiple files or modules
+- You're about to make an architectural decision
+- The task would take more than 30 minutes to implement
 
-## Core Principles
+**When NOT to use:** Single-line fixes, typo corrections, or changes where requirements are unambiguous and self-contained.
 
-**Three Amigos:** Before writing any code, product owner, developer, and tester meet to define examples together. This conversation surfaces ambiguity. The scenarios written in this meeting are the specification — not a description of code already written.
+## The Gated Workflow
 
-**Ubiquitous Language:** Gherkin scenarios use domain language, not technical language. `Given the user has a premium subscription` not `Given the user_subscription table has a row with type='PREMIUM'`. The scenario must be readable by a domain expert with no technical background.
+Spec-driven development has four phases. Do not advance to the next phase until the current one is validated.
 
-**Scenarios as Acceptance Criteria:** Each Scenario represents one acceptance criterion. A Feature passes when all its Scenarios pass. This makes scope explicit and completion measurable.
-
-**Living Documentation:** Feature files live in the codebase alongside the code they test. They are updated when behaviour changes. A scenario that does not match the current system behaviour is a bug in the documentation — treat it as seriously as a code bug.
-
-**Declarative Over Imperative:** Scenarios express intent, not procedure. `When the user places an order` (declarative) not `When the user clicks "Add to Cart", scrolls down, and clicks "Checkout"` (imperative). Implementation details belong in step definitions, not feature files.
-
-## Approach
-
-**Gherkin syntax.** Structure:
-```gherkin
-Feature: Premium discount calculation
-  As a premium subscriber
-  I want discounts applied automatically
-  So that I pay the correct reduced price
-
-  Scenario: 10% discount for premium subscriber
-    Given I am logged in as a premium subscriber
-    And my cart contains a product worth £100
-    When I proceed to checkout
-    Then the order total should be £90
-
-  Scenario: No discount for standard subscriber
-    Given I am logged in as a standard subscriber
-    And my cart contains a product worth £100
-    When I proceed to checkout
-    Then the order total should be £100
+```
+SPECIFY ──→ PLAN ──→ TASKS ──→ IMPLEMENT
+   │          │        │          │
+   ▼          ▼        ▼          ▼
+ Human      Human    Human      Human
+ reviews    reviews  reviews    reviews
 ```
 
-**Scenario Outline for parameterisation.**
-```gherkin
-Scenario Outline: Discount tiers by subscription level
-  Given I am logged in as a <tier> subscriber
-  When I checkout with a product worth £100
-  Then my total should be <total>
+### Phase 1: Specify
 
-  Examples:
-    | tier      | total |
-    | standard  | £100  |
-    | premium   | £90   |
-    | corporate | £75   |
+Start with a high-level vision. Ask the human clarifying questions until requirements are concrete.
+
+**Surface assumptions immediately.** Before writing any spec content, list what you're assuming:
+
+```
+ASSUMPTIONS I'M MAKING:
+1. This is a web application (not native mobile)
+2. Authentication uses session-based cookies (not JWT)
+3. The database is PostgreSQL (based on existing Prisma schema)
+4. We're targeting modern browsers only (no IE11)
+→ Correct me now or I'll proceed with these.
 ```
 
-**Step definition discipline.** Step definitions should be thin glue. They call application services or page objects — they do not contain business logic. Each step should be under 10 lines. If your step definition is growing complex, extract to a helper or page object.
+Don't silently fill in ambiguous requirements. The spec's entire purpose is to surface misunderstandings *before* code gets written — assumptions are the most dangerous form of misunderstanding.
 
-**Background for shared context.** Use `Background` for setup steps shared across all scenarios in a Feature. Avoid putting scenario-specific setup in Background.
+**Write a spec document covering these six core areas:**
 
-**Tagging and filtering.** Tag scenarios: `@smoke`, `@regression`, `@wip`. Run smoke suite in CI on every PR. Run full regression on merge to main. `@wip` tags allow scenarios to be written before implementation without blocking CI.
+1. **Objective** — What are we building and why? Who is the user? What does success look like?
 
-**Tooling.** Cucumber (Java, JS, Ruby), SpecFlow (.NET), Behave (Python), Behat (PHP). Wire step definitions to your real application layer — for APIs, call HTTP endpoints; for UI, use Selenium/Playwright page objects. Cucumber's HTML report becomes your living documentation portal.
+2. **Commands** — Full executable commands with flags, not just tool names.
+   ```
+   Build: npm run build
+   Test: npm test -- --coverage
+   Lint: npm run lint --fix
+   Dev: npm run dev
+   ```
 
-## Common Mistakes to Avoid
+3. **Project Structure** — Where source code lives, where tests go, where docs belong.
+   ```
+   src/           → Application source code
+   src/components → React components
+   src/lib        → Shared utilities
+   tests/         → Unit and integration tests
+   e2e/           → End-to-end tests
+   docs/          → Documentation
+   ```
 
-- **Writing scenarios after implementation:** "BDD" where the developer writes feature files to match code already written is not BDD. It's documentation generated from implementation, missing the collaboration benefit entirely.
-- **Imperative scenarios:** Scenarios that read like UI scripts (`click button with id "submit"`) couple to implementation. When the UI changes, all scenarios break. Keep scenarios declarative.
-- **One mega-feature file:** A feature file with 100 scenarios is unmaintainable. Limit to 10-15 scenarios per feature, split by user goal.
-- **Business logic in step definitions:** `if (tier === 'premium') { discount = 10 }` in a step definition duplicates domain logic. Step definitions call the system; they don't re-implement it.
+4. **Code Style** — One real code snippet showing your style beats three paragraphs describing it. Include naming conventions, formatting rules, and examples of good output.
 
-## Output
+5. **Testing Strategy** — What framework, where tests live, coverage expectations, which test levels for which concerns.
 
-Feature files with: a clear Feature header expressing user value, declarative scenarios using domain language, Scenario Outline for data-driven cases, Background for shared preconditions, and tags for suite filtering. Step definitions that are thin wrappers over application services or page objects.
+6. **Boundaries** — Three-tier system:
+   - **Always do:** Run tests before commits, follow naming conventions, validate inputs
+   - **Ask first:** Database schema changes, adding dependencies, changing CI config
+   - **Never do:** Commit secrets, edit vendor directories, remove failing tests without approval
+
+**Spec template:**
+
+```markdown
+# Spec: [Project/Feature Name]
+
+## Objective
+[What we're building and why. User stories or acceptance criteria.]
+
+## Tech Stack
+[Framework, language, key dependencies with versions]
+
+## Commands
+[Build, test, lint, dev — full commands]
+
+## Project Structure
+[Directory layout with descriptions]
+
+## Code Style
+[Example snippet + key conventions]
+
+## Testing Strategy
+[Framework, test locations, coverage requirements, test levels]
+
+## Boundaries
+- Always: [...]
+- Ask first: [...]
+- Never: [...]
+
+## Success Criteria
+[How we'll know this is done — specific, testable conditions]
+
+## Open Questions
+[Anything unresolved that needs human input]
+```
+
+**Reframe instructions as success criteria.** When receiving vague requirements, translate them into concrete conditions:
+
+```
+REQUIREMENT: "Make the dashboard faster"
+
+REFRAMED SUCCESS CRITERIA:
+- Dashboard LCP < 2.5s on 4G connection
+- Initial data load completes in < 500ms
+- No layout shift during load (CLS < 0.1)
+→ Are these the right targets?
+```
+
+This lets you loop, retry, and problem-solve toward a clear goal rather than guessing what "faster" means.
+
+### Phase 2: Plan
+
+With the validated spec, generate a technical implementation plan:
+
+1. Identify the major components and their dependencies
+2. Determine the implementation order (what must be built first)
+3. Note risks and mitigation strategies
+4. Identify what can be built in parallel vs. what must be sequential
+5. Define verification checkpoints between phases
+
+The plan should be reviewable: the human should be able to read it and say "yes, that's the right approach" or "no, change X."
+
+### Phase 3: Tasks
+
+Break the plan into discrete, implementable tasks:
+
+- Each task should be completable in a single focused session
+- Each task has explicit acceptance criteria
+- Each task includes a verification step (test, build, manual check)
+- Tasks are ordered by dependency, not by perceived importance
+- No task should require changing more than ~5 files
+
+**Task template:**
+```markdown
+- [ ] Task: [Description]
+  - Acceptance: [What must be true when done]
+  - Verify: [How to confirm — test command, build, manual check]
+  - Files: [Which files will be touched]
+```
+
+### Phase 4: Implement
+
+Execute tasks one at a time following `incremental-implementation` and `test-driven-development` skills. Use `context-engineering` to load the right spec sections and source files at each step rather than flooding the agent with the entire spec.
+
+## Keeping the Spec Alive
+
+The spec is a living document, not a one-time artifact:
+
+- **Update when decisions change** — If you discover the data model needs to change, update the spec first, then implement.
+- **Update when scope changes** — Features added or cut should be reflected in the spec.
+- **Commit the spec** — The spec belongs in version control alongside the code.
+- **Reference the spec in PRs** — Link back to the spec section that each PR implements.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "This is simple, I don't need a spec" | Simple tasks don't need *long* specs, but they still need acceptance criteria. A two-line spec is fine. |
+| "I'll write the spec after I code it" | That's documentation, not specification. The spec's value is in forcing clarity *before* code. |
+| "The spec will slow us down" | A 15-minute spec prevents hours of rework. Waterfall in 15 minutes beats debugging in 15 hours. |
+| "Requirements will change anyway" | That's why the spec is a living document. An outdated spec is still better than no spec. |
+| "The user knows what they want" | Even clear requests have implicit assumptions. The spec surfaces those assumptions. |
+
+## Red Flags
+
+- Starting to write code without any written requirements
+- Asking "should I just start building?" before clarifying what "done" means
+- Implementing features not mentioned in any spec or task list
+- Making architectural decisions without documenting them
+- Skipping the spec because "it's obvious what to build"
+
+## Verification
+
+Before proceeding to implementation, confirm:
+
+- [ ] The spec covers all six core areas
+- [ ] The human has reviewed and approved the spec
+- [ ] Success criteria are specific and testable
+- [ ] Boundaries (Always/Ask First/Never) are defined
+- [ ] The spec is saved to a file in the repository

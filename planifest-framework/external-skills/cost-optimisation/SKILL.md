@@ -1,59 +1,280 @@
 ---
-name: cost-optimisation
-description: Cloud cost optimisation covering rightsizing, reserved capacity, waste identification, and FinOps culture; use when auditing cloud spend, designing cost governance, or responding to budget overruns.
+name: aws-cost-operations
+description: AWS cost optimization, monitoring, and operational excellence expert. Use when analyzing AWS bills, estimating costs, setting up CloudWatch alarms, querying logs, auditing CloudTrail activity, or assessing security posture. Essential when user mentions AWS costs, spending, billing, budget, pricing, CloudWatch, observability, monitoring, alerting, CloudTrail, audit, or wants to optimize AWS infrastructure costs and operational efficiency.
+context: fork
+skills:
+  - aws-mcp-setup
+allowed-tools:
+  - mcp__pricing__*
+  - mcp__costexp__*
+  - mcp__cw__*
+  - mcp__aws-mcp__*
+  - mcp__awsdocs__*
+  - Bash(aws ce *)
+  - Bash(aws cloudwatch *)
+  - Bash(aws logs *)
+  - Bash(aws budgets *)
+  - Bash(aws cloudtrail *)
+  - Bash(aws sts get-caller-identity)
+hooks:
+  PreToolUse:
+    - matcher: Bash(aws ce *)
+      command: aws sts get-caller-identity --query Account --output text
+      once: true
 ---
 
-# Cloud Cost Optimisation Engineer
+# AWS Cost & Operations
 
-You are a senior FinOps practitioner and cloud engineer who treats cloud spend as an engineering problem: measure, analyse, optimise, and govern continuously.
+This skill provides comprehensive guidance for AWS cost optimization, monitoring, observability, and operational excellence with integrated MCP servers.
 
-## When to Use
+## AWS Documentation Requirement
 
-- Auditing cloud spend to identify waste and optimisation opportunities
-- Designing a reserved capacity strategy (Reserved Instances, Savings Plans, CUDs)
-- Implementing cost allocation tagging and chargeback/showback for teams
-- Building FinOps culture and processes in an engineering organisation
+Always verify AWS facts using MCP tools (`mcp__aws-mcp__*` or `mcp__*awsdocs*__*`) before answering. The `aws-mcp-setup` dependency is auto-loaded — if MCP tools are unavailable, guide the user through that skill's setup flow.
 
-## Core Principles
+## Integrated MCP Servers
 
-**Unit economics over total spend.** Absolute cloud spend is less useful than cost per user, cost per API request, or cost per transaction. Unit economics expose whether the architecture scales linearly, sub-linearly (good), or super-linearly (bad) with business growth.
+This plugin provides 3 MCP servers:
 
-**Measure before you optimise.** Cost optimisation without data is guessing. Establish a baseline: total monthly spend, spend by service, spend by team (via tags), spend trend over 90 days. Waste is visible only against a baseline.
+### Bundled Servers
 
-**Commitment = discount, but commitment = risk.** 1-year Reserved Instances (RI) or Savings Plans give 30-40% discounts vs on-demand. 3-year give 50-60%. The risk: you pay for capacity whether you use it or not. Cover only the stable baseline with commitments; use on-demand and Spot for burst capacity.
+#### 1. AWS Pricing MCP Server (`pricing`)
+**Purpose**: Pre-deployment cost estimation and optimization
+- Estimate costs before deploying resources
+- Compare pricing across regions
+- Calculate Total Cost of Ownership (TCO)
+- Evaluate different service options for cost efficiency
 
-**Waste is a technical debt that compounds.** Idle resources do not just cost money — they accumulate. An untagged, forgotten EC2 instance from 3 years ago is invisible without tagging hygiene. Waste identification must be automated and run continuously.
+#### 2. AWS Cost Explorer MCP Server (`costexp`)
+**Purpose**: Detailed cost analysis and reporting
+- Analyze historical spending patterns
+- Identify cost anomalies and trends
+- Forecast future costs
+- Analyze cost by service, region, or tag
 
-**FinOps is a team sport.** Platform engineers optimise infrastructure. Developers make architectural choices that drive cost. Finance sets budgets. Without shared ownership and visibility, optimisation initiatives fail. The FinOps team facilitates; product teams own their spend.
+#### 3. Amazon CloudWatch MCP Server (`cw`)
+**Purpose**: Metrics, alarms, and logs analysis
+- Query CloudWatch metrics and logs
+- Create and manage CloudWatch alarms
+- Troubleshoot operational issues
+- Monitor resource utilization
 
-## Approach
+> **Note**: The following servers are available separately via the Full AWS MCP Server (see `aws-mcp-setup` skill) and are not bundled with this plugin:
+> - AWS Billing and Cost Management MCP — Real-time billing details
+> - CloudWatch Application Signals MCP — APM and SLOs
+> - AWS Managed Prometheus MCP — PromQL queries for containers
+> - AWS CloudTrail MCP — API activity audit
+> - AWS Well-Architected Security Assessment MCP — Security posture assessment
 
-**Cost visibility foundation:** Tag every resource with: `team`, `service`, `environment`, `cost-centre`. Enforce via AWS Config rules, GCP org policies, or Azure Policy with deny effect for untagged resources. Use AWS Cost Explorer or GCP Billing console to create per-team dashboards. Export billing data to BigQuery or Athena for custom analysis. Set up AWS Budgets or GCP Budget Alerts per team account.
+## When to Use This Skill
 
-**Waste identification:**
-- *Idle EC2/VMs:* CPU < 5% and network I/O < 5 MB/day for 2 weeks — candidates for termination or downsizing. Use AWS Compute Optimizer or Infracost.
-- *Unattached EBS/PDs:* volumes not attached to an instance. Script: `aws ec2 describe-volumes --filters Name=status,Values=available`.
-- *Idle load balancers:* ALBs/NLBs with zero active connections for 7 days.
-- *Oversized databases:* RDS instances with CPU < 10% and storage < 50% used consistently.
-- *Old snapshots:* EBS snapshots and RDS snapshots older than 90 days with no associated AMI or DR policy.
-- *NAT Gateway overuse:* High NAT Gateway data transfer often indicates cross-AZ traffic that could be eliminated with VPC endpoints.
+Use this skill when:
+- Optimizing AWS costs and reducing spending
+- Estimating costs before deployment
+- Monitoring application and infrastructure performance
+- Setting up observability and alerting
+- Analyzing spending patterns and trends
+- Investigating operational issues
+- Auditing AWS activity and changes
+- Assessing security posture
+- Implementing operational excellence
 
-**Rightsizing process:** Use AWS Compute Optimizer's EC2 recommendations (p90 CPU and memory over 14 days). For ECS/Fargate: compare `cpu.utilized` vs allocated; down-size in 25% increments. For RDS: compare `CPUUtilization` and `FreeableMemory`; move to next smaller instance class if both have > 40% headroom consistently. Rightsizing saves 20-40% on compute for mature workloads.
+## Cost Optimization Best Practices
 
-**Reserved capacity strategy:** Analyse on-demand spend over 30 days. Identify the stable baseline (the minimum consistent usage). Purchase Compute Savings Plans (AWS) or CUDs (GCP) to cover 70-80% of the stable baseline. Savings Plans are more flexible than RIs — they apply across instance types and families. Purchase 1-year terms first; upgrade to 3-year only for stable, long-lived workloads. Review coverage monthly in the Cost Explorer Coverage report.
+### Pre-Deployment Cost Estimation
 
-**Spot/Preemptible instances:** Use Spot for: batch processing (EMR, Batch), CI/CD runners, stateless web tier (with Spot interruption handling — graceful shutdown in 2 minutes). Do not use Spot for: databases, stateful workloads, latency-sensitive singletons. Configure `SpotFleet` or Karpenter with multiple instance types and AZs to reduce interruption rate to < 5%.
+**Always estimate costs before deploying**:
+1. Use **AWS Pricing MCP** to estimate resource costs
+2. Compare pricing across different regions
+3. Evaluate alternative service options
+4. Calculate expected monthly costs
+5. Plan for scaling and growth
 
-**Data transfer cost reduction:** Cross-AZ traffic: deploy databases in the same AZ as the primary application tier (trade HA for cost in dev environments). Cross-region: cache aggressively at the edge with CloudFront/Fastly. S3 egress: use CloudFront as origin-pull; most large cloud providers have free egress tier to CloudFront. VPC endpoints: Gateway endpoints for S3 and DynamoDB are free and eliminate NAT Gateway egress costs.
+**Example workflow**:
+```
+"Estimate the monthly cost of running a Lambda function with
+1 million invocations, 512MB memory, 3-second duration in us-east-1"
+```
 
-## Common Mistakes to Avoid
+### Cost Analysis and Optimization
 
-- **Optimising before measuring.** Intuition about which service costs the most is usually wrong. Run the analysis first; the highest cost line is almost always a surprise.
-- **Purchasing 3-year RIs for everything.** Purchasing 3-year commitments for services that might be refactored or replaced creates stranded spend. Start with 1-year Savings Plans; extend to 3-year only after 12 months of stable usage.
-- **Treating cost as exclusively a platform problem.** A developer who makes an API call that downloads a 1GB file on every page load has created an architecture cost problem. Cost visibility per team and per service is what surfaces this.
-- **Tagging as an afterthought.** Retroactively tagging thousands of resources is painful. Enforce tagging at resource creation via SCPs/org policies. Every untagged resource is invisible in cost allocation.
-- **Ignoring data transfer costs.** Data transfer frequently represents 20-40% of total cloud spend in data-intensive architectures. It is not a line item in most engineers' mental model. Make it visible in dashboards.
+**Regular cost reviews**:
+1. Use **Cost Explorer MCP** to analyze spending trends
+2. Identify cost anomalies and unexpected charges
+3. Review costs by service, region, and environment
+4. Compare actual vs. budgeted costs
+5. Generate cost optimization recommendations
 
-## Output
+**Cost optimization strategies**:
+- Right-size over-provisioned resources
+- Use appropriate storage classes (S3, EBS)
+- Implement auto-scaling for dynamic workloads
+- Leverage Savings Plans and Reserved Instances
+- Delete unused resources and snapshots
+- Use cost allocation tags effectively
 
-Cost audit report: spend by service, by team, top 10 waste items with estimated savings. Savings Plan/RI purchase recommendation with coverage analysis. Tagging policy with enforcement mechanism. FinOps dashboard specification with unit economics KPIs. Spot Fleet configuration for CI/CD and batch workloads.
+### Budget Monitoring
+
+**Track spending against budgets**:
+1. Use **Billing and Cost Management MCP** to monitor budgets
+2. Set up budget alerts for threshold breaches
+3. Review budget utilization regularly
+4. Adjust budgets based on trends
+5. Implement cost controls and governance
+
+## Monitoring and Observability Best Practices
+
+### CloudWatch Metrics and Alarms
+
+**Implement comprehensive monitoring**:
+1. Use **CloudWatch MCP** to query metrics and logs
+2. Set up alarms for critical metrics:
+   - CPU and memory utilization
+   - Error rates and latency
+   - Queue depths and processing times
+   - API gateway throttling
+   - Lambda errors and timeouts
+3. Create CloudWatch dashboards for visualization
+4. Use log insights for troubleshooting
+
+**Example alarm scenarios**:
+- Lambda error rate > 1%
+- EC2 CPU utilization > 80%
+- API Gateway 4xx/5xx error spike
+- DynamoDB throttled requests
+- ECS task failures
+
+### Application Performance Monitoring
+
+**Monitor application health**:
+1. Use **CloudWatch Application Signals MCP** for APM
+2. Track service-level objectives (SLOs)
+3. Monitor application dependencies
+4. Identify performance bottlenecks
+5. Set up distributed tracing
+
+### Container and Kubernetes Monitoring
+
+**For containerized workloads**:
+1. Use **AWS Managed Prometheus MCP** for metrics
+2. Monitor container resource utilization
+3. Track pod and node health
+4. Create PromQL queries for custom metrics
+5. Set up alerts for container anomalies
+
+## Audit and Security Best Practices
+
+### CloudTrail Activity Analysis
+
+**Audit AWS activity**:
+1. Use **CloudTrail MCP** to analyze API activity
+2. Track who made changes to resources
+3. Investigate security incidents
+4. Monitor for suspicious activity patterns
+5. Audit compliance with policies
+
+**Common audit scenarios**:
+- "Who deleted this S3 bucket?"
+- "Show all IAM role changes in the last 24 hours"
+- "List failed login attempts"
+- "Find all actions by a specific user"
+- "Track modifications to security groups"
+
+### Security Assessment
+
+**Regular security reviews**:
+1. Use **Well-Architected Security Assessment MCP**
+2. Assess security posture against best practices
+3. Identify security gaps and vulnerabilities
+4. Implement recommended security improvements
+5. Document security compliance
+
+**Security assessment areas**:
+- Identity and Access Management (IAM)
+- Detective controls and monitoring
+- Infrastructure protection
+- Data protection and encryption
+- Incident response preparedness
+
+## Using MCP Servers Effectively
+
+### Cost Analysis Workflow
+
+1. **Pre-deployment**: Use Pricing MCP to estimate costs
+2. **Post-deployment**: Use Billing MCP to track actual spending
+3. **Analysis**: Use Cost Explorer MCP for detailed cost analysis
+4. **Optimization**: Implement recommendations from Cost Explorer
+
+### Monitoring Workflow
+
+1. **Setup**: Configure CloudWatch metrics and alarms
+2. **Monitor**: Use CloudWatch MCP to track key metrics
+3. **Analyze**: Use Application Signals for APM insights
+4. **Troubleshoot**: Query CloudWatch Logs for issue resolution
+
+### Security Workflow
+
+1. **Audit**: Use CloudTrail MCP to review activity
+2. **Assess**: Use Well-Architected Security Assessment
+3. **Remediate**: Implement security recommendations
+4. **Monitor**: Track security events via CloudWatch
+
+### MCP Usage Best Practices
+
+1. **Cost Awareness**: Check pricing before deploying resources
+2. **Proactive Monitoring**: Set up alarms for critical metrics
+3. **Regular Reviews**: Analyze costs and performance weekly
+4. **Audit Trails**: Review CloudTrail logs for compliance
+5. **Security First**: Run security assessments regularly
+6. **Optimize Continuously**: Act on cost and performance recommendations
+
+## Operational Excellence Guidelines
+
+### Cost Optimization
+
+- **Tag Everything**: Use consistent cost allocation tags
+- **Review Monthly**: Analyze spending trends and anomalies
+- **Right-size**: Match resources to actual usage
+- **Automate**: Use auto-scaling and scheduling
+- **Monitor Budgets**: Set alerts for cost overruns
+
+### Monitoring and Alerting
+
+- **Critical Metrics**: Alert on business-critical metrics
+- **Noise Reduction**: Fine-tune thresholds to reduce false positives
+- **Actionable Alerts**: Ensure alerts have clear remediation steps
+- **Dashboard Visibility**: Create dashboards for key stakeholders
+- **Log Retention**: Balance cost and compliance needs
+
+### Security and Compliance
+
+- **Least Privilege**: Grant minimum required permissions
+- **Audit Regularly**: Review CloudTrail logs for anomalies
+- **Encrypt Data**: Use encryption at rest and in transit
+- **Assess Continuously**: Run security assessments frequently
+- **Incident Response**: Have procedures for security events
+
+## Additional Resources
+
+For detailed operational patterns and best practices, refer to the comprehensive reference:
+
+**File**: `references/operations-patterns.md`
+
+This reference includes:
+- Cost optimization strategies
+- Monitoring and alerting patterns
+- Observability best practices
+- Security and compliance guidelines
+- Troubleshooting workflows
+
+## CloudWatch Alarms Reference
+
+**File**: `references/cloudwatch-alarms.md`
+
+Common alarm configurations for:
+- Lambda functions
+- EC2 instances
+- RDS databases
+- DynamoDB tables
+- API Gateway
+- ECS services
+- Application Load Balancers

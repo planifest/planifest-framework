@@ -1,59 +1,255 @@
 ---
-name: streaming-data
-description: Design and operate real-time data streaming systems — from event ingestion to stream processing and sink delivery — with correctness guarantees and operational resilience
-version: 1.0.0
-author: Planifest Contributors
-license: MIT
+name: kafka-development
+description: Best practices and guidelines for Apache Kafka event streaming and distributed messaging
 ---
 
-# Streaming Data
+# Kafka Development
 
-> You are a streaming data engineer who builds real-time data pipelines that process millions of events per second with exactly-once semantics, low latency, and fault tolerance. You understand the tradeoffs between event time and processing time, windowing strategies, and the operational complexity that streaming systems introduce.
+You are an expert in Apache Kafka event streaming and distributed messaging systems. Follow these best practices when building Kafka-based applications.
 
 ## Core Principles
 
-- **Event time over processing time.** Process events based on when they occurred, not when they were ingested. Late-arriving events are the rule, not the exception.
-- **Exactly-once is harder than it sounds.** Understand whether your system guarantees at-most-once, at-least-once, or exactly-once — and what "exactly-once" actually means for your sinks.
-- **Watermarks are approximations.** Watermarks estimate event-time progress; they cannot guarantee all late data has been seen. Design for late event handling explicitly.
-- **Backpressure is a signal, not a problem to suppress.** When a consumer cannot keep up, propagate backpressure upstream rather than dropping events or growing unbounded queues.
-- **Idempotent sinks make at-least-once delivery safe.** Design sink writes to be idempotent — upserts, deduplication keys — to tolerate redelivery without double-counting.
-- **Schema evolution breaks streaming pipelines.** Use a schema registry and enforce compatibility policies before schema changes reach production.
-- **Stateful processing requires state backup.** Checkpointing and state snapshots are mandatory for stateful stream processing — failure recovery depends on them.
+- Kafka is a distributed event streaming platform for high-throughput, fault-tolerant messaging
+- Unlike traditional pub/sub, Kafka uses a pull model - consumers pull messages from partitions
+- Design for scalability, durability, and exactly-once semantics where needed
+- Leave NO todos, placeholders, or missing pieces in the implementation
 
-## Approach
+## Architecture Overview
 
-Begin with a streaming requirements analysis. Identify: event sources and their delivery guarantees (Kafka, Kinesis, Pub/Sub), event volume and peak throughput, latency target (sub-second, seconds, minutes), processing semantics required (stateless filter/transform, stateful aggregation, join), sink systems, and acceptable late event handling strategy. These determine technology selection and processing framework.
+### Core Components
 
-Design the event schema with evolution in mind. Use Apache Avro or Protocol Buffers with a schema registry (Confluent Schema Registry, AWS Glue Schema Registry). Enforce BACKWARD compatibility by default — new schema versions must be readable by old consumers. Include a standard envelope: `event_id` (UUID for deduplication), `event_time` (millisecond-precision UTC timestamp of when the event occurred), `producer_id`, `schema_version`. Never use `created_at` as the event time — it is processing time, not event time.
+- **Topics**: Categories/feeds for organizing messages
+- **Partitions**: Ordered, immutable sequences within topics enabling parallelism
+- **Producers**: Clients that publish messages to topics
+- **Consumers**: Clients that read messages from topics
+- **Consumer Groups**: Coordinate consumption across multiple consumers
+- **Brokers**: Kafka servers that store data and serve clients
 
-Design the Kafka topic structure deliberately. Topic granularity: one topic per event type, not one topic for everything. Partition count: target 1-2 MB/s throughput per partition; over-partition to enable future scaling. Retention: balance storage cost against recovery window requirements. Compacted topics for reference data (latest value per key); time-retention topics for event streams. Use a naming convention: `{domain}.{entity}.{event-type}.{version}` (e.g., `orders.order.placed.v1`).
+### Key Concepts
 
-Select the stream processing framework for your latency and stateful processing requirements. Kafka Streams: excellent for JVM applications, native Kafka integration, lightweight deployment. Apache Flink: best-in-class for complex stateful processing, event time, and exactly-once. Apache Spark Structured Streaming: familiar API for teams with Spark expertise, micro-batch model (seconds latency, not milliseconds). For simple stateless transformations at high throughput: consider Kafka Streams or a custom consumer before reaching for Flink.
+- Messages are appended to partitions in order
+- Each message has an offset - a unique sequential ID within the partition
+- Consumers maintain their own cursor (offset) and can read streams repeatedly
+- Partitions are distributed across brokers for scalability
 
-## Key Patterns
+## Topic Design
 
-- **Event-time windowing**: Tumbling windows (non-overlapping), sliding windows (overlapping), and session windows (gap-based) for time-based aggregations.
-- **Watermark + allowed lateness**: Define a watermark delay (e.g., 5 minutes) and an allowed lateness window; emit early results and correct with late data.
-- **Changelog streams (CDC as streams)**: Publish database changes as Kafka events using Debezium; enables event-driven architectures without polling.
-- **Kappa architecture**: Treat all data as streams; batch is a special case of stream processing with bounded datasets. Single processing paradigm.
-- **Outbox pattern**: Transactional outbox table + CDC ensures exactly-once event publication from a service without dual-write inconsistency.
-- **Stream-table join**: Enrich streaming events with reference data stored in a compacted topic (materialized as a table). Enables stateful enrichment without database lookups.
-- **Dead-letter topic**: Route unprocessable events (schema violations, processing errors) to a dead-letter topic with error metadata for investigation and replay.
+### Partitioning Strategy
 
-## Anti-Patterns
+- Use partition keys to place related events in the same partition
+- Messages with the same key always go to the same partition
+- This ensures ordering for related events
+- Choose keys carefully - uneven distribution causes hot partitions
 
-- **Processing time as event time**: Aggregating by the time events were processed rather than when they occurred; produces incorrect results for late-arriving events.
-- **Unbounded state growth**: Accumulating state in stream processors without TTL or eviction policies exhausts memory over time.
-- **No backpressure handling**: Consumers that drop events or crash under load rather than propagating backpressure upstream.
-- **Single-partition topics**: All events in one partition, eliminating parallelism and creating a throughput ceiling.
-- **Schema changes without compatibility checks**: Deploying schema changes that break existing consumers mid-stream causes pipeline failures.
-- **Ignoring consumer group lag**: Not monitoring consumer lag allows pipelines to fall hours or days behind without alerting.
-- **Synchronous external calls in stream processors**: Making synchronous HTTP or database calls per event in a stream processor creates latency and availability coupling.
+### Partition Count
 
-## Output Format
+- More partitions = more parallelism but more overhead
+- Consider: expected throughput, consumer count, broker resources
+- Start with number of consumers you expect to run concurrently
+- Partitions can be increased but not decreased
 
-- **Topic design document**: topic names, partition count, retention, compaction policy, schema references
-- **Stream processing job**: Flink/Kafka Streams application with windowing logic, state stores, checkpointing configuration
-- **Schema definitions**: Avro/Protobuf schemas registered in schema registry with compatibility policy
-- **Operational runbook**: lag monitoring, consumer restart procedure, dead-letter topic processing, checkpoint restoration
-- **Infrastructure config**: Kafka cluster sizing, retention settings, replication factor, producer/consumer tuning parameters
+### Topic Configuration
+
+- `retention.ms`: How long to keep messages (default 7 days)
+- `retention.bytes`: Maximum size per partition
+- `cleanup.policy`: delete (remove old) or compact (keep latest per key)
+- `min.insync.replicas`: Minimum replicas that must acknowledge
+
+## Producer Best Practices
+
+### Reliability Settings
+
+```
+acks=all               # Wait for all replicas to acknowledge
+retries=MAX_INT        # Retry on transient failures
+enable.idempotence=true # Prevent duplicate messages on retry
+```
+
+### Performance Tuning
+
+- `batch.size`: Accumulate messages before sending (default 16KB)
+- `linger.ms`: Wait time for batching (0 = send immediately)
+- `buffer.memory`: Total memory for buffering unsent messages
+- `compression.type`: gzip, snappy, lz4, or zstd for bandwidth savings
+
+### Error Handling
+
+- Implement retry logic with exponential backoff
+- Handle retriable vs non-retriable exceptions differently
+- Log and alert on send failures
+- Consider dead letter topics for messages that fail repeatedly
+
+### Partitioner
+
+- Default: hash of key determines partition (null key = round-robin)
+- Custom partitioners for specific routing needs
+- Ensure even distribution to avoid hot partitions
+
+## Consumer Best Practices
+
+### Offset Management
+
+- Consumers track which messages they've processed via offsets
+- `auto.offset.reset`: earliest (start from beginning) or latest (only new messages)
+- Commit offsets after successful processing, not before
+- Use `enable.auto.commit=false` for exactly-once semantics
+
+### Consumer Groups
+
+- Consumers in a group share partitions (each partition to one consumer)
+- More consumers than partitions = some consumers idle
+- Group rebalancing occurs when consumers join/leave
+- Use `group.instance.id` for static membership to reduce rebalances
+
+### Processing Patterns
+
+- Process messages in order within a partition
+- Handle out-of-order messages across partitions if needed
+- Implement idempotent processing for at-least-once delivery
+- Consider transactional processing for exactly-once
+
+### Timeouts and Failures
+
+- Implement processing timeout to isolate slow events
+- When timeout occurs, set event aside and continue to next message
+- Maintain overall system performance over processing every single event
+- Use dead letter queues for messages failing all retries
+
+## Error Handling and Retry
+
+### Retry Strategy
+
+- Allow multiple runtime retries per processing attempt
+- Example: 3 runtime retries per redrive, maximum 5 redrives = 15 total retries
+- Runtime retries typically cover 99% of failures
+- After exhausting retries, route to dead letter queue
+
+### Dead Letter Topics
+
+- Create dedicated DLT for messages that can't be processed
+- Include original topic, partition, offset, and error details
+- Monitor DLT for patterns indicating systemic issues
+- Implement manual or automated retry from DLT
+
+## Schema Management
+
+### Schema Registry
+
+- Use Confluent Schema Registry for schema management
+- Producers validate data against registered schemas during serialization
+- Schema mismatches throw exceptions, preventing malformed data
+- Provides common reference for producers and consumers
+
+### Schema Evolution
+
+- Design schemas for forward and backward compatibility
+- Add optional fields with defaults for backward compatibility
+- Avoid removing or renaming fields
+- Use schema versioning and migration strategies
+
+## Kafka Streams
+
+### State Management
+
+- Implement log compaction to maintain latest version of each key
+- Periodically purge old data from state stores
+- Monitor state store size and access patterns
+- Use appropriate storage backends for your scale
+
+### Windowing Operations
+
+- Handle out-of-order events and skewed timestamps
+- Use appropriate time extraction and watermarking techniques
+- Configure grace periods for late-arriving data
+- Choose window types based on use case (tumbling, hopping, sliding, session)
+
+## Security
+
+### Authentication
+
+- Use SASL/SSL for client authentication
+- Support SASL mechanisms: PLAIN, SCRAM, OAUTHBEARER, GSSAPI
+- Enable SSL for encryption in transit
+- Rotate credentials regularly
+
+### Authorization
+
+- Use Kafka ACLs for fine-grained access control
+- Grant minimum necessary permissions per principal
+- Separate read/write permissions by topic
+- Audit access patterns regularly
+
+## Monitoring and Observability
+
+### Key Metrics
+
+- **Producer**: record-send-rate, record-error-rate, batch-size-avg
+- **Consumer**: records-consumed-rate, records-lag, commit-latency
+- **Broker**: under-replicated-partitions, request-latency, disk-usage
+
+### Lag Monitoring
+
+- Consumer lag = last produced offset - last committed offset
+- High lag indicates consumers can't keep up
+- Alert on increasing lag trends
+- Scale consumers or optimize processing
+
+### Distributed Tracing
+
+- Propagate trace context in message headers
+- Use OpenTelemetry for end-to-end tracing
+- Correlate producer and consumer spans
+- Track message journey through the pipeline
+
+## Testing
+
+### Unit Testing
+
+- Mock Kafka clients for isolated testing
+- Test serialization/deserialization logic
+- Verify partitioning logic
+- Test error handling paths
+
+### Integration Testing
+
+- Use embedded Kafka or Testcontainers
+- Test full producer-consumer flows
+- Verify exactly-once semantics if used
+- Test rebalancing scenarios
+
+### Performance Testing
+
+- Load test with production-like message rates
+- Test consumer throughput and lag behavior
+- Verify broker resource usage under load
+- Test failure and recovery scenarios
+
+## Common Patterns
+
+### Event Sourcing
+
+- Store all state changes as immutable events
+- Rebuild state by replaying events
+- Use log compaction for snapshots
+- Enable time-travel debugging
+
+### CQRS (Command Query Responsibility Segregation)
+
+- Separate write (command) and read (query) models
+- Use Kafka as the event store
+- Build read-optimized projections from events
+- Handle eventual consistency appropriately
+
+### Saga Pattern
+
+- Coordinate distributed transactions across services
+- Each service publishes events for next step
+- Implement compensating transactions for rollback
+- Use correlation IDs to track saga instances
+
+### Change Data Capture (CDC)
+
+- Capture database changes as Kafka events
+- Use Debezium or similar CDC tools
+- Enable real-time data synchronization
+- Build event-driven integrations

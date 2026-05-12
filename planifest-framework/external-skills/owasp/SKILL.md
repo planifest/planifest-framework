@@ -1,65 +1,349 @@
 ---
-name: owasp
-description: OWASP Top 10 and ASVS skill — map real code and architecture decisions to OWASP standards, apply appropriate verification levels, and produce actionable mitigations.
+name: security-and-hardening
+description: Hardens code against vulnerabilities. Use when handling user input, authentication, data storage, or external integrations. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services.
 ---
 
-# OWASP Top 10 and ASVS
+# Security and Hardening
 
-You are a senior application security engineer who applies OWASP standards to real code and architecture, not as a compliance checkbox but as a practical vulnerability elimination framework.
+## Overview
+
+Security-first development practices for web applications. Treat every external input as hostile, every secret as sacred, and every authorization check as mandatory. Security isn't a phase — it's a constraint on every line of code that touches user data, authentication, or external systems.
 
 ## When to Use
 
-- Evaluating a web application against OWASP Top 10 2021 categories
-- Selecting ASVS (Application Security Verification Standard) level and deriving security requirements from it
-- Preparing for a compliance assessment that references OWASP standards (PCI DSS, SOC 2, ISO 27001)
-- Reviewing a new feature against the ASVS verification requirements most applicable to its risk category
+- Building anything that accepts user input
+- Implementing authentication or authorization
+- Storing or transmitting sensitive data
+- Integrating with external APIs or services
+- Adding file uploads, webhooks, or callbacks
+- Handling payment or PII data
 
-## Core Principles
+## The Three-Tier Boundary System
 
-**Top 10 Is a Risk List, Not a Complete Standard.** OWASP Top 10 2021 identifies the ten most prevalent categories by incidence rate in real applications. Missing from the list does not mean low risk — business logic flaws, race conditions, and mass assignment vulnerabilities are not in the Top 10 but are routinely exploited. Use ASVS for comprehensive coverage.
+### Always Do (No Exceptions)
 
-**ASVS Level Matches Application Risk.** ASVS L1 (automated scanning achievable) applies to low-value public apps. L2 (most applications, manual verification required) applies to applications handling personal data, financial transactions, or authentication. L3 (critical infrastructure, healthcare, defence) requires formal verification and architectural review. Do not apply L3 controls to an L1 application — disproportionate effort provides diminishing returns.
+- **Validate all external input** at the system boundary (API routes, form handlers)
+- **Parameterize all database queries** — never concatenate user input into SQL
+- **Encode output** to prevent XSS (use framework auto-escaping, don't bypass it)
+- **Use HTTPS** for all external communication
+- **Hash passwords** with bcrypt/scrypt/argon2 (never store plaintext)
+- **Set security headers** (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
+- **Use httpOnly, secure, sameSite cookies** for sessions
+- **Run `npm audit`** (or equivalent) before every release
 
-**Mitigations Must Eliminate the Root Cause.** OWASP A03 (Injection) is not mitigated by a WAF rule. The root cause is string concatenation into an interpreted context. The mitigation is parameterised statements or allowlist validation. WAF is a compensating control, not a fix.
+### Ask First (Requires Human Approval)
 
-**Validation Has a Right Context.** Input validation (ASVS V5) occurs at the boundary. Output encoding (ASVS V5.3) occurs at the rendering context. Both are required. Validating input does not substitute for context-sensitive output encoding.
+- Adding new authentication flows or changing auth logic
+- Storing new categories of sensitive data (PII, payment info)
+- Adding new external service integrations
+- Changing CORS configuration
+- Adding file upload handlers
+- Modifying rate limiting or throttling
+- Granting elevated permissions or roles
 
-**Access Control Must Be Deny-by-Default.** OWASP A01 (Broken Access Control) is the #1 category. The root pattern: access control logic defaults to permit, and restrictions are added selectively. Invert this: every route returns 403 by default; access is explicitly granted by policy.
+### Never Do
 
-## Approach
+- **Never commit secrets** to version control (API keys, passwords, tokens)
+- **Never log sensitive data** (passwords, tokens, full credit card numbers)
+- **Never trust client-side validation** as a security boundary
+- **Never disable security headers** for convenience
+- **Never use `eval()` or `innerHTML`** with user-provided data
+- **Never store sessions in client-accessible storage** (localStorage for auth tokens)
+- **Never expose stack traces** or internal error details to users
 
-**OWASP Top 10 2021 Applied to Code.**
+## OWASP Top 10 Prevention
 
-A01 Broken Access Control — Check: IDOR (resource IDs in requests with no ownership validation), missing function-level access control (route exists but has no auth middleware), privilege escalation (users can change their own role via API), path traversal (`../../etc/passwd` in file path parameters), CORS misconfiguration (wildcard origin with credentials).
+### 1. Injection (SQL, NoSQL, OS Command)
 
-A02 Cryptographic Failures — Check: PII and credentials transmitted over HTTP, sensitive data stored in plaintext or with reversible encryption, weak algorithms (MD5, SHA1, DES, RC4), hardcoded cryptographic keys, weak TLS configuration (TLS 1.0/1.1 accepted, weak cipher suites), missing certificate pinning in mobile clients.
+```typescript
+// BAD: SQL injection via string concatenation
+const query = `SELECT * FROM users WHERE id = '${userId}'`;
 
-A03 Injection — SQLi (string concatenation, ORM raw queries), LDAP injection (user input in filter strings), OS command injection (shell=True with user input), XSS (user input in HTML response without encoding), SSTI (user input in template string). Verify all input-to-sink data flows.
+// GOOD: Parameterized query
+const user = await db.query('SELECT * FROM users WHERE id = $1', [userId]);
 
-A04 Insecure Design — Absence of threat model, rate limiting absent on authentication endpoints, missing account lockout, business logic flaws (negative quantity in cart, price manipulation), lack of fraud detection.
+// GOOD: ORM with parameterized input
+const user = await prisma.user.findUnique({ where: { id: userId } });
+```
 
-A05 Security Misconfiguration — Debug mode enabled in production, default credentials, unnecessary HTTP methods (TRACE, CONNECT), verbose error messages exposing stack traces, missing security headers (CSP, HSTS, X-Frame-Options, X-Content-Type-Options).
+### 2. Broken Authentication
 
-A06 Vulnerable and Outdated Components — Unpatched dependencies with known CVEs, end-of-life frameworks, transitive dependency vulnerabilities not tracked in SCA tooling.
+```typescript
+// Password hashing
+import { hash, compare } from 'bcrypt';
 
-A07 Identification and Authentication Failures — Weak password policy, no MFA on privileged accounts, session token not invalidated on logout, predictable session IDs, credential stuffing not detected or rate-limited.
+const SALT_ROUNDS = 12;
+const hashedPassword = await hash(plaintext, SALT_ROUNDS);
+const isValid = await compare(plaintext, hashedPassword);
 
-A08 Software and Data Integrity Failures — CI/CD pipeline with unsigned artifacts, auto-update mechanisms without signature verification, insecure deserialisation, missing subresource integrity on CDN-loaded scripts.
+// Session management
+app.use(session({
+  secret: process.env.SESSION_SECRET,  // From environment, not code
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,     // Not accessible via JavaScript
+    secure: true,       // HTTPS only
+    sameSite: 'lax',    // CSRF protection
+    maxAge: 24 * 60 * 60 * 1000,  // 24 hours
+  },
+}));
+```
 
-A09 Security Logging and Monitoring Failures — Authentication events not logged, log injection possible (user input written to log without sanitisation), no alerting on repeated failed authentication, logs accessible to application process (SSRF → log read).
+### 3. Cross-Site Scripting (XSS)
 
-A10 Server-Side Request Forgery — User-supplied URLs fetched by the server, no allowlist of permitted schemes and hosts, cloud metadata endpoints reachable (169.254.169.254, fd00:ec2::254).
+```typescript
+// BAD: Rendering user input as HTML
+element.innerHTML = userInput;
 
-**Mapping ASVS Requirements.** For each ASVS chapter relevant to the feature under review, enumerate the specific verification requirements (e.g., ASVS 2.1.1: "Verify that user set passwords are at least 12 characters in length"). Translate each to a testable assertion: "POST /auth/register with password length < 12 returns 400 with error code PWD_TOO_SHORT."
+// GOOD: Use framework auto-escaping (React does this by default)
+return <div>{userInput}</div>;
 
-## Common Mistakes to Avoid
+// If you MUST render HTML, sanitize first
+import DOMPurify from 'dompurify';
+const clean = DOMPurify.sanitize(userInput);
+```
 
-- **Treating OWASP Top 10 as the complete security standard.** Use ASVS for systematic coverage; Top 10 for executive communication.
-- **Applying the same ASVS level to all components.** The authentication service warrants L3 scrutiny; a read-only public API may warrant L1.
-- **WAF as a primary control.** WAFs are bypassed routinely by encoding, chunked transfer, or protocol-level manipulation. Fix root causes.
-- **Ignoring A04 (Insecure Design).** Business logic flaws — a user transferring money to themselves to earn loyalty points, or a discount code applicable unlimited times — are not detectable by scanners. They require design review.
-- **Logging credentials in A09 compliance effort.** Improving logging coverage without redacting passwords, tokens, and PII from log lines violates A02 while attempting to fix A09.
+### 4. Broken Access Control
 
-## Output
+```typescript
+// Always check authorization, not just authentication
+app.patch('/api/tasks/:id', authenticate, async (req, res) => {
+  const task = await taskService.findById(req.params.id);
 
-Produce an OWASP assessment as: a mapping table (Top 10 category → finding or "Not Applicable" with rationale), severity-ranked finding list with ASVS reference IDs, and remediation recommendations with priority tiers. For ASVS assessments, produce a coverage matrix (chapter → L1/L2/L3 requirements met/failed/not tested) with gap analysis.
+  // Check that the authenticated user owns this resource
+  if (task.ownerId !== req.user.id) {
+    return res.status(403).json({
+      error: { code: 'FORBIDDEN', message: 'Not authorized to modify this task' }
+    });
+  }
+
+  // Proceed with update
+  const updated = await taskService.update(req.params.id, req.body);
+  return res.json(updated);
+});
+```
+
+### 5. Security Misconfiguration
+
+```typescript
+// Security headers (use helmet for Express)
+import helmet from 'helmet';
+app.use(helmet());
+
+// Content Security Policy
+app.use(helmet.contentSecurityPolicy({
+  directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],  // Tighten if possible
+    imgSrc: ["'self'", 'data:', 'https:'],
+    connectSrc: ["'self'"],
+  },
+}));
+
+// CORS — restrict to known origins
+app.use(cors({
+  origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
+  credentials: true,
+}));
+```
+
+### 6. Sensitive Data Exposure
+
+```typescript
+// Never return sensitive fields in API responses
+function sanitizeUser(user: UserRecord): PublicUser {
+  const { passwordHash, resetToken, ...publicFields } = user;
+  return publicFields;
+}
+
+// Use environment variables for secrets
+const API_KEY = process.env.STRIPE_API_KEY;
+if (!API_KEY) throw new Error('STRIPE_API_KEY not configured');
+```
+
+## Input Validation Patterns
+
+### Schema Validation at Boundaries
+
+```typescript
+import { z } from 'zod';
+
+const CreateTaskSchema = z.object({
+  title: z.string().min(1).max(200).trim(),
+  description: z.string().max(2000).optional(),
+  priority: z.enum(['low', 'medium', 'high']).default('medium'),
+  dueDate: z.string().datetime().optional(),
+});
+
+// Validate at the route handler
+app.post('/api/tasks', async (req, res) => {
+  const result = CreateTaskSchema.safeParse(req.body);
+  if (!result.success) {
+    return res.status(422).json({
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid input',
+        details: result.error.flatten(),
+      },
+    });
+  }
+  // result.data is now typed and validated
+  const task = await taskService.create(result.data);
+  return res.status(201).json(task);
+});
+```
+
+### File Upload Safety
+
+```typescript
+// Restrict file types and sizes
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+function validateUpload(file: UploadedFile) {
+  if (!ALLOWED_TYPES.includes(file.mimetype)) {
+    throw new ValidationError('File type not allowed');
+  }
+  if (file.size > MAX_SIZE) {
+    throw new ValidationError('File too large (max 5MB)');
+  }
+  // Don't trust the file extension — check magic bytes if critical
+}
+```
+
+## Triaging npm audit Results
+
+Not all audit findings require immediate action. Use this decision tree:
+
+```
+npm audit reports a vulnerability
+├── Severity: critical or high
+│   ├── Is the vulnerable code reachable in your app?
+│   │   ├── YES --> Fix immediately (update, patch, or replace the dependency)
+│   │   └── NO (dev-only dep, unused code path) --> Fix soon, but not a blocker
+│   └── Is a fix available?
+│       ├── YES --> Update to the patched version
+│       └── NO --> Check for workarounds, consider replacing the dependency, or add to allowlist with a review date
+├── Severity: moderate
+│   ├── Reachable in production? --> Fix in the next release cycle
+│   └── Dev-only? --> Fix when convenient, track in backlog
+└── Severity: low
+    └── Track and fix during regular dependency updates
+```
+
+**Key questions:**
+- Is the vulnerable function actually called in your code path?
+- Is the dependency a runtime dependency or dev-only?
+- Is the vulnerability exploitable given your deployment context (e.g., a server-side vulnerability in a client-only app)?
+
+When you defer a fix, document the reason and set a review date.
+
+## Rate Limiting
+
+```typescript
+import rateLimit from 'express-rate-limit';
+
+// General API rate limit
+app.use('/api/', rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,                   // 100 requests per window
+  standardHeaders: true,
+  legacyHeaders: false,
+}));
+
+// Stricter limit for auth endpoints
+app.use('/api/auth/', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,  // 10 attempts per 15 minutes
+}));
+```
+
+## Secrets Management
+
+```
+.env files:
+  ├── .env.example  → Committed (template with placeholder values)
+  ├── .env          → NOT committed (contains real secrets)
+  └── .env.local    → NOT committed (local overrides)
+
+.gitignore must include:
+  .env
+  .env.local
+  .env.*.local
+  *.pem
+  *.key
+```
+
+**Always check before committing:**
+```bash
+# Check for accidentally staged secrets
+git diff --cached | grep -i "password\|secret\|api_key\|token"
+```
+
+## Security Review Checklist
+
+```markdown
+### Authentication
+- [ ] Passwords hashed with bcrypt/scrypt/argon2 (salt rounds ≥ 12)
+- [ ] Session tokens are httpOnly, secure, sameSite
+- [ ] Login has rate limiting
+- [ ] Password reset tokens expire
+
+### Authorization
+- [ ] Every endpoint checks user permissions
+- [ ] Users can only access their own resources
+- [ ] Admin actions require admin role verification
+
+### Input
+- [ ] All user input validated at the boundary
+- [ ] SQL queries are parameterized
+- [ ] HTML output is encoded/escaped
+
+### Data
+- [ ] No secrets in code or version control
+- [ ] Sensitive fields excluded from API responses
+- [ ] PII encrypted at rest (if applicable)
+
+### Infrastructure
+- [ ] Security headers configured (CSP, HSTS, etc.)
+- [ ] CORS restricted to known origins
+- [ ] Dependencies audited for vulnerabilities
+- [ ] Error messages don't expose internals
+```
+## See Also
+
+For detailed security checklists and pre-commit verification steps, see `references/security-checklist.md`.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "This is an internal tool, security doesn't matter" | Internal tools get compromised. Attackers target the weakest link. |
+| "We'll add security later" | Security retrofitting is 10x harder than building it in. Add it now. |
+| "No one would try to exploit this" | Automated scanners will find it. Security by obscurity is not security. |
+| "The framework handles security" | Frameworks provide tools, not guarantees. You still need to use them correctly. |
+| "It's just a prototype" | Prototypes become production. Security habits from day one. |
+
+## Red Flags
+
+- User input passed directly to database queries, shell commands, or HTML rendering
+- Secrets in source code or commit history
+- API endpoints without authentication or authorization checks
+- Missing CORS configuration or wildcard (`*`) origins
+- No rate limiting on authentication endpoints
+- Stack traces or internal errors exposed to users
+- Dependencies with known critical vulnerabilities
+
+## Verification
+
+After implementing security-relevant code:
+
+- [ ] `npm audit` shows no critical or high vulnerabilities
+- [ ] No secrets in source code or git history
+- [ ] All user input validated at system boundaries
+- [ ] Authentication and authorization checked on every protected endpoint
+- [ ] Security headers present in response (check with browser DevTools)
+- [ ] Error responses don't expose internal details
+- [ ] Rate limiting active on auth endpoints

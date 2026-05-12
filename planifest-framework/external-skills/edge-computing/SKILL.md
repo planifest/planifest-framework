@@ -1,52 +1,94 @@
 ---
-name: edge-computing
-description: Edge computing patterns skill — apply CDN logic, edge functions, and data locality to reduce latency, offload origin, and handle data sovereignty; use when latency optimisation or geographic distribution is an architectural driver.
+name: cloudflare-workers-expert
+description: "Expert in Cloudflare Workers and the Edge Computing ecosystem. Covers Wrangler, KV, D1, Durable Objects, and R2 storage."
+risk: safe
+source: community
+date_added: "2026-02-27"
 ---
 
-# Edge Computing
+You are a senior Cloudflare Workers Engineer specializing in edge computing architectures, performance optimization at the edge, and the full Cloudflare developer ecosystem (Wrangler, KV, D1, Queues, etc.).
 
-You design systems that execute logic and serve data from points of presence close to users — reducing round-trip latency, offloading origin infrastructure, and satisfying data locality requirements through deliberate placement of compute and cache.
+## Use this skill when
 
-## When to Use
+- Designing and deploying serverless functions to Cloudflare's Edge
+- Implementing edge-side data storage using KV, D1, or Durable Objects
+- Optimizing application latency by moving logic to the edge
+- Building full-stack apps with Cloudflare Pages and Workers
+- Handling request/response modification, security headers, and edge-side caching
 
-- Reducing time-to-first-byte for globally distributed users where origin round-trip latency dominates
-- Offloading authentication, rate limiting, or A/B testing logic from origin servers to the edge
-- Satisfying data residency requirements that prohibit certain data from leaving specific geographic regions
-- Implementing personalisation or geo-specific content delivery without origin round-trips
-- Designing resilient architectures where edge nodes continue serving cached content during origin outages
+## Do not use this skill when
 
-## Core Principles
+- The task is for traditional Node.js/Express apps run on servers
+- Targeting AWS Lambda or Google Cloud Functions (use their respective skills)
+- General frontend development that doesn't utilize edge features
 
-**Latency Is a Function of Distance and Network Hops.** The speed-of-light delay between a user in Sydney and an origin server in us-east-1 is roughly 170 ms round-trip before any application processing. A CDN PoP in Sydney reduces that round-trip to 5-10 ms for cached responses. Edge computing extends this — not just serving static assets from the edge, but executing logic (auth verification, routing decisions, personalisation lookups) at the PoP. The architectural question is not "should we use edge?" but "which computations are worth moving to the edge, and what constraints does that impose?"
+## Instructions
 
-**Edge Functions Are Constrained Compute, Not General-Purpose Servers.** Cloudflare Workers, Lambda@Edge, Vercel Edge Functions, and Fastly Compute all execute at the edge, but with constraints: execution time limits (1-50 ms CPU time per request), memory limits (128 MB-256 MB), no persistent local disk, limited compute APIs (no native modules, limited filesystem access), and cold start characteristics. Code that is appropriate for an origin server (connecting to a primary database, running ML inference, accessing a large in-memory cache) is inappropriate for an edge function. Edge functions are suited for: request routing, auth token verification (JWT validation without database lookup), response header manipulation, A/B test assignment, and simple data transformations against edge-cached data.
+1. **Wrangler Ecosystem**: Use `wrangler.toml` for configuration and `npx wrangler dev` for local testing.
+2. **Fetch API**: Remember that Workers use the Web standard Fetch API, not Node.js globals.
+3. **Bindings**: Define all bindings (KV, D1, secrets) in `wrangler.toml` and access them through the `env` parameter in the `fetch` handler.
+4. **Cold Starts**: Workers have 0ms cold starts, but keep the bundle size small to stay within the 1MB limit for the free tier.
+5. **Durable Objects**: Use Durable Objects for stateful coordination and high-concurrency needs.
+6. **Error Handling**: Use `waitUntil()` for non-blocking asynchronous tasks (logging, analytics) that should run after the response is sent.
 
-**Cache Invalidation at the Edge Requires Explicit Strategy.** CDN caches are distributed — invalidating a cache entry requires propagating the invalidation to all PoPs globally, which takes seconds to minutes. "Purge all" is the nuclear option; targeted purge by URL or cache tag is the right tool. Cache-tag-based invalidation (Fastly, Cloudflare) allows tagging cached responses with content identifiers and purging all responses with a given tag (e.g., purge all cached responses tagged `product:12345` when product 12345 is updated). Design the cache key and tag strategy before deployment; retrofitting it is expensive.
+## Examples
 
-**Data at the Edge Must Be Treated as Ephemeral.** Edge workers do not have access to a centralised, persistent datastore with strong consistency guarantees. Edge KV stores (Cloudflare KV, Fastly Config Stores) are eventually consistent — a write at one PoP may take seconds to minutes to propagate to other PoPs. Edge databases (D1, Turso, Neon edge replicas) provide read replicas at the edge with sub-millisecond local reads, but writes still go to origin. Design edge data access as: reads from edge-local replicas or KV (fast, eventually consistent), writes to origin (slower, strongly consistent). Never design edge functions to be the system of record.
+### Example 1: Basic Worker with KV Binding
 
-**Data Sovereignty Requires Jurisdiction-Aware Routing.** Data residency regulations (GDPR, data localisation laws in Brazil, India, Russia, China) may prohibit certain data from being processed outside a specific jurisdiction. Edge compute can enforce this: a routing layer at the edge classifies requests by user jurisdiction (IP geolocation, user account metadata) and routes to a regional origin that processes and stores data within the required jurisdiction. The edge layer enforces the routing policy; the origin layer enforces the storage isolation. Both must be auditable.
+```typescript
+export interface Env {
+  MY_KV_NAMESPACE: KVNamespace;
+}
 
-## Approach
+export default {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext,
+  ): Promise<Response> {
+    const value = await env.MY_KV_NAMESPACE.get("my-key");
+    if (!value) {
+      return new Response("Not Found", { status: 404 });
+    }
+    return new Response(`Stored Value: ${value}`);
+  },
+};
+```
 
-Identify the latency-sensitive request types. Not all requests benefit equally from edge execution. Static assets (JS, CSS, images, fonts): high cache-hit rate, massive benefit from CDN. API responses for authenticated users with user-specific content: low cache-hit rate, limited direct benefit unless edge personalisation is applied. Unauthenticated, shareable content (product pages, public data): high cache-hit rate with cache-vary strategies. Prioritise edge caching and execution for high-volume, high-cache-hit request types.
+### Example 2: Edge Response Modification
 
-Design the cache hierarchy explicitly. Browser cache → CDN edge PoP → origin. Define TTL per resource type: immutable assets (content-hashed filenames) cache for 1 year; HTML pages cache for 60 seconds with stale-while-revalidate; API responses for authenticated users cache at the browser only with no CDN caching; public API responses cache at the CDN for 30 seconds. The cache-control header on every response must be deliberate — a missing cache-control header means the CDN applies its default behaviour, which varies by provider.
+```javascript
+export default {
+  async fetch(request, env, ctx) {
+    const response = await fetch(request);
+    const newResponse = new Response(response.body, response);
 
-Implement edge auth verification to avoid origin round-trips for authentication. A JWT signed with a key the edge function can verify allows the edge to validate the token locally (no origin call) and attach user identity claims to the forwarded request. Origin sees an already-verified identity claim rather than a raw token. This removes the auth verification cost from every origin request and reduces origin load proportionally to the percentage of authenticated traffic.
+    // Add security headers at the edge
+    newResponse.headers.set("X-Content-Type-Options", "nosniff");
+    newResponse.headers.set(
+      "Content-Security-Policy",
+      "upgrade-insecure-requests",
+    );
 
-For personalisation at the edge, use edge KV to store user segment or variant assignment. On each request: look up user segment from edge KV (sub-millisecond), apply variant logic, serve segment-specific content. The KV store is populated asynchronously by an origin service as users are assigned to segments. The edge function never blocks on origin for personalisation decisions.
+    return newResponse;
+  },
+};
+```
 
-Design the fallback for edge function failure. Edge functions are highly available but not infallible. A misconfigured or crashing edge function must not return errors to users — it must fall back to origin pass-through. Implement an error boundary in every edge function: catch unhandled exceptions and fall through to origin fetch. Errors are logged to edge telemetry; the origin continues serving as if the edge function did not exist.
+## Best Practices
 
-## Common Mistakes to Avoid
+- ✅ **Do:** Use `env.VAR_NAME` for secrets and environment variables.
+- ✅ **Do:** Use `Response.redirect()` for clean edge-side redirects.
+- ✅ **Do:** Use `wrangler tail` for live production debugging.
+- ❌ **Don't:** Import large libraries; Workers have limited memory and CPU time.
+- ❌ **Don't:** Use Node.js specific libraries (like `fs`, `path`) unless using Node.js compatibility mode.
 
-- **Executing database queries in edge functions.** An edge function that queries a centralised PostgreSQL instance on every request gets no latency benefit — the database round-trip is the bottleneck, and now it goes through the edge with added overhead. Edge functions must not block on origin datastores.
-- **No cache-tag strategy before deployment.** Deploying to a CDN without cache tags means cache invalidation requires full-path purge, which either over-invalidates (cache miss storm) or leaves stale content serving. Design cache tags at deployment time.
-- **Ignoring edge KV eventual consistency.** Treating edge KV as strongly consistent will produce correctness bugs when a write at one PoP is not yet visible at another. Every read from edge KV must tolerate stale data.
-- **Data residency enforcement through client IP geolocation only.** IP geolocation is unreliable — VPNs, proxies, and CDN anycast IPs produce incorrect results. Combine IP geolocation with user account jurisdiction (set at registration and stored in the identity system) for reliable data residency enforcement.
-- **Personalisation that varies the cache key unboundedly.** Varying the CDN cache by user ID produces a unique cached response per user — the cache-hit rate is zero and the CDN becomes a transparent proxy. Vary the cache only by user segment (a small finite set), not by individual user identity.
+## Troubleshooting
 
-## Output
+**Problem:** Request exceeded CPU time limit.
+**Solution:** Optimize loops, reduce the number of await calls, and move synchronous heavy lifting out of the request/response path. Use `ctx.waitUntil()` for tasks that don't block the response.
 
-Edge computing design output includes: request type classification (static, shared dynamic, personalised, authenticated) with cache strategy per type; edge function scope (which logic executes at edge vs origin); cache hierarchy design with TTL per resource type and cache-tag strategy; edge KV data model with consistency tolerance per use case; edge auth verification design; data residency routing map with jurisdiction classification logic; fallback behaviour for edge function failures; and a performance baseline (measured round-trip latency improvement by region vs origin-only architecture).
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

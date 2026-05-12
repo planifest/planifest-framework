@@ -1,52 +1,245 @@
 ---
-name: strangler-fig
-description: Strangler Fig migration skill — identify seams in a legacy system, route traffic through a facade, and incrementally extract functionality to new services or modules without a big-bang rewrite; use when migrating a legacy monolith while keeping production running.
+name: incremental-implementation
+description: Delivers changes incrementally. Use when implementing any feature or change that touches more than one file. Use when you're about to write a large amount of code at once, or when a task feels too big to land in one step.
 ---
 
-# Strangler Fig
+# Incremental Implementation
 
-You migrate legacy systems incrementally by wrapping the old system with a routing facade, extracting functionality piece by piece, and deleting the old code when the new implementation is proven — avoiding the existential risk of a big-bang rewrite.
+## Overview
+
+Build in thin vertical slices — implement one piece, test it, verify it, then expand. Avoid implementing an entire feature in one pass. Each increment should leave the system in a working, testable state. This is the execution discipline that makes large features manageable.
 
 ## When to Use
 
-- Migrating a legacy monolith to a new architecture (microservices, modular monolith, new framework) while maintaining production availability
-- Replacing a third-party system or COTS product with a custom implementation incrementally
-- Extracting a domain area from a big-ball-of-mud into a well-structured module or service
-- Managing the risk of a large-scale architectural transition through incremental, validated steps
-- Rewriting a system in a new language or technology stack without a cutover date
+- Implementing any multi-file change
+- Building a new feature from a task breakdown
+- Refactoring existing code
+- Any time you're tempted to write more than ~100 lines before testing
 
-## Core Principles
+**When NOT to use:** Single-file, single-function changes where the scope is already minimal.
 
-**The Routing Layer Is the Migration's Control Plane.** The strangler fig works by interposing a routing layer (HTTP proxy, API gateway, feature flag service, load balancer rule) between callers and the system being replaced. The routing layer forwards each request to either the old system or the new implementation, based on routing rules. This single control plane enables: gradual traffic shifting, instant rollback by changing routing rules, and A/B comparison between old and new. Without a routing layer, migration becomes a cutover.
+## The Increment Cycle
 
-**Seam Identification Precedes Extraction.** A seam is a point in the codebase where behaviour can be changed without modifying surrounding code — a function boundary, an interface, an API endpoint, a database table. Migration starts by identifying seams that map to coherent domain capabilities. Not all seams are equal: choose initial extraction targets that are high-value (frequently changed, blocking new features), low-risk (well-understood, minimal dependencies), and independently testable. The first extraction proves the migration pattern; it should not be the most complex one.
+```
+┌──────────────────────────────────────┐
+│                                      │
+│   Implement ──→ Test ──→ Verify ──┐  │
+│       ▲                           │  │
+│       └───── Commit ◄─────────────┘  │
+│              │                       │
+│              ▼                       │
+│          Next slice                  │
+│                                      │
+└──────────────────────────────────────┘
+```
 
-**New Implementation Is Proven Alongside the Old.** During transition, both implementations run concurrently for any given capability. The new implementation is validated by comparing its behaviour against the old. Techniques: shadow mode (route all requests to old, also send to new in parallel and compare responses without exposing to users), percentage-based routing (send 1% of traffic to new, monitor error rates and latency differentials), and dark launch (new implementation receives traffic but returns are discarded). Never delete old code until the new implementation has proven correctness in production.
+For each slice:
 
-**Data Migration Is the Hard Problem.** Extracting a capability almost always requires migrating data. The old system owns the data; the new system needs it. Strategies: dual-write (write to both old and new datastores during transition, read from new, verify against old), backfill (one-time migration of historical data before cutover), and event replay (if the old system has an audit log, replay events to the new datastore). Dual-write is complex — write ordering, failure handling, and lag monitoring add significant operational overhead. Plan data migration before starting code extraction.
+1. **Implement** the smallest complete piece of functionality
+2. **Test** — run the test suite (or write a test if none exists)
+3. **Verify** — confirm the slice works as expected (tests pass, build succeeds, manual check)
+4. **Commit** -- save your progress with a descriptive message (see `git-workflow-and-versioning` for atomic commit guidance)
+5. **Move to the next slice** — carry forward, don't restart
 
-**Delete Is the Measure of Progress.** The strangler fig is complete when the old code is deleted, not when the new code is deployed. Migration projects that run indefinitely in parallel mode accumulate operational overhead, maintenance burden, and cognitive load. Establish a deletion criterion for each extracted capability: new implementation handles 100% of traffic, error rates are equivalent, for N days. When criteria are met, delete old code. Track deletion progress as the migration metric.
+## Slicing Strategies
 
-## Approach
+### Vertical Slices (Preferred)
 
-Begin with an inventory of the legacy system's capabilities. Map each capability to: current implementation location, external callers, data ownership, and dependencies on other capabilities. Produce a dependency graph. Capabilities with no dependencies on other capabilities are extraction candidates. Capabilities at the centre of the dependency graph are extracted last.
+Build one complete path through the stack:
 
-Install the routing layer before extracting any capability. The routing layer must be in place before the first extraction — not after. An HTTP proxy (nginx, Envoy, API gateway) that initially routes 100% of traffic to the old system can have routing rules added incrementally as new implementations are deployed. Validate that the routing layer itself introduces no latency or correctness issues before any migration work begins.
+```
+Slice 1: Create a task (DB + API + basic UI)
+    → Tests pass, user can create a task via the UI
 
-Extract capabilities in reverse dependency order. Start with leaf capabilities (no outgoing dependencies to other legacy capabilities). Example extraction sequence: extract the notification capability (sends emails, no incoming legacy dependencies) first, then extract the reporting capability (reads from notification history), then extract the order management capability (depends on notification). Never extract a capability before its dependencies are extracted — it would create a new service with a dependency on the legacy system.
+Slice 2: List tasks (query + API + UI)
+    → Tests pass, user can see their tasks
 
-For each extraction, follow the proven sequence: (1) write the new implementation behind a feature flag, (2) shadow-mode test against production traffic, (3) shift 1% of traffic and monitor, (4) ramp to 100% over N days while comparing metrics, (5) remove the routing rule to the old implementation, (6) delete old code after stability period.
+Slice 3: Edit a task (update + API + UI)
+    → Tests pass, user can modify tasks
 
-Manage the shared database during extraction. The most dangerous moment in a strangler fig migration is when two implementations write to the same database. Establish a transition period: the old system continues to own the database; the new system reads from the old system's API (not directly from the database); once the new system handles 100% of writes, the database is migrated to the new system's ownership. Never have two implementations writing to the same tables concurrently without a conflict resolution strategy.
+Slice 4: Delete a task (delete + API + UI + confirmation)
+    → Tests pass, full CRUD complete
+```
 
-## Common Mistakes to Avoid
+Each slice delivers working end-to-end functionality.
 
-- **Extracting capabilities with shared database writes.** Two systems writing to the same table without synchronisation will corrupt each other's data. Establish clear data ownership before enabling writes in the new implementation.
-- **Big-bang data migration.** Migrating all data in a single operation with a maintenance window is a rewrite risk disguised as a migration. Use incremental backfill with live traffic running against both old and new data, validated for consistency.
-- **No rollback test.** Validating that routing rules can redirect traffic back to the old implementation must be tested before production cutover, not assumed. A rollback that has never been executed will fail when you need it.
-- **Skipping the shadow-mode phase.** Shifting production traffic directly to the new implementation without comparing responses against the old creates undiscovered divergence. Always shadow-test before routing real users.
-- **Celebrating deployment, not deletion.** A "migrated" capability that still has the old implementation running in parallel is not migrated — it is duplicated. The migration is complete when old code is deleted and the routing layer reference to the old implementation is removed.
+### Contract-First Slicing
 
-## Output
+When backend and frontend need to develop in parallel:
 
-Strangler fig migration output includes: capability inventory with dependency graph; extraction order (reverse dependency); routing layer design and technology choice; seam definition per capability; data migration strategy per capability (dual-write, backfill, replay); rollback procedure per extraction; shadow-mode and canary criteria; deletion criteria per capability; and a migration dashboard tracking extraction status, traffic split, and deletion progress.
+```
+Slice 0: Define the API contract (types, interfaces, OpenAPI spec)
+Slice 1a: Implement backend against the contract + API tests
+Slice 1b: Implement frontend against mock data matching the contract
+Slice 2: Integrate and test end-to-end
+```
+
+### Risk-First Slicing
+
+Tackle the riskiest or most uncertain piece first:
+
+```
+Slice 1: Prove the WebSocket connection works (highest risk)
+Slice 2: Build real-time task updates on the proven connection
+Slice 3: Add offline support and reconnection
+```
+
+If Slice 1 fails, you discover it before investing in Slices 2 and 3.
+
+## Implementation Rules
+
+### Rule 0: Simplicity First
+
+Before writing any code, ask: "What is the simplest thing that could work?"
+
+After writing code, review it against these checks:
+- Can this be done in fewer lines?
+- Are these abstractions earning their complexity?
+- Would a staff engineer look at this and say "why didn't you just..."?
+- Am I building for hypothetical future requirements, or the current task?
+
+```
+SIMPLICITY CHECK:
+✗ Generic EventBus with middleware pipeline for one notification
+✓ Simple function call
+
+✗ Abstract factory pattern for two similar components
+✓ Two straightforward components with shared utilities
+
+✗ Config-driven form builder for three forms
+✓ Three form components
+```
+
+Three similar lines of code is better than a premature abstraction. Implement the naive, obviously-correct version first. Optimize only after correctness is proven with tests.
+
+### Rule 0.5: Scope Discipline
+
+Touch only what the task requires.
+
+Do NOT:
+- "Clean up" code adjacent to your change
+- Refactor imports in files you're not modifying
+- Remove comments you don't fully understand
+- Add features not in the spec because they "seem useful"
+- Modernize syntax in files you're only reading
+
+If you notice something worth improving outside your task scope, note it — don't fix it:
+
+```
+NOTICED BUT NOT TOUCHING:
+- src/utils/format.ts has an unused import (unrelated to this task)
+- The auth middleware could use better error messages (separate task)
+→ Want me to create tasks for these?
+```
+
+### Rule 1: One Thing at a Time
+
+Each increment changes one logical thing. Don't mix concerns:
+
+**Bad:** One commit that adds a new component, refactors an existing one, and updates the build config.
+
+**Good:** Three separate commits — one for each change.
+
+### Rule 2: Keep It Compilable
+
+After each increment, the project must build and existing tests must pass. Don't leave the codebase in a broken state between slices.
+
+### Rule 3: Feature Flags for Incomplete Features
+
+If a feature isn't ready for users but you need to merge increments:
+
+```typescript
+// Feature flag for work-in-progress
+const ENABLE_TASK_SHARING = process.env.FEATURE_TASK_SHARING === 'true';
+
+if (ENABLE_TASK_SHARING) {
+  // New sharing UI
+}
+```
+
+This lets you merge small increments to the main branch without exposing incomplete work.
+
+### Rule 4: Safe Defaults
+
+New code should default to safe, conservative behavior:
+
+```typescript
+// Safe: disabled by default, opt-in
+export function createTask(data: TaskInput, options?: { notify?: boolean }) {
+  const shouldNotify = options?.notify ?? false;
+  // ...
+}
+```
+
+### Rule 5: Rollback-Friendly
+
+Each increment should be independently revertable:
+
+- Additive changes (new files, new functions) are easy to revert
+- Modifications to existing code should be minimal and focused
+- Database migrations should have corresponding rollback migrations
+- Avoid deleting something in one commit and replacing it in the same commit — separate them
+
+## Working with Agents
+
+When directing an agent to implement incrementally:
+
+```
+"Let's implement Task 3 from the plan.
+
+Start with just the database schema change and the API endpoint.
+Don't touch the UI yet — we'll do that in the next increment.
+
+After implementing, run `npm test` and `npm run build` to verify
+nothing is broken."
+```
+
+Be explicit about what's in scope and what's NOT in scope for each increment.
+
+## Increment Checklist
+
+After each increment, verify:
+
+- [ ] The change does one thing and does it completely
+- [ ] All existing tests still pass (`npm test`)
+- [ ] The build succeeds (`npm run build`)
+- [ ] Type checking passes (`npx tsc --noEmit`)
+- [ ] Linting passes (`npm run lint`)
+- [ ] The new functionality works as expected
+- [ ] The change is committed with a descriptive message
+
+**Note:** Run each verification command after a change that could affect it. After a successful run, don't repeat the same command unless the code has changed since — re-running on unchanged code adds no information.
+
+## Common Rationalizations
+
+| Rationalization | Reality |
+|---|---|
+| "I'll test it all at the end" | Bugs compound. A bug in Slice 1 makes Slices 2-5 wrong. Test each slice. |
+| "It's faster to do it all at once" | It *feels* faster until something breaks and you can't find which of 500 changed lines caused it. |
+| "These changes are too small to commit separately" | Small commits are free. Large commits hide bugs and make rollbacks painful. |
+| "I'll add the feature flag later" | If the feature isn't complete, it shouldn't be user-visible. Add the flag now. |
+| "This refactor is small enough to include" | Refactors mixed with features make both harder to review and debug. Separate them. |
+| "Let me run the build command again just to be sure" | After a successful run, repeating the same command adds nothing unless the code has changed since. Run it again after subsequent edits, not as reassurance. |
+
+## Red Flags
+
+- More than 100 lines of code written without running tests
+- Multiple unrelated changes in a single increment
+- "Let me just quickly add this too" scope expansion
+- Skipping the test/verify step to move faster
+- Build or tests broken between increments
+- Large uncommitted changes accumulating
+- Building abstractions before the third use case demands it
+- Touching files outside the task scope "while I'm here"
+- Creating new utility files for one-time operations
+- Running the same build/test command twice in a row without any intervening code change
+
+## Verification
+
+After completing all increments for a task:
+
+- [ ] Each increment was individually tested and committed
+- [ ] The full test suite passes
+- [ ] The build is clean
+- [ ] The feature works end-to-end as specified
+- [ ] No uncommitted changes remain

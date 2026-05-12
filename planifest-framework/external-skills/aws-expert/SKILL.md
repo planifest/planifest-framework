@@ -1,60 +1,149 @@
 ---
-name: aws-expert
-description: Expert AWS cloud engineering — well-architected design, service selection, cost optimisation, and operational excellence
-version: 1.0.0
-author: Planifest Contributors
-license: MIT
+name: aws-agentic-ai
+aliases:
+  - bedrock-agentcore
+description: AWS Bedrock AgentCore comprehensive expert for deploying and managing AI agents at scale. Use when working with any AgentCore service including Gateway, Runtime, Memory, Identity, Code Interpreter, Browser, Observability, Agent Registry, or Evaluations. Covers agent deployment, MCP tool integration, credential management, agent discovery, governance workflows, and automated quality assessment. Essential when user mentions AgentCore, agent runtime, agent registry, agent evaluation, MCP gateway, deploy agent, register MCP server, discover agents, evaluate agent quality, agent credentials, or wants to build, deploy, catalog, or monitor AI agents on AWS.
+context: fork
+model: sonnet
+skills:
+  - aws-mcp-setup
+allowed-tools:
+  - mcp__aws-mcp__*
+  - mcp__awsdocs__*
+  - mcp__acdocs__search_agentcore_docs
+  - mcp__acdocs__fetch_agentcore_doc
+  - Bash(aws bedrock-agentcore *)
+  - Bash(aws bedrock-agentcore-control *)
+  - Bash(aws bedrock-agentcore-runtime *)
+  - Bash(aws bedrock *)
+  - Bash(aws s3 cp *)
+  - Bash(aws s3 ls *)
+  - Bash(aws secretsmanager *)
+  - Bash(aws sts get-caller-identity)
+hooks:
+  PreToolUse:
+    - matcher: Bash(aws bedrock-agentcore-control create-*)
+      command: aws sts get-caller-identity --query Account --output text
+      once: true
 ---
 
-# AWS Expert
+# AWS Bedrock AgentCore
 
-> I am an AWS expert who designs cloud architectures following the Well-Architected Framework — optimising for reliability, security, performance, cost, and operational excellence simultaneously. I select AWS services based on fit to the problem, not familiarity.
+AWS Bedrock AgentCore provides a complete platform for deploying and scaling AI agents with nine core services. This skill covers service selection, deployment patterns, and integration workflows using AWS CLI.
 
-## Core Principles
+**How to use this skill**: Identify the service(s) the user needs from the table below, then read the corresponding service README before responding. For cross-service patterns (credentials, security, registry integration), check the Cross-Service Resources section. Verify AWS-specific details using the MCP documentation tools.
 
-- **Least privilege everywhere.** IAM policies grant minimum required permissions. No `*` actions or resources in production policies. Use SCPs to enforce boundaries at the organisation level.
-- **Infrastructure as code is non-negotiable.** CDK, CloudFormation, or Terraform. No manual console changes in shared environments — every resource is declared and version-controlled.
-- **Multi-AZ for anything that matters.** Single-AZ deployments are development topology. Production services span at least two AZs with automatic failover.
-- **Design for failure.** Assume any service call can fail. Implement retries with exponential backoff, circuit breakers, and graceful degradation.
-- **Cost visibility from day one.** Tag every resource with `Environment`, `Service`, and `Owner`. Enable AWS Cost Explorer and set billing alerts.
-- **Encryption in transit and at rest.** TLS 1.2+ for all data in transit. KMS encryption for S3, RDS, DynamoDB, and EBS volumes.
-- **Audit logging is always on.** CloudTrail in every region and account. VPC Flow Logs for network traffic. Config Rules for compliance drift detection.
+## AWS Documentation Requirement
 
-## Approach
+Always verify AWS facts using MCP tools before answering. Two documentation sources are available:
+- **AgentCore-specific docs** (`mcp__acdocs__*`) — bundled with this plugin, provides `search_agentcore_docs` and `fetch_agentcore_doc` for AgentCore documentation
+- **General AWS docs** (`mcp__aws-mcp__*` or `mcp__*awsdocs*__*`) — loaded via the `aws-mcp-setup` dependency for broader AWS documentation
 
-AWS architecture begins with the application's NFRs: availability target, RPO/RTO, expected throughput, data sensitivity classification, and cost envelope. These drive service selection. A 99.9% availability target with RPO < 1 hour leads to different choices than 99.99% with RPO < 5 minutes.
+Prefer the AgentCore docs MCP for AgentCore-specific questions. If MCP tools are unavailable, guide the user through the `aws-mcp-setup` skill's setup flow.
 
-Service selection follows fit-to-purpose principles. Compute: Lambda for event-driven, bursty, or short-lived workloads; ECS Fargate for container workloads without cluster management; EKS for workloads needing Kubernetes primitives; EC2 when fine-grained instance control or licensing requires it. Storage: S3 for objects, EBS for block storage, EFS for shared file systems, FSx for specific workloads. Database: RDS Aurora Serverless v2 for SQL with variable load; DynamoDB for key-value at scale; ElastiCache for caching.
+## Available Services
 
-Networking follows the hub-and-spoke or landing zone pattern for multi-account architectures. VPCs are sized appropriately — I plan for 4x the current IP count. Private subnets host compute; public subnets host only load balancers and NAT Gateways. Security Groups follow the principle of minimal ingress — only the ports and sources required. VPC endpoints for S3 and DynamoDB eliminate NAT Gateway costs for high-volume traffic.
+| Service | Use For | Documentation |
+|---------|---------|---------------|
+| **Gateway** | Converting REST APIs to MCP tools | [`services/gateway/README.md`](services/gateway/README.md) |
+| **Runtime** | Deploying and scaling agents | [`services/runtime/README.md`](services/runtime/README.md) |
+| **Memory** | Managing conversation state | [`services/memory/README.md`](services/memory/README.md) |
+| **Identity** | Credential and access management | [`services/identity/README.md`](services/identity/README.md) |
+| **Code Interpreter** | Secure code execution in sandboxes | [`services/code-interpreter/README.md`](services/code-interpreter/README.md) |
+| **Browser** | Web automation and scraping | [`services/browser/README.md`](services/browser/README.md) |
+| **Observability** | Tracing and monitoring | [`services/observability/README.md`](services/observability/README.md) |
+| **Agent Registry** | Catalog, discover, and govern agents/tools (Preview) | [`services/registry/README.md`](services/registry/README.md) |
+| **Evaluations** | Automated agent quality assessment (LLM-as-a-Judge) | [`services/evaluations/README.md`](services/evaluations/README.md) |
 
-Observability uses CloudWatch Metrics and Logs for native services, with Container Insights for ECS/EKS, Application Signals for distributed tracing, and custom metrics via the CloudWatch Embedded Metric Format. I define alarms on business-level metrics (error rates, latency percentiles) and infrastructure metrics (CPU, memory, disk). SNS topics route alarms to PagerDuty or Slack.
+## Common Workflows
 
-## Key Patterns
+### Deploying a Gateway Target
 
-- **Event-driven with EventBridge.** Decouple services via events. SaaS integrations, cross-account events, and scheduled rules without glue code.
-- **SQS for reliable async processing.** Decouple producers and consumers. Dead-letter queues capture failed messages. Visibility timeout matches processing time.
-- **S3 lifecycle policies for cost.** Transition to S3-IA after 30 days, Glacier after 90 days, delete after retention period.
-- **ALB target group weights for canary deploys.** Route 5% of traffic to the new version; monitor error rates; shift fully when stable.
-- **Parameter Store / Secrets Manager for configuration.** No secrets in environment variables or code. Rotation policies for database credentials.
-- **CloudFront for global distribution.** CDN in front of ALBs and S3. Origin failover for reliability. Lambda@Edge for request manipulation.
-- **AWS WAF on public endpoints.** Managed rule groups for OWASP Top 10, rate limiting, and IP reputation lists.
-- **Savings Plans and Reserved Instances for committed workloads.** 30-60% savings over on-demand for predictable compute.
+Read [`services/gateway/README.md`](services/gateway/README.md) before implementing — Gateway setup involves deployment strategies, IAM, and auth choices that vary significantly by use case.
 
-## Anti-Patterns
+1. Upload OpenAPI schema to S3
+2. *(API Key auth only)* Create credential provider and store API key
+3. Create gateway target linking schema (and credentials if using API key)
+4. Verify target status and test connectivity
 
-- **Root account access keys.** Root credentials are never used programmatically. Enable MFA on root; lock credentials in a safe.
-- **Public S3 buckets.** All S3 buckets are private by default. Use CloudFront or pre-signed URLs for content delivery.
-- **Security Groups with `0.0.0.0/0` ingress on non-80/443 ports.** Every open port is an attack vector. Restrict to known sources.
-- **Single-region architecture for global users.** Latency and availability suffer. Use CloudFront, Route 53 latency routing, or multi-region active-active.
-- **Over-provisioned EC2 for variable load.** Auto Scaling Groups or Lambda scale with demand. Fixed instance fleets waste money.
-- **No automated backups.** RDS automated backups and point-in-time recovery, S3 versioning, and DynamoDB PITR must be enabled.
-- **Logging to the same account.** A compromised account can delete logs. Send CloudTrail and access logs to a dedicated logging account.
+> Credential provider is only needed for API key authentication. Lambda targets use IAM roles, and MCP servers use OAuth.
 
-## Output Format
+### Managing Credentials
 
-- AWS CDK TypeScript stacks with constructs organised by service domain
-- CloudFormation templates for services not covered by CDK
-- Architecture diagrams following AWS icon standards (Draw.io or Lucidchart)
-- Cost estimation using AWS Pricing Calculator or Infracost
-- Well-Architected Review findings with prioritised remediation
+Read [`cross-service/credential-management.md`](cross-service/credential-management.md) first — credential patterns differ across services and getting them wrong causes hard-to-debug auth failures.
+
+1. Use Identity service credential providers for all API keys
+2. Link providers to gateway targets via ARN references
+3. Rotate credentials quarterly through credential provider updates
+4. Monitor usage with CloudWatch metrics
+
+### Discovering Agents and Tools (Agent Registry)
+
+Read [`services/registry/README.md`](services/registry/README.md) first — the registry has governance workflows, MCP endpoint options, and sync modes that affect how records become discoverable.
+
+1. Create a registry to catalog your organization's AI resources
+2. Register resources (MCP servers, agents, skills, custom) with descriptive metadata
+3. Submit records for approval (auto-approve for dev, manual for production)
+4. Search and discover approved resources via CLI or MCP endpoint
+
+> Agent Registry is in Preview. Available in us-east-1, us-west-2, eu-west-1, ap-northeast-1, ap-southeast-2.
+
+### Evaluating Agent Quality
+
+Read [`services/evaluations/README.md`](services/evaluations/README.md) first — evaluators, scoring modes, and IAM setup vary between online monitoring and on-demand testing.
+
+1. Instrument the agent with OpenTelemetry (ADOT) for trace collection
+2. Create evaluators (use built-in like `Builtin.Helpfulness` or create custom)
+3. Set up online evaluation with sampling rate and data source
+4. Monitor scores in CloudWatch dashboards; investigate low-scoring sessions
+
+### Monitoring Agents
+
+Read [`services/observability/README.md`](services/observability/README.md) for the full monitoring setup — observability configuration depends on your Runtime protocol and framework choice.
+
+1. Enable observability for agents
+2. Configure CloudWatch dashboards for metrics
+3. Set up alarms for error rates and latency
+4. Use X-Ray for distributed tracing
+
+## Deep-Dive References
+
+Each service README (linked in the table above) contains sub-links to getting-started guides, troubleshooting, and advanced topics. Start with the service README and follow pointers from there.
+
+### Advanced Runtime & OAuth References
+
+Deep-dive reference documentation for Runtime internals, deployment, OAuth integration, and communication protocols. Read these when building production Runtime deployments or configuring OAuth authentication:
+
+- **OAuth Integration**: [`references/agentcore-oauth-integration.md`](references/agentcore-oauth-integration.md) - Three-layer OAuth architecture (Inbound JWT, Outbound Credential Provider, Gateway OAuth), Cognito configuration, supported IdPs, end-to-end CDK examples
+- **Runtime Core Mechanisms**: [`references/agentcore-runtime-core.md`](references/agentcore-runtime-core.md) - Container contract, MicroVM Session model, Agent lifecycle (per-request vs per-session), tool integration (MCP/HTTP), startup flow
+- **Runtime Deployment & Operations**: [`references/agentcore-runtime-deploy.md`](references/agentcore-runtime-deploy.md) - CDK deployment (L1/L2 constructs), multi-Runtime architecture, security model, observability (OTel/CloudWatch), BedrockAgentCoreApp vs FastAPI comparison
+- **Runtime Protocol Reference**: [`references/agentcore-runtime-protocols.md`](references/agentcore-runtime-protocols.md) - HTTP, MCP, A2A, AG-UI protocol specifications with container contracts, endpoint specs, and selection guide
+
+### Runnable Script Templates
+
+Production-ready templates in [`scripts/`](scripts/) for common deployment patterns:
+
+| Script | Protocol | Description |
+|--------|----------|-------------|
+| [`Dockerfile.runtime-template`](scripts/Dockerfile.runtime-template) | — | ARM64 multi-stage Docker build for AgentCore Runtime |
+| [`runtime-fastapi-template.py`](scripts/runtime-fastapi-template.py) | HTTP | FastAPI Runtime with SSE streaming and MCPClient |
+| [`mcp-server-template.py`](scripts/mcp-server-template.py) | MCP | MCP Server with Streamable HTTP transport |
+| [`a2a-server-template.py`](scripts/a2a-server-template.py) | A2A | A2A Server with Agent Card discovery |
+| [`agui-server-template.py`](scripts/agui-server-template.py) | AG-UI | AG-UI Server with standard AG-UI event stream |
+| [`gateway-custom-resource-lambda.py`](scripts/gateway-custom-resource-lambda.py) | — | CDK Custom Resource Lambda for Gateway lifecycle |
+
+## Cross-Service Resources
+
+For patterns and best practices that span multiple AgentCore services:
+
+- **Credential Management**: [`cross-service/credential-management.md`](cross-service/credential-management.md) - Unified credential patterns, security practices, rotation procedures
+- **Registry Integration**: [`cross-service/registry-integration.md`](cross-service/registry-integration.md) - Cross-service patterns with Gateway, Identity, Runtime
+- **Security & Resource Policies**: [`cross-service/security-resource-policies.md`](cross-service/security-resource-policies.md) - Resource-based policies, cross-account access, VPC/IP restrictions
+- **Agent Deployment with S3 Files**: [`cross-service/agent-persistence-patterns.md`](cross-service/agent-persistence-patterns.md) - Deploy Strands Agents, OpenClaw, Claude Agent SDK on AgentCore with S3 Files and Session Storage
+
+## Additional Resources
+
+- **AWS Documentation**: [Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html)
+- **API Reference**: [Bedrock AgentCore Control Plane API](https://docs.aws.amazon.com/bedrock-agentcore-control/latest/APIReference/)
+- **AWS CLI Reference**: [bedrock-agentcore-control commands](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/bedrock-agentcore-control/index.html)
+

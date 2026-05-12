@@ -1,66 +1,103 @@
 ---
-name: pair-programmer
-description: Facilitates effective pair programming sessions through structured driver/navigator discipline, active communication, and deliberate knowledge transfer.
+name: requesting-code-review
+description: Use when completing tasks, implementing major features, or before merging to verify work meets requirements
 ---
 
-# Pair Programming Facilitator
+# Requesting Code Review
 
-You are a disciplined pair programming practitioner who maximises the value of two-engineer sessions through role clarity, pacing, and deliberate communication.
+Dispatch a code reviewer subagent to catch issues before they cascade. The reviewer gets precisely crafted context for evaluation — never your session's history. This keeps the reviewer focused on the work product, not your thought process, and preserves your own context for continued work.
 
-## When to Use
+**Core principle:** Review early, review often.
 
-- Tackling a complex problem where one engineer's mental model is incomplete
-- Onboarding a new team member to an unfamiliar codebase
-- Working through a bug that has resisted solo investigation
-- Building shared understanding of a critical component before the team owns it
+## When to Request Review
 
-## Core Principles
+**Mandatory:**
+- After each task in subagent-driven development
+- After completing major feature
+- Before merge to main
 
-**Role Clarity** — Driver types; navigator thinks. The driver focuses on the immediate line or function. The navigator holds the larger picture: where this fits in the architecture, what edge cases to consider, what the next step is. Both roles are active; neither is passive.
+**Optional but valuable:**
+- When stuck (fresh perspective)
+- Before refactoring (baseline check)
+- After fixing complex bug
 
-**Spoken Intent** — The driver narrates intention before acting: "I'm going to extract this into a function called `parseUserId`." This gives the navigator time to raise concerns before code exists, not after. Unspoken intent is the root cause of most pairing inefficiency.
+## How to Request
 
-**Regular Role Rotation** — Swap driver and navigator every 20-30 minutes (Pomodoro-style) or at logical breakpoints (function complete, test green). Continuous driving or navigating degrades attention and creates knowledge silos.
+**1. Get git SHAs:**
+```bash
+BASE_SHA=$(git rev-parse HEAD~1)  # or origin/main
+HEAD_SHA=$(git rev-parse HEAD)
+```
 
-**No Unilateral Decisions** — The navigator proposes; the driver executes after agreement. Neither partner unilaterally changes direction. Disagreements are paused and resolved explicitly, not silently overridden.
+**2. Dispatch code reviewer subagent:**
 
-**Respect Pacing Differences** — One partner may think faster or slower. Faster thinkers should ask questions rather than take over the keyboard. Slower thinkers should verbalise their thinking to make it navigable, not bottle it up.
+Use Task tool with `general-purpose` type, fill template at `code-reviewer.md`
 
-## Approach
+**Placeholders:**
+- `{DESCRIPTION}` - Brief summary of what you built
+- `{PLAN_OR_REQUIREMENTS}` - What it should do
+- `{BASE_SHA}` - Starting commit
+- `{HEAD_SHA}` - Ending commit
 
-**Session Setup (5 min):**
-- Agree on the goal: what does done look like for this session?
-- Agree on tools and environment (whose machine, which IDE, screen share setup)
-- Agree on rotation interval
-- Clarify roles for the first segment
+**3. Act on feedback:**
+- Fix Critical issues immediately
+- Fix Important issues before proceeding
+- Note Minor issues for later
+- Push back if reviewer is wrong (with reasoning)
 
-**During the Session:**
-- *Navigator responsibilities:* Maintain a notepad of things to revisit (edge cases, TODOs, naming concerns) without interrupting the current task. Speak up immediately for correctness issues; hold style preferences for review.
-- *Driver responsibilities:* Think aloud. Read code as you type ("I'm calling `findUser` with the raw email string — should we normalise first?"). Ask for navigation help when stuck rather than silently switching to solo problem-solving.
+## Example
 
-**Handling Disagreement:** When partners disagree on approach, time-box the debate to 5 minutes. If unresolved, write both approaches as comments and move on; resolve asynchronously. Never let a disagreement stall the session.
+```
+[Just completed Task 2: Add verification function]
 
-**Remote Pairing Specifics:** Use a shared coding environment (VS Code Live Share, JetBrains Code With Me, Tuple). Agree on a backchannel for notes (shared doc). Turn video on — facial expressions carry intent. Fatigue arrives faster in remote sessions; shorten rotation intervals to 15 minutes.
+You: Let me request code review before proceeding.
 
-**Knowledge Transfer Mode (Onboarding):** When the goal is to transfer knowledge to a less-experienced partner:
-- Senior engineer navigates; junior drives — the junior must touch the keyboard to build muscle memory
-- Senior narrates *why* decisions are made, not just what
-- Stop at the end of each segment to ask: "what questions do you have about what we just built?"
-- Summarise the mental model at the end of the session in writing
+BASE_SHA=$(git log --oneline | grep "Task 1" | head -1 | awk '{print $1}')
+HEAD_SHA=$(git rev-parse HEAD)
 
-**Session Retrospective (5 min):**
-- What worked well in this session?
-- What slowed us down?
-- What did each partner learn?
-- Any open items to log?
+[Dispatch code reviewer subagent]
+  DESCRIPTION: Added verifyIndex() and repairIndex() with 4 issue types
+  PLAN_OR_REQUIREMENTS: Task 2 from docs/superpowers/plans/deployment-plan.md
+  BASE_SHA: a7981ec
+  HEAD_SHA: 3df7661
 
-## Common Mistakes to Avoid
+[Subagent returns]:
+  Strengths: Clean architecture, real tests
+  Issues:
+    Important: Missing progress indicators
+    Minor: Magic number (100) for reporting interval
+  Assessment: Ready to proceed
 
-- The "navigator" doing nothing but watching — both partners must be mentally engaged at all times
-- Back-seat driving: navigator grabbing the keyboard or mouse without consent
-- Skipping rotation because "we're in the middle of something" — this leads to one-sided exhaustion and knowledge concentration
-- Not noting things to revisit — small distractions kill flow, but important observations must not be lost
+You: [Fix progress indicators]
+[Continue to Task 3]
+```
 
-## Output
+## Integration with Workflows
 
-Completed code with shared understanding between both partners, a session retrospective note, and any open items captured as tickets or TODOs in the code.
+**Subagent-Driven Development:**
+- Review after EACH task
+- Catch issues before they compound
+- Fix before moving to next task
+
+**Executing Plans:**
+- Review after each task or at natural checkpoints
+- Get feedback, apply, continue
+
+**Ad-Hoc Development:**
+- Review before merge
+- Review when stuck
+
+## Red Flags
+
+**Never:**
+- Skip review because "it's simple"
+- Ignore Critical issues
+- Proceed with unfixed Important issues
+- Argue with valid technical feedback
+
+**If reviewer wrong:**
+- Push back with technical reasoning
+- Show code/tests that prove it works
+- Request clarification
+
+See template at: requesting-code-review/code-reviewer.md

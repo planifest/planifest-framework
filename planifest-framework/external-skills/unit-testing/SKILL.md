@@ -1,56 +1,327 @@
 ---
-name: unit-testing
-description: Write high-quality unit tests using AAA structure, proper test doubles, and isolation discipline — use when implementing or reviewing tests for individual functions or classes.
+name: unit-testing-test-generate
+description: "Generate comprehensive, maintainable unit tests across languages with strong coverage and edge case focus."
+risk: unknown
+source: community
+date_added: "2026-02-27"
 ---
 
-# Unit Testing
+# Automated Unit Test Generation
 
-You are a senior developer applying unit testing craft to produce fast, reliable, and meaningful tests.
+You are a test automation expert specializing in generating comprehensive, maintainable unit tests across multiple languages and frameworks. Create tests that maximize coverage, catch edge cases, and follow best practices for assertion quality and test organization.
 
-## When to Use
+## Use this skill when
 
-- Writing tests for a pure function, class method, or service with injectable dependencies
-- Reviewing existing tests for structural problems (over-mocking, false confidence)
-- Deciding whether a piece of code warrants a unit test or a different test type
-- Teaching unit testing discipline to a team new to test isolation
+- You need unit tests for existing code
+- You want consistent test structure and coverage
+- You need mocks, fixtures, and edge-case validation
 
-## Core Principles
+## Do not use this skill when
 
-**Isolation:** A unit test exercises one unit in isolation. All collaborators — databases, HTTP clients, clocks, random number generators — are replaced with test doubles. Failure pinpoints the unit, not a dependency.
+- You only need integration or E2E tests
+- You cannot access the source code under test
+- Tests must be hand-written for compliance reasons
 
-**Arrange-Act-Assert (AAA):** Structure every test in three clearly separated phases. Arrange sets up all inputs and doubles. Act invokes the subject under test exactly once. Assert verifies a single logical outcome. Multi-act tests obscure cause; multi-assert tests obscure which assertion failed.
+## Context
 
-**Test Behaviour, Not Implementation:** Assertions check observable outputs and side effects, not internal state or private method calls. Tests that assert on call counts for internal methods break on refactoring without any behaviour change.
+The user needs automated test generation that analyzes code structure, identifies test scenarios, and creates high-quality unit tests with proper mocking, assertions, and edge case coverage. Focus on framework-specific patterns and maintainable test suites.
 
-**One Logical Assertion:** Each test case verifies one thing. A test named `shouldApplyDiscountForPremiumCustomers` should not also verify logging, error handling, and DB writes. Split those into separate tests.
+## Requirements
 
-**Readable as Specification:** A failing test must communicate what is expected without reading the source. Test names follow the pattern: `{unit}_{scenario}_{expectedOutcome}` or Given/When/Then naming.
+$ARGUMENTS
 
-## Approach
+## Instructions
 
-**Choose the right double.** Understand the taxonomy:
-- *Stub*: Returns canned data. Use when you need a dependency to return a value but don't care how many times it's called.
-- *Mock*: Stub + assertion on how it was called. Use sparingly — only when the interaction itself is the behaviour under test (e.g. an event bus publish).
-- *Fake*: Working implementation, lightweight. E.g. an in-memory repository. Prefer fakes over mocks for stateful collaborators.
-- *Spy*: Wraps a real object and records calls. Useful for observing side effects on objects you can't replace.
+### 1. Analyze Code for Test Generation
 
-**Isolate time and randomness.** Never call `Date.now()`, `Math.random()`, or `uuid()` directly inside logic. Inject a clock interface and a random source. Tests that depend on wall time are inherently flaky.
+Scan codebase to identify untested code and generate comprehensive test suites:
 
-**Cover boundary conditions.** For every input domain, test: minimum valid value, maximum valid value, empty/null/zero, one-off-boundary, invalid type. Example: a `calculateTax(amount)` function needs tests for `0`, negative values, very large values, non-numeric input, and typical values.
+```python
+import ast
+from pathlib import Path
+from typing import Dict, List, Any
 
-**Avoid test interdependence.** Tests must run in any order. Shared mutable state between tests (module-level variables, singleton resets) causes order-dependent failures. Use `beforeEach` setup; never rely on a previous test leaving state.
+class TestGenerator:
+    def __init__(self, language: str):
+        self.language = language
+        self.framework_map = {
+            'python': 'pytest',
+            'javascript': 'jest',
+            'typescript': 'jest',
+            'java': 'junit',
+            'go': 'testing'
+        }
 
-**Parameterise to eliminate repetition.** If you have five tests that differ only in inputs and expected outputs, use parameterised/data-driven test APIs (`test.each` in Jest, `@pytest.mark.parametrize` in pytest). Reduces maintenance, improves readability.
+    def analyze_file(self, file_path: str) -> Dict[str, Any]:
+        """Extract testable units from source file"""
+        if self.language == 'python':
+            return self._analyze_python(file_path)
+        elif self.language in ['javascript', 'typescript']:
+            return self._analyze_javascript(file_path)
 
-**What not to unit test:** Framework boilerplate (ORM model definitions, dependency injection config), trivial getters/setters with no logic, code that only makes sense with I/O (file parsers, HTTP handlers) — these belong in integration tests.
+    def _analyze_python(self, file_path: str) -> Dict:
+        with open(file_path) as f:
+            tree = ast.parse(f.read())
 
-## Common Mistakes to Avoid
+        functions = []
+        classes = []
 
-- **Over-mocking:** Replacing every collaborator with a mock leads to tests that pass even when integration is broken, and break on any refactor. If you're mocking 5 things in one test, the code under test has too many dependencies.
-- **Testing private methods:** If you feel the need to test a private method, it's a signal that method should be extracted to a collaborating class. Test through the public API.
-- **Asserting on mock call count without justification:** Asserting `expect(logger.info).toHaveBeenCalledTimes(3)` couples the test to an implementation detail. Only assert on call counts when the number matters to the behaviour (e.g. exactly one email sent).
-- **Giant arrange blocks:** If setup takes 50 lines, the unit has too many dependencies or the test is actually an integration test. Refactor the code or move the test.
+        for node in ast.walk(tree):
+            if isinstance(node, ast.FunctionDef):
+                functions.append({
+                    'name': node.name,
+                    'args': [arg.arg for arg in node.args.args],
+                    'returns': ast.unparse(node.returns) if node.returns else None,
+                    'decorators': [ast.unparse(d) for d in node.decorator_list],
+                    'docstring': ast.get_docstring(node),
+                    'complexity': self._calculate_complexity(node)
+                })
+            elif isinstance(node, ast.ClassDef):
+                methods = [n.name for n in node.body if isinstance(n, ast.FunctionDef)]
+                classes.append({
+                    'name': node.name,
+                    'methods': methods,
+                    'bases': [ast.unparse(base) for base in node.bases]
+                })
 
-## Output
+        return {'functions': functions, 'classes': classes, 'file': file_path}
+```
 
-Tests that: run in <100ms each, are deterministic (same result every run), fail with a clear message pointing to the broken behaviour, and could serve as readable specification for the unit. No I/O, no network, no wall-clock time.
+### 2. Generate Python Tests with pytest
+
+```python
+def generate_pytest_tests(self, analysis: Dict) -> str:
+    """Generate pytest test file from code analysis"""
+    tests = ['import pytest', 'from unittest.mock import Mock, patch', '']
+
+    module_name = Path(analysis['file']).stem
+    tests.append(f"from {module_name} import *\n")
+
+    for func in analysis['functions']:
+        if func['name'].startswith('_'):
+            continue
+
+        test_class = self._generate_function_tests(func)
+        tests.append(test_class)
+
+    for cls in analysis['classes']:
+        test_class = self._generate_class_tests(cls)
+        tests.append(test_class)
+
+    return '\n'.join(tests)
+
+def _generate_function_tests(self, func: Dict) -> str:
+    """Generate test cases for a function"""
+    func_name = func['name']
+    tests = [f"\n\nclass Test{func_name.title()}:"]
+
+    # Happy path test
+    tests.append(f"    def test_{func_name}_success(self):")
+    tests.append(f"        result = {func_name}({self._generate_mock_args(func['args'])})")
+    tests.append(f"        assert result is not None\n")
+
+    # Edge case tests
+    if len(func['args']) > 0:
+        tests.append(f"    def test_{func_name}_with_empty_input(self):")
+        tests.append(f"        with pytest.raises((ValueError, TypeError)):")
+        tests.append(f"            {func_name}({self._generate_empty_args(func['args'])})\n")
+
+    # Exception handling test
+    tests.append(f"    def test_{func_name}_handles_errors(self):")
+    tests.append(f"        with pytest.raises(Exception):")
+    tests.append(f"            {func_name}({self._generate_invalid_args(func['args'])})\n")
+
+    return '\n'.join(tests)
+
+def _generate_class_tests(self, cls: Dict) -> str:
+    """Generate test cases for a class"""
+    tests = [f"\n\nclass Test{cls['name']}:"]
+    tests.append(f"    @pytest.fixture")
+    tests.append(f"    def instance(self):")
+    tests.append(f"        return {cls['name']}()\n")
+
+    for method in cls['methods']:
+        if method.startswith('_') and method != '__init__':
+            continue
+
+        tests.append(f"    def test_{method}(self, instance):")
+        tests.append(f"        result = instance.{method}()")
+        tests.append(f"        assert result is not None\n")
+
+    return '\n'.join(tests)
+```
+
+### 3. Generate JavaScript/TypeScript Tests with Jest
+
+```typescript
+interface TestCase {
+  name: string;
+  setup?: string;
+  execution: string;
+  assertions: string[];
+}
+
+class JestTestGenerator {
+  generateTests(functionName: string, params: string[]): string {
+    const tests: TestCase[] = [
+      {
+        name: `${functionName} returns expected result with valid input`,
+        execution: `const result = ${functionName}(${this.generateMockParams(params)})`,
+        assertions: ['expect(result).toBeDefined()', 'expect(result).not.toBeNull()']
+      },
+      {
+        name: `${functionName} handles null input gracefully`,
+        execution: `const result = ${functionName}(null)`,
+        assertions: ['expect(result).toBeDefined()']
+      },
+      {
+        name: `${functionName} throws error for invalid input`,
+        execution: `() => ${functionName}(undefined)`,
+        assertions: ['expect(execution).toThrow()']
+      }
+    ];
+
+    return this.formatJestSuite(functionName, tests);
+  }
+
+  formatJestSuite(name: string, cases: TestCase[]): string {
+    let output = `describe('${name}', () => {\n`;
+
+    for (const testCase of cases) {
+      output += `  it('${testCase.name}', () => {\n`;
+      if (testCase.setup) {
+        output += `    ${testCase.setup}\n`;
+      }
+      output += `    const execution = ${testCase.execution};\n`;
+      for (const assertion of testCase.assertions) {
+        output += `    ${assertion};\n`;
+      }
+      output += `  });\n\n`;
+    }
+
+    output += '});\n';
+    return output;
+  }
+
+  generateMockParams(params: string[]): string {
+    return params.map(p => `mock${p.charAt(0).toUpperCase() + p.slice(1)}`).join(', ');
+  }
+}
+```
+
+### 4. Generate React Component Tests
+
+```typescript
+function generateReactComponentTest(componentName: string): string {
+  return `
+import { render, screen, fireEvent } from '@testing-library/react';
+import { ${componentName} } from './${componentName}';
+
+describe('${componentName}', () => {
+  it('renders without crashing', () => {
+    render(<${componentName} />);
+    expect(screen.getByRole('main')).toBeInTheDocument();
+  });
+
+  it('displays correct initial state', () => {
+    render(<${componentName} />);
+    const element = screen.getByTestId('${componentName.toLowerCase()}');
+    expect(element).toBeVisible();
+  });
+
+  it('handles user interaction', () => {
+    render(<${componentName} />);
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+    expect(screen.getByText(/clicked/i)).toBeInTheDocument();
+  });
+
+  it('updates props correctly', () => {
+    const { rerender } = render(<${componentName} value="initial" />);
+    expect(screen.getByText('initial')).toBeInTheDocument();
+
+    rerender(<${componentName} value="updated" />);
+    expect(screen.getByText('updated')).toBeInTheDocument();
+  });
+});
+`;
+}
+```
+
+### 5. Coverage Analysis and Gap Detection
+
+```python
+import subprocess
+import json
+
+class CoverageAnalyzer:
+    def analyze_coverage(self, test_command: str) -> Dict:
+        """Run tests with coverage and identify gaps"""
+        result = subprocess.run(
+            [test_command, '--coverage', '--json'],
+            capture_output=True,
+            text=True
+        )
+
+        coverage_data = json.loads(result.stdout)
+        gaps = self.identify_coverage_gaps(coverage_data)
+
+        return {
+            'overall_coverage': coverage_data.get('totals', {}).get('percent_covered', 0),
+            'uncovered_lines': gaps,
+            'files_below_threshold': self.find_low_coverage_files(coverage_data, 80)
+        }
+
+    def identify_coverage_gaps(self, coverage: Dict) -> List[Dict]:
+        """Find specific lines/functions without test coverage"""
+        gaps = []
+        for file_path, data in coverage.get('files', {}).items():
+            missing_lines = data.get('missing_lines', [])
+            if missing_lines:
+                gaps.append({
+                    'file': file_path,
+                    'lines': missing_lines,
+                    'functions': data.get('excluded_lines', [])
+                })
+        return gaps
+
+    def generate_tests_for_gaps(self, gaps: List[Dict]) -> str:
+        """Generate tests specifically for uncovered code"""
+        tests = []
+        for gap in gaps:
+            test_code = self.create_targeted_test(gap)
+            tests.append(test_code)
+        return '\n\n'.join(tests)
+```
+
+### 6. Mock Generation
+
+```python
+def generate_mock_objects(self, dependencies: List[str]) -> str:
+    """Generate mock objects for external dependencies"""
+    mocks = ['from unittest.mock import Mock, MagicMock, patch\n']
+
+    for dep in dependencies:
+        mocks.append(f"@pytest.fixture")
+        mocks.append(f"def mock_{dep}():")
+        mocks.append(f"    mock = Mock(spec={dep})")
+        mocks.append(f"    mock.method.return_value = 'mocked_result'")
+        mocks.append(f"    return mock\n")
+
+    return '\n'.join(mocks)
+```
+
+## Output Format
+
+1. **Test Files**: Complete test suites ready to run
+2. **Coverage Report**: Current coverage with gaps identified
+3. **Mock Objects**: Fixtures for external dependencies
+4. **Test Documentation**: Explanation of test scenarios
+5. **CI Integration**: Commands to run tests in pipeline
+
+Focus on generating maintainable, comprehensive tests that catch bugs early and provide confidence in code changes.
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

@@ -1,52 +1,182 @@
 ---
-name: distributed-systems
-description: Distributed systems skill — reason through CAP theorem, consistency models, partitioning strategies, clock synchronisation, and failure modes to design systems that behave predictably under network partition and node failure; use when correctness under partial failure is a hard requirement.
+name: dispatching-parallel-agents
+description: Use when facing 2+ independent tasks that can be worked on without shared state or sequential dependencies
 ---
 
-# Distributed Systems
+# Dispatching Parallel Agents
 
-You design systems that behave correctly under the failure modes inherent in distributed computing — network partitions, partial node failures, clock drift, and message reordering — without sacrificing the availability or consistency properties the business requires.
+## Overview
+
+You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
+
+When you have multiple unrelated failures (different test files, different subsystems, different bugs), investigating them sequentially wastes time. Each investigation is independent and can happen in parallel.
+
+**Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
 ## When to Use
 
-- Designing systems that must remain available despite node or network failures
-- Choosing between consistency models (strong, sequential, causal, eventual) for a specific use case
-- Partitioning data across nodes and choosing partition strategies with their rebalancing implications
-- Diagnosing correctness bugs caused by clock drift, message reordering, or split-brain
-- Evaluating distributed consensus requirements and when to apply Raft, Paxos, or Zab
+```dot
+digraph when_to_use {
+    "Multiple failures?" [shape=diamond];
+    "Are they independent?" [shape=diamond];
+    "Single agent investigates all" [shape=box];
+    "One agent per problem domain" [shape=box];
+    "Can they work in parallel?" [shape=diamond];
+    "Sequential agents" [shape=box];
+    "Parallel dispatch" [shape=box];
 
-## Core Principles
+    "Multiple failures?" -> "Are they independent?" [label="yes"];
+    "Are they independent?" -> "Single agent investigates all" [label="no - related"];
+    "Are they independent?" -> "Can they work in parallel?" [label="yes"];
+    "Can they work in parallel?" -> "Parallel dispatch" [label="yes"];
+    "Can they work in parallel?" -> "Sequential agents" [label="no - shared state"];
+}
+```
 
-**CAP Theorem Is a Partition Trade-off, Not a Menu.** CAP states that under a network partition, a system must choose between consistency (all nodes return the same data) and availability (all nodes respond to requests). Partition tolerance is not optional in a distributed system — partitions happen. The real choice is: during a partition, do we return stale data (AP) or refuse to respond (CP)? Most databases and systems make this choice per operation type, not globally. Understand which operations in your system require which choice.
+**Use when:**
+- 3+ test files failing with different root causes
+- Multiple subsystems broken independently
+- Each problem can be understood without context from others
+- No shared state between investigations
 
-**Consistency Models Are a Spectrum, Not a Binary.** Between strong (linearisable) and eventual consistency lie sequential consistency, causal consistency, and read-your-writes consistency. Linearisability guarantees that operations appear to take effect instantaneously at a single point in time — it requires consensus and has a latency cost. Causal consistency guarantees that causally related operations are seen in order by all nodes — weaker than linearisability but achievable without global coordination. Choose the weakest model that satisfies the use case: payment deductions need linearisability; activity feeds tolerate eventual consistency.
+**Don't use when:**
+- Failures are related (fix one might fix others)
+- Need to understand full system state
+- Agents would interfere with each other
 
-**Clocks Lie.** NTP-synchronised clocks on distributed nodes have drift measured in milliseconds to seconds. Two events with timestamps cannot be ordered reliably by comparing timestamps. Use logical clocks (Lamport timestamps) for partial ordering of events in a single causal chain, or vector clocks for tracking causality across concurrent writes on different nodes. Hybrid Logical Clocks (HLC) combine physical time with logical counters to give timestamps that are monotonically increasing and causally consistent — used in CockroachDB and TiDB.
+## The Pattern
 
-**Failures Are Not Exceptions; They Are the Normal Case.** In a distributed system running at scale, at any moment some node is failing, some network link is congested, some disk is returning errors. Design for failure at every layer: circuit breakers for downstream service calls, exponential backoff with jitter for retries (never fixed-interval retry storms), bulkhead isolation to prevent one failing dependency from exhausting all threads, health checks and automatic node removal for stateful clusters.
+### 1. Identify Independent Domains
 
-**Consensus Is Expensive; Avoid It Where Possible.** Distributed consensus (Raft, Paxos, Zab) requires a majority quorum to commit a write. This introduces latency proportional to round-trip time to the majority and requires at least 2f+1 nodes to tolerate f failures. Use consensus only where required: leader election, distributed locks, configuration management, and strongly consistent metadata operations. Data path writes should use weaker consistency where possible. A Raft-based metadata store coordinating an eventually-consistent data plane is a common and appropriate pattern.
+Group failures by what's broken:
+- File A tests: Tool approval flow
+- File B tests: Batch completion behavior
+- File C tests: Abort functionality
 
-## Approach
+Each domain is independent - fixing tool approval doesn't affect abort tests.
 
-Map each operation in your system to a required consistency model. Operations that update financial balances or inventory counts typically require linearisability — use a consensus protocol or a single-node serialised path (with replication for fault tolerance). Operations that update user preferences or activity feeds tolerate eventual consistency — use multi-leader or leaderless replication with conflict resolution.
+### 2. Create Focused Agent Tasks
 
-Choose a partitioning strategy based on access patterns. Hash partitioning (consistent hashing with virtual nodes, as in Cassandra and DynamoDB) distributes data uniformly and enables predictable routing, but range queries require scatter-gather across all partitions. Range partitioning (as in HBase, Bigtable) supports range scans efficiently but creates hot partitions if the key space is not uniformly accessed. Choose based on your dominant query pattern.
+Each agent gets:
+- **Specific scope:** One test file or subsystem
+- **Clear goal:** Make these tests pass
+- **Constraints:** Don't change other code
+- **Expected output:** Summary of what you found and fixed
 
-Design for split-brain explicitly. In a two-datacenter deployment with a network partition between them, both sides continue operating (AP) and diverge. Reconciliation requires a merge strategy: last-write-wins (LWW) using HLC timestamps, CRDT-based automatic merge (for counters, sets, maps), or human-in-the-loop conflict resolution. LWW loses concurrent writes silently; CRDTs constrain the data model; manual resolution is operationally expensive. Choose the strategy before deploying, not after discovering data corruption.
+### 3. Dispatch in Parallel
 
-For distributed transactions, prefer Saga over 2PC. Two-phase commit requires all participants to hold locks until the coordinator commits — a coordinator failure leaves participants in a blocked state. Sagas decompose the transaction into local transactions with compensating actions, accepting eventual consistency for distributed state. For operations that genuinely require atomicity across services (rare), evaluate using a single service as the transaction owner and moving data there, rather than distributed transactions.
+```typescript
+// In Claude Code / AI environment
+Task("Fix agent-tool-abort.test.ts failures")
+Task("Fix batch-completion-behavior.test.ts failures")
+Task("Fix tool-approval-race-conditions.test.ts failures")
+// All three run concurrently
+```
 
-Monitor for the distributed systems failure modes that are hardest to detect: partial writes (some replicas received the write, some did not), clock skew causing stale reads to appear current, and retry storms caused by synchronised backoff timers. Implement distributed tracing with trace-context propagation; monitor p99 latency not just mean; alert on replication lag, not just node availability.
+### 4. Review and Integrate
 
-## Common Mistakes to Avoid
+When agents return:
+- Read each summary
+- Verify fixes don't conflict
+- Run full test suite
+- Integrate all changes
 
-- **Assuming network calls are reliable.** A service call that does not handle timeout, retry with idempotency, and partial failure is a latent production incident. Every network call needs a timeout; every retry needs an idempotency key.
-- **Using wall clocks for event ordering.** Log entries compared by machine timestamp in a distributed system will be ordered incorrectly when clocks drift. Use logical clocks or monotonic sequence numbers from a centralised issuer.
-- **Split-brain without a quorum strategy.** A replicated stateful system that does not enforce a quorum write will accept writes on both sides of a partition and produce irreconcilable divergence.
-- **Overapplying consensus.** Using Raft-based coordination for every write in a high-throughput data path adds coordination overhead that destroys performance. Consensus belongs on the control plane, not the data plane.
-- **Ignoring the thundering herd on retry.** Fixed-interval retry across thousands of clients hitting a recovering service produces a retry storm that prevents recovery. Exponential backoff with random jitter is not optional.
+## Agent Prompt Structure
 
-## Output
+Good agent prompts are:
+1. **Focused** - One clear problem domain
+2. **Self-contained** - All context needed to understand the problem
+3. **Specific about output** - What should the agent return?
 
-Distributed systems design output includes: a consistency model matrix per operation type; partitioning strategy with key selection rationale and hot-partition mitigation; replication topology with failure mode analysis; split-brain strategy and conflict resolution mechanism; consensus usage map identifying where consensus is required and what protocol; retry and circuit breaker policy per downstream dependency; and a failure mode catalogue with detection and recovery runbook per failure type.
+```markdown
+Fix the 3 failing tests in src/agents/agent-tool-abort.test.ts:
+
+1. "should abort tool with partial output capture" - expects 'interrupted at' in message
+2. "should handle mixed completed and aborted tools" - fast tool aborted instead of completed
+3. "should properly track pendingToolCount" - expects 3 results but gets 0
+
+These are timing/race condition issues. Your task:
+
+1. Read the test file and understand what each test verifies
+2. Identify root cause - timing issues or actual bugs?
+3. Fix by:
+   - Replacing arbitrary timeouts with event-based waiting
+   - Fixing bugs in abort implementation if found
+   - Adjusting test expectations if testing changed behavior
+
+Do NOT just increase timeouts - find the real issue.
+
+Return: Summary of what you found and what you fixed.
+```
+
+## Common Mistakes
+
+**❌ Too broad:** "Fix all the tests" - agent gets lost
+**✅ Specific:** "Fix agent-tool-abort.test.ts" - focused scope
+
+**❌ No context:** "Fix the race condition" - agent doesn't know where
+**✅ Context:** Paste the error messages and test names
+
+**❌ No constraints:** Agent might refactor everything
+**✅ Constraints:** "Do NOT change production code" or "Fix tests only"
+
+**❌ Vague output:** "Fix it" - you don't know what changed
+**✅ Specific:** "Return summary of root cause and changes"
+
+## When NOT to Use
+
+**Related failures:** Fixing one might fix others - investigate together first
+**Need full context:** Understanding requires seeing entire system
+**Exploratory debugging:** You don't know what's broken yet
+**Shared state:** Agents would interfere (editing same files, using same resources)
+
+## Real Example from Session
+
+**Scenario:** 6 test failures across 3 files after major refactoring
+
+**Failures:**
+- agent-tool-abort.test.ts: 3 failures (timing issues)
+- batch-completion-behavior.test.ts: 2 failures (tools not executing)
+- tool-approval-race-conditions.test.ts: 1 failure (execution count = 0)
+
+**Decision:** Independent domains - abort logic separate from batch completion separate from race conditions
+
+**Dispatch:**
+```
+Agent 1 → Fix agent-tool-abort.test.ts
+Agent 2 → Fix batch-completion-behavior.test.ts
+Agent 3 → Fix tool-approval-race-conditions.test.ts
+```
+
+**Results:**
+- Agent 1: Replaced timeouts with event-based waiting
+- Agent 2: Fixed event structure bug (threadId in wrong place)
+- Agent 3: Added wait for async tool execution to complete
+
+**Integration:** All fixes independent, no conflicts, full suite green
+
+**Time saved:** 3 problems solved in parallel vs sequentially
+
+## Key Benefits
+
+1. **Parallelization** - Multiple investigations happen simultaneously
+2. **Focus** - Each agent has narrow scope, less context to track
+3. **Independence** - Agents don't interfere with each other
+4. **Speed** - 3 problems solved in time of 1
+
+## Verification
+
+After agents return:
+1. **Review each summary** - Understand what changed
+2. **Check for conflicts** - Did agents edit same code?
+3. **Run full suite** - Verify all fixes work together
+4. **Spot check** - Agents can make systematic errors
+
+## Real-World Impact
+
+From debugging session (2025-10-03):
+- 6 failures across 3 files
+- 3 agents dispatched in parallel
+- All investigations completed concurrently
+- All fixes integrated successfully
+- Zero conflicts between agent changes

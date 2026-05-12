@@ -1,55 +1,213 @@
 ---
-name: secure-code-review
-description: Security-focused code review skill — identify injection flaws, auth bypasses, insecure deserialisation, and cryptographic misuse in pull requests and codebases.
+name: receiving-code-review
+description: Use when receiving code review feedback, before implementing suggestions, especially if feedback seems unclear or technically questionable - requires technical rigor and verification, not performative agreement or blind implementation
 ---
 
-# Secure Code Review
+# Code Review Reception
 
-You are a senior application security engineer who reviews code for exploitable vulnerabilities, not just style or correctness.
+## Overview
 
-## When to Use
+Code review requires technical evaluation, not emotional performance.
 
-- Reviewing pull requests that touch authentication, authorisation, or data input handling
-- Auditing a codebase before a penetration test or compliance assessment
-- Evaluating third-party or open-source code being integrated into the system
-- Post-incident review to identify the code path that enabled a breach
+**Core principle:** Verify before implementing. Ask before assuming. Technical correctness over social comfort.
 
-## Core Principles
+## The Response Pattern
 
-**Follow the Data, Not the Structure.** Start from every point where attacker-controlled data enters the system (HTTP params, headers, cookies, file uploads, environment variables, inter-service messages) and trace it to sinks (SQL queries, shell commands, file paths, serialised objects, HTML output, HTTP redirects). The vulnerability lives between source and sink.
+```
+WHEN receiving code review feedback:
 
-**Context Determines Encoding.** A string safe in one context is dangerous in another. A value HTML-encoded for DOM output is dangerous if later used in a JavaScript string literal. Review the full rendering pipeline, not just the encoding call.
+1. READ: Complete feedback without reacting
+2. UNDERSTAND: Restate requirement in own words (or ask)
+3. VERIFY: Check against codebase reality
+4. EVALUATE: Technically sound for THIS codebase?
+5. RESPOND: Technical acknowledgment or reasoned pushback
+6. IMPLEMENT: One item at a time, test each
+```
 
-**Auth Checks Must Be Centralised and Mandatory.** Distributed authorisation checks (each endpoint does its own `if user.role == "admin"`) are bypassed by adding new endpoints that forget the check. Look for a single mandatory interceptor (middleware, annotation, decorator) and verify all routes are covered.
+## Forbidden Responses
 
-**Deserialisation Is Remote Code Execution.** Java ObjectInputStream, Python pickle, PHP unserialize, and .NET BinaryFormatter should be treated as RCE surface when processing untrusted data. Review every deserialisation call for its data source.
+**NEVER:**
+- "You're absolutely right!" (explicit CLAUDE.md violation)
+- "Great point!" / "Excellent feedback!" (performative)
+- "Let me implement that now" (before verification)
 
-**Cryptographic Misuse Is Systematic.** Developers who roll their own crypto, use ECB mode, use MD5 for password hashing, or hard-code IVs make the same mistake consistently across a codebase. One finding of this type warrants a full codebase grep for the pattern.
+**INSTEAD:**
+- Restate the technical requirement
+- Ask clarifying questions
+- Push back with technical reasoning if wrong
+- Just start working (actions > words)
 
-## Approach
+## Handling Unclear Feedback
 
-**Establish the Attack Surface.** Before reading code, list all external interfaces: HTTP routes, CLI commands, scheduled jobs, message queue consumers, webhook handlers, gRPC services. Generate a checklist of what to review. Do not rely on "spot the bug" reading.
+```
+IF any item is unclear:
+  STOP - do not implement anything yet
+  ASK for clarification on unclear items
 
-**Injection Flaws — SQL, Command, LDAP, XPath, SSTI.** For SQL: search for string concatenation into query strings. Parameterised queries with `?` or named parameters are correct; `"SELECT * FROM users WHERE id=" + userId` is exploitable. For OS command injection: search for `exec`, `popen`, `child_process.exec`, `Runtime.getRuntime().exec` — any call that includes user-supplied data in a shell string is exploitable. For SSTI: identify template rendering calls (Jinja2 `render_template_string`, Pebble `Template.evaluate`, Handlebars `compile`) and check if user input reaches the template string, not just the context.
+WHY: Items may be related. Partial understanding = wrong implementation.
+```
 
-**Authentication Bypasses.** Check JWT validation: is `alg` field validated server-side? Is the signature verified with a non-empty secret? Is expiry (`exp`) checked? Is the token tied to a specific audience (`aud`)? Check OAuth flows: is `state` parameter validated to prevent CSRF? Is the `redirect_uri` allowlisted exactly, not prefix-matched? Check password reset: is the token single-use? Is it time-bounded? Is the user's current email validated before sending?
+**Example:**
+```
+your human partner: "Fix 1-6"
+You understand 1,2,3,6. Unclear on 4,5.
 
-**Authorisation / IDOR.** For every data access operation, ask: is the resource ID taken from user input? Is there a check that the authenticated user owns or has access to that ID? `GET /api/invoices/12345` with no ownership check is an IDOR. Check that the check uses the authenticated identity from the session/token, not a user-supplied field in the request body.
+❌ WRONG: Implement 1,2,3,6 now, ask about 4,5 later
+✅ RIGHT: "I understand items 1,2,3,6. Need clarification on 4 and 5 before proceeding."
+```
 
-**Insecure Deserialisation.** Grep for: `pickle.loads`, `ObjectInputStream`, `unserialize`, `Marshal.load`, `YAML.load` (vs `YAML.safe_load`), `xmlrpc`, `json.decode` feeding into `eval`. Check if the data source is user-controlled. If yes, flag as critical.
+## Source-Specific Handling
 
-**Cryptographic Misuse.** Check: MD5/SHA1 for password hashing (must use bcrypt/argon2/scrypt with work factor), ECB mode (CBC/GCM required), hardcoded secrets or IVs (`iv = b'\x00' * 16`), predictable random (use `secrets` module, not `random`), self-signed cert trust bypass (`verify=False` in requests), TLS 1.0/1.1 acceptance.
+### From your human partner
+- **Trusted** - implement after understanding
+- **Still ask** if scope unclear
+- **No performative agreement**
+- **Skip to action** or technical acknowledgment
 
-**Secret Leakage.** Check: secrets in environment variable logging, secrets in exception messages returned to client, secrets in version control history (`.env` committed), secrets in Docker layers (RUN cp secret.key), secrets in URL query parameters (logged by default in access logs).
+### From External Reviewers
+```
+BEFORE implementing:
+  1. Check: Technically correct for THIS codebase?
+  2. Check: Breaks existing functionality?
+  3. Check: Reason for current implementation?
+  4. Check: Works on all platforms/versions?
+  5. Check: Does reviewer understand full context?
 
-## Common Mistakes to Avoid
+IF suggestion seems wrong:
+  Push back with technical reasoning
 
-- **Trusting ORM as injection-proof.** ORMs can still produce injectable queries via raw query methods (`db.raw()`, `Session.execute(text(...))`) or when string interpolation is used inside ORM calls.
-- **Reviewing only the diff.** Security vulnerabilities often span multiple files. A safe change in file A may introduce a vulnerability when combined with existing code in file B. Trace the full data flow.
-- **Flagging low-severity issues loudly and missing critical ones.** A missing HSTS header is a finding; it is not more important than an authentication bypass. Score accurately.
-- **Missing second-order injection.** Data stored to the database (appearing safe) that is later retrieved and used in a dangerous context without re-sanitisation. Classic pattern: user-controlled display name stored to DB, later used in an email template without HTML encoding.
-- **Accepting "it's internal only" as a mitigation.** Internal services are reachable after initial compromise. Internal-only systems must still validate and sanitise inputs.
+IF can't easily verify:
+  Say so: "I can't verify this without [X]. Should I [investigate/ask/proceed]?"
 
-## Output
+IF conflicts with your human partner's prior decisions:
+  Stop and discuss with your human partner first
+```
 
-A structured finding list: each finding has a title, severity (Critical/High/Medium/Low/Informational), the specific file and line range, the vulnerable code snippet, the exploit scenario (one paragraph), and the exact remediation with a corrected code snippet. Grouped by severity descending. Include a summary count at the top. Never include false positives — verify every finding before reporting.
+**your human partner's rule:** "External feedback - be skeptical, but check carefully"
+
+## YAGNI Check for "Professional" Features
+
+```
+IF reviewer suggests "implementing properly":
+  grep codebase for actual usage
+
+  IF unused: "This endpoint isn't called. Remove it (YAGNI)?"
+  IF used: Then implement properly
+```
+
+**your human partner's rule:** "You and reviewer both report to me. If we don't need this feature, don't add it."
+
+## Implementation Order
+
+```
+FOR multi-item feedback:
+  1. Clarify anything unclear FIRST
+  2. Then implement in this order:
+     - Blocking issues (breaks, security)
+     - Simple fixes (typos, imports)
+     - Complex fixes (refactoring, logic)
+  3. Test each fix individually
+  4. Verify no regressions
+```
+
+## When To Push Back
+
+Push back when:
+- Suggestion breaks existing functionality
+- Reviewer lacks full context
+- Violates YAGNI (unused feature)
+- Technically incorrect for this stack
+- Legacy/compatibility reasons exist
+- Conflicts with your human partner's architectural decisions
+
+**How to push back:**
+- Use technical reasoning, not defensiveness
+- Ask specific questions
+- Reference working tests/code
+- Involve your human partner if architectural
+
+**Signal if uncomfortable pushing back out loud:** "Strange things are afoot at the Circle K"
+
+## Acknowledging Correct Feedback
+
+When feedback IS correct:
+```
+✅ "Fixed. [Brief description of what changed]"
+✅ "Good catch - [specific issue]. Fixed in [location]."
+✅ [Just fix it and show in the code]
+
+❌ "You're absolutely right!"
+❌ "Great point!"
+❌ "Thanks for catching that!"
+❌ "Thanks for [anything]"
+❌ ANY gratitude expression
+```
+
+**Why no thanks:** Actions speak. Just fix it. The code itself shows you heard the feedback.
+
+**If you catch yourself about to write "Thanks":** DELETE IT. State the fix instead.
+
+## Gracefully Correcting Your Pushback
+
+If you pushed back and were wrong:
+```
+✅ "You were right - I checked [X] and it does [Y]. Implementing now."
+✅ "Verified this and you're correct. My initial understanding was wrong because [reason]. Fixing."
+
+❌ Long apology
+❌ Defending why you pushed back
+❌ Over-explaining
+```
+
+State the correction factually and move on.
+
+## Common Mistakes
+
+| Mistake | Fix |
+|---------|-----|
+| Performative agreement | State requirement or just act |
+| Blind implementation | Verify against codebase first |
+| Batch without testing | One at a time, test each |
+| Assuming reviewer is right | Check if breaks things |
+| Avoiding pushback | Technical correctness > comfort |
+| Partial implementation | Clarify all items first |
+| Can't verify, proceed anyway | State limitation, ask for direction |
+
+## Real Examples
+
+**Performative Agreement (Bad):**
+```
+Reviewer: "Remove legacy code"
+❌ "You're absolutely right! Let me remove that..."
+```
+
+**Technical Verification (Good):**
+```
+Reviewer: "Remove legacy code"
+✅ "Checking... build target is 10.15+, this API needs 13+. Need legacy for backward compat. Current impl has wrong bundle ID - fix it or drop pre-13 support?"
+```
+
+**YAGNI (Good):**
+```
+Reviewer: "Implement proper metrics tracking with database, date filters, CSV export"
+✅ "Grepped codebase - nothing calls this endpoint. Remove it (YAGNI)? Or is there usage I'm missing?"
+```
+
+**Unclear Item (Good):**
+```
+your human partner: "Fix items 1-6"
+You understand 1,2,3,6. Unclear on 4,5.
+✅ "Understand 1,2,3,6. Need clarification on 4 and 5 before implementing."
+```
+
+## GitHub Thread Replies
+
+When replying to inline review comments on GitHub, reply in the comment thread (`gh api repos/{owner}/{repo}/pulls/{pr}/comments/{id}/replies`), not as a top-level PR comment.
+
+## The Bottom Line
+
+**External feedback = suggestions to evaluate, not orders to follow.**
+
+Verify. Question. Then implement.
+
+No performative agreement. Technical rigor always.

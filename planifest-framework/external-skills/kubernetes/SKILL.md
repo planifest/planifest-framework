@@ -1,53 +1,171 @@
 ---
-name: kubernetes
-description: Kubernetes operations covering workload design, resource management, networking, RBAC, and troubleshooting; use when designing, operating, or debugging Kubernetes clusters and workloads.
+name: kubernetes-deployment
+description: "Kubernetes deployment workflow for container orchestration, Helm charts, service mesh, and production-ready K8s configurations."
+category: granular-workflow-bundle
+risk: safe
+source: personal
+date_added: "2026-02-27"
 ---
 
-# Kubernetes Engineer
+# Kubernetes Deployment Workflow
 
-You are a senior Kubernetes engineer who designs reliable, resource-efficient workloads and can diagnose cluster problems systematically.
+## Overview
 
-## When to Use
+Specialized workflow for deploying applications to Kubernetes including container orchestration, Helm charts, service mesh configuration, and production-ready K8s patterns.
 
-- Designing Deployment, StatefulSet, DaemonSet, or Job manifests for production
-- Sizing resource requests/limits and configuring HPA/VPA/KEDA autoscaling
-- Debugging pods stuck in CrashLoopBackOff, OOMKilled, Pending, or Evicted states
-- Designing RBAC policies, NetworkPolicies, or multi-tenant namespace strategies
+## When to Use This Workflow
 
-## Core Principles
+Use this workflow when:
+- Deploying to Kubernetes
+- Creating Helm charts
+- Configuring service mesh
+- Setting up K8s networking
+- Implementing K8s security
 
-**Requests are scheduling; limits are enforcement.** CPU requests determine where a pod lands; CPU limits throttle it. Memory limits trigger OOMKill. Set requests accurately from profiling, not guesses. Omitting requests means the scheduler is flying blind.
+## Workflow Phases
 
-**Pods are cattle, not pets.** Design for termination. SIGTERM handlers must flush in-flight requests (graceful shutdown). Termination grace period must exceed your longest request timeout. PodDisruptionBudgets protect availability during voluntary disruptions.
+### Phase 1: Container Preparation
 
-**Least-privilege RBAC.** ServiceAccounts are namespaced; ClusterRoles are cluster-wide. Grant the minimum verbs on the minimum resources. Audit with `kubectl auth can-i --list` and tools like rakkess or rbac-lookup.
+#### Skills to Invoke
+- `docker-expert` - Docker containerization
+- `k8s-manifest-generator` - K8s manifests
 
-**Network policy is deny-by-default.** An unlabelled namespace with no NetworkPolicy accepts all traffic. Apply a default-deny-ingress policy to every namespace, then whitelist explicitly. Calico or Cilium for policy enforcement.
+#### Actions
+1. Create Dockerfile
+2. Build container image
+3. Optimize image size
+4. Push to registry
+5. Test container
 
-**Observability built in.** Every workload must expose a `/healthz` liveness probe, a `/readyz` readiness probe with startup delay, and a `/metrics` Prometheus endpoint. Liveness probes that fail cause restarts — make them cheap and conservative.
+#### Copy-Paste Prompts
+```
+Use @docker-expert to containerize application for K8s
+```
 
-## Approach
+### Phase 2: K8s Manifests
 
-**Workload design:** Use Deployments for stateless services with rolling update strategy (maxUnavailable: 0, maxSurge: 1 for zero-downtime). StatefulSets for ordered, stable-identity workloads (databases, Kafka). DaemonSets for per-node agents (log shippers, node exporters). Use `topologySpreadConstraints` to spread replicas across zones, not just nodes.
+#### Skills to Invoke
+- `k8s-manifest-generator` - Manifest generation
+- `kubernetes-architect` - K8s architecture
 
-**Resource sizing:** Baseline with `kubectl top pods` or VPA recommendation mode (not auto). Set requests at the p50 of observed usage; set limits at p99 + 20% headroom. Never set CPU limits on latency-sensitive services (they cause throttling at arbitrary points, not at actual saturation). Memory limits are safer to set because OOMKill is predictable.
+#### Actions
+1. Create Deployment
+2. Configure Service
+3. Set up ConfigMap
+4. Create Secrets
+5. Add Ingress
 
-**Autoscaling:** HPA on custom metrics via KEDA (queue depth, Pub/Sub lag) is more reliable than CPU-based HPA for bursty workloads. VPA handles right-sizing but cannot scale in-place on many versions — combine with HPA for mixed strategies. Cluster Autoscaler (or Karpenter on AWS) provisions nodes; set `cluster-autoscaler.kubernetes.io/safe-to-evict: "true"` on non-critical pods.
+#### Copy-Paste Prompts
+```
+Use @k8s-manifest-generator to create K8s manifests
+```
 
-**Troubleshooting flow:** `kubectl describe pod <name>` for events and condition reasons. `kubectl logs --previous` for crash loop logs. `kubectl get events --sort-by=.lastTimestamp` for cluster-wide context. For networking: exec into a debug container (`kubectl debug -it`), use `curl`, `nslookup`, and `nc` to test connectivity. `kubectl exec` into the pod with a netshoot image if the main container lacks tools.
+### Phase 3: Helm Chart
 
-**Security posture:** Set `securityContext.runAsNonRoot: true`, `readOnlyRootFilesystem: true`, `allowPrivilegeEscalation: false` on every container. Use `seccompProfile: RuntimeDefault`. Scan images with Trivy in CI. Admission controllers (OPA/Gatekeeper or Kyverno) enforce policy at apply time.
+#### Skills to Invoke
+- `helm-chart-scaffolding` - Helm charts
 
-**Upgrade strategy:** Drain nodes with `kubectl drain --ignore-daemonsets --delete-emptydir-data`. Use PodDisruptionBudgets to prevent simultaneous eviction. Upgrade control plane first, then node groups one at a time.
+#### Actions
+1. Create chart structure
+2. Define values.yaml
+3. Add templates
+4. Configure dependencies
+5. Test chart
 
-## Common Mistakes to Avoid
+#### Copy-Paste Prompts
+```
+Use @helm-chart-scaffolding to create Helm chart
+```
 
-- **Setting CPU limits on latency-sensitive services.** CPU throttling from limits causes p99 spikes that look like application bugs. Profile, set requests, and leave limits unset or very high.
-- **Missing PodDisruptionBudgets.** Without PDBs, node drains can evict all replicas of a Deployment simultaneously. Set `minAvailable: 1` as a baseline.
-- **Liveness probes that check external dependencies.** If your liveness probe calls a database, a database blip restarts every pod. Liveness = is the process alive. Readiness = is the process ready to serve traffic.
-- **Storing secrets in ConfigMaps.** Use Kubernetes Secrets (base64 is not encryption), then seal them with Sealed Secrets or inject via External Secrets Operator from Vault/AWS SSM.
-- **Ignoring eviction and preemption.** Pods without `priorityClass` can be evicted during resource pressure. Set `PriorityClass` for critical workloads. Understand `BestEffort` vs `Burstable` vs `Guaranteed` QoS classes.
+### Phase 4: Service Mesh
 
-## Output
+#### Skills to Invoke
+- `istio-traffic-management` - Istio
+- `linkerd-patterns` - Linkerd
+- `service-mesh-expert` - Service mesh
 
-Annotated YAML manifests with inline comments explaining non-obvious choices. For troubleshooting, a ordered diagnostic sequence ending in a root cause and remediation. For RBAC design, a table of subject/verb/resource tuples. Always include resource requests and probes — manifests without them are incomplete.
+#### Actions
+1. Choose service mesh
+2. Install mesh
+3. Configure traffic management
+4. Set up mTLS
+5. Add observability
+
+#### Copy-Paste Prompts
+```
+Use @istio-traffic-management to configure Istio
+```
+
+### Phase 5: Security
+
+#### Skills to Invoke
+- `k8s-security-policies` - K8s security
+- `mtls-configuration` - mTLS
+
+#### Actions
+1. Configure RBAC
+2. Set up NetworkPolicy
+3. Enable PodSecurity
+4. Configure secrets
+5. Implement mTLS
+
+#### Copy-Paste Prompts
+```
+Use @k8s-security-policies to secure Kubernetes cluster
+```
+
+### Phase 6: Observability
+
+#### Skills to Invoke
+- `grafana-dashboards` - Grafana
+- `prometheus-configuration` - Prometheus
+
+#### Actions
+1. Install monitoring stack
+2. Configure Prometheus
+3. Create Grafana dashboards
+4. Set up alerts
+5. Add distributed tracing
+
+#### Copy-Paste Prompts
+```
+Use @prometheus-configuration to set up K8s monitoring
+```
+
+### Phase 7: Deployment
+
+#### Skills to Invoke
+- `deployment-engineer` - Deployment
+- `gitops-workflow` - GitOps
+
+#### Actions
+1. Configure CI/CD
+2. Set up GitOps
+3. Deploy to cluster
+4. Verify deployment
+5. Monitor rollout
+
+#### Copy-Paste Prompts
+```
+Use @gitops-workflow to implement GitOps deployment
+```
+
+## Quality Gates
+
+- [ ] Containers working
+- [ ] Manifests valid
+- [ ] Helm chart installs
+- [ ] Security configured
+- [ ] Monitoring active
+- [ ] Deployment successful
+
+## Related Workflow Bundles
+
+- `cloud-devops` - Cloud/DevOps
+- `terraform-infrastructure` - Infrastructure
+- `docker-containerization` - Containers
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

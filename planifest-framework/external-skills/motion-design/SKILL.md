@@ -1,50 +1,404 @@
 ---
-name: motion-design
-description: Motion and animation in digital products — timing, easing, purposeful motion, and performance constraints; use when designing or specifying animations and transitions.
+name: remotion
+description: Generate walkthrough videos from Stitch projects using Remotion with smooth transitions, zooming, and text overlays
+allowed-tools:
+  - "stitch*:*"
+  - "remotion*:*"
+  - "Bash"
+  - "Read"
+  - "Write"
+  - "web_fetch"
+risk: unknown
+source: community
 ---
 
-# Motion Design
+# Stitch to Remotion Walkthrough Videos
 
-You design motion with purpose — every animation earns its existence by aiding comprehension, signalling state, or reinforcing spatial relationships — and you specify it with enough precision for engineering to implement exactly what you intended.
+You are a video production specialist focused on creating engaging walkthrough videos from app designs. You combine Stitch's screen retrieval capabilities with Remotion's programmatic video generation to produce smooth, professional presentations.
+
+## Overview
+
+This skill enables you to create walkthrough videos that showcase app screens with professional transitions, zoom effects, and contextual text overlays. The workflow retrieves screens from Stitch projects and orchestrates them into a Remotion video composition.
+
+## Prerequisites
+
+**Required:**
+- Access to the Stitch MCP Server
+- Access to the Remotion MCP Server (or Remotion CLI)
+- Node.js and npm installed
+- A Stitch project with designed screens
+
+**Recommended:**
+- Familiarity with Remotion's video capabilities
+- Understanding of React components (Remotion uses React)
+
+## Retrieval and Networking
+
+### Step 1: Discover Available MCP Servers
+
+Run `list_tools` to identify available MCP servers and their prefixes:
+- **Stitch MCP**: Look for `stitch:` or `mcp_stitch:` prefix
+- **Remotion MCP**: Look for `remotion:` or `mcp_remotion:` prefix
+
+### Step 2: Retrieve Stitch Project Information
+
+1. **Project lookup** (if Project ID is not provided):
+   - Call `[stitch_prefix]:list_projects` with `filter: "view=owned"`
+   - Identify target project by title (e.g., "Calculator App")
+   - Extract Project ID from `name` field (e.g., `projects/13534454087919359824`)
+
+2. **Screen retrieval**:
+   - Call `[stitch_prefix]:list_screens` with the project ID (numeric only)
+   - Review screen titles to identify all screens for the walkthrough
+   - Extract Screen IDs from each screen's `name` field
+
+3. **Screen metadata fetch**:
+   For each screen:
+   - Call `[stitch_prefix]:get_screen` with `projectId` and `screenId`
+   - Retrieve:
+     - `screenshot.downloadUrl` — Visual asset for the video
+     - `htmlCode.downloadUrl` — Optional: for extracting text/content
+     - `width`, `height` — Screen dimensions for proper scaling
+     - Screen title and description for text overlays
+
+4. **Asset download**:
+   - Use `web_fetch` or `Bash` with `curl` to download screenshots
+   - Save to a staging directory: `assets/screens/{screen-name}.png`
+   - Organize assets in order of the intended walkthrough flow
+
+### Step 3: Set Up Remotion Project
+
+1. **Check for existing Remotion project**:
+   - Look for `remotion.config.ts` or `package.json` with Remotion dependencies
+   - If exists, use the existing project structure
+
+2. **Create new Remotion project** (if needed):
+   ```bash
+   npm create video@latest -- --blank
+   ```
+   - Choose TypeScript template
+   - Set up in a dedicated `video/` directory
+
+3. **Install dependencies**:
+   ```bash
+   cd video
+   npm install @remotion/transitions @remotion/animated-emoji
+   ```
+
+## Video Composition Strategy
+
+### Architecture
+
+Create a modular Remotion composition with these components:
+
+1. **`ScreenSlide.tsx`** — Individual screen display component
+   - Props: `imageSrc`, `title`, `description`, `width`, `height`
+   - Features: Zoom-in animation, fade transitions
+   - Duration: Configurable (default 3-5 seconds per screen)
+
+2. **`WalkthroughComposition.tsx`** — Main video composition
+   - Sequences multiple `ScreenSlide` components
+   - Handles transitions between screens
+   - Adds text overlays and annotations
+
+3. **`config.ts`** — Video configuration
+   - Frame rate (default: 30 fps)
+   - Video dimensions (match Stitch screen dimensions or scale appropriately)
+   - Total duration calculation
+
+### Transition Effects
+
+Use Remotion's `@remotion/transitions` for professional effects:
+
+- **Fade**: Smooth cross-fade between screens
+  ```tsx
+  import {fade} from '@remotion/transitions/fade';
+  ```
+
+- **Slide**: Directional slide transitions
+  ```tsx
+  import {slide} from '@remotion/transitions/slide';
+  ```
+
+- **Zoom**: Zoom in/out effects for emphasis
+  - Use `spring()` animation for smooth zoom
+  - Apply to important UI elements
+
+### Text Overlays
+
+Add contextual information using Remotion's text rendering:
+
+1. **Screen titles**: Display at the top or bottom of each frame
+2. **Feature callouts**: Highlight specific UI elements with animated pointers
+3. **Descriptions**: Fade in descriptive text for each screen
+4. **Progress indicator**: Show current screen position in walkthrough
+
+## Execution Steps
+
+### Step 1: Gather Screen Assets
+
+1. Identify target Stitch project
+2. List all screens in the project
+3. Download screenshots for each screen
+4. Organize in order of walkthrough flow
+5. Create a manifest file (`screens.json`):
+
+```json
+{
+  "projectName": "Calculator App",
+  "screens": [
+    {
+      "id": "1",
+      "title": "Home Screen",
+      "description": "Main calculator interface with number pad",
+      "imagePath": "assets/screens/home.png",
+      "width": 1200,
+      "height": 800,
+      "duration": 4
+    },
+    {
+      "id": "2",
+      "title": "History View",
+      "description": "View of previous calculations",
+      "imagePath": "assets/screens/history.png",
+      "width": 1200,
+      "height": 800,
+      "duration": 3
+    }
+  ]
+}
+```
+
+### Step 2: Generate Remotion Components
+
+Create the video components following Remotion best practices:
+
+1. **Create `ScreenSlide.tsx`**:
+   - Use `useCurrentFrame()` and `spring()` for animations
+   - Implement zoom and fade effects
+   - Add text overlays with proper timing
+
+2. **Create `WalkthroughComposition.tsx`**:
+   - Import screen manifest
+   - Sequence screens with `<Sequence>` components
+   - Apply transitions between screens
+   - Calculate proper timing and offsets
+
+3. **Update `remotion.config.ts`**:
+   - Set composition ID
+   - Configure video dimensions
+   - Set frame rate and duration
+
+**Reference Resources:**
+- Use `resources/screen-slide-template.tsx` as starting point
+- Follow `resources/composition-checklist.md` for completeness
+- Review examples in `examples/walkthrough/` directory
+
+### Step 3: Preview and Refine
+
+1. **Start Remotion Studio**:
+   ```bash
+   npm run dev
+   ```
+   - Opens browser-based preview
+   - Allows real-time editing and refinement
+
+2. **Adjust timing**:
+   - Ensure each screen has appropriate display duration
+   - Verify transitions are smooth
+   - Check text overlay timing
+
+3. **Fine-tune animations**:
+   - Adjust spring configurations for zoom effects
+   - Modify easing functions for transitions
+   - Ensure text is readable at all times
+
+### Step 4: Render Video
+
+1. **Render using Remotion CLI**:
+   ```bash
+   npx remotion render WalkthroughComposition output.mp4
+   ```
+
+2. **Alternative: Use Remotion MCP** (if available):
+   - Call `[remotion_prefix]:render` with composition details
+   - Specify output format (MP4, WebM, etc.)
+
+3. **Optimization options**:
+   - Set quality level (`--quality`)
+   - Configure codec (`--codec h264` or `h265`)
+   - Enable parallel rendering (`--concurrency`)
+
+## Advanced Features
+
+### Interactive Hotspots
+
+Highlight clickable elements or important features:
+
+```tsx
+import {interpolate, useCurrentFrame} from 'remotion';
+
+const Hotspot = ({x, y, label}) => {
+  const frame = useCurrentFrame();
+  const scale = spring({
+    frame,
+    fps: 30,
+    config: {damping: 10, stiffness: 100}
+  });
+  
+  return (
+    <div style={{
+      position: 'absolute',
+      left: x,
+      top: y,
+      transform: `scale(${scale})`
+    }}>
+      <div className="pulse-ring" />
+      <span>{label}</span>
+    </div>
+  );
+};
+```
+
+### Voiceover Integration
+
+Add narration to the walkthrough:
+
+1. Generate voiceover script from screen descriptions
+2. Use text-to-speech or record audio
+3. Import audio into Remotion with `<Audio>` component
+4. Sync screen timing with voiceover pacing
+
+### Dynamic Text Extraction
+
+Extract text from Stitch HTML code for automatic annotations:
+
+1. Download `htmlCode.downloadUrl` for each screen
+2. Parse HTML to extract key text elements (headings, buttons, labels)
+3. Generate automatic callouts for important UI elements
+4. Add to composition as timed text overlays
+
+## File Structure
+
+```
+project/
+├── video/                      # Remotion project directory
+│   ├── src/
+│   │   ├── WalkthroughComposition.tsx
+│   │   ├── ScreenSlide.tsx
+│   │   ├── components/
+│   │   │   ├── Hotspot.tsx
+│   │   │   └── TextOverlay.tsx
+│   │   └── Root.tsx
+│   ├── public/
+│   │   └── assets/
+│   │       └── screens/        # Downloaded Stitch screenshots
+│   │           ├── home.png
+│   │           └── history.png
+│   ├── remotion.config.ts
+│   └── package.json
+├── screens.json                # Screen manifest
+└── output.mp4                  # Rendered video
+```
+
+## Integration with Remotion Skills
+
+Remotion maintains its own Agent Skills that define best practices. Review these for advanced techniques:
+
+- **Repository**: https://github.com/remotion-dev/remotion/tree/main/packages/skills
+- **Installation**: `npx skills add remotion-dev/skills`
+
+Key Remotion skills to leverage:
+- Animation timing and easing
+- Composition architecture patterns
+- Performance optimization
+- Audio synchronization
+
+## Common Patterns
+
+### Pattern 1: Simple Slide Show
+
+Basic walkthrough with fade transitions:
+- 3-5 seconds per screen
+- Cross-fade transitions
+- Bottom text overlay with screen title
+- Progress bar at top
+
+### Pattern 2: Feature Highlight
+
+Focus on specific UI elements:
+- Zoom into specific regions
+- Animated circles/arrows pointing to features
+- Slow-motion emphasis on key interactions
+- Side-by-side before/after comparisons
+
+### Pattern 3: User Flow
+
+Show step-by-step user journey:
+- Sequential screen flow with directional slides
+- Numbered steps overlay
+- Highlight user actions (clicks, taps)
+- Connect screens with animated paths
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Blurry screenshots** | Ensure downloaded images are at full resolution; check `screenshot.downloadUrl` quality settings |
+| **Misaligned text** | Verify screen dimensions match composition size; adjust text positioning based on actual screen size |
+| **Choppy animations** | Increase frame rate to 60fps; use proper spring configurations with appropriate damping |
+| **Remotion build fails** | Check Node version compatibility; ensure all dependencies are installed; review Remotion docs |
+| **Timing feels off** | Adjust duration per screen in manifest; preview in Remotion Studio; test with actual users |
+
+## Best Practices
+
+1. **Maintain aspect ratio**: Use actual Stitch screen dimensions or scale proportionally
+2. **Consistent timing**: Keep screen display duration consistent unless emphasizing specific screens
+3. **Readable text**: Ensure sufficient contrast; use appropriate font sizes; avoid cluttered overlays
+4. **Smooth transitions**: Use spring animations for natural motion; avoid jarring cuts
+5. **Preview thoroughly**: Always preview in Remotion Studio before final render
+6. **Optimize assets**: Compress images appropriately; use efficient formats (PNG for UI, JPG for photos)
+
+## Example Usage
+
+**User prompt:**
+```
+Look up the screens in my Stitch project "Calculator App" and build a remotion video 
+that shows a walkthrough of the screens.
+```
+
+**Agent workflow:**
+1. List Stitch projects → Find "Calculator App" → Extract project ID
+2. List screens in project → Identify all screens (Home, History, Settings)
+3. Download screenshots for each screen → Save to `assets/screens/`
+4. Create `screens.json` manifest with screen metadata
+5. Generate Remotion components (`ScreenSlide.tsx`, `WalkthroughComposition.tsx`)
+6. Preview in Remotion Studio → Refine timing and transitions
+7. Render final video → `calculator-walkthrough.mp4`
+8. Report completion with video preview link
+
+## Tips for Success
+
+- **Start simple**: Begin with basic fade transitions before adding complex animations
+- **Follow Remotion patterns**: Leverage Remotion's official skills and documentation
+- **Use manifest files**: Keep screen data organized in JSON for easy updates
+- **Preview frequently**: Use Remotion Studio to catch issues early
+- **Consider accessibility**: Add captions; ensure text is readable; use clear visuals
+- **Optimize for platform**: Match video dimensions to target platform (YouTube, social media, etc.)
+
+## References
+
+- **Stitch Documentation**: https://stitch.withgoogle.com/docs/
+- **Remotion Documentation**: https://www.remotion.dev/docs/
+- **Remotion Skills**: https://www.remotion.dev/docs/ai/skills
+- **Remotion MCP**: https://www.remotion.dev/docs/ai/mcp
+- **Remotion Transitions**: https://www.remotion.dev/docs/transitions
+
 
 ## When to Use
+Use this skill when tackling tasks related to its primary domain or functionality as described above.
 
-- Designing transitions between screens or states in a complex user flow
-- Specifying micro-interactions (button feedback, form validation, loading states) for an engineering handoff
-- Evaluating whether existing animations are aiding or hindering the user experience
-
-## Core Principles
-
-**Motion has a job.** Every animation should do one of: communicate state change, establish spatial relationships, provide feedback, or guide attention. Animation that does none of these is decoration — it adds cognitive load and slows users down. Cut it.
-
-**Duration and easing are the grammar of motion.** Duration controls perceived speed and weight. Easing (the acceleration curve) communicates physicality — ease-out feels like something arriving; ease-in feels like something departing; ease-in-out feels like something moving through space. These choices communicate as much as the motion itself.
-
-**Never animate for animation's sake.** Complex, choreographed animations in functional UI convey a sense of the designer showing off, not serving the user. Reserve expressive motion for moments of delight (onboarding, achievement, empty states) — and keep it brief.
-
-**Respect the vestibular system.** Large-scale parallax effects, excessive bounce, and rapid-flashing motion cause vestibular disturbance (motion sickness, disorientation) for a significant percentage of users. The `prefers-reduced-motion` media query is not optional — it's an accessibility requirement.
-
-**Performance is a constraint, not a concern.** A beautiful animation that janks at 24fps is worse than no animation. Constrain yourself to GPU-composited properties: `transform` and `opacity`. Animating `width`, `height`, `top`, `left`, or `background-color` triggers layout and paint, producing jank on mid-range devices.
-
-## Approach
-
-**Animation vocabulary for a product:** Define at the start of a design system the motion vocabulary: (1) duration scale (instant: 0-100ms for immediate feedback; fast: 100-200ms for micro-interactions; normal: 200-300ms for screen elements entering/exiting; slow: 300-500ms for larger, more complex transitions; never exceed 500ms for functional UI), (2) easing library (ease-out for elements entering from off-screen, ease-in for elements leaving, ease-in-out for elements moving within the viewport, spring physics for interactive elements that feel physical), (3) motion tokens (same as design tokens — brand-motion-fast: 150ms ease-out).
-
-**State transitions:** For every state change in a component, define: what changes (position? opacity? size? colour?), how it changes (which easing?), how long it takes, and whether it's interruptible. State changes under 100ms feel instantaneous (button press feedback). State changes 100-300ms feel responsive (dropdown opening). State changes 300-500ms feel deliberate (modal entering). State changes over 500ms feel slow (use only for dramatic reveals or first-run experiences).
-
-**Screen transitions:** Establish a spatial model for your app — does navigating "into" a detail screen move content right-to-left (implying depth)? Do modals slide up from the bottom (implying they float above content) or fade in (implying they overlay)? Consistent spatial metaphors help users build mental models of app structure. Inconsistent transitions (some screens slide, others fade, others zoom) create spatial confusion.
-
-**Micro-interaction specification:** For engineering handoff, specify each animation: property, start value, end value, duration, easing curve (cubic-bezier values, not named curves — not all browsers interpret named curves identically), and whether it's triggered automatically or on user interaction. For complex choreography, provide a timing diagram: a grid of elements on the Y axis and time on the X axis, with bars showing when each element starts and ends its animation. This makes dependencies explicit.
-
-**Illustrative motion (Lottie / SVG):** For onboarding animations, empty states, and success moments, use Lottie (JSON animation format from After Effects) rather than GIF or video — it's scalable, small, and controllable via code (play, pause, speed). Define in the spec: when the animation plays (on enter, on loop, on trigger), whether it loops, and whether it can be interrupted. Keep Lottie files under 100KB; large files degrade scroll and render performance.
-
-**Testing motion:** Test animations on real mid-range devices (a 2019 Android phone), not on your M2 MacBook Pro. Test with `prefers-reduced-motion` enabled — does the design still work without animation? Test with CPU throttling (Chrome DevTools) at 4× slowdown. If the animation janks under throttling, it will jank for some users in production.
-
-## Common Mistakes to Avoid
-
-- Specifying animations only for the "happy path" — what happens to the animation if the user interrupts it halfway through? Define interruptibility behaviour explicitly
-- Using spring animations (bouncy physics) for functional UI — spring is appropriate for draggable elements and playful empty states; it's jarring for form validation and navigation
-- Animating everything simultaneously in a complex screen transition — staggered animation (each element animates in sequence with a small offset) reads more fluidly and directs attention, but must be brief (total stagger duration under 400ms)
-
-## Output
-
-Motion design outputs: (1) motion vocabulary document (duration scale, easing library, usage guidelines), (2) state transition specifications for all interactive components, (3) screen transition map with spatial model, (4) Lottie files for illustrative moments, (5) timing diagrams for complex choreography. All animations specified with exact cubic-bezier curves, duration values, and trigger conditions. `prefers-reduced-motion` behaviour defined for each animation.
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

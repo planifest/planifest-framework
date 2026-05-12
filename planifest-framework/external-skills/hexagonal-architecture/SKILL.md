@@ -1,54 +1,169 @@
 ---
-name: hexagonal-architecture
-description: Hexagonal (ports-and-adapters) architecture skill — define driving and driven ports, implement technology-specific adapters, and invert dependencies to keep domain logic testable and technology-independent; use when designing systems that must swap infrastructure without touching business logic.
+name: clean-ddd-hexagonal
+description: Proactively apply when designing APIs, microservices, or scalable backend structure. Triggers on DDD, Clean Architecture, Hexagonal, ports and adapters, entities, value objects, domain events, CQRS, event sourcing, repository pattern, use cases, onion architecture, outbox pattern, aggregate root, anti-corruption layer. Use when working with domain models, aggregates, repositories, or bounded contexts. Clean Architecture + DDD + Hexagonal patterns for backend services, language-agnostic (Go, Rust, Python, TypeScript, Java, C#).
 ---
 
-# Hexagonal Architecture
+# Clean Architecture + DDD + Hexagonal
 
-You structure systems so the domain model is completely isolated from infrastructure concerns — databases, frameworks, message brokers, and HTTP — by inverting all dependencies at explicit port boundaries.
+Backend architecture combining DDD tactical patterns, Clean Architecture dependency rules, and Hexagonal ports/adapters for maintainable, testable systems.
 
-## When to Use
+## When to Use (and When NOT to)
 
-- Designing a system where the domain model must be testable without any infrastructure
-- Building systems that must support multiple delivery mechanisms (HTTP API, CLI, message queue) for the same use case
-- Planning to replace or swap infrastructure (e.g., migrate from PostgreSQL to DynamoDB, from REST to gRPC) without touching business logic
-- Applying to a legacy codebase where framework concerns have penetrated the domain — refactoring towards hexagonal incrementally
-- Enforcing a strict dependency rule across a team where framework leakage is a recurring problem
+| Use When | Skip When |
+|----------|-----------|
+| Complex business domain with many rules | Simple CRUD, few business rules |
+| Long-lived system (years of maintenance) | Prototype, MVP, throwaway code |
+| Team of 5+ developers | Solo developer or small team (1-2) |
+| Multiple entry points (API, CLI, events) | Single entry point, simple API |
+| Need to swap infrastructure (DB, broker) | Fixed infrastructure, unlikely to change |
+| High test coverage required | Quick scripts, internal tools |
 
-## Core Principles
+**Start simple. Evolve complexity only when needed.** Most systems don't need full CQRS or Event Sourcing.
 
-**Ports Are Interfaces Owned by the Domain.** A port is an interface declared inside the domain/application layer that expresses what the application needs from the outside world, in domain terms. A driven port (secondary port) might be `OrderRepository` with methods `save(order: Order)` and `findById(id: OrderId): Option<Order>`. It says nothing about SQL, HTTP, or Kafka — those are adapter concerns. The domain owns the port; the adapter implements it.
+## CRITICAL: The Dependency Rule
 
-**Adapters Are Technology Implementations of Ports.** An adapter wires a technology to a port. `PostgresOrderRepository implements OrderRepository` is a driven adapter. `OrderHttpController` is a driving adapter — it calls the application's primary port (`OrderApplicationService`) using HTTP as the delivery mechanism. Adapters live outside the hexagon and depend inward. The domain never depends on an adapter.
+Dependencies point **inward only**. Outer layers depend on inner layers, never the reverse.
 
-**Driving vs Driven Distinction Matters for Testing.** Driving ports (primary) are called by the outside world — they are the application's input surface. Driven ports (secondary) are called by the application — they are the application's output surface. For driving ports, the adapter is a controller/consumer that translates an external protocol into a domain call. For driven ports, the adapter translates a domain call into an external protocol. Driven ports have in-memory test doubles that replace real infrastructure in unit tests.
+```
+Infrastructure → Application → Domain
+   (adapters)     (use cases)    (core)
+```
 
-**Dependency Inversion at the Port Boundary.** The Dependency Inversion Principle is the mechanical engine of hexagonal architecture. High-level modules (domain) define abstractions (ports); low-level modules (adapters) implement them. This means the application layer's tests never instantiate a database — they inject an `InMemoryOrderRepository` that implements the same port interface. The domain compiles and tests run without any infrastructure present.
+**Violations to catch:**
+- Domain importing database/HTTP libraries
+- Controllers calling repositories directly (bypassing use cases)
+- Entities depending on application services
 
-**Configuration Root Wires Adapters.** The composition root (main method, DI container, test fixture) is the only place that knows both the port and the adapter. It constructs the adapter and injects it into the application service. This is not a framework concern — the hexagon is framework-agnostic. The DI framework is itself an adapter at the composition root.
+**Design validation:** "Create your application to work without either a UI or a database" — Alistair Cockburn. If you can run your domain logic from tests with no infrastructure, your boundaries are correct.
 
-## Approach
+## Quick Decision Trees
 
-Begin by drawing the hexagon explicitly. The inside contains: domain entities, value objects, domain services, and application services (use cases). Application services implement primary ports and call secondary ports. The outside contains adapters. Draw a strict boundary — no import from outside the hexagon into the inside is permitted.
+### "Where does this code go?"
 
-Define ports before adapters. Write the secondary port interfaces (repositories, message publishers, external service clients) in the domain or application layer, in domain vocabulary. `NotificationPort.notifyOrderShipped(orderId: OrderId, customerId: CustomerId)` — not `EmailService.sendEmail(to: String, subject: String, body: String)`. The port expresses intent; the adapter implements it using the actual email provider.
+```
+Where does it go?
+├─ Pure business logic, no I/O           → domain/
+├─ Orchestrates domain + has side effects → application/
+├─ Talks to external systems              → infrastructure/
+├─ Defines HOW to interact (interface)    → port (domain or application)
+└─ Implements a port                      → adapter (infrastructure)
+```
 
-Implement the simplest adapter first as an in-memory double. Before writing the Postgres adapter, write `InMemoryOrderRepository implements OrderRepository`. This immediately enables unit testing the entire application layer. The Postgres adapter comes later and must pass the same adapter contract tests — a shared test suite that both the in-memory and the real adapter must pass, verifying the port contract.
+### "Is this an Entity or Value Object?"
 
-For driving ports, define them as interfaces that the application service implements. Example: `OrderUseCase` interface with methods `placeOrder(command: PlaceOrderCommand): OrderId`. The HTTP controller calls this interface; it does not instantiate the application service directly. This allows a CLI adapter or a message consumer adapter to call the same use case without any changes to the domain.
+```
+Entity or Value Object?
+├─ Has unique identity that persists → Entity
+├─ Defined only by its attributes    → Value Object
+├─ "Is this THE same thing?"         → Entity (identity comparison)
+└─ "Does this have the same value?"  → Value Object (structural equality)
+```
 
-Apply the pattern incrementally to legacy code. Identify the most painful infrastructure dependency in the domain (typically a database call or framework annotation inside a business class). Extract a port interface for it. Implement the current behaviour as an adapter. The domain now depends on the abstraction; the test injects an in-memory double. Repeat until the domain is clean.
+### "Should this be its own Aggregate?"
 
-Enforce the boundary with static analysis. ArchUnit (Java), Dependency Cruiser (Node/TS), or import-linter (Python) can verify that no class in the domain package imports from an adapter package. Make this a CI check — hexagonal architecture enforced only by convention degrades quickly under feature pressure.
+```
+Aggregate boundaries?
+├─ Must be consistent together in a transaction → Same aggregate
+├─ Can be eventually consistent                 → Separate aggregates
+├─ Referenced by ID only                        → Separate aggregates
+└─ >10 entities in aggregate                    → Split it
+```
 
-## Common Mistakes to Avoid
+**Rule:** One aggregate per transaction. Cross-aggregate consistency via domain events (eventual consistency).
 
-- **Leaking framework annotations into the domain.** JPA `@Entity` annotations, Spring `@Component`, or ActiveRecord base classes inside domain entities create a hidden adapter dependency. The domain class now requires the framework to compile and run. Use plain domain objects; map to persistence models in the adapter.
-- **Ports that mirror adapter APIs.** A port method `saveOrderToDatabase(sql: String)` is not a port — it is a database adapter API leaked upward. Ports speak domain language exclusively.
-- **Single-adapter thinking.** If you design a system with exactly one adapter per port and never test-drive a second, the port is probably not abstracted at the right level. A port that cannot be implemented by an in-memory double without violating domain invariants is poorly designed.
-- **Composition root in the domain.** The domain must not know which adapter is in use. If the domain instantiates `new PostgresOrderRepository()`, the dependency inversion is broken. Wiring belongs at the composition root only.
-- **Fat application services.** Application services should orchestrate use cases — delegate to domain objects, call ports, publish events. Business logic that accumulates in application services is domain logic that has escaped the domain model.
+## Directory Structure
 
-## Output
+```
+src/
+├── domain/                    # Core business logic (NO external dependencies)
+│   ├── {aggregate}/
+│   │   ├── entity              # Aggregate root + child entities
+│   │   ├── value_objects       # Immutable value types
+│   │   ├── events              # Domain events
+│   │   ├── repository          # Repository interface (DRIVEN PORT)
+│   │   └── services            # Domain services (stateless logic)
+│   └── shared/
+│       └── errors              # Domain errors
+├── application/               # Use cases / Application services
+│   ├── {use-case}/
+│   │   ├── command             # Command/Query DTOs
+│   │   ├── handler             # Use case implementation
+│   │   └── port                # Driver port interface
+│   └── shared/
+│       └── unit_of_work        # Transaction abstraction
+├── infrastructure/            # Adapters (external concerns)
+│   ├── persistence/           # Database adapters
+│   ├── messaging/             # Message broker adapters
+│   ├── http/                  # REST/GraphQL adapters (DRIVER)
+│   └── config/
+│       └── di                  # Dependency injection / composition root
+└── main                        # Bootstrap / entry point
+```
 
-Hexagonal architecture output includes: a hexagon diagram with named primary and secondary ports; interface definitions for each port in domain vocabulary; adapter list with technology per adapter; a port contract test suite shared by in-memory and real adapters; a static analysis rule set for the domain boundary; and a composition root wiring guide showing which adapter is injected per environment (test, local, production).
+## DDD Building Blocks
+
+| Pattern | Purpose | Layer | Key Rule |
+|---------|---------|-------|----------|
+| **Entity** | Identity + behavior | Domain | Equality by ID |
+| **Value Object** | Immutable data | Domain | Equality by value, no setters |
+| **Aggregate** | Consistency boundary | Domain | Only root is referenced externally |
+| **Domain Event** | Record of change | Domain | Past tense naming (`OrderPlaced`) |
+| **Repository** | Persistence abstraction | Domain (port) | Per aggregate, not per table |
+| **Domain Service** | Stateless logic | Domain | When logic doesn't fit an entity |
+| **Application Service** | Orchestration | Application | Coordinates domain + infra |
+
+## Anti-Patterns (CRITICAL)
+
+| Anti-Pattern | Problem | Fix |
+|--------------|---------|-----|
+| **Anemic Domain Model** | Entities are data bags, logic in services | Move behavior INTO entities |
+| **Repository per Entity** | Breaks aggregate boundaries | One repository per AGGREGATE |
+| **Leaking Infrastructure** | Domain imports DB/HTTP libs | Domain has ZERO external deps |
+| **God Aggregate** | Too many entities, slow transactions | Split into smaller aggregates |
+| **Skipping Ports** | Controllers → Repositories directly | Always go through application layer |
+| **CRUD Thinking** | Modeling data, not behavior | Model business operations |
+| **Premature CQRS** | Adding complexity before needed | Start with simple read/write, evolve |
+| **Cross-Aggregate TX** | Multiple aggregates in one transaction | Use domain events for consistency |
+
+## Implementation Order
+
+1. **Discover the Domain** — Event Storming, conversations with domain experts
+2. **Model the Domain** — Entities, value objects, aggregates (no infra)
+3. **Define Ports** — Repository interfaces, external service interfaces
+4. **Implement Use Cases** — Application services coordinating domain
+5. **Add Adapters last** — HTTP, database, messaging implementations
+
+**DDD is collaborative.** Modeling sessions with domain experts are as important as the code patterns.
+
+## Reference Documentation
+
+| File | Purpose |
+|------|---------|
+| [references/LAYERS.md](references/LAYERS.md) | Complete layer specifications |
+| [references/DDD-STRATEGIC.md](references/DDD-STRATEGIC.md) | Bounded contexts, context mapping |
+| [references/DDD-TACTICAL.md](references/DDD-TACTICAL.md) | Entities, value objects, aggregates (pseudocode) |
+| [references/HEXAGONAL.md](references/HEXAGONAL.md) | Ports, adapters, naming |
+| [references/CQRS-EVENTS.md](references/CQRS-EVENTS.md) | Command/query separation, events |
+| [references/TESTING.md](references/TESTING.md) | Unit, integration, architecture tests |
+| [references/CHEATSHEET.md](references/CHEATSHEET.md) | Quick decision guide |
+
+## Sources
+
+### Primary Sources
+- [The Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) — Robert C. Martin (2012)
+- [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/) — Alistair Cockburn (2005)
+- [Domain-Driven Design: The Blue Book](https://www.domainlanguage.com/ddd/blue-book/) — Eric Evans (2003)
+- [Implementing Domain-Driven Design](https://openlibrary.org/works/OL17392277W) — Vaughn Vernon (2013)
+
+### Pattern References
+- [CQRS](https://martinfowler.com/bliki/CQRS.html) — Martin Fowler
+- [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html) — Martin Fowler
+- [Repository Pattern](https://martinfowler.com/eaaCatalog/repository.html) — Martin Fowler (PoEAA)
+- [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html) — Martin Fowler (PoEAA)
+- [Bounded Context](https://martinfowler.com/bliki/BoundedContext.html) — Martin Fowler
+- [Transactional Outbox](https://microservices.io/patterns/data/transactional-outbox.html) — microservices.io
+- [Effective Aggregate Design](https://www.dddcommunity.org/library/vernon_2011/) — Vaughn Vernon
+
+### Implementation Guides
+- [Microsoft: DDD + CQRS Microservices](https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/)
+- [Domain Events](https://udidahan.com/2009/06/14/domain-events-salvation/) — Udi Dahan

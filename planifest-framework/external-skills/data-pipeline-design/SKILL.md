@@ -1,52 +1,209 @@
 ---
-name: data-pipeline-design
-description: Data pipeline architecture skill — design ingestion, transformation, and loading patterns with lineage tracking, schema evolution, and operational reliability; use when building data platforms, analytics pipelines, or data integration systems.
+name: data-engineering-data-pipeline
+description: "You are a data pipeline architecture expert specializing in scalable, reliable, and cost-effective data pipelines for batch and streaming data processing."
+risk: unknown
+source: community
+date_added: "2026-02-27"
 ---
 
-# Data Pipeline Design
+# Data Pipeline Architecture
 
-You architect data pipelines that are operationally reliable, schema-evolvable, and lineage-traceable — from raw data ingestion through transformation to queryable analytical stores.
+You are a data pipeline architecture expert specializing in scalable, reliable, and cost-effective data pipelines for batch and streaming data processing.
 
-## When to Use
+## Use this skill when
 
-- Building a data platform that ingests from multiple operational systems into an analytical store
-- Designing ETL/ELT pipelines for a data warehouse, lakehouse, or data mesh
-- Implementing real-time streaming pipelines alongside or replacing batch pipelines
-- Adding data lineage and observability to existing pipelines that break silently
-- Planning schema evolution strategy for a pipeline serving downstream consumers
+- Working on data pipeline architecture tasks or workflows
+- Needing guidance, best practices, or checklists for data pipeline architecture
 
-## Core Principles
+## Do not use this skill when
 
-**ELT Supersedes ETL for Analytical Workloads.** Extract-Transform-Load (ETL) transforms data before landing it, consuming compute in the pipeline layer. Extract-Load-Transform (ELT) loads raw data first, then transforms using the analytical store's compute (BigQuery, Snowflake, Redshift, DuckDB). ELT is preferred for analytical workloads because: raw data is preserved for reprocessing; transformation is decoupled from ingestion and can be versioned independently; cloud warehouses offer cost-efficient bulk compute for transformation; and debugging is easier when you can query the raw layer. ETL remains appropriate when: data must be masked or filtered before landing for compliance, or the analytical store cannot handle the raw format.
+- The task is unrelated to data pipeline architecture
+- You need a different domain or tool outside this scope
 
-**Medallion Architecture Structures Data Quality Progressively.** The Bronze/Silver/Gold (or Raw/Curated/Serving) layering pattern separates data by transformation maturity. Bronze: raw, immutable data as received from sources — no transformation, only type casting. Silver: cleansed, deduplicated, enriched data with business keys resolved and validated. Gold: purpose-built aggregations and models serving specific analytical consumers. Each layer is queryable independently; a consumer that needs raw access uses Bronze; a BI tool uses Gold. New requirements are met by adding Silver or Gold transformations without modifying ingestion.
+## Requirements
 
-**Lineage Is Not Optional for Regulated Data.** Data lineage tracks: where each data element came from, what transformations were applied, when it was processed, and which downstream artefacts it contributed to. For regulated industries (financial services, healthcare), lineage is a compliance requirement — "show me the provenance of this regulatory report's figures" must be answerable. Implement lineage at the pipeline framework level (Apache Atlas, OpenLineage, dbt lineage) rather than documenting it in wikis that diverge from reality.
+$ARGUMENTS
 
-**Schema Evolution Must Be Planned Before the First Consumer Exists.** A pipeline's schema is a contract with its consumers. Once a downstream dashboard or analytical model depends on a column, that column cannot be dropped without a migration. Strategies: backward-compatible additions only (new columns with defaults; never drop or rename); schema versioning with explicit version column in every table; or a schema registry for streaming topics. Choose the strategy at pipeline design time — retrofitting schema governance onto an existing pipeline with 40 consumers is extremely expensive.
+## Core Capabilities
 
-**Data Quality Is an Operational Concern, Not a One-Time Check.** Data quality (completeness, accuracy, timeliness, consistency) degrades continuously as upstream sources evolve without coordination. Implement automated data quality tests that run after each pipeline execution: row count variance from expected range, null rate in required fields, referential integrity between tables, business rule assertions (revenue cannot be negative, date cannot be in the future). Alert on quality failures before downstream consumers are served stale or incorrect data. dbt tests, Great Expectations, or Soda Core are implementations of this pattern.
+- Design ETL/ELT, Lambda, Kappa, and Lakehouse architectures
+- Implement batch and streaming data ingestion
+- Build workflow orchestration with Airflow/Prefect
+- Transform data using dbt and Spark
+- Manage Delta Lake/Iceberg storage with ACID transactions
+- Implement data quality frameworks (Great Expectations, dbt tests)
+- Monitor pipelines with CloudWatch/Prometheus/Grafana
+- Optimize costs through partitioning, lifecycle policies, and compute optimization
 
-## Approach
+## Instructions
 
-Map the data topology before designing the pipeline. Sources (operational databases, SaaS APIs, event streams, files), frequency of updates per source (real-time, hourly, daily), volume per source, and downstream consumers (BI tools, ML feature stores, operational reports, regulatory reports). The topology drives technology selection: high-frequency low-latency sources need streaming (Kafka, Flink, Spark Streaming); low-frequency high-volume sources suit batch (Spark, dbt on a warehouse).
+### 1. Architecture Design
+- Assess: sources, volume, latency requirements, targets
+- Select pattern: ETL (transform before load), ELT (load then transform), Lambda (batch + speed layers), Kappa (stream-only), Lakehouse (unified)
+- Design flow: sources → ingestion → processing → storage → serving
+- Add observability touchpoints
 
-Design the ingestion layer with CDC for database sources. Change Data Capture (Debezium for MySQL/Postgres, Striim for Oracle) captures database changes at the transaction log level — every insert, update, and delete — with sub-second latency and no query overhead on the source. For SaaS APIs, implement incremental ingestion (query by last-modified timestamp) rather than full-table extraction — full-table extraction scales poorly as source tables grow and creates unnecessary load on the source system.
+### 2. Ingestion Implementation
+**Batch**
+- Incremental loading with watermark columns
+- Retry logic with exponential backoff
+- Schema validation and dead letter queue for invalid records
+- Metadata tracking (_extracted_at, _source)
 
-Define the transformation layer's execution model. For batch transformations: dbt (SQL-based, version-controlled, lineage-aware, test-integrated) is the current standard for warehouse transformations. For streaming transformations: Apache Flink (stateful stream processing, exactly-once semantics) or Spark Structured Streaming. The choice between streaming and micro-batch (Spark with a 5-minute trigger interval) depends on the freshness requirement — sub-minute freshness requires true streaming; 15-minute freshness can be served by micro-batch at lower operational cost.
+**Streaming**
+- Kafka consumers with exactly-once semantics
+- Manual offset commits within transactions
+- Windowing for time-based aggregations
+- Error handling and replay capability
 
-Implement late-arriving data handling explicitly. Events from mobile clients or IoT devices may arrive hours or days after they occurred. A pipeline that windows data by ingestion time will misattribute late events to the wrong window. Use event time (the timestamp the event occurred) rather than processing time for windowing. Implement a watermark — the maximum expected delay for late data — and buffer events until the watermark passes before closing a window. Events arriving after the watermark may be discarded, counted separately, or trigger a window correction depending on business requirements.
+### 3. Orchestration
+**Airflow**
+- Task groups for logical organization
+- XCom for inter-task communication
+- SLA monitoring and email alerts
+- Incremental execution with execution_date
+- Retry with exponential backoff
 
-Design the serving layer for consumer access patterns. A data warehouse optimised for sequential scans (Snowflake, BigQuery) serves BI tools well but is inefficient for point lookups. An operational analytics store (ClickHouse, Druid) serves high-concurrency sub-second queries on recent data. A feature store (Feast, Tecton) serves ML model serving endpoints. A single Gold layer served directly from the warehouse is the simplest starting point; specialised serving layers are added when the warehouse cannot satisfy specific latency or concurrency requirements.
+**Prefect**
+- Task caching for idempotency
+- Parallel execution with .submit()
+- Artifacts for visibility
+- Automatic retries with configurable delays
 
-## Common Mistakes to Avoid
+### 4. Transformation with dbt
+- Staging layer: incremental materialization, deduplication, late-arriving data handling
+- Marts layer: dimensional models, aggregations, business logic
+- Tests: unique, not_null, relationships, accepted_values, custom data quality tests
+- Sources: freshness checks, loaded_at_field tracking
+- Incremental strategy: merge or delete+insert
 
-- **Full-table extraction from production databases.** Extracting `SELECT * FROM orders` daily from a production OLTP database introduces query load that degrades production performance and misses intra-day updates. Use CDC or incremental extraction.
-- **Schema-on-read without schema enforcement.** Landing raw JSON or Avro in a data lake without schema enforcement lets schema drift pass silently into downstream consumers. Validate schema on ingestion; reject or quarantine records that violate the expected schema.
-- **No data quality monitoring.** A pipeline that runs successfully but produces incorrect output is worse than a failed pipeline — at least a failure is visible. Implement data quality assertions; a pipeline that produces wrong data silently is a compliance and trust risk.
-- **Ignoring late-arriving data.** A streaming pipeline that windows by processing time and never re-opens closed windows will silently misattribute late events. Define the late-arrival policy explicitly before deployment.
-- **Tight coupling between ingestion and transformation.** A pipeline that transforms data during ingestion prevents reprocessing with new transformation logic against historical data. Separate ingestion (land raw) from transformation (apply business logic to raw) — the medallion architecture enforces this separation.
+### 5. Data Quality Framework
+**Great Expectations**
+- Table-level: row count, column count
+- Column-level: uniqueness, nullability, type validation, value sets, ranges
+- Checkpoints for validation execution
+- Data docs for documentation
+- Failure notifications
 
-## Output
+**dbt Tests**
+- Schema tests in YAML
+- Custom data quality tests with dbt-expectations
+- Test results tracked in metadata
 
-Data pipeline design output includes: data topology map (sources, volumes, frequencies, consumers); medallion layer design (Bronze/Silver/Gold definitions); ingestion strategy per source (CDC, incremental, full with justification); transformation framework selection; streaming vs batch decision per pipeline with freshness requirement; schema evolution policy; lineage implementation (tool and coverage); data quality test catalogue per layer; late-arriving data handling policy; and serving layer design per consumer access pattern.
+### 6. Storage Strategy
+**Delta Lake**
+- ACID transactions with append/overwrite/merge modes
+- Upsert with predicate-based matching
+- Time travel for historical queries
+- Optimize: compact small files, Z-order clustering
+- Vacuum to remove old files
+
+**Apache Iceberg**
+- Partitioning and sort order optimization
+- MERGE INTO for upserts
+- Snapshot isolation and time travel
+- File compaction with binpack strategy
+- Snapshot expiration for cleanup
+
+### 7. Monitoring & Cost Optimization
+**Monitoring**
+- Track: records processed/failed, data size, execution time, success/failure rates
+- CloudWatch metrics and custom namespaces
+- SNS alerts for critical/warning/info events
+- Data freshness checks
+- Performance trend analysis
+
+**Cost Optimization**
+- Partitioning: date/entity-based, avoid over-partitioning (keep >1GB)
+- File sizes: 512MB-1GB for Parquet
+- Lifecycle policies: hot (Standard) → warm (IA) → cold (Glacier)
+- Compute: spot instances for batch, on-demand for streaming, serverless for adhoc
+- Query optimization: partition pruning, clustering, predicate pushdown
+
+## Example: Minimal Batch Pipeline
+
+```python
+# Batch ingestion with validation
+from batch_ingestion import BatchDataIngester
+from storage.delta_lake_manager import DeltaLakeManager
+from data_quality.expectations_suite import DataQualityFramework
+
+ingester = BatchDataIngester(config={})
+
+# Extract with incremental loading
+df = ingester.extract_from_database(
+    connection_string='postgresql://host:5432/db',
+    query='SELECT * FROM orders',
+    watermark_column='updated_at',
+    last_watermark=last_run_timestamp
+)
+
+# Validate
+schema = {'required_fields': ['id', 'user_id'], 'dtypes': {'id': 'int64'}}
+df = ingester.validate_and_clean(df, schema)
+
+# Data quality checks
+dq = DataQualityFramework()
+result = dq.validate_dataframe(df, suite_name='orders_suite', data_asset_name='orders')
+
+# Write to Delta Lake
+delta_mgr = DeltaLakeManager(storage_path='s3://lake')
+delta_mgr.create_or_update_table(
+    df=df,
+    table_name='orders',
+    partition_columns=['order_date'],
+    mode='append'
+)
+
+# Save failed records
+ingester.save_dead_letter_queue('s3://lake/dlq/orders')
+```
+
+## Output Deliverables
+
+### 1. Architecture Documentation
+- Architecture diagram with data flow
+- Technology stack with justification
+- Scalability analysis and growth patterns
+- Failure modes and recovery strategies
+
+### 2. Implementation Code
+- Ingestion: batch/streaming with error handling
+- Transformation: dbt models (staging → marts) or Spark jobs
+- Orchestration: Airflow/Prefect DAGs with dependencies
+- Storage: Delta/Iceberg table management
+- Data quality: Great Expectations suites and dbt tests
+
+### 3. Configuration Files
+- Orchestration: DAG definitions, schedules, retry policies
+- dbt: models, sources, tests, project config
+- Infrastructure: Docker Compose, K8s manifests, Terraform
+- Environment: dev/staging/prod configs
+
+### 4. Monitoring & Observability
+- Metrics: execution time, records processed, quality scores
+- Alerts: failures, performance degradation, data freshness
+- Dashboards: Grafana/CloudWatch for pipeline health
+- Logging: structured logs with correlation IDs
+
+### 5. Operations Guide
+- Deployment procedures and rollback strategy
+- Troubleshooting guide for common issues
+- Scaling guide for increased volume
+- Cost optimization strategies and savings
+- Disaster recovery and backup procedures
+
+## Success Criteria
+- Pipeline meets defined SLA (latency, throughput)
+- Data quality checks pass with >99% success rate
+- Automatic retry and alerting on failures
+- Comprehensive monitoring shows health and performance
+- Documentation enables team maintenance
+- Cost optimization reduces infrastructure costs by 30-50%
+- Schema evolution without downtime
+- End-to-end data lineage tracked
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

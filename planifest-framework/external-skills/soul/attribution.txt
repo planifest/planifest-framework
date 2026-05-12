@@ -1,20 +1,12 @@
-License type: MIT
+# Attribution snapshot — captured 2026-05-11
+# Source: planifest-framework (original work)
+# Licence: MIT
 
-Copyright holder: Aaron Mars
-
-Source URL: https://github.com/aaronjmars/soul.md
-
-Required attribution text:
-Include the following copyright notice and this permission notice in all
-copies or substantial portions of the Software.
-
----
-
-LICENSE:
+LICENSE (MIT):
 
 MIT License
 
-Copyright (c) 2026 Aaron Mars
+Copyright (c) 2026 Planifest Framework Contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

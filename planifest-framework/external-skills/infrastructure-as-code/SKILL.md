@@ -1,57 +1,281 @@
 ---
-name: infrastructure-as-code
-description: IaC principles covering idempotency, drift detection, testing strategies, module reuse, and documentation standards; use when evaluating IaC maturity, designing multi-tool IaC strategies, or improving IaC quality across Terraform, Pulumi, and Ansible.
+name: aws-cdk-development
+description: AWS Cloud Development Kit (CDK) expert for building cloud infrastructure with TypeScript/Python. Use when creating CDK stacks, defining CDK constructs, implementing infrastructure as code, or when the user mentions CDK, CloudFormation, IaC, cdk synth, cdk deploy, or wants to define AWS infrastructure programmatically. Covers CDK app structure, construct patterns, stack composition, and deployment workflows.
+context: fork
+skills:
+  - aws-mcp-setup
+allowed-tools:
+  - mcp__cdk__*
+  - mcp__aws-mcp__*
+  - mcp__awsdocs__*
+  - Bash(cdk *)
+  - Bash(npm *)
+  - Bash(npx *)
+  - Bash(aws cloudformation *)
+  - Bash(aws sts get-caller-identity)
+hooks:
+  PreToolUse:
+    - matcher: Bash(cdk deploy*)
+      command: aws sts get-caller-identity --query Account --output text
+      once: true
 ---
 
-# Infrastructure-as-Code Engineer
+# AWS CDK Development
 
-You are a senior IaC engineer who applies software engineering discipline to infrastructure: version control, testing, code review, and continuous integration for infrastructure definitions.
+This skill provides comprehensive guidance for developing AWS infrastructure using the Cloud Development Kit (CDK), with integrated MCP servers for accessing latest AWS knowledge and CDK utilities.
 
-## When to Use
+## AWS Documentation Requirement
 
-- Evaluating or improving the IaC maturity of an engineering organisation
-- Designing a testing strategy for Terraform, Pulumi, or Ansible code
-- Standardising module structure and documentation across multiple teams
-- Implementing drift detection and remediation workflows
+Always verify AWS facts using MCP tools (`mcp__aws-mcp__*` or `mcp__*awsdocs*__*`) before answering. The `aws-mcp-setup` dependency is auto-loaded — if MCP tools are unavailable, guide the user through that skill's setup flow.
 
-## Core Principles
+## Integrated MCP Servers
 
-**Infrastructure code is software.** It deserves the same quality bar: linting, testing, code review, version control, and CI/CD. An untested Terraform module that provisions production RDS is as risky as untested application code that writes to production databases.
+This skill includes the CDK MCP server automatically configured with the plugin:
 
-**Idempotency is a correctness property.** Running `terraform apply` or `ansible-playbook` twice must produce the same end state. A non-idempotent IaC tool creates drift on every run. Test idempotency explicitly: apply twice, assert no changes on the second run.
+### AWS CDK MCP Server
+**When to use**: For CDK-specific guidance and utilities
+- Get CDK construct recommendations
+- Retrieve CDK best practices
+- Access CDK pattern suggestions
+- Validate CDK configurations
+- Get help with CDK-specific APIs
 
-**Immutable infrastructure over mutable.** Prefer replacing infrastructure (new AMI, new node group) over mutating running systems (apt-get upgrade on a live host). Mutable infrastructure accumulates configuration drift that is invisible until it causes an incident.
+**Important**: Leverage this server for CDK construct guidance and advanced CDK operations.
 
-**Blast radius through state scoping.** A single Terraform state file managing 500 resources means a bug in any module can destroy any resource. Scope state to the smallest logical unit that changes together. Layer: networking (changes rarely), data (changes occasionally), compute (changes frequently).
+## When to Use This Skill
 
-**Documentation is part of the module contract.** A Terraform module without `variables.tf` descriptions, `outputs.tf` descriptions, and a README explaining purpose, prerequisites, and example usage is not production-ready. Auto-generate docs with `terraform-docs`.
+Use this skill when:
+- Creating new CDK stacks or constructs
+- Refactoring existing CDK infrastructure
+- Implementing Lambda functions within CDK
+- Following AWS CDK best practices
+- Validating CDK stack configurations before deployment
+- Verifying AWS service capabilities and regional availability
 
-## Approach
+## Core CDK Principles
 
-**IaC tool selection:** Terraform/OpenTofu: declarative HCL, large ecosystem, excellent for cloud resources. Best when the team wants a DSL with strong state management. Pulumi: real programming languages (TypeScript, Python, Go), same state model as Terraform. Best for teams that want loops, conditionals, and abstraction power beyond HCL. Ansible: procedural YAML, agentless, best for configuration management of existing hosts (not provisioning). CDK (AWS) / CDKTF: programming languages generating CloudFormation or Terraform. Best for teams already deep in the AWS ecosystem. Crossplane: Kubernetes-native, GitOps-friendly, best for platform teams offering self-service infrastructure via Kubernetes CRDs.
+### Resource Naming
 
-**Module design principles:** Single responsibility — a module does one thing (provisions a VPC, or provisions an RDS cluster, not both). Composable — modules are composed in root modules, not nested arbitrarily. Interface stability — module inputs/outputs change rarely; the implementation can refactor freely. Version pinned — modules consumed via registry or Git tag with a pinned version. Never `source = "module" // latest`.
+**CRITICAL**: Do NOT explicitly specify resource names when they are optional in CDK constructs.
 
-**Testing pyramid for IaC:**
-- *Static analysis (seconds):* `terraform validate`, `tflint`, `checkov -d .`, `ansible-lint`. Run on every commit.
-- *Unit tests (minutes):* `conftest`/OPA policies asserting structural properties (every S3 bucket has versioning enabled). Terratest with `plan` only (no apply).
-- *Integration tests (10-30 minutes):* Terratest with real `apply` + assertions + `destroy` in an isolated test account. Test the most critical modules (VPC, EKS, RDS).
-- *End-to-end tests (hours):* Full environment provisioning in a staging account. Run nightly. Alert on drift from expected state.
+**Why**: CDK-generated names enable:
+- **Reusable patterns**: Deploy the same construct/pattern multiple times without conflicts
+- **Parallel deployments**: Multiple stacks can deploy simultaneously in the same region
+- **Cleaner shared logic**: Patterns and shared code can be initialized multiple times without name collision
+- **Stack isolation**: Each stack gets uniquely identified resources automatically
 
-**Drift detection workflow:** Schedule `terraform plan` in CI on a cron (daily minimum). Parse exit codes: 2 = drift detected. Create a Jira/Linear ticket automatically for each drift event. Categories: (1) cosmetic drift (tag changes from console) — auto-remediate; (2) configuration drift (instance type changed via console) — alert + human review; (3) resource deletion drift — P1 alert + immediate review. Use `driftctl scan` for deeper drift analysis across AWS accounts.
+**Pattern**: Let CDK generate unique names automatically using CloudFormation's naming mechanism.
 
-**Documentation standards (terraform-docs):** Configure `.terraform-docs.yml` in every module. Output format: Markdown with inputs table (name, type, description, default, required), outputs table, and usage example. Generate docs in CI and fail if the committed docs are stale (`terraform-docs --output-check`). Every module README must include: purpose (one sentence), prerequisites, example usage, and known limitations.
+```typescript
+// ❌ BAD - Explicit naming prevents reusability and parallel deployments
+new lambda.Function(this, 'MyFunction', {
+  functionName: 'my-lambda',  // Avoid this
+  // ...
+});
 
-**Ansible best practices:** Use roles, not playbooks. Each role has `tasks/main.yml`, `defaults/main.yml`, `handlers/main.yml`, `molecule/` for testing. Use `molecule test` with Docker driver for local testing. Tag every task for selective runs (`--tags nginx`). Use `ansible-vault` for secrets; never store plaintext secrets in variables. Use `block`/`rescue` for error handling in critical task sequences. Run `ansible-lint` in CI.
+// ✅ GOOD - Let CDK generate unique names
+new lambda.Function(this, 'MyFunction', {
+  // No functionName specified - CDK generates: StackName-MyFunctionXXXXXX
+  // ...
+});
+```
 
-## Common Mistakes to Avoid
+**Security Note**: For different environments (dev, staging, prod), follow AWS Security Pillar best practices by using separate AWS accounts rather than relying on resource naming within a single account. Account-level isolation provides stronger security boundaries.
 
-- **No testing at all.** The most common IaC failure mode. Even `terraform validate` and `checkov` catch structural errors that cost hours in production. Zero testing is not an option for infrastructure that affects production availability.
-- **Monolithic root modules.** One root module with 300 resources is not decomposed. The first complex refactor will require careful state surgery. Decompose early, while the state is small.
-- **Mutable AMIs in production.** Running `yum update` on production hosts during an incident to fix a vulnerability is a configuration management failure. Bake AMIs with Packer; deploy new instances; terminate old ones. Immutable infrastructure.
-- **Secrets in variable files.** `.tfvars` files checked into Git with database passwords or API keys. Use Vault, AWS Secrets Manager, or environment variable injection from a secrets manager at apply time.
-- **Not pinning provider versions.** `required_providers { aws = { source = "hashicorp/aws" } }` without a version constraint picks the latest provider on every `terraform init`. A provider breaking change will break your module silently on the next team member's workstation.
+### Lambda Function Development
 
-## Output
+Use the appropriate Lambda construct based on runtime:
 
-Module structure template with `variables.tf`, `outputs.tf`, `versions.tf`, and README skeleton. Testing scaffold with Checkov policy files and Terratest go files. Drift detection CI workflow YAML with alert logic. `terraform-docs` configuration file. IaC maturity assessment rubric scored across: testing, documentation, state management, secret handling, and drift detection.
+**TypeScript/JavaScript**: Use `@aws-cdk/aws-lambda-nodejs`
+```typescript
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+
+new NodejsFunction(this, 'MyFunction', {
+  entry: 'lambda/handler.ts',
+  handler: 'handler',
+  // Automatically handles bundling, dependencies, and transpilation
+});
+```
+
+**Python**: Use `@aws-cdk/aws-lambda-python`
+```typescript
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
+
+new PythonFunction(this, 'MyFunction', {
+  entry: 'lambda',
+  index: 'handler.py',
+  handler: 'handler',
+  // Automatically handles dependencies and packaging
+});
+```
+
+**Benefits**:
+- Automatic bundling and dependency management
+- Transpilation handled automatically
+- No manual packaging required
+- Consistent deployment patterns
+
+### Pre-Deployment Validation
+
+Use a **multi-layer validation strategy** for comprehensive CDK quality checks:
+
+#### Layer 1: Real-Time IDE Feedback (Recommended)
+
+**For TypeScript/JavaScript projects**:
+
+Install [cdk-nag](https://github.com/cdklabs/cdk-nag) for synthesis-time validation:
+```bash
+npm install --save-dev cdk-nag
+```
+
+Add to your CDK app:
+```typescript
+import { Aspects } from 'aws-cdk-lib';
+import { AwsSolutionsChecks } from 'cdk-nag';
+
+const app = new App();
+Aspects.of(app).add(new AwsSolutionsChecks());
+```
+
+**Optional - VS Code users**: Install [CDK NAG Validator extension](https://marketplace.visualstudio.com/items?itemName=alphacrack.cdk-nag-validator) for faster feedback on file save.
+
+**For Python/Java/C#/Go projects**: cdk-nag is available in all CDK languages and provides the same synthesis-time validation.
+
+#### Layer 2: Synthesis-Time Validation (Required)
+
+1. **Synthesis with cdk-nag**: Validate stack with comprehensive rules
+   ```bash
+   cdk synth  # cdk-nag runs automatically via Aspects
+   ```
+
+2. **Suppress legitimate exceptions** with documented reasons:
+   ```typescript
+   import { NagSuppressions } from 'cdk-nag';
+
+   // Document WHY the exception is needed
+   NagSuppressions.addResourceSuppressions(resource, [
+     {
+       id: 'AwsSolutions-L1',
+       reason: 'Lambda@Edge requires specific runtime for CloudFront compatibility'
+     }
+   ]);
+   ```
+
+#### Layer 3: Pre-Commit Safety Net
+
+1. **Build**: Ensure compilation succeeds
+   ```bash
+   npm run build  # or language-specific build command
+   ```
+
+2. **Tests**: Run unit and integration tests
+   ```bash
+   npm test  # or pytest, mvn test, etc.
+   ```
+
+3. **Validation Script**: Meta-level checks
+   ```bash
+   ./scripts/validate-stack.sh
+   ```
+
+The validation script now focuses on:
+- Language detection
+- Template size and resource count analysis
+- Synthesis success verification
+- (Note: Detailed anti-pattern checks are handled by cdk-nag)
+
+## Workflow Guidelines
+
+### Development Workflow
+
+1. **Design**: Plan infrastructure resources and relationships
+2. **Verify AWS Services**: Use AWS Documentation MCP to confirm service availability and features
+   - Check regional availability for all required services
+   - Verify service limits and quotas
+   - Confirm latest API specifications
+3. **Implement**: Write CDK constructs following best practices
+   - Use CDK MCP server for construct recommendations
+   - Reference CDK best practices via MCP tools
+4. **Validate**: Run pre-deployment checks (see above)
+5. **Synthesize**: Generate CloudFormation templates
+6. **Review**: Examine synthesized templates for correctness
+7. **Deploy**: Deploy to target environment
+8. **Verify**: Confirm resources are created correctly
+
+### Stack Organization
+
+- Use nested stacks for complex applications
+- Separate concerns into logical construct boundaries
+- Export values that other stacks may need
+- Use CDK context for environment-specific configuration
+
+### Testing Strategy
+
+- Unit test individual constructs
+- Integration test stack synthesis
+- Snapshot test CloudFormation templates
+- Validate resource properties and relationships
+
+## Using MCP Servers Effectively
+
+### When to Use AWS Documentation MCP
+
+**Always verify before implementing**:
+- New AWS service features or configurations
+- Service availability in target regions
+- API parameter specifications
+- Service limits and quotas
+- Security best practices for AWS services
+
+**Example scenarios**:
+- "Check if Lambda supports Python 3.13 runtime"
+- "Verify DynamoDB is available in eu-south-2"
+- "What are the current Lambda timeout limits?"
+- "Get latest S3 encryption options"
+
+### When to Use CDK MCP Server
+
+**Leverage for CDK-specific guidance**:
+- CDK construct selection and usage
+- CDK API parameter options
+- CDK best practice patterns
+- Construct property configurations
+- CDK-specific optimizations
+
+**Example scenarios**:
+- "What's the recommended CDK construct for API Gateway REST API?"
+- "How to configure NodejsFunction bundling options?"
+- "Best practices for CDK stack organization"
+- "CDK construct for DynamoDB with auto-scaling"
+
+### MCP Usage Best Practices
+
+1. **Verify First**: Always check AWS Documentation MCP before implementing new features
+2. **Regional Validation**: Check service availability in target deployment regions
+3. **CDK Guidance**: Use CDK MCP for construct-specific recommendations
+4. **Stay Current**: MCP servers provide latest information beyond knowledge cutoff
+5. **Combine Sources**: Use both skill patterns and MCP servers for comprehensive guidance
+
+## CDK Patterns Reference
+
+For detailed CDK patterns, anti-patterns, and architectural guidance, refer to the comprehensive reference:
+
+**File**: `references/cdk-patterns.md`
+
+This reference includes:
+- Common CDK patterns and their use cases
+- Anti-patterns to avoid
+- Security best practices
+- Cost optimization strategies
+- Performance considerations
+
+## Additional Resources
+
+- **Validation Script**: `scripts/validate-stack.sh` - Pre-deployment validation
+- **CDK Patterns**: `references/cdk-patterns.md` - Detailed pattern library
+- **AWS Documentation MCP**: Integrated for latest AWS information
+- **CDK MCP Server**: Integrated for CDK-specific guidance
+
+## GitHub Actions Integration
+
+When GitHub Actions workflow files exist in the repository, ensure all checks defined in `.github/workflows/` pass before committing. This prevents CI/CD failures and maintains code quality standards.

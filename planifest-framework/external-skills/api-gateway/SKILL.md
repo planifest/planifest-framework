@@ -1,52 +1,343 @@
 ---
 name: api-gateway
-description: API gateway patterns skill — design routing, auth offloading, rate limiting, request aggregation, and Backend-for-Frontend (BFF) patterns; use when designing the edge layer between external consumers and internal services.
+description: AWS API Gateway for REST and HTTP API management. Use when creating APIs, configuring integrations, setting up authorization, managing stages, implementing rate limiting, or troubleshooting API issues.
+last_updated: "2026-01-07"
+doc_source: https://docs.aws.amazon.com/apigateway/latest/developerguide/
 ---
 
-# API Gateway
+# AWS API Gateway
 
-You design the edge layer that mediates between external consumers and internal services — handling cross-cutting concerns at the boundary rather than duplicating them across every service.
+Amazon API Gateway is a fully managed service for creating, publishing, and securing APIs at any scale. Supports REST APIs, HTTP APIs, and WebSocket APIs.
 
-## When to Use
+## Table of Contents
 
-- Consolidating authentication, rate limiting, and TLS termination into a single edge layer rather than reimplementing per service
-- Designing for multiple consumer types (web, mobile, third-party) that need different API shapes from the same backend
-- Aggregating calls to multiple downstream services into a single consumer-facing response
-- Migrating a monolith to services while maintaining a stable external API surface
-- Applying traffic management (A/B routing, canary, circuit breaking) at the edge
+- [Core Concepts](#core-concepts)
+- [Common Patterns](#common-patterns)
+- [CLI Reference](#cli-reference)
+- [Best Practices](#best-practices)
+- [Troubleshooting](#troubleshooting)
+- [References](#references)
 
-## Core Principles
+## Core Concepts
 
-**The Gateway Is a Cross-Cutting Concern Platform, Not a Business Logic Layer.** Auth verification, rate limiting, request logging, TLS termination, response caching, and protocol translation are legitimate gateway concerns. Business logic is not. A gateway that validates business rules, enriches requests with domain data, or performs multi-step orchestration is a service masquerading as infrastructure. When this boundary is violated, the gateway becomes a deployment bottleneck and a test liability.
+### API Types
 
-**BFF Pattern Serves Consumer-Specific API Shapes.** A single monolithic gateway serving web, mobile, and third-party consumers must make trade-offs that serve none of them optimally — web apps want aggregated data with navigation state; mobile clients want minimal payloads; third-party integrators want stable, versioned, general-purpose APIs. The Backend-for-Frontend (BFF) pattern addresses this by deploying a dedicated gateway per consumer type, owned by the team that owns the consumer. Each BFF shapes the API for its consumer without compromise.
+| Type | Description | Use Case |
+|------|-------------|----------|
+| **HTTP API** | Low-latency, cost-effective | Simple APIs, Lambda proxy |
+| **REST API** | Full-featured, more control | Complex APIs, transformation |
+| **WebSocket API** | Bidirectional communication | Real-time apps, chat |
 
-**Route Configuration Is Infrastructure as Code.** Gateway routing rules (path matching, header-based routing, upstream targets) must be version-controlled and deployed through the same pipeline as service code. Ad-hoc gateway configuration changes are the primary source of production incidents in gateway-heavy architectures. Every routing rule must have: a source of truth in code, a review process, and automated validation before deployment.
+### Key Components
 
-**Rate Limiting Requires a Distributed Counter.** A gateway running multiple instances with per-instance in-memory rate counters will allow N times the intended rate, where N is instance count. Rate limiting in a distributed gateway requires a shared counter — Redis with atomic increment and TTL is the standard implementation. Design rate limit keys carefully: by IP (coarse, ineffective against distributed attack), by API key (correct for partner APIs), by user ID (correct for authenticated consumer APIs), or a combination.
+- **Resources**: URL paths (/users, /orders/{id})
+- **Methods**: HTTP verbs (GET, POST, PUT, DELETE)
+- **Integrations**: Backend connections (Lambda, HTTP, AWS services)
+- **Stages**: Deployment environments (dev, prod)
 
-**Auth Offloading Shifts Trust to the Gateway.** When the gateway validates JWTs and forwards a trusted identity header (`X-User-Id`) to downstream services, downstream services trust that header unconditionally. A bypass of the gateway (direct call to an internal service) with a forged header compromises the entire system. Internal services must be network-isolated such that they are unreachable except through the gateway or service-to-service paths. This is a deployment topology requirement, not a code requirement.
+### Integration Types
 
-## Approach
+| Type | Description |
+|------|-------------|
+| **Lambda Proxy** | Pass-through to Lambda (recommended) |
+| **Lambda Custom** | Transform request/response |
+| **HTTP Proxy** | Pass-through to HTTP endpoint |
+| **AWS Service** | Direct integration with AWS services |
+| **Mock** | Return static response |
 
-Map consumer types first. Who calls the gateway? Web application, mobile app, third-party partners, internal services, IoT devices. Each consumer type likely has different auth mechanisms (session cookies, JWTs, API keys, mTLS certificates), different acceptable latencies, different payload size tolerances, and different versioning requirements. This mapping drives whether a single gateway or multiple BFFs are appropriate.
+## Common Patterns
 
-Define cross-cutting concern ownership. For each concern (auth, rate limiting, logging, caching, CORS, request validation, response transformation), decide: gateway responsibility or service responsibility? Auth and rate limiting almost always belong at the gateway. Business-rule validation (not schema validation) belongs in services. Schema validation (is this JSON well-formed, does it have required fields?) can live at the gateway as a defence-in-depth measure.
+### Create HTTP API with Lambda
 
-Design the routing table with path-based and header-based routing. Path prefixes route to upstream services: `/api/orders/*` → Order Service, `/api/inventory/*` → Inventory Service. Header-based routing supports API versioning (`Accept-Version: v2` → v2 upstream) and canary releases (`X-Canary: true` → canary deployment). Ensure the routing table is tested — an incorrectly routed request is a security issue if it reaches the wrong service.
+**AWS CLI:**
 
-For aggregation (fan-out and merge), decide whether the gateway or a dedicated aggregation service is the right home. A gateway plugin that calls three downstream services in parallel and merges responses is operationally complex and tightly couples the gateway to service API contracts. A dedicated aggregation BFF that calls services and merges is more maintainable and independently deployable. Reserve gateway aggregation for simple cases.
+```bash
+# Create HTTP API
+aws apigatewayv2 create-api \
+  --name my-api \
+  --protocol-type HTTP \
+  --target arn:aws:lambda:us-east-1:123456789012:function:MyFunction
 
-Plan for gateway availability as an architectural concern. A gateway that is a single point of failure for all traffic must have: horizontal scaling, health checks from a load balancer, graceful shutdown handling in-flight requests, and a circuit breaker for each upstream. A gateway that itself goes down takes the entire system's external surface with it.
+# Get API endpoint
+aws apigatewayv2 get-api --api-id abc123 --query 'ApiEndpoint'
+```
 
-## Common Mistakes to Avoid
+**SAM Template:**
 
-- **Business logic in gateway plugins.** Pricing rules, eligibility checks, or data enrichment in gateway middleware create a deployment coupling between infrastructure and domain logic. Extract to a service.
-- **Single gateway for all consumer types.** A gateway making field-level trade-offs between mobile minimal responses and web full-detail responses satisfies neither. BFF per consumer type where access patterns diverge significantly.
-- **Per-instance rate limit counters.** Multi-instance gateway with in-memory counters allows burst rates that are N times the limit. Distribute the counter.
-- **Gateway as a synchronous aggregation layer for complex workflows.** A gateway that calls 8 downstream services in a dependency chain with timeouts is a distributed transaction with no compensation mechanism. Move complex aggregation to a dedicated service.
-- **Undocumented gateway routing rules.** Gateway configuration maintained in a vendor UI or YAML files not in version control is unauditable and unrecoverable. Every routing rule, rate limit, and auth policy must be in version control.
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 
-## Output
+Resources:
+  MyApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: prod
 
-API gateway design output includes: consumer type map with auth mechanism per consumer; cross-cutting concern ownership matrix (gateway vs service); routing table with path, header, and upstream targets; BFF decomposition decision with rationale; rate limiting strategy with key selection and backend (Redis configuration); auth offloading mechanism and downstream trust model; availability design (scaling, circuit breakers, health checks); and configuration-as-code structure for all gateway rules.
+  MyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: app.handler
+      Runtime: python3.12
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref MyApi
+            Path: /items
+            Method: GET
+```
+
+### Create REST API with Lambda Proxy
+
+```bash
+# Create REST API
+aws apigateway create-rest-api \
+  --name my-rest-api \
+  --endpoint-configuration types=REGIONAL
+
+API_ID=abc123
+
+# Get root resource ID
+ROOT_ID=$(aws apigateway get-resources --rest-api-id $API_ID --query 'items[0].id' --output text)
+
+# Create resource
+aws apigateway create-resource \
+  --rest-api-id $API_ID \
+  --parent-id $ROOT_ID \
+  --path-part items
+
+RESOURCE_ID=xyz789
+
+# Create method
+aws apigateway put-method \
+  --rest-api-id $API_ID \
+  --resource-id $RESOURCE_ID \
+  --http-method GET \
+  --authorization-type NONE
+
+# Create Lambda integration
+aws apigateway put-integration \
+  --rest-api-id $API_ID \
+  --resource-id $RESOURCE_ID \
+  --http-method GET \
+  --type AWS_PROXY \
+  --integration-http-method POST \
+  --uri arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:123456789012:function:MyFunction/invocations
+
+# Deploy to stage
+aws apigateway create-deployment \
+  --rest-api-id $API_ID \
+  --stage-name prod
+```
+
+### Lambda Handler for API Gateway
+
+```python
+import json
+
+def handler(event, context):
+    # HTTP API event
+    http_method = event.get('requestContext', {}).get('http', {}).get('method')
+    path = event.get('rawPath', '')
+    query_params = event.get('queryStringParameters', {})
+    body = event.get('body', '')
+
+    if body and event.get('isBase64Encoded'):
+        import base64
+        body = base64.b64decode(body).decode('utf-8')
+
+    # Process request
+    response_body = {'message': 'Success', 'path': path}
+
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Content-Type': 'application/json'
+        },
+        'body': json.dumps(response_body)
+    }
+```
+
+### Configure CORS
+
+**HTTP API:**
+
+```bash
+aws apigatewayv2 update-api \
+  --api-id abc123 \
+  --cors-configuration '{
+    "AllowOrigins": ["https://example.com"],
+    "AllowMethods": ["GET", "POST", "PUT", "DELETE"],
+    "AllowHeaders": ["Content-Type", "Authorization"],
+    "MaxAge": 86400
+  }'
+```
+
+**REST API:**
+
+```bash
+# Enable CORS on resource
+aws apigateway put-method \
+  --rest-api-id $API_ID \
+  --resource-id $RESOURCE_ID \
+  --http-method OPTIONS \
+  --authorization-type NONE
+
+aws apigateway put-integration \
+  --rest-api-id $API_ID \
+  --resource-id $RESOURCE_ID \
+  --http-method OPTIONS \
+  --type MOCK \
+  --request-templates '{"application/json": "{\"statusCode\": 200}"}'
+
+aws apigateway put-method-response \
+  --rest-api-id $API_ID \
+  --resource-id $RESOURCE_ID \
+  --http-method OPTIONS \
+  --status-code 200 \
+  --response-parameters '{
+    "method.response.header.Access-Control-Allow-Headers": true,
+    "method.response.header.Access-Control-Allow-Methods": true,
+    "method.response.header.Access-Control-Allow-Origin": true
+  }'
+
+aws apigateway put-integration-response \
+  --rest-api-id $API_ID \
+  --resource-id $RESOURCE_ID \
+  --http-method OPTIONS \
+  --status-code 200 \
+  --response-parameters '{
+    "method.response.header.Access-Control-Allow-Headers": "'\''Content-Type,Authorization'\''",
+    "method.response.header.Access-Control-Allow-Methods": "'\''GET,POST,PUT,DELETE,OPTIONS'\''",
+    "method.response.header.Access-Control-Allow-Origin": "'\''*'\''"
+  }'
+```
+
+### JWT Authorization (HTTP API)
+
+```bash
+aws apigatewayv2 create-authorizer \
+  --api-id abc123 \
+  --name jwt-authorizer \
+  --authorizer-type JWT \
+  --identity-source '$request.header.Authorization' \
+  --jwt-configuration '{
+    "Issuer": "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_abc123",
+    "Audience": ["client-id"]
+  }'
+```
+
+## CLI Reference
+
+### HTTP API (apigatewayv2)
+
+| Command | Description |
+|---------|-------------|
+| `aws apigatewayv2 create-api` | Create API |
+| `aws apigatewayv2 get-apis` | List APIs |
+| `aws apigatewayv2 create-route` | Create route |
+| `aws apigatewayv2 create-integration` | Create integration |
+| `aws apigatewayv2 create-stage` | Create stage |
+| `aws apigatewayv2 create-authorizer` | Create authorizer |
+
+### REST API (apigateway)
+
+| Command | Description |
+|---------|-------------|
+| `aws apigateway create-rest-api` | Create API |
+| `aws apigateway get-rest-apis` | List APIs |
+| `aws apigateway create-resource` | Create resource |
+| `aws apigateway put-method` | Create method |
+| `aws apigateway put-integration` | Create integration |
+| `aws apigateway create-deployment` | Deploy API |
+
+## Best Practices
+
+### Performance
+
+- **Use HTTP APIs** for simple use cases (70% cheaper, lower latency)
+- **Enable caching** for REST APIs
+- **Use regional endpoints** unless global distribution needed
+- **Implement pagination** for list endpoints
+
+### Security
+
+- **Use authorization** on all endpoints
+- **Enable WAF** for REST APIs
+- **Use API keys** for rate limiting (not authentication)
+- **Enable access logging**
+- **Use HTTPS only**
+
+### Reliability
+
+- **Set up throttling** to protect backends
+- **Configure timeout** appropriately
+- **Use canary deployments** for updates
+- **Monitor with CloudWatch**
+
+## Troubleshooting
+
+### 403 Forbidden
+
+**Causes:**
+- Missing authorization
+- Invalid API key
+- WAF blocking
+- Resource policy denying
+
+**Debug:**
+
+```bash
+# Check API key
+aws apigateway get-api-key --api-key abc123 --include-value
+
+# Check authorizer
+aws apigatewayv2 get-authorizer --api-id abc123 --authorizer-id xyz789
+```
+
+### 502 Bad Gateway
+
+**Causes:**
+- Lambda error
+- Integration timeout
+- Invalid response format
+
+**Lambda response format:**
+
+```python
+# Correct format
+return {
+    'statusCode': 200,
+    'headers': {'Content-Type': 'application/json'},
+    'body': json.dumps({'message': 'success'})
+}
+
+# Wrong - missing statusCode
+return {'message': 'success'}
+```
+
+### 504 Gateway Timeout
+
+**Causes:**
+- Backend timeout (Lambda max 29 seconds for REST API)
+- Integration timeout too short
+
+**Solutions:**
+- Increase Lambda timeout
+- Use async processing for long operations
+- Increase integration timeout (max 29s for REST, 30s for HTTP)
+
+### CORS Errors
+
+**Debug:**
+- Check OPTIONS method exists
+- Verify headers in response
+- Check origin matches allowed origins
+
+## References
+
+- [API Gateway Developer Guide](https://docs.aws.amazon.com/apigateway/latest/developerguide/)
+- [API Gateway REST API Reference](https://docs.aws.amazon.com/apigateway/latest/api/)
+- [API Gateway CLI Reference](https://docs.aws.amazon.com/cli/latest/reference/apigateway/)
+- [boto3 API Gateway](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/apigateway.html)

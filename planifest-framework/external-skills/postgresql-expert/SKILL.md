@@ -1,60 +1,179 @@
 ---
-name: postgresql-expert
-description: Expert PostgreSQL engineering — schema design, query optimisation, indexing strategy, and reliability
-version: 1.0.0
-author: Planifest Contributors
-license: MIT
+name: postgresql-optimization
+description: "PostgreSQL database optimization workflow for query tuning, indexing strategies, performance analysis, and production database management."
+category: granular-workflow-bundle
+risk: safe
+source: personal
+date_added: "2026-02-27"
 ---
 
-# PostgreSQL Expert
+# PostgreSQL Optimization Workflow
 
-> I am a PostgreSQL expert who designs schemas that enforce business invariants at the database level, writes queries that the planner can optimise, and builds indexing strategies based on actual access patterns — not assumptions.
+## Overview
 
-## Core Principles
+Specialized workflow for PostgreSQL database optimization including query tuning, indexing strategies, performance analysis, vacuum management, and production database administration.
 
-- **The database is the source of truth.** Constraints, foreign keys, and CHECK constraints enforce invariants that application code can never guarantee.
-- **EXPLAIN ANALYZE before optimising.** Query plans reveal reality. Never add an index without looking at the actual plan and row estimates.
-- **Normalise first, denormalise with evidence.** Start with a normalised schema. Add denormalisation only when a measured bottleneck justifies it.
-- **Transactions are the unit of consistency.** Every mutation that spans multiple tables runs in a transaction. `BEGIN`/`COMMIT` is not optional.
-- **Migrations are append-only.** Never edit a deployed migration. Write a new one. Every schema change is versioned and reversible.
-- **Connection pooling is mandatory.** PostgreSQL has a fixed connection limit per instance. Use PgBouncer or application-level pooling.
-- **`VACUUM` and autovacuum are operational concerns.** Monitor bloat and dead tuple accumulation. Tune autovacuum for write-heavy tables.
+## When to Use This Workflow
 
-## Approach
+Use this workflow when:
+- Optimizing slow PostgreSQL queries
+- Designing indexing strategies
+- Analyzing database performance
+- Tuning PostgreSQL configuration
+- Managing production databases
 
-Schema design begins with entity relationships and the constraints the business requires. I define primary keys as `BIGINT GENERATED ALWAYS AS IDENTITY` for new tables — not `SERIAL`, which has subtle permission issues. Foreign keys include `ON DELETE` behaviour that matches the domain: `CASCADE` for owned children, `RESTRICT` for referenced entities, `SET NULL` for optional associations. CHECK constraints enforce enumerable values, ranges, and format rules — not just NOT NULL.
+## Workflow Phases
 
-Index strategy follows access patterns. I index every foreign key column that participates in a JOIN or filter. I use partial indexes (`WHERE active = true`) to index a subset of rows when queries consistently filter on a condition. I use expression indexes for case-insensitive search (`LOWER(email)`) and JSONB containment. `pg_stat_user_indexes` and `pg_stat_user_tables` reveal unused indexes consuming write overhead.
+### Phase 1: Performance Assessment
 
-Query design avoids common anti-patterns. I use `EXISTS` instead of `IN` with subqueries for large sets. I use CTEs for readability, understanding that materialised CTEs (`WITH ... AS MATERIALIZED`) can prevent optimiser optimisations in older Postgres versions. I use window functions (`ROW_NUMBER()`, `LAG()`, `LEAD()`) for ranking and analytics instead of self-joins. `LATERAL` joins enable correlated subqueries that reference the outer row.
+#### Skills to Invoke
+- `database-optimizer` - Database optimization
+- `postgres-best-practices` - PostgreSQL best practices
 
-Full-text search uses `tsvector` columns with GIN indexes, updated via trigger or generated column. For JSONB storage, I index the specific access paths with `jsonb_path_ops` GIN indexes rather than scanning entire documents. `pg_trgm` with GIN indexes enables LIKE/ILIKE pattern matching at scale.
+#### Actions
+1. Check database version
+2. Review configuration
+3. Analyze slow queries
+4. Check resource usage
+5. Identify bottlenecks
 
-## Key Patterns
+#### Copy-Paste Prompts
+```
+Use @database-optimizer to assess PostgreSQL performance
+```
 
-- **Generated columns for computed attributes.** `GENERATED ALWAYS AS (LOWER(email)) STORED` — computed at write time, indexed normally.
-- **`UPSERT` with `INSERT ... ON CONFLICT DO UPDATE`.** Atomic upsert without application-level read-then-write races.
-- **Table partitioning for time-series data.** Range partitioning by month on timestamp columns; automatic partition pruning at query time.
-- **`LISTEN`/`NOTIFY` for lightweight pub/sub.** Application-level change notifications without polling.
-- **Row-level security (RLS).** Enforce multi-tenant data isolation at the database layer. Policies on tables; `SET ROLE` for context.
-- **`pg_cron` for scheduled jobs.** Database-managed job scheduling without external dependencies.
-- **`COPY` for bulk inserts.** 10-100x faster than `INSERT` for large data loads. Use `COPY FROM STDIN` from application code.
-- **Covering indexes (`INCLUDE`).** Add non-key columns to an index to enable index-only scans for common queries.
+### Phase 2: Query Analysis
 
-## Anti-Patterns
+#### Skills to Invoke
+- `sql-optimization-patterns` - SQL optimization
+- `postgres-best-practices` - PostgreSQL patterns
 
-- **`SELECT *` in application queries.** Fetches unused columns, defeats index-only scans, and breaks when schema changes.
-- **No foreign keys because "performance".** Foreign keys are cheap to enforce; orphaned data is expensive to clean up.
-- **Sequences as business identifiers.** Auto-increment IDs leak cardinality. Use UUIDs (`gen_random_uuid()`) for external-facing IDs.
-- **Long-running transactions.** Block `VACUUM`, hold locks, inflate WAL. Batch large updates; use advisory locks for coordination.
-- **`NOT IN` with nullable subquery.** If the subquery can return NULL, `NOT IN` returns no rows. Use `NOT EXISTS`.
-- **Indexes on every column.** Each index adds write overhead. Every index must earn its keep via measurable query improvement.
-- **DDL in application code at startup.** Schema migration is a separate concern from application startup. Use Flyway, Liquibase, or `golang-migrate`.
+#### Actions
+1. Run EXPLAIN ANALYZE
+2. Identify scan types
+3. Check join strategies
+4. Analyze execution time
+5. Find optimization opportunities
 
-## Output Format
+#### Copy-Paste Prompts
+```
+Use @sql-optimization-patterns to analyze and optimize queries
+```
 
-- SQL migration files with up/down scripts
-- `EXPLAIN ANALYZE` output with interpretation
-- Index creation statements with rationale
-- `psql` scripts for data seeding and verification
-- Table definitions with all constraints, indexes, and comments
+### Phase 3: Indexing Strategy
+
+#### Skills to Invoke
+- `database-design` - Index design
+- `postgresql` - PostgreSQL indexing
+
+#### Actions
+1. Identify missing indexes
+2. Create B-tree indexes
+3. Add composite indexes
+4. Consider partial indexes
+5. Review index usage
+
+#### Copy-Paste Prompts
+```
+Use @database-design to design PostgreSQL indexing strategy
+```
+
+### Phase 4: Query Optimization
+
+#### Skills to Invoke
+- `sql-optimization-patterns` - Query tuning
+- `sql-pro` - SQL expertise
+
+#### Actions
+1. Rewrite inefficient queries
+2. Optimize joins
+3. Add CTEs where helpful
+4. Implement pagination
+5. Test improvements
+
+#### Copy-Paste Prompts
+```
+Use @sql-optimization-patterns to optimize SQL queries
+```
+
+### Phase 5: Configuration Tuning
+
+#### Skills to Invoke
+- `postgres-best-practices` - Configuration
+- `database-admin` - Database administration
+
+#### Actions
+1. Tune shared_buffers
+2. Configure work_mem
+3. Set effective_cache_size
+4. Adjust checkpoint settings
+5. Configure autovacuum
+
+#### Copy-Paste Prompts
+```
+Use @postgres-best-practices to tune PostgreSQL configuration
+```
+
+### Phase 6: Maintenance
+
+#### Skills to Invoke
+- `database-admin` - Database maintenance
+- `postgresql` - PostgreSQL maintenance
+
+#### Actions
+1. Schedule VACUUM
+2. Run ANALYZE
+3. Check table bloat
+4. Monitor autovacuum
+5. Review statistics
+
+#### Copy-Paste Prompts
+```
+Use @database-admin to schedule PostgreSQL maintenance
+```
+
+### Phase 7: Monitoring
+
+#### Skills to Invoke
+- `grafana-dashboards` - Monitoring dashboards
+- `prometheus-configuration` - Metrics collection
+
+#### Actions
+1. Set up monitoring
+2. Create dashboards
+3. Configure alerts
+4. Track key metrics
+5. Review trends
+
+#### Copy-Paste Prompts
+```
+Use @grafana-dashboards to create PostgreSQL monitoring
+```
+
+## Optimization Checklist
+
+- [ ] Slow queries identified
+- [ ] Indexes optimized
+- [ ] Configuration tuned
+- [ ] Maintenance scheduled
+- [ ] Monitoring active
+- [ ] Performance improved
+
+## Quality Gates
+
+- [ ] Query performance improved
+- [ ] Indexes effective
+- [ ] Configuration optimized
+- [ ] Maintenance automated
+- [ ] Monitoring in place
+
+## Related Workflow Bundles
+
+- `database` - Database operations
+- `cloud-devops` - Infrastructure
+- `performance-optimization` - Performance
+
+## Limitations
+- Use this skill only when the task clearly matches the scope described above.
+- Do not treat the output as a substitute for environment-specific validation, testing, or expert review.
+- Stop and ask for clarification if required inputs, permissions, safety boundaries, or success criteria are missing.

@@ -1,55 +1,49 @@
 ---
-name: integration-testing
-description: Design and write integration tests that verify real component interactions — databases, queues, and HTTP boundaries — using containers and controlled dependency strategies.
+name: testing-integration
+description: "Integration-boundary testing for component and service collaboration correctness. Use when modules interact via APIs, queues, databases, or adapters and boundary behavior must be verified; do not use for full UI journey validation or pure unit isolation work."
 ---
 
-# Integration Testing
+# Testing Integration
 
-You are a senior engineer designing integration tests that verify real system seams without the cost of full E2E.
+## Overview
+Use this skill to verify boundary behavior where independently correct units may still fail in combination.
 
-## When to Use
+## Scope Boundaries
+- Use when correctness depends on integration seams.
+- Typical requests:
+  - `Validate repository-to-database behavior including failure paths.`
+  - `Test timeout and retry handling between services.`
+  - `Verify adapter replacement does not break boundary contracts.`
+- Do not use when:
+  - The goal is full browser journey validation (`testing-e2e`/`playwright`).
+  - The goal is pure isolated unit checks (`testing-unit`).
 
-- Verifying that a repository correctly reads and writes to a real database
-- Testing that a service correctly handles HTTP responses from an external API (including error codes)
-- Validating message queue consumers and producers in realistic conditions
-- Testing database migrations and schema evolution
+## Inputs
+- Integration seams and dependency topology
+- Failure-mode expectations (timeout, retry, partial failure)
+- Fixture/environment constraints
 
-## Core Principles
+## Outputs
+- Boundary test matrix with dependency strategy
+- Decision record for integration depth and tooling choices
+- Verification checklist for success and failure semantics
 
-**Real Dependencies at the Seam:** Integration tests exist to verify the seam between your code and a dependency. Use real databases, real message queues, and real HTTP servers (or faithful WireMock/MSW stubs). A repository test against an in-memory SQLite when production is Postgres misses real query semantics, index behaviour, and constraint enforcement.
+## Workflow
+1. Enumerate high-risk seams and boundary contracts.
+2. Define required behaviors for success, timeout, and error cases.
+3. Compare fixture strategies and choose one with rationale.
+4. Execute focused integration tests with reproducible setup.
+5. Publish coverage gaps, residual risks, and ownership.
 
-**Container Parity:** Use Testcontainers (or Docker Compose) to spin up the real engine — Postgres, Redis, Kafka — at test runtime. Ephemeral containers eliminate "works on my machine" and ensure parity with CI. Each test suite gets a fresh container or a clean database schema.
+## Quality Gates
+- Critical seams include failure-path coverage.
+- Boundary expectations are explicit and deterministic.
+- Evidence can be replayed in CI.
+- Dependency assumptions are documented.
 
-**Scope Discipline:** Integration tests cover one integration point per test file. A test file for `UserRepository` tests only persistence. It does not also test the HTTP handler. That boundary keeps failures diagnostic.
+## Failure Handling
+- Stop when critical boundaries lack failure-path tests.
+- Escalate when dependency ownership blocks reliable fixtures.
 
-**Transaction Rollback Isolation:** For database tests, wrap each test in a transaction and roll back after. This gives per-test isolation without the cost of truncating and reseeding every table. Works for most relational stores; for Mongo or Redis use explicit cleanup in `afterEach`.
-
-**Controlled External Services:** For third-party APIs (Stripe, SendGrid, Twilio), use WireMock or MSW to replay recorded responses. Record responses with real credentials once; commit the cassette. Tests run offline, deterministically, and do not consume API quotas.
-
-## Approach
-
-**Database integration tests.** Use Testcontainers to start a Postgres container. Apply migrations with your real migration tool (Flyway, Liquibase, golang-migrate). Write tests that:
-1. Arrange: insert seed data via direct SQL or a fixture loader
-2. Act: call your repository method
-3. Assert: query the database directly to verify the outcome (do not trust the object returned — verify the DB state)
-
-Example: after calling `userRepo.create(user)`, run a raw `SELECT` and assert on the returned row. This verifies the SQL, not just the object mapping.
-
-**HTTP client integration tests.** Stub the external HTTP server with WireMock or nock. Define expected request patterns and response fixtures. Test that your client: handles 200 with valid body, handles 422 with validation errors, handles 429 with retry behaviour, handles 503 with circuit breaker. Do not test business logic here — test the HTTP adapter only.
-
-**Message queue integration tests.** Start a real Kafka or RabbitMQ container. Publish a message, consume it with your real consumer code, assert on DB state or published side effects. Test dead letter routing by publishing malformed messages.
-
-**Migration tests.** On every schema migration, run tests that verify: old data survives the migration intact, new constraints are enforced, rollback migration restores previous schema.
-
-**Test data setup.** Use builder patterns for test fixtures. Never share mutable fixture state between tests. Each test constructs its own minimum viable data set. Avoid loading a full 50-table seed just to test one repository method.
-
-## Common Mistakes to Avoid
-
-- **Using H2/SQLite in-memory to test Postgres code:** Different SQL dialects, no JSON column support, no partial indexes. Run the real engine in a container — Testcontainers startup cost is under 10 seconds.
-- **Testing too much in one integration test:** A test that creates a user, logs in, places an order, and checks inventory is an E2E test, not an integration test. Keep scope narrow.
-- **Sharing container state across tests:** Tests that run in parallel against a shared database with no isolation produce intermittent failures. Use transaction rollback or per-test schema namespacing.
-- **Ignoring non-happy-path HTTP responses:** Most HTTP client bugs manifest on 4xx/5xx. If your integration test only checks the 200 path, you'll find out about error handling in production.
-
-## Output
-
-Integration tests that: use real infrastructure (containerised), have per-test isolation, cover happy path and error paths at the integration boundary, complete in under 30 seconds for a suite of 50 tests, and produce failure messages that identify which dependency interaction failed and why.
+## Bundled Resources
+- `references/trigger-and-examples.md`: trigger patterns, anti-patterns, and deliverable expectations.
