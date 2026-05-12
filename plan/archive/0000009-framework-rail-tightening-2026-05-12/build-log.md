@@ -127,6 +127,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P7 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-12T03:00:00Z` |
+| Model tier | primary |
+| Skills loaded | `planifest-ship-agent` |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | 2 commits: core P3-P6 implementation (31 files); external-skills attribution fixes. PR description produced. No regression candidates. Test report written. Archive: plan/archive/0000009-framework-rail-tightening-2026-05-12/. Sentinels deleted. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
@@ -149,11 +163,11 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
+| Total phases completed | 8 (P0–P7) |
+| Total agents spawned | 0 |
+| Total MCP calls | 8 |
+| Phases using parallelism | 3 (P1, P2, P5) |
+| Primary tier agent calls | 8 |
+| Cheaper tier agent calls | 0 |
+| Self-corrections | 1 (S-001: featureId sanitisation added in P5) |
+| Phases skipped | none |
