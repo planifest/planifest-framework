@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: garrytan/gstack
-# Source URL: https://github.com/garrytan/gstack
-# Stars at capture: ~93k
-# Skill: design-shotgun
-# Skill URL: https://github.com/garrytan/gstack/blob/main/design-shotgun/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Garry Tan
+
+Source URL: https://github.com/garrytan/gstack
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

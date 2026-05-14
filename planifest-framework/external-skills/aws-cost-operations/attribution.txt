@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: zxkane/aws-skills
-# Source URL: https://github.com/zxkane/aws-skills
-# Stars at capture: ~200
-# Skill: aws-cost-operations
-# Skill URL: https://github.com/zxkane/aws-skills/blob/main/plugins/aws-cost-ops/skills/aws-cost-operations/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Mengxin Zhu
+
+Source URL: https://github.com/zxkane/aws-skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

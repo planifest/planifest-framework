@@ -1,10 +1,11 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: mukul975/Privacy-Data-Protection-Skills
-# Source URL: https://github.com/mukul975/Privacy-Data-Protection-Skills
-# Stars at capture: ~100
-# Skill: gdpr-compliance-audit
-# Skill URL: https://github.com/mukul975/Privacy-Data-Protection-Skills/blob/main/plugins/gdpr-compliance-skills/skills/gdpr-compliance-audit/SKILL.md
-# Licence: Apache-2.0
+License type: Apache-2.0
+
+Copyright holder: mukul975
+
+Source URL: https://github.com/mukul975/Privacy-Data-Protection-Skills
+
+Required attribution text:
+Include the NOTICE file (if present) and reproduce the Apache License 2.0 header in any distribution.
 
 LICENSE (Apache-2.0):
 

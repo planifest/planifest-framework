@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: itsmostafa/aws-agent-skills
-# Source URL: https://github.com/itsmostafa/aws-agent-skills
-# Stars at capture: ~100
-# Skill: iam
-# Skill URL: https://github.com/itsmostafa/aws-agent-skills/blob/main/skills/iam/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: 5
+
+Source URL: https://github.com/itsmostafa/aws-agent-skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

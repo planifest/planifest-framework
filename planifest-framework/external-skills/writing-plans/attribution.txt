@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: obra/superpowers
-# Source URL: https://github.com/obra/superpowers
-# Stars at capture: ~2k
-# Skill: writing-plans
-# Skill URL: https://github.com/obra/superpowers/blob/main/skills/writing-plans/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Jesse Vincent
+
+Source URL: https://github.com/obra/superpowers
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

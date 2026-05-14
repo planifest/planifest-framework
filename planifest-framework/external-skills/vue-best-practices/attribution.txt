@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: vuejs-ai/skills
-# Source URL: https://github.com/vuejs-ai/skills
-# Stars at capture: ~500
-# Skill: vue-best-practices
-# Skill URL: https://github.com/vuejs-ai/skills/blob/main/skills/vue-best-practices/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: hyf0, SerKo <https://github.com/serkodev>
+
+Source URL: https://github.com/vuejs-ai/skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: addyosmani/agent-skills
-# Source URL: https://github.com/addyosmani/agent-skills
-# Stars at capture: 2.6k+
-# Skill: shipping-and-launch
-# Skill URL: https://github.com/addyosmani/agent-skills/blob/main/skills/shipping-and-launch/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Addy Osmani
+
+Source URL: https://github.com/addyosmani/agent-skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

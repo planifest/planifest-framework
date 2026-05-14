@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: sickn33/antigravity-awesome-skills
-# Source URL: https://github.com/sickn33/antigravity-awesome-skills
-# Stars at capture: ~500
-# Skill: typescript-expert
-# Skill URL: https://github.com/sickn33/antigravity-awesome-skills/blob/main/plugins/antigravity-awesome-skills/skills/typescript-expert/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Antigravity User
+
+Source URL: https://github.com/sickn33/antigravity-awesome-skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

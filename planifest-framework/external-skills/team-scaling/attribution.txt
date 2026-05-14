@@ -1,8 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: planifest-framework (original work)
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Planifest Framework Contributors
+
+Source URL: https://github.com/coreyhaines/marketingskills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

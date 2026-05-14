@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-12
-# Source: aj-geddes/useful-ai-prompts
-# Source URL: https://github.com/aj-geddes/useful-ai-prompts
-# Stars at capture: ~800
-# Skill: data-visualization
-# Skill URL: https://github.com/aj-geddes/useful-ai-prompts/blob/main/skills/data-visualization/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: AJ Geddes
+
+Source URL: https://github.com/aj-geddes/useful-ai-prompts
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

@@ -1,14 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: danielmiessler/fabric
-# Source URL: https://github.com/danielmiessler/fabric
-# Stars at capture: 41.6k+
-# Pattern: review_code
-# Pattern URL: https://github.com/danielmiessler/fabric/blob/main/data/patterns/review_code/system.md
-#
-# This pattern is distributed under the MIT Licence.
-# Full licence text as captured at inclusion date below.
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Scott Chacon and others
+
+Source URL: https://github.com/danielmiessler/fabric
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 
@@ -32,5 +31,3 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-Full licence URL: https://raw.githubusercontent.com/danielmiessler/fabric/main/LICENSE

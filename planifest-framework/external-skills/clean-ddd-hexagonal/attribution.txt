@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: ccheney/robust-skills
-# Source URL: https://github.com/ccheney/robust-skills
-# Stars at capture: ~100
-# Skill: clean-ddd-hexagonal
-# Skill URL: https://github.com/ccheney/robust-skills/blob/main/skills/clean-ddd-hexagonal/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: robust-skills contributors
+
+Source URL: https://github.com/ccheney/robust-skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

@@ -1,10 +1,11 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: anthropics/skills
-# Source URL: https://github.com/anthropics/skills
-# Stars at capture: ~132k
-# Skill: internal-comms
-# Skill URL: https://github.com/anthropics/skills/blob/main/skills/internal-comms/SKILL.md
-# Licence: Apache-2.0
+License type: Apache-2.0
+
+Copyright holder: anthropics
+
+Source URL: https://github.com/anthropics/skills
+
+Required attribution text:
+Include the NOTICE file (if present) and reproduce the Apache License 2.0 header in any distribution.
 
 LICENSE (Apache-2.0):
 

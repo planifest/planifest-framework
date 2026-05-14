@@ -1,11 +1,11 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: KentoShimizu/sw-agent-skills
-# Source URL: https://github.com/KentoShimizu/sw-agent-skills
-# Stars at capture: ~200
-# Skill: design-tokens
-# Skill URL: https://github.com/KentoShimizu/sw-agent-skills/blob/main/skills/design-tokens/SKILL.md
-# Licence: Apache-2.0
-# NOTICE: Copyright 2026 Kento Shimizu
+License type: Apache-2.0
+
+Copyright holder: KentoShimizu
+
+Source URL: https://github.com/KentoShimizu/sw-agent-skills
+
+Required attribution text:
+Include the NOTICE file (if present) and reproduce the Apache License 2.0 header in any distribution.
 
 LICENSE (Apache-2.0):
 

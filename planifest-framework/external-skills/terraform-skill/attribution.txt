@@ -1,10 +1,11 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: antonbabenko/terraform-skill
-# Source URL: https://github.com/antonbabenko/terraform-skill
-# Stars at capture: ~500
-# Skill: terraform-skill
-# Skill URL: https://github.com/antonbabenko/terraform-skill/blob/main/skills/terraform-skill/SKILL.md
-# Licence: Apache-2.0
+License type: Apache-2.0
+
+Copyright holder: antonbabenko
+
+Source URL: https://github.com/antonbabenko/terraform-skill
+
+Required attribution text:
+Include the NOTICE file (if present) and reproduce the Apache License 2.0 header in any distribution.
 
 LICENSE (Apache-2.0):
 

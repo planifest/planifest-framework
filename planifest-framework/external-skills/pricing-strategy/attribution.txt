@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: coreyhaines31/marketingskills
-# Source URL: https://github.com/coreyhaines31/marketingskills
-# Stars at capture: ~300
-# Skill: pricing-strategy
-# Skill URL: https://github.com/coreyhaines31/marketingskills/blob/main/skills/pricing-strategy/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Corey Haines
+
+Source URL: https://github.com/coreyhaines31/marketingskills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 

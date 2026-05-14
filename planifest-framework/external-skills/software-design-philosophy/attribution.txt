@@ -1,12 +1,13 @@
-# Attribution snapshot — captured 2026-05-11
-# Source: wondelai/skills
-# Source URL: https://github.com/wondelai/skills
-# Stars at capture: ~200
-# Skill: software-design-philosophy
-# Skill URL: https://github.com/wondelai/skills/blob/main/software-design-philosophy/SKILL.md
-# Licence: MIT
+License type: MIT
 
-LICENSE (MIT):
+Copyright holder: Wondel.ai sp. z o.o.
+
+Source URL: https://github.com/wondelai/skills
+
+Required attribution text:
+Include the copyright notice and this permission notice in all copies or substantial portions of the Software.
+
+LICENSE:
 
 MIT License
 
