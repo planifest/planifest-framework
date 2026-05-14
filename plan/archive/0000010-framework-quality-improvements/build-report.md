@@ -30,8 +30,9 @@ All 4 requirements delivered and verified. 20/20 acceptance tests pass.
 | Skills added this feature | 196 (sw-agent-skills: 152, marketingskills: 40, garden-skills: 4) |
 | Dir name mismatches | 0 |
 | Missing attribution.txt | 0 |
+| Incomplete attribution.txt | 0 (fixed in 0000010b) |
 | New-repo attributions | 199 |
-| Test suite | 20/20 pass |
+| Test suite | 20/20 pass (feature); 2605/0 pass/fail (attribution) |
 | Self-corrections in P4 | 3 |
 
 ---
@@ -68,6 +69,21 @@ Added `## Pre-Execution Parallelism Plan`: forces the agent to identify independ
 | ADR-001 | Agent in allowedTools — project-scoped; removes per-use confirmation |
 | ADR-002 | name field as canonical skill identifier; dirs renamed to match |
 | ADR-003 | Input Validation section conditional — only when untrusted input present |
+
+---
+
+## Patch: 0000010b — Attribution normalisation (2026-05-14)
+
+All 372 `external-skills/*/attribution.txt` files normalised to the structured key-value format required by `test-attribution-validation.sh`.
+
+**Root cause:** Pre-existing skills from 0000009 era used an old comment-style format (`# Source URL:`, `LICENSE (MIT):`) that the test suite's `grep` patterns did not match. The 196 new skills added in 0000010 were created in correct format; the 184 pre-existing files were not migrated.
+
+**Changes:**
+- `LICENSE (MIT):` → `LICENSE:` across 164 files (PowerShell bulk replace)
+- `Source URL: (original work)` → `https://github.com/coreyhaines/marketingskills` in 52 marketingskills files
+- Old comment-format headers converted to structured `License type:` / `Copyright holder:` / `Source URL:` / `Required attribution text:` fields
+
+**Result:** `test-attribution-validation.sh` 2605/0 pass/fail.
 
 ---
 
