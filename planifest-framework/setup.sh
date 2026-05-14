@@ -633,6 +633,34 @@ install_telemetry_hooks() {
   merge_telemetry_hook_settings "$settings" "$hooks_dir_rel" "$backend_url"
 }
 
+merge_allowed_tools() {
+  # Idempotently add "Agent" to allowedTools in .claude/settings.json (REQ-002).
+  # Preserves existing allowedTools entries — additive merge only.
+  # Requires node (always available for Claude Code targets).
+  local settings_file="$1"
+
+  if command -v node >/dev/null 2>&1; then
+    PLANIFEST_SETTINGS="$settings_file" node -e '
+      const fs = require("fs"), path = require("path");
+      const sf = process.env.PLANIFEST_SETTINGS;
+      let s = {};
+      if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^﻿/,""));
+      const existing = Array.isArray(s.allowedTools) ? s.allowedTools : [];
+      if (!existing.includes("Agent")) {
+        s.allowedTools = existing.concat(["Agent"]);
+        fs.mkdirSync(path.dirname(sf),{recursive:true});
+        fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
+        console.log("  ~ .claude/settings.json (Agent added to allowedTools)");
+      } else {
+        console.log("  - .claude/settings.json (Agent already in allowedTools)");
+      }
+    '
+  else
+    echo "  ! Warning: node not found — skipping allowedTools update"
+    echo "  ! Manually add \"Agent\" to allowedTools in .claude/settings.json"
+  fi
+}
+
 activate_guardrails() {
   echo ""
   echo "  Activating Planifest Git Guardrails"
@@ -998,6 +1026,11 @@ setup_tool() {
   # Skipped for Tier 1 tools — they use the adapter path instead (REQ-027).
   if [ -n "${TOOL_SETTINGS_FILE:-}" ] && ! [[ "${PLANIFEST_TIER:-}" =~ ^1 ]]; then
     install_enforcement_hooks "hooks/enforcement" ".claude/hooks/enforcement" "$TOOL_SETTINGS_FILE"
+  fi
+
+  # Add Agent to allowedTools so sub-agent dispatch works without per-use confirmation (REQ-002)
+  if [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
+    merge_allowed_tools "$PROJECT_ROOT/$TOOL_SETTINGS_FILE"
   fi
 
   # Tier 1 / 1b: copy adapter + shared hook scripts (REQ-009, REQ-010, REQ-013)

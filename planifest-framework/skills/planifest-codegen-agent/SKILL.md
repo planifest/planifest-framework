@@ -227,6 +227,52 @@ Independent implementation work MUST be parallelised. Components with no shared 
 
 ---
 
+## Parallel Dispatch Checklist
+
+Run this checklist **before writing any implementation code**. Do not skip it.
+
+1. **List all requirements** for this phase from `plan/current/requirements/`.
+2. **Map dependencies** — for each requirement, note which (if any) other requirements it depends on. A requirement depends on another only if it imports types from it, reads files it produces, or builds on a contract it defines.
+3. **Identify leaf requirements** — requirements with no dependencies on siblings.
+4. **Dispatch all leaf requirements in a single parallel batch** — one Agent call per requirement in a single message. Do not dispatch sequentially.
+5. **Wait for all leaf requirements to complete**, then dispatch dependent requirements in the next batch.
+6. **Record batch count in build log** — note how many parallel batches you dispatched.
+
+**Concrete example** (three requirements, two leaves, one dependent):
+
+```
+# Requirements: REQ-001 (no deps), REQ-002 (no deps), REQ-003 (depends on REQ-001)
+# Batch 1: dispatch REQ-001 and REQ-002 in parallel
+
+Agent({
+  description: "Implement REQ-001",
+  subagent_type: "general-purpose",
+  model: "claude-haiku-4-5",
+  prompt: "Implement REQ-001 per plan/current/requirements/req-001-....md. Stack: [stack]. ADRs: [paths]. Confirm when done."
+})
+
+Agent({
+  description: "Implement REQ-002",
+  subagent_type: "general-purpose",
+  model: "claude-haiku-4-5",
+  prompt: "Implement REQ-002 per plan/current/requirements/req-002-....md. Stack: [stack]. ADRs: [paths]. Confirm when done."
+})
+
+# After both complete:
+# Batch 2: dispatch REQ-003 (which depends on REQ-001's output)
+
+Agent({
+  description: "Implement REQ-003",
+  subagent_type: "general-purpose",
+  model: "claude-haiku-4-5",
+  prompt: "Implement REQ-003 per plan/current/requirements/req-003-....md. REQ-001 is complete — its output is at [path]. Stack: [stack]. ADRs: [paths]. Confirm when done."
+})
+```
+
+If you cannot identify any parallelism opportunity, state the dependency reason explicitly in the build log before proceeding sequentially.
+
+---
+
 ## Telemetry
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.

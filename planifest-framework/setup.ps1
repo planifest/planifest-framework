@@ -423,6 +423,33 @@ function Merge-EnforcementHookSettings {
     }
 }
 
+function Merge-AllowedTools {
+    # Idempotently add "Agent" to allowedTools in .claude/settings.json (REQ-002).
+    # Preserves existing allowedTools entries — additive merge only.
+    param([string]$SettingsPath)
+
+    $settings = @{}
+    if (Test-Path $SettingsPath) {
+        $raw = Get-Content -Raw -Path $SettingsPath -Encoding UTF8
+        $settings = $raw | ConvertFrom-Json -AsHashtable -ErrorAction SilentlyContinue
+        if (-not $settings) { $settings = @{} }
+    }
+
+    $existing = if ($settings.ContainsKey('allowedTools') -and $settings['allowedTools']) {
+        @($settings['allowedTools'])
+    } else { @() }
+
+    if ($existing -notcontains 'Agent') {
+        $settings['allowedTools'] = $existing + @('Agent')
+        $dir = Split-Path -Parent $SettingsPath
+        if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+        $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
+        Write-Host "  ~ .claude/settings.json (Agent added to allowedTools)"
+    } else {
+        Write-Host "  - .claude/settings.json (Agent already in allowedTools)"
+    }
+}
+
 function Install-EnforcementHooks {
     # Copy gate-write.mjs + check-design.mjs and wire settings.json. Always runs — no flag required.
     param(
@@ -985,6 +1012,12 @@ function Invoke-PlanifestSetup {
             -HooksSrcRel $toolConfig.EnforcementHooksSrc `
             -HooksDirRel $toolConfig.EnforcementHooksDir `
             -SettingsRel $toolConfig.SettingsFile
+    }
+
+    # Add Agent to allowedTools so sub-agent dispatch works without per-use confirmation (REQ-002)
+    if ($toolConfig.SettingsFile) {
+        $settingsPath = Join-Path $ProjectRoot $toolConfig.SettingsFile
+        Merge-AllowedTools -SettingsPath $settingsPath
     }
 
     # Install context-mode enforcement hooks if --context-mode-mcp flag is set (REQ-004)

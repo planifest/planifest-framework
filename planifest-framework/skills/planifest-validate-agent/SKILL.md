@@ -112,6 +112,24 @@ If a capability skill exists for the declared testing framework (e.g. `webapp-te
 
 ---
 
+## Pre-Execution Parallelism Plan
+
+Run this step **before executing any CI check**. Do not skip it.
+
+1. **List all checks required** for this validation run (lint, typecheck, test, build, custom scripts).
+2. **Identify independent checks** — checks are independent if neither produces output the other reads as input. Lint and typecheck are always independent of each other. Tests depend on typecheck passing (type errors cause spurious test failures). Build depends on tests passing.
+3. **Dispatch all independent checks in a single parallel batch** — multiple Bash or ctx_execute calls in one message.
+4. **State the dependency reason** for any check run sequentially: "running X after Y because Y's output is X's input."
+
+**Correct dispatch order:**
+- Batch 1 (parallel): lint + typecheck
+- Batch 2 (after Batch 1 passes): test suite
+- Batch 3 (after Batch 2 passes): build
+
+Never run lint → wait → typecheck → wait as a serial chain without a stated dependency reason.
+
+---
+
 ## Parallelism Directive
 
 Independent CI checks MUST be run in parallel. Where the tool supports multiple simultaneous Bash calls, lint, typecheck, and test MUST be dispatched in a single parallel batch — not sequentially.

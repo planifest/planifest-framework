@@ -668,6 +668,78 @@ The ship-agent invokes the build-assessment-agent after the archive is confirmed
 
 ---
 
+## Agent Dispatch Template
+
+Use two levels of parallelism: (1) parallel native tool calls within the current agent, and (2) Agent spawning for independent sub-tasks.
+
+**Two levels of parallelism — both are required:**
+
+1. **Native tool calls** — multiple Write, Read, ctx_execute, or Bash calls dispatched in a single message. These run concurrently within the active agent's own context. Use for: writing independent files, running independent searches, executing independent shell commands.
+
+2. **Agent spawning** — invoking the Agent tool to create a separate Claude Code sub-agent session. Use for: decomposing a phase's work across multiple independent requirements, each of which needs its own tool access and context. The spawned agent is isolated — it receives only what is in its prompt.
+
+**When to spawn vs. inline:**
+- Spawn when a task is self-contained and could be briefed to a colleague in one paragraph.
+- Stay inline when the task requires ongoing dialogue, access to shared mutable state, or is too small to justify the overhead (single file read, single command).
+
+**Concrete parallel dispatch example** (two independent requirements built simultaneously):
+
+```
+# Send these two Agent calls in a SINGLE message — they execute concurrently.
+
+Agent({
+  description: "Implement REQ-001: input validation template",
+  subagent_type: "general-purpose",
+  model: "claude-haiku-4-5",
+  prompt: """
+    You are implementing REQ-001 for feature 0000010-framework-quality-improvements.
+    
+    Requirement file: plan/current/requirements/req-001-input-validation-ac-template.md
+    ADR: plan/current/adr/ADR-003-input-validation-section-conditional.md
+    Stack: Markdown template authoring — no runtime, no build step.
+    
+    Task: Add the ## Input Validation conditional section to
+    planifest-framework/templates/requirement.template.md as specified in the
+    requirement file. Follow the ADR: the section is conditional, not mandatory.
+    
+    When done, confirm: file path modified, what was added.
+  """
+})
+
+Agent({
+  description: "Implement REQ-002: Agent allowedTools in setup.sh",
+  subagent_type: "general-purpose",
+  model: "claude-haiku-4-5",
+  prompt: """
+    You are implementing the setup.sh portion of REQ-002 for feature
+    0000010-framework-quality-improvements.
+    
+    Requirement file: plan/current/requirements/req-002-agent-tool-and-parallelism.md
+    ADR: plan/current/adr/ADR-001-agent-tool-in-allowedtools.md
+    Stack: bash scripting — planifest-framework/setup.sh
+    
+    Task: Add logic to setup.sh so that when configuring for claude-code, the
+    function writes "Agent" into the allowedTools array in .claude/settings.json,
+    merged with existing entries (idempotent). Follow the existing settings.json
+    merge pattern already used in the file.
+    
+    When done, confirm: file path modified, function name changed.
+  """
+})
+```
+
+**Self-contained prompt rule:** The prompt passed to Agent MUST be self-contained. Include:
+- The requirement file path
+- Relevant ADR paths
+- Stack declaration or relevant constraint
+- What "done" looks like (confirmation format)
+
+Do NOT rely on shared conversation history. The spawned agent has no memory of this session.
+
+**Model tier for spawned agents:** Use `claude-haiku-4-5` for mechanical tasks (file writes, codebase discovery, formatting). Use `claude-sonnet-4-6` for synthesis tasks (security review, architecture decisions). See the Model Tier Decision Table.
+
+---
+
 ## Mid-Pipeline Requirement Changes
 
 If the human requests a change to requirements while the pipeline is in progress (Phases 1-6):

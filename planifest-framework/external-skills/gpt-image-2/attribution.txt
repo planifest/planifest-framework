@@ -1,0 +1,3 @@
+Source: https://github.com/garden-skills/garden-skills
+Repository: garden-skills
+Skill: gpt-image-2

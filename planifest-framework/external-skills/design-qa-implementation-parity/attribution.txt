@@ -1,0 +1,3 @@
+Source: https://github.com/pablof7z/sw-agent-skills
+Repository: sw-agent-skills
+Skill: design-qa-implementation-parity
