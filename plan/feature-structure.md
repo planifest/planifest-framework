@@ -39,7 +39,7 @@ planifest-framework/
 
 ## `plan/` - The Plan/Specifications
 
-Organized by feature. Each feature gets a subfolder. This is where humans write briefs and agents write specs. No code lives here.
+Organised by feature. Each feature gets a subfolder. This is where humans write briefs and agents write specs. No code lives here.
 
 ```
 plan/
@@ -77,7 +77,7 @@ plan/
 
 ## `src/` - The Code
 
-Organized by component. Each component is a subfolder at the top level of `src/`. The component manifest lives with the code, not with the plan.
+Organised by component. Each component is a subfolder at the top level of `src/`. The component manifest lives with the code, not with the plan.
 
 ```
 src/

@@ -60,4 +60,4 @@
 
 ## Confirmation
 Human confirmed this design before proceeding: yes
-Date confirmed: 2026-04-12
+Date confirmed: 12 Apr 2026

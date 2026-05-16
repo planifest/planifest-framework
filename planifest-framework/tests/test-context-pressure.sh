@@ -7,13 +7,22 @@ set -uo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/helpers/assert.sh"
 
-HOOK="$(cd "$SCRIPT_DIR/.." && pwd)/hooks/telemetry/context-pressure.mjs"
+_hook_abs="$(cd "$SCRIPT_DIR/.." && pwd)/hooks/telemetry/context-pressure.mjs"
+# cygpath converts /c/d/... to C:\d\... for Node.js on Windows/Git Bash
+if command -v cygpath >/dev/null 2>&1; then
+  HOOK="$(cygpath -w "$_hook_abs")"
+else
+  HOOK="$_hook_abs"
+fi
 MOCK_PORT=19741
 
 # Write the mock HTTP server to a temp file so it can be run as a plain node process.
 # Using -t flag for mktemp ensures the path lands in the real Windows temp dir on Git Bash.
 MOCK_SETUP_DIR=$(mktemp -d -t planifest_mock_XXXXXX)
 MOCK_JS="$MOCK_SETUP_DIR/mock-server.mjs"
+if command -v cygpath >/dev/null 2>&1; then
+  MOCK_JS="$(cygpath -m "$MOCK_JS")"
+fi
 
 cat > "$MOCK_JS" << 'MOCK_SERVER_EOF'
 import http from 'node:http';
@@ -88,6 +97,10 @@ echo "=== REQ-008: above threshold (700 KB) — POSTs correct event envelope ===
 MOCK_RUN_DIR=$(mktemp -d -t planifest_mock_run_XXXXXX)
 RECEIVED_FILE="$MOCK_RUN_DIR/received.json"
 READY_FILE="$MOCK_RUN_DIR/ready"
+if command -v cygpath >/dev/null 2>&1; then
+  RECEIVED_FILE="$(cygpath -m "$RECEIVED_FILE")"
+  READY_FILE="$(cygpath -m "$READY_FILE")"
+fi
 
 # Start mock server — runs as a background node process in the current shell
 node "$MOCK_JS" "$RECEIVED_FILE" "$MOCK_PORT" "$READY_FILE" &
@@ -97,6 +110,9 @@ wait_for_file "$READY_FILE" 40
 TRANSCRIPT_DIR=$(mktemp -d -t planifest_transcript_XXXXXX)
 UUID="aabbccdd-1122-3344-5566-778899aabbcc"
 LARGE_FILE="$TRANSCRIPT_DIR/${UUID}.jsonl"
+if command -v cygpath >/dev/null 2>&1; then
+  LARGE_FILE="$(cygpath -m "$LARGE_FILE")"
+fi
 # 700 KB > 630 KB threshold
 node -e "require('fs').writeFileSync(process.argv[1], Buffer.alloc(700 * 1024))" "$LARGE_FILE"
 
@@ -131,6 +147,9 @@ echo "=== NFR-001: dead backend — exits 0, no output ==="
 DEAD_DIR=$(mktemp -d -t planifest_dead_XXXXXX)
 UUID2="11223344-aabb-ccdd-eeff-001122334455"
 DEAD_FILE="$DEAD_DIR/${UUID2}.jsonl"
+if command -v cygpath >/dev/null 2>&1; then
+  DEAD_FILE="$(cygpath -m "$DEAD_FILE")"
+fi
 node -e "require('fs').writeFileSync(process.argv[1], Buffer.alloc(700 * 1024))" "$DEAD_FILE"
 
 INPUT="{\"session_id\":\"test-005\",\"hook_event_name\":\"PostToolUse\",\"tool_name\":\"Read\",\"transcript_path\":\"$DEAD_FILE\"}"

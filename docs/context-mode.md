@@ -32,13 +32,9 @@ Only the agent's search results — typically a few hundred words — enter the 
 
 ## What `--context-mode-mcp` Installs
 
-Running setup with `--context-mode-mcp` adds two layers of context-mode integration:
+Running setup with `--context-mode-mcp` installs enforcement hooks for Claude Code. Routing rules are provided automatically by the context-mode plugin's system prompt when the plugin is installed — no separate file is needed.
 
-### 1. Routing rules
-
-A rules file is written alongside your boot file (e.g. `AGENTS.md` for Claude Code). It instructs the agent to prefer `ctx_*` tools over native tools whenever context-mode is available. This is advisory — the agent follows the rules cooperatively.
-
-### 2. Enforcement hooks (Claude Code only)
+### Enforcement hooks (Claude Code only)
 
 For Claude Code, three `PreToolUse` hook scripts are installed to `.claude/hooks/context-mode/` and registered in `.claude/settings.json`. These fire synchronously before each tool call and block native tool use at the platform level — the agent cannot bypass them even accidentally.
 
@@ -107,12 +103,12 @@ sudo apt install jq      # Ubuntu / Debian
 
 ## Supported tools
 
-| Tool | Routing rules | Enforcement hooks |
+| Tool | Routing rules (plugin) | Enforcement hooks |
 |------|:---:|:---:|
 | Claude Code | ✅ | ✅ |
 | Cursor | ✅ | — |
 | Windsurf | ✅ | — |
 | Copilot | ✅ | — |
-| Cline / Roo Code | ✅ | — |
+| Cline | ✅ | — |
 
-Enforcement hooks are a Claude Code-specific feature (PreToolUse hooks). Other tools receive routing rules only.
+Routing rules are injected by the context-mode plugin's system prompt — available to any tool that supports the plugin. Enforcement hooks are a Claude Code-specific feature (PreToolUse hooks).

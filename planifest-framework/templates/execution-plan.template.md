@@ -12,6 +12,16 @@
 
 ---
 
+## Active Skills
+
+Capability skills loaded for this pipeline run (populated by orchestrator at P0).
+
+| Skill | Scope | Purpose |
+|-------|-------|---------|
+| {{skill-name}} | plan \| permanent | {{what it provides}} |
+
+---
+
 ## Functional Requirements Directory
 
 Functional requirements are split into granular files to optimise agent context windows.
