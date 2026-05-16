@@ -159,7 +159,7 @@ Generate the test report artifact before archiving.
 
 **Copy-then-delete** (ADR-006 — never use atomic move):
 
-1. Determine archive path: `plan/archive/{feature-id}-{YYYY-MM-DD}/`
+1. Determine archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/`
 2. If path exists, use `{feature-id}-{YYYY-MM-DD}-2/`, `-3/`, etc.
 3. Recursively copy all files from `plan/current/` to the archive path (including `capability-skills/` if present)
 4. Confirm the copy is complete before proceeding
@@ -173,7 +173,7 @@ Generate the test report artifact before archiving.
 **Before acting:** Load the `planifest-build-assessment-agent` skill now.
 
 1. Confirm the archive path from Step 7 exists
-2. Invoke the build-assessment-agent, passing the archive path: `plan/archive/{feature-id}-{YYYY-MM-DD}/`
+2. Invoke the build-assessment-agent, passing the archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/`
 3. The build-assessment-agent reads `build-log.md` from the archive and writes `build-report.md` to the same directory
 4. Wait for `P8: Complete` before proceeding
 
@@ -183,9 +183,9 @@ Generate the test report artifact before archiving.
 P7: Ship complete.
 
 PR: {URL}
-Archive: plan/archive/{feature-id}-{YYYY-MM-DD}/
+Archive: plan/_archive/{feature-id}-{YYYY-MM-DD}/
 Changelog: plan/changelog/{feature-id}-{YYYY-MM-DD}.md
-Build report: plan/archive/{feature-id}-{YYYY-MM-DD}/build-report.md
+Build report: plan/_archive/{feature-id}-{YYYY-MM-DD}/build-report.md
 {If skips: "Skipped phases recorded in changelog."}
 
 plan/current/ is empty and ready for the next feature.

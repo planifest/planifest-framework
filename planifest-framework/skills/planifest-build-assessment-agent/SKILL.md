@@ -28,14 +28,14 @@ Every response begins with `P8:`. No exceptions.
 
 ## Input
 
-- `plan/current/build-log.md` (if archive not yet complete) **or** `plan/archive/{feature-id}-{date}/build-log.md` (after archive)
+- `plan/current/build-log.md` (if archive not yet complete) **or** `plan/_archive/{feature-id}-{date}/build-log.md` (after archive)
 - The archive path is passed by the ship-agent when invoking this skill
 
 ---
 
 ## What You Produce
 
-Write the build report to `plan/archive/{feature-id}-{date}/build-report.md`.
+Write the build report to `plan/_archive/{feature-id}-{date}/build-report.md`.
 
 ---
 

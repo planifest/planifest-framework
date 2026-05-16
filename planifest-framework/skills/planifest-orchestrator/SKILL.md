@@ -112,7 +112,20 @@ Load each file at the moment you need it - not before, not in bulk at session st
 
 ## Routing Directive
 
-Every request must be triaged before any action is taken. Route to exactly one of three tracks.
+Every request must be triaged before any action is taken. Route to exactly one of four tracks.
+
+### Standalone Skills
+
+These skills exist outside the main pipeline phases. Invoke them directly when the trigger condition is met.
+
+| Skill | Trigger condition | Pipeline relationship |
+|-------|------------------|-----------------------|
+| `planifest-test-writer` | Starting the TDD red phase for one requirement | Sub-agent of P3 codegen — do not invoke independently |
+| `planifest-implementer` | Making a failing test pass in the TDD green phase | Sub-agent of P3 codegen — do not invoke independently |
+| `planifest-refactor` | Improving code quality after a test goes green | Sub-agent of P3 codegen — do not invoke independently |
+| `planifest-optimise-agent` | Human asks to optimise or trim a skill file | Standalone — invoke any time, outside pipeline context |
+
+> `planifest-test-writer`, `planifest-implementer`, and `planifest-refactor` are managed by `planifest-codegen-agent` and must not be invoked independently. Only `planifest-optimise-agent` is user-invocable outside a pipeline run.
 
 ### Three-Track Decision Tree
 
@@ -400,7 +413,7 @@ not stop at per-phase gates. If [1], honour every STOP gate below.
 Before presenting the confirmed design for confirmation, verify every item:
 
 - [ ] Problem statement is specific and names the target user
-- [ ] At least one user story with testable acceptance criteria exists
+- [ ] At least one user story in "As a / I / so that" format is written into the design (full text, not just a count)
 - [ ] Stack is fully declared (no "TBD" in language, runtime, framework, database, ORM, IaC, cloud, compute, CI)
 - [ ] Every component is named with clear single-responsibility purpose
 - [ ] Data ownership is assigned - every dataset maps to exactly one component
@@ -560,7 +573,9 @@ Invoke the **docs-agent** skill.
 
 **Input:** All artifacts from all phases
 
-**What it produces:** Living repository documentation at `docs/` (component registry, dependency graph), per-component docs at `src/{component-id}/docs/`, and recommendations.
+**What it produces:** Living repository documentation at `docs/` (component registry, dependency graph, architecture overview, decisions index, API index) and per-component docs at `src/{component-id}/docs/`, and recommendations.
+
+> `docs/` is the living state layer — it reflects what the repo currently is. `plan/` reflects what is changing or has changed. These are distinct: never put living state into `plan/`, never put change artifacts into `docs/`.
 
 **Gate:** Every living artifact has been produced and is consistent. The active plan is complete and ready for human review.
 
@@ -579,7 +594,7 @@ Invoke the **ship-agent** skill.
 
 **Input:** All artifacts from all phases; `plan/current/.skips` file (if any)
 
-**What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
+**What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
 
 **Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. Wait for the ship-agent to report `P8: Complete` before delivering final confirmation to the human.
 
@@ -594,9 +609,9 @@ Exception: `continuous_run: true` does NOT bypass this gate. Raising a PR is alw
 
 The ship-agent invokes the build-assessment-agent after the archive is confirmed. You own the final human-facing confirmation once P8 reports complete.
 
-**Input:** `plan/archive/{feature-id}-{date}/build-log.md` (the archived build log)
+**Input:** `plan/_archive/{feature-id}-{date}/build-log.md` (the archived build log)
 
-**What it produces:** `plan/archive/{feature-id}-{date}/build-report.md`
+**What it produces:** `plan/_archive/{feature-id}-{date}/build-report.md`
 
 **Gate:** Confirm the build report exists in the archive. Report the archive path and any efficiency observations to the human.
 

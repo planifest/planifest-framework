@@ -6,7 +6,9 @@
 - Feature ID: {0000000}-{kebab-case-name}
 
 ## Product Layer
-- User stories confirmed: {count}
+- User stories:
+  - US-001: As a [role], I [action], so that [outcome]
+  - US-002: As a [role], I [action], so that [outcome]
 - Acceptance criteria confirmed: {count}
 - Constraints: {list}
 - Integrations: {list or "none"}

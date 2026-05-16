@@ -13,6 +13,35 @@ hooks:
 
 ---
 
+## Living Documentation Layer
+
+`docs/` at the repository root is the **living state layer** — it reflects what the repo currently is. `plan/` reflects what is changing or has changed. These are distinct concerns:
+
+| Layer | Directory | What it contains | Updated when |
+|-------|-----------|-----------------|-------------|
+| Living state | `docs/` | Current system state — components, architecture, decisions, APIs | Every pipeline run |
+| Change artifacts | `plan/` | Feature briefs, specs, ADRs, risks — the paper trail of decisions | Per feature, then archived |
+| Component-local docs | `src/{id}/docs/` | Component-specific contracts, quirks, debt | During codegen and docs phases |
+
+**Mandatory living docs** — maintain these on every pipeline run. Update, do not recreate. Destroying historical context is a defect.
+
+| Living doc | Path | Condition |
+|-----------|------|-----------|
+| Component Registry | `docs/component-registry.md` | Always |
+| Dependency Graph | `docs/dependency-graph.md` | Always |
+| Architecture Overview | `docs/architecture-overview.md` | Always |
+| Decisions Index | `docs/decisions-index.md` | Always |
+| API Index | `docs/api-index.md` | Only when at least one component exposes an API |
+
+Each living doc must include `Last updated: {feature-id}` at the top.
+
+Read the relevant template before writing any living doc for the first time:
+- `planifest-framework/templates/architecture-overview.template.md`
+- `planifest-framework/templates/decisions-index.template.md`
+- `planifest-framework/templates/api-index.template.md`
+
+---
+
 ## Input
 
 - All artifacts produced by prior phases at `plan/`

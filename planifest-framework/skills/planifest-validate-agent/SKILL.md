@@ -42,7 +42,13 @@ Run the project's CI checks in this strict order:
 
 0. **Library audit** — for the component's declared language, check `planifest-overrides/library-standards/{language}/prefer-avoid.md` (if exists) then `planifest-framework/standards/library-standards/{language}/prefer-avoid.md`. Scan the installed dependency manifest against the avoid list. If an avoided library is present: fail, name the library, name the preferred alternative, and report. Skip if the language subdir is a stub or absent.
 
-1. **Semantic Correctness** - Verify that every functional requirement from `plan/current/requirements/` has a mapped, executing test case identifiable by its req-ID. If logic exists without a covering test, semantic validation fails.
+1. **Semantic Correctness** - For each requirement file in `plan/current/requirements/`:
+   - Verify a mapped, executing test case identifiable by its req-ID exists (req-ID must appear in the test description or a structured comment).
+   - Read the `## Acceptance Criteria` checklist in the requirement file. Verify that each individual criterion is covered by at least one test (by description or AC-ID comment). A single test may cover multiple ACs if its description clearly encompasses them.
+   - Produce a coverage table: `REQ-ID | AC | Covered by test | Pass/Fail`
+   - Missing AC coverage = semantic validation failure (not a warning). Report the specific uncovered criterion.
+   - If a requirement file has no `## Acceptance Criteria` section, flag it as a doc gap and continue — do not halt validation.
+   - If logic exists without a covering test, semantic validation fails.
 2. **Lint** - code style and static analysis
 3. **Type-check** - type system verification
 4. **Test** - unit tests, integration tests, contract tests (MUST pass and report the tracked req-IDs)

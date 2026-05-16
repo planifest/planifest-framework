@@ -18,3 +18,6 @@ TOOL_HOOK_ADAPTER_SRC="hooks/adapters/cursor.mjs"
 TOOL_HOOK_ADAPTER_DEST=".cursor/hooks/adapters/cursor.mjs"
 TOOL_HOOKS_INSTALL_DIR=".cursor/hooks"
 TOOL_SETTINGS_FILE=".cursor/settings.json"
+
+# Register check-design for beforeSubmitPrompt in addition to gate-write for PreToolUse (REQ-018)
+TOOL_BEFORE_SUBMIT_HOOK=true
