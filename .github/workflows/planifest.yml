@@ -43,13 +43,17 @@ jobs:
 
   validate-telemetry-schema:
     runs-on: ubuntu-latest
-    # Only runs when the telemetry endpoint secret is configured (REQ-021)
-    if: ${{ secrets.PLANIFEST_TELEMETRY_URL != '' }}
     steps:
       - name: Verify ship phase accepted by telemetry MCP
+        # secrets context is unavailable in job-level if conditions (GitHub Actions limitation).
+        # Secret is passed as env var; step exits 0 silently when not configured (REQ-021).
         env:
           PLANIFEST_TELEMETRY_URL: ${{ secrets.PLANIFEST_TELEMETRY_URL }}
         run: |
+          if [ -z "$PLANIFEST_TELEMETRY_URL" ]; then
+            echo "ℹ️ PLANIFEST_TELEMETRY_URL not configured — skipping telemetry schema guard."
+            exit 0
+          fi
           PAYLOAD=$(node -e "
             process.stdout.write(JSON.stringify({
               schema_version: '1.0',
