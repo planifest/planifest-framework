@@ -100,6 +100,7 @@ What technology stack has been decided? The agent builds with this - it does not
 | Cloud | {{e.g. GCP, AWS, none}} |
 | Compute | {{e.g. Cloud Run, Lambda, k8s}} |
 | CI | {{e.g. GitHub Actions, GitLab CI}} |
+| Build target | local \| docker \| ci-only |
 
 ---
 

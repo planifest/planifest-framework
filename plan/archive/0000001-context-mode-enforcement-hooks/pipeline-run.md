@@ -1,6 +1,6 @@
 # Pipeline Run — 0000001-context-mode-enforcement-hooks
 
-**Date:** 2026-04-12
+**Date:** 12 Apr 2026
 **Feature:** 0000001-context-mode-enforcement-hooks
 **Status:** validate passed (with noted deviation)
 

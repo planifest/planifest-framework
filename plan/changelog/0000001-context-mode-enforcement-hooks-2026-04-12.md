@@ -1,6 +1,6 @@
 # Iteration Log — 0000001-context-mode-enforcement-hooks
 
-**Date:** 2026-04-12
+**Date:** 12 Apr 2026
 **Feature:** 0000001-context-mode-enforcement-hooks
 **Tool:** claude-code (Claude Sonnet 4.6)
 **Pipeline Status:** Complete

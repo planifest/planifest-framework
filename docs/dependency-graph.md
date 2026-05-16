@@ -1,6 +1,6 @@
 # Dependency Graph
 
-**Last updated:** 2026-04-12
+**Last updated:** 12 Apr 2026
 **Maintained by:** planifest-docs-agent
 
 ---

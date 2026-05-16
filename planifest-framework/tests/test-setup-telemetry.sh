@@ -20,6 +20,8 @@ make_workspace() {
   cp -r "$FRAMEWORK_SRC" "$dir/planifest-framework"
   # git init so activate_guardrails() (git config core.hooksPath) doesn't fail
   git init "$dir" >/dev/null 2>&1
+  # Allow git to operate in this temp dir (Windows safe.directory guard)
+  git config --global --add safe.directory "$dir" >/dev/null 2>&1 || true
   echo "$dir"
 }
 
@@ -27,7 +29,8 @@ get_posttooluse_json() {
   local settings_file="$1"
   node -e "
     const fs = require('fs');
-    const j = JSON.parse(fs.readFileSync('$settings_file', 'utf8'));
+    const raw = fs.readFileSync('$settings_file', 'utf8').replace(/^\uFEFF/,'');
+    const j = JSON.parse(raw);
     console.log(JSON.stringify(j?.hooks?.PostToolUse ?? []));
   "
 }
@@ -36,7 +39,8 @@ count_context_pressure_entries() {
   local settings_file="$1"
   node -e "
     const fs = require('fs');
-    const j = JSON.parse(fs.readFileSync('$settings_file', 'utf8'));
+    const raw = fs.readFileSync('$settings_file', 'utf8').replace(/^\uFEFF/,'');
+    const j = JSON.parse(raw);
     const entries = (j?.hooks?.PostToolUse ?? []).filter(e =>
       JSON.stringify(e).includes('context-pressure')
     );
