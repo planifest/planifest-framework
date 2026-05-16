@@ -594,9 +594,9 @@ Invoke the **ship-agent** skill.
 
 **Input:** All artifacts from all phases; `plan/current/.skips` file (if any)
 
-**What it produces:** PR raised via `gh pr create`, changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written.
+**What it produces:** changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written, P8 build assessment invoked, then PR raised via `gh pr create` after archive and build-report are on the branch (REQ-020).
 
-**Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. Wait for the ship-agent to report `P8: Complete` before delivering final confirmation to the human.
+**Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. The ship-agent raises the PR after `P8: Complete`, then reports the PR URL.
 
 **STOP** — present to the human: PR URL, archive path, changelog path, build report path. This is always a confirmation stop — ship actions are external and irreversible.
 Exception: `continuous_run: true` does NOT bypass this gate. Raising a PR is always confirmed with the human first.
