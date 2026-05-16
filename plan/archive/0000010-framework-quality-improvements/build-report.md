@@ -87,6 +87,16 @@ All 372 `external-skills/*/attribution.txt` files normalised to the structured k
 
 ---
 
+## Patch: 0000010c — CI workflow secrets context fix (2026-05-16)
+
+**Root cause:** GitHub Actions does not permit `secrets` context in job-level `if` conditions. The `validate-telemetry-schema` job used `if: ${{ secrets.PLANIFEST_TELEMETRY_URL != '' }}`, causing the workflow to fail with "Unrecognised named-value: 'secrets'" on every PR run.
+
+**Fix:** Removed the job-level `if`. Secret is passed as an env var into the step; a shell guard (`if [ -z "$PLANIFEST_TELEMETRY_URL" ]`) at the top of the `run` block exits 0 silently when the secret is not configured.
+
+**File changed:** `.github/workflows/planifest.yml` — 6 lines inserted, 2 removed.
+
+---
+
 ## Recommendations for Next Feature
 
 1. **wondelai-skills repo**: `_temp/wondelai-skills/` returned empty during extraction — verify the repo was cloned correctly before the next skill library sweep.
