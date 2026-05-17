@@ -158,8 +158,8 @@ assert_contains "Verbosity"                     "$FMT" "req-013: verbosity stand
 echo ""
 echo "=== req-014: migration infrastructure ==="
 
-assert_file_exists "$MIGRATIONS/0001-date-format.md"         "req-014: 0001-date-format.md"
-assert_file_exists "$MIGRATIONS/0002-british-english.md"     "req-014: 0002-british-english.md"
+assert_file_exists "$MIGRATIONS/_done/0001-date-format.md"   "req-014: 0001-date-format.md"
+assert_file_exists "$MIGRATIONS/_done/0002-british-english.md" "req-014: 0002-british-english.md"
 assert_file_exists "$MIGRATIONS/_done/.gitkeep"              "req-014: _done/ archive dir"
 assert_file_exists "$SKILLS/planifest-migrator/SKILL.md"     "req-014: planifest-migrator skill"
 MIGRATOR=$(cat "$SKILLS/planifest-migrator/SKILL.md")

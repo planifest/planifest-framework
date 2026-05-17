@@ -832,6 +832,8 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope and emission conditions. The snippets below show the `data` field only.
 
+**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+
 **Event type reference** (14 types as of v0.2.0):
 
 | Category | Event | When |

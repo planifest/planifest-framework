@@ -64,8 +64,8 @@ try {
     event: rawEvent.includes("prompt") ? "UserPromptSubmit" : "PreToolUse",
   });
 
-  // --- preToolUse: gate-write ---
-  if (rawEvent === "pretooluse") {
+  // --- preToolUse / pre_tool_use: gate-write ---
+  if (rawEvent === "pretooluse" || rawEvent === "pre_tool_use") {
     const result = spawnSync(
       process.execPath,
       [join(enfDir, "gate-write.mjs")],
@@ -80,8 +80,8 @@ try {
     process.exit(0);
   }
 
-  // --- userPromptSubmitted: check-design context injection ---
-  if (rawEvent === "userpromptsubmitted") {
+  // --- userPromptSubmitted / prompt_submit: check-design context injection ---
+  if (rawEvent === "userpromptsubmitted" || rawEvent === "prompt_submit") {
     const result = spawnSync(
       process.execPath,
       [join(enfDir, "check-design.mjs")],

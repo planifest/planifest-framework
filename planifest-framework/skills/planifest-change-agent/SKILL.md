@@ -151,6 +151,8 @@ If a relevant capability skill exists for the technology being modified (e.g. `f
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
+**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+
 **`deviation`** — when implementation diverges from the confirmed design:
 ```json
 { "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }

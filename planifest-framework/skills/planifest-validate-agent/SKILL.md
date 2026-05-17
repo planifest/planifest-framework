@@ -154,6 +154,8 @@ Independent CI checks MUST be run in parallel. Where the tool supports multiple 
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
+**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+
 **`validation_failure`** — for each test or check failure:
 ```json
 { "failure_type": "test" | "lint" | "type" | "build", "phase_name": "validate", "attempt_number": <n>, "action_id": "<suite or check name>" }
