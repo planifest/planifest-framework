@@ -1,0 +1,122 @@
+# Decisions Index
+
+> Living document. Index of all ADRs across all features. Updated after every pipeline run.
+> Do not archive this file — update it in place.
+
+Last updated: 0000011-setup-parity-and-consistency
+
+> **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
+
+---
+
+## All Architecture Decision Records
+
+### Feature 0000001 — context-mode-enforcement-hooks
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | PreToolUse block mechanism | active | Hook scripts block tool calls by writing a deny response to stdout; exit code alone is insufficient |
+| ADR-002 | Allowlist hardcoded vs configurable | active | Allowlist is hardcoded in the script; configuration adds complexity without proportional benefit |
+| ADR-003 | Unconditional vs pattern-based blocking | active | Pattern-based blocking (Grep/Bash/WebFetch) rather than unconditional; lets non-search tool calls through |
+| ADR-004 | Hook script ownership split | active | Each hook type (block-grep, block-bash, block-webfetch) is a separate script; no monolithic hook |
+
+### Feature 0000003 — hook-based-enforcement
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Three-tier enforcement model | active | Tier 1a (Claude Code native hooks), Tier 1b (other IDE hooks), Tier 2 (instructions only) |
+| ADR-002 | Common envelope shape | active | All adapters translate to `{ session_id, cwd, tool_input, event }` before delegating to enforcement |
+| ADR-003 | Flag-file deduplication | active | `.orchestrator-active` sentinel prevents duplicate orchestrator activation per session |
+| ADR-004 | Two-check gate model | active | gate-write performs (1) sentinel check, (2) component-path allowlist — in order |
+| ADR-005 | Exit-zero failure mode | active | Hooks never exit non-zero on unexpected errors; session must never be blocked by a hook bug |
+| ADR-006 | Copy-then-delete archive | active | Archive uses explicit copy then delete, not atomic move, to survive partial failures |
+| ADR-007 | Px prefix convention | active | Every phase response begins with its phase prefix (P0:, P1:, ...) for instant human orientation |
+| ADR-008 | Advisory commit-msg hook | active | commit-msg hook rejects AI attribution and >72-char subjects; exit 1 on violation |
+| ADR-009 | Anthropic-first skill trust model | active | Skills in `.claude/skills/` are trusted; external skills require explicit `--include-full-skill-library` |
+| ADR-010 | Plan-scoped skill lifecycle | active | Skills are loaded JIT per phase, not upfront; prevents context bloat |
+
+### Feature 0000004 — tdd-regression-test-quality
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | TDD inner loop as codegen subloop | active | codegen-agent orchestrates test-writer → implementer → refactor per requirement, not per feature |
+| ADR-002 | Subagent model tier convention | active | Sub-agents declare `recommended_model: haiku`; codegen-agent retains full model for orchestration |
+| ADR-003 | Regression promotion criteria | active | Tests promoted to regression pack only with human confirmation; `promote-to-regression.sh` is the mechanism |
+
+### Feature 0000005 — framework-governance
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Library standards directory tree | active | Per-language prefer/avoid lists under `planifest-framework/standards/library-standards/{lang}/` |
+| ADR-002 | planifest-overrides sibling directory | active | Project-level overrides live in `planifest-overrides/` (sibling to `planifest-framework/`), never inside the framework |
+| ADR-003 | Sentinel-file orchestrator enforcement | active | `plan/.orchestrator-active` sentinel gates all writes to `plan/current/` |
+| ADR-004 | Repo instructions via design.md | active | Per-repo instructions (e.g. local-git-only) are embedded in `design.md` Engineering Layer |
+| ADR-005 | Markdown migration files | active | Migrations are documented in `.md` files under `planifest-framework/migrations/`; applied migrations archived to `_done/` |
+| ADR-006 | Two-registry capability skills | active | Capability skills exist in two registries: `planifest-framework/skills-inbox/` (framework) and `planifest-overrides/capability-skills/` (project) |
+
+### Feature 0000006 — build-assessment-phase
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Build log as markdown | active | `build-log.md` in `plan/current/` captures P3/P4 cycle details; P8 reads this file |
+| ADR-002 | Model tier abstraction | active | Phase skills declare `recommended_model` in frontmatter; orchestrator respects this for sub-agent invocations |
+| ADR-003 | Parallelism as skill instructions | active | Parallelism directives belong in SKILL.md, not in code; agent tooling handles scheduling |
+| ADR-004 | P8 as separate phase | active | Build assessment (P8) is a distinct phase invoked by P7 (ship), not by P4 (validate) |
+
+### Feature 0000007 — agent-optimisation
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Explicit build target field | active | `design.md` Engineering Layer has a `Build target:` field; agents use it to select Docker vs host toolchain |
+| ADR-002 | Telemetry guidance centralised | active | All telemetry envelope docs live in `telemetry-standards.md`; skill files reference it rather than duplicating |
+| ADR-003 | Optimise-agent suggestion-only | active | planifest-optimise-agent produces suggestions only, never modifies code; human decides what to apply |
+| ADR-004 | Setup manifest for managed directories | active | `.planifest-manifest` tracks installed paths for idempotent re-run cleanup |
+| ADR-005 | Locale-tagged language quirks files | active | `quirks.md` files include locale tag (`en-GB`) so agents apply the correct language variant |
+
+### Feature 0000008 — context-mode-plugin-routing-rules
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Plugin as canonical source for routing rules | active | Context-mode plugin is the source of truth for which tools to block; framework hook scripts read from it |
+| ADR-002 | No per-tool routing rules fallback | active | If the plugin is absent, hooks pass through silently rather than applying a hard-coded fallback list |
+
+### Feature 0000009 — framework-rail-tightening
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | External skills opt-in flag | active | `--include-full-skill-library` required to install external skills; default install is framework skills only |
+| ADR-002 | Attribution.txt per skill | active | Each external skill must include `attribution.txt`; missing file is a hard skip, not a silent install |
+| ADR-003 | Auto-trigger hook plus fallback | active | `UserPromptSubmit` hook auto-triggers orchestrator; non-hook tools rely on manual skill load as fallback |
+| ADR-004 | Skill map in design.md | active | `design.md` Engineering Layer includes a Skill Map table: requirement → skill → rationale |
+| ADR-005 | gate-write Windows path normalisation | active | gate-write uses `norm()` (normalise + forward-slash + lowercase) for all path comparisons; avoids POSIX/Win mismatch |
+| ADR-006 | Pause-resume via pause.md | active | `pause.md` in `plan/current/` is always permitted by gate-write; enables session pause/resume at any phase |
+
+### Feature 0000010 — framework-quality-improvements
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Agent tool in allowedTools | active | `Agent` tool must be in `allowedTools` for multi-agent features; not assumed present by default |
+| ADR-002 | Skill name field as canonical identifier | active | `name:` frontmatter field in SKILL.md is the canonical skill identifier; descriptions are secondary |
+| ADR-003 | Input validation section conditional | active | OpenAPI spec section in spec-agent output is conditional on the feature including an API; omit for non-API features |
+
+### Feature 0000011 — setup-parity-and-consistency
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Hook deny response format | active | Copilot/Codex use `{ permissionDecision, permissionDecisionReason }` JSON deny; Claude Code uses exit 2 + stdout message |
+| ADR-002 | Workspace hook config write strategy | active | Tool-specific hook configs (`.cursor/hooks.json`, `.codex/hooks.json`) are written by setup scripts using merge-not-overwrite |
+| ADR-003 | Hook adapter architecture | active | All adapters are delegating (translate envelope → call enforcement script); no inline enforcement logic in adapters |
+
+---
+
+## Status Definitions
+
+| Status | Meaning |
+|--------|---------|
+| active | Decision stands; implementation follows it |
+| superseded | Replaced by a later ADR (reference provided in the ADR body) |
+| amended | Core decision unchanged but conditions or scope updated |
+
+---
+
+*Template: decisions-index.template.md*

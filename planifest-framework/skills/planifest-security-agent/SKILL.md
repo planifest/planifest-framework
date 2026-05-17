@@ -115,6 +115,8 @@ Independent security review scans MUST be run in parallel. Where the feature has
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
+**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+
 **`security_finding`** — for each vulnerability or risk identified:
 ```json
 { "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN>" }

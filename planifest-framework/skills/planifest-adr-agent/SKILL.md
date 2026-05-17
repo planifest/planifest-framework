@@ -87,6 +87,8 @@ Independent ADRs MUST be written in parallel. Apply the dependency test: does AD
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
+**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+
 **`adr_decision`** — after each ADR is written to disk:
 ```json
 { "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }

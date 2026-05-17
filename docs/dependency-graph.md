@@ -1,6 +1,6 @@
 # Dependency Graph
 
-**Last updated:** 12 Apr 2026
+**Last updated:** 0000011-setup-parity-and-consistency (17 May 2026)
 **Maintained by:** planifest-docs-agent
 
 ---

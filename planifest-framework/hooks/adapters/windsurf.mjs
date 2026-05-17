@@ -1,67 +1,111 @@
 #!/usr/bin/env node
 /**
- * Windsurf hook adapter — Tier 1 (ADR-001, ADR-002).
+ * Windsurf Cascade hook adapter — delegating (ADR-003, REQ-016).
  *
- * Translates Windsurf's native hook envelope to the Planifest common envelope,
- * then delegates to the appropriate shared hook script.
+ * Reads the Windsurf hook envelope from stdin, dispatches on agent_action_name,
+ * and delegates to gate-write.mjs or check-design.mjs via spawnSync.
+ * Never contains inline enforcement logic.
  *
- * Windsurf PreToolUse envelope shape:
- *   { tool_name, tool_input, session_id?, workspace_root? }
+ * Block mechanism: exit code 2 (Windsurf pre-hooks).
  *
- * Usage: node windsurf.mjs <script> [phase]
- *   e.g.  node windsurf.mjs gate-write
- *         node windsurf.mjs emit-phase-start spec
+ * Windsurf envelope:
+ *   { agent_action_name, trajectory_id, timestamp, model_name, tool_info }
  */
 
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { join, dirname } from "node:path";
 
-const SCRIPT_NAME = process.argv[2];
-const PHASE_ARG = process.argv[3];
-
-const ADAPTER_DIR = dirname(new URL(import.meta.url).pathname);
-const HOOKS_DIR = dirname(ADAPTER_DIR);
+const __dir = dirname(fileURLToPath(import.meta.url));
+const enfDir = join(__dir, "..", "enforcement");
 
 async function readStdin() {
   return new Promise((resolve) => {
     let data = "";
     process.stdin.setEncoding("utf-8");
     process.stdin.on("data", (c) => { data += c; });
-    process.stdin.on("end", () => resolve(data.replace(/^\uFEFF/, "")));
+    process.stdin.on("end", () => resolve(data.replace(/^﻿/, "")));
     process.stdin.resume();
   });
 }
 
+const WRITE_MCP_TOOLS = /write|edit|create|update|delete|remove|patch/i;
+
 try {
-  if (!SCRIPT_NAME) process.exit(0);
-
   const raw = await readStdin();
-  const windsurfInput = JSON.parse(raw);
 
-  // Translate Windsurf envelope → Planifest common envelope (ADR-002)
-  const envelope = {
-    session_id: windsurfInput.session_id ?? windsurfInput.sessionId,
-    cwd: windsurfInput.workspace_root ?? windsurfInput.workspaceRoot ?? windsurfInput.cwd ?? process.cwd(),
-    tool_input: windsurfInput.tool_input ?? windsurfInput.toolInput ?? {},
-    event: "PreToolUse",
-  };
+  let input;
+  try { input = JSON.parse(raw); } catch { process.exit(0); }
 
-  const scriptSubdir = SCRIPT_NAME.startsWith("emit-") ? "telemetry" : "enforcement";
-  const scriptPath = join(HOOKS_DIR, scriptSubdir, `${SCRIPT_NAME}.mjs`);
+  const event = (input?.agent_action_name ?? "").toLowerCase();
+  const cwd = input?.tool_info?.cwd ?? input?.tool_info?.workspace_root ?? process.cwd();
+  const sessionId = input?.trajectory_id ?? "";
 
-  if (!existsSync(scriptPath)) process.exit(0);
+  // --- pre_write_code: gate-write ---
+  if (event === "pre_write_code") {
+    const path = input?.tool_info?.path ?? input?.tool_info?.file_path ?? "";
+    const envelope = JSON.stringify({
+      session_id: sessionId,
+      cwd,
+      tool_input: { path },
+      event: "PreToolUse",
+    });
 
-  const args = PHASE_ARG ? [scriptPath, PHASE_ARG] : [scriptPath];
-  const result = spawnSync(process.execPath, args, {
-    input: JSON.stringify(envelope),
-    encoding: "utf-8",
-    stdio: ["pipe", "pipe", "pipe"],
-  });
+    const result = spawnSync(
+      process.execPath,
+      [join(enfDir, "gate-write.mjs")],
+      { input: envelope, encoding: "utf-8" }
+    );
 
-  if (result.stdout) process.stdout.write(result.stdout);
-  if (result.stderr) process.stderr.write(result.stderr);
-  process.exit(result.status ?? 0);
+    if (result.stdout) process.stdout.write(result.stdout);
+    process.exit(result.status === 2 ? 2 : 0);
+  }
+
+  // --- pre_mcp_tool_use: gate-write for write-type MCP tools ---
+  if (event === "pre_mcp_tool_use") {
+    const toolName = input?.tool_info?.tool_name ?? input?.tool_info?.name ?? "";
+    if (!WRITE_MCP_TOOLS.test(toolName)) process.exit(0);
+
+    const path = input?.tool_info?.tool_input?.path ?? input?.tool_info?.tool_input?.file_path ?? "";
+    const envelope = JSON.stringify({
+      session_id: sessionId,
+      cwd,
+      tool_input: { path, tool_name: toolName },
+      event: "PreToolUse",
+    });
+
+    const result = spawnSync(
+      process.execPath,
+      [join(enfDir, "gate-write.mjs")],
+      { input: envelope, encoding: "utf-8" }
+    );
+
+    if (result.stdout) process.stdout.write(result.stdout);
+    process.exit(result.status === 2 ? 2 : 0);
+  }
+
+  // --- pre_user_prompt: check-design scope injection ---
+  if (event === "pre_user_prompt") {
+    const envelope = JSON.stringify({
+      session_id: sessionId,
+      cwd,
+      tool_input: {},
+      event: "UserPromptSubmit",
+    });
+
+    const result = spawnSync(
+      process.execPath,
+      [join(enfDir, "check-design.mjs")],
+      { input: envelope, encoding: "utf-8" }
+    );
+
+    if (result.stdout) process.stdout.write(result.stdout);
+    process.exit(result.status === 2 ? 2 : 0);
+  }
+
+  // Unknown event — pass through silently
+  process.exit(0);
 } catch {
+  // Never block on unexpected errors (NFR-003)
   process.exit(0);
 }

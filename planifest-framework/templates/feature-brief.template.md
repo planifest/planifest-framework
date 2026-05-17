@@ -29,12 +29,14 @@ What problem does this feature solve? Who benefits and how?
 Break the feature into discrete features. Each feature should be small enough that an agent can implement it within a single session (roughly: one API endpoint with its data model, validation, tests, and docs - or one UI screen with its state management and tests).
 
 > **Rule of thumb:** If a feature has more than 3 user stories, it's too big. Split it further. Big features should have many small features, not a few large ones.
+>
+> **User story format:** Write each story as "As a [role], I [action], so that [outcome]." Each story becomes one requirement doc. If a story implies more than 3 acceptance criteria, split it into two stories.
 
 | Feature | User Stories | Priority | Phase |
 |---------|-------------|----------|-------|
-| {{feature-name}} | {{story-1}}, {{story-2}} | must-have / should-have / could-have | 1 |
-| {{feature-name}} | {{story-1}}, {{story-2}} | must-have / should-have / could-have | 1 |
-| {{feature-name}} | {{story-1}} | must-have / should-have / could-have | 2 |
+| {{feature-name}} | As a developer, I can run setup.ps1 with --include-full-skill-library, so that external skills are installed without manual copying | must-have | 1 |
+| {{feature-name}} | As a [role], I [action], so that [outcome] | should-have | 1 |
+| {{feature-name}} | As a [role], I [action], so that [outcome] | could-have | 2 |
 
 ---
 

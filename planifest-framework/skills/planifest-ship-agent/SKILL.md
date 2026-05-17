@@ -1,6 +1,6 @@
 ---
 name: planifest-ship-agent
-description: Phase 7 only — raises the PR, writes the changelog, handles skips, and archives plan/current/. Invoked by the orchestrator at the end of the feature pipeline.
+description: Phase 7 only — writes the changelog, handles skips, archives plan/current/, invokes P8, then raises the PR. PR is raised last so archive and build-report commits are included.
 bundle_templates: [iteration-log.template.md]
 bundle_standards: [formatting-standards.md, telemetry-standards.md]
 hooks:
@@ -9,7 +9,7 @@ hooks:
 
 # Planifest - ship-agent
 
-> You are Phase 7. You close the feature. You raise the PR, write the changelog, process any skipped phases, and archive the plan. You do not add features or fix bugs — that work is done. Your job is a clean handoff.
+> You are Phase 7. You close the feature. You write the changelog, process any skipped phases, archive the plan, invoke P8 build assessment, then raise the PR. The PR is raised last — after archive and build-report commits are on the branch — so everything is included in one PR. You do not add features or fix bugs. Your job is a clean handoff.
 
 ---
 
@@ -48,7 +48,7 @@ Read:
 - `plan/current/security-report.md` — findings to surface (if exists)
 - `plan/current/.skips` — skipped phases to disclose (if exists)
 
-Draft the PR description:
+Draft the PR description (do not raise the PR yet — it is raised in Step 8 after archive and P8 complete):
 
 ```markdown
 ## Summary
@@ -78,7 +78,7 @@ Write `plan/changelog/{feature-id}-{YYYY-MM-DD}.md` as the permanent audit trail
 
 **Feature:** {feature name from brief}
 **Pipeline run:** {phases completed, phases skipped}
-**PR:** {PR URL once raised}
+**PR:** {pending — updated after PR is raised in Step 8}
 
 ## What Was Built
 {Summary from feature brief}
@@ -100,26 +100,15 @@ If `plan/current/.skips` exists:
 2. The changelog (Step 2) already includes the skips under `## Skipped Phases`
 3. Delete `plan/current/.skips` after the changelog is confirmed written
 
-### Step 4 — Raise the PR
-
-```bash
-gh pr create \
-  --title "{feature-id}: {one-line feature summary}" \
-  --body "$(cat <<'EOF'
-{PR description from Step 1}
-EOF
-)"
-```
-
-Capture and confirm the PR URL. Include it in the changelog (`## PR` field).
-
-### Step 5 — Write .feature-id marker
+### Step 4 — Write .feature-id marker
 
 Write `plan/current/.feature-id` containing the feature ID (e.g. `0000003-hook-based-enforcement`).
 
 This marker enables resume detection to identify stale artifacts from a failed archive (DD-012, ADR-006).
 
-### Step R — Regression confirmation
+### Step 5 — Regression confirmation
+
+*(Previously Step R)*
 
 Before archiving, present agent-tagged regression candidates to the human for curation.
 
@@ -137,10 +126,10 @@ Before archiving, present agent-tagged regression candidates to the human for cu
    bash planifest-framework/scripts/promote-to-regression.sh \
      "{test-file-path}" "{feature-id}" "human"
    ```
-4. Record the human's decisions — they will appear in the test report (Step T).
+4. Record the human's decisions — they will appear in the test report (Step 6).
 5. If no candidates are tagged: note "No regression candidates for this feature" and continue.
 
-### Step T — Test report
+### Step 6 — Test report
 
 Generate the test report artifact before archiving.
 
@@ -148,7 +137,7 @@ Generate the test report artifact before archiving.
 2. Populate all sections:
    - **Tests run (P4):** sourced from P4 validate-agent output — every test file run during validation, with req-ID and pass/fail status.
    - **Regression pack state:** run `bash planifest-framework/tests/run-tests.sh` regression block output, or read the latest run summary. Record total / pass / fail counts and list any failures.
-   - **Newly promoted tests:** the confirmations from Step R above.
+   - **Newly promoted tests:** the confirmations from Step 5 above.
 3. Write the populated report to:
    ```
    plan/changelog/{feature-id}-test-report-{YYYY-MM-DD}.md
@@ -159,7 +148,7 @@ Generate the test report artifact before archiving.
 
 **Copy-then-delete** (ADR-006 — never use atomic move):
 
-1. Determine archive path: `plan/archive/{feature-id}-{YYYY-MM-DD}/`
+1. Determine archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/`
 2. If path exists, use `{feature-id}-{YYYY-MM-DD}-2/`, `-3/`, etc.
 3. Recursively copy all files from `plan/current/` to the archive path (including `capability-skills/` if present)
 4. Confirm the copy is complete before proceeding
@@ -173,19 +162,34 @@ Generate the test report artifact before archiving.
 **Before acting:** Load the `planifest-build-assessment-agent` skill now.
 
 1. Confirm the archive path from Step 7 exists
-2. Invoke the build-assessment-agent, passing the archive path: `plan/archive/{feature-id}-{YYYY-MM-DD}/`
+2. Invoke the build-assessment-agent, passing the archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/`
 3. The build-assessment-agent reads `build-log.md` from the archive and writes `build-report.md` to the same directory
 4. Wait for `P8: Complete` before proceeding
 
-### Step 9 — Confirm to human
+### Step 9 — Raise the PR
+
+All archive and build-report commits are now on the branch. Raise the PR (REQ-020):
+
+```bash
+gh pr create \
+  --title "{feature-id}: {one-line feature summary}" \
+  --body "$(cat <<'EOF'
+{PR description from Step 1}
+EOF
+)"
+```
+
+Capture and confirm the PR URL. Update the changelog (`## PR` field) with the URL.
+
+### Step 10 — Confirm to human
 
 ```
 P7: Ship complete.
 
 PR: {URL}
-Archive: plan/archive/{feature-id}-{YYYY-MM-DD}/
+Archive: plan/_archive/{feature-id}-{YYYY-MM-DD}/
 Changelog: plan/changelog/{feature-id}-{YYYY-MM-DD}.md
-Build report: plan/archive/{feature-id}-{YYYY-MM-DD}/build-report.md
+Build report: plan/_archive/{feature-id}-{YYYY-MM-DD}/build-report.md
 {If skips: "Skipped phases recorded in changelog."}
 
 plan/current/ is empty and ready for the next feature.
@@ -202,7 +206,7 @@ See `planifest-framework/standards/telemetry-standards.md` for the full event en
 { "phase_name": "ship" }
 ```
 
-**`phase_end`** — after Step 8 (archive confirmed):
+**`phase_end`** — after Step 9 (PR raised):
 ```json
 { "phase_name": "ship", "status": "pass", "duration_ms": <elapsed> }
 ```

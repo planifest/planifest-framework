@@ -19,10 +19,7 @@ Without the flag, external skills are not copied.
 ## Licence Compliance
 
 All upstream skills are sourced from MIT or Apache-2.0 repositories. Full licence text and
-attribution details are in each skill's ttribution.txt file.
-
-For the complete compliance analysis see
-[plan/current/requirements/req-005-open-source-skill-library.md](../../plan/current/requirements/req-005-open-source-skill-library.md).
+attribution details are in each skill's `attribution.txt` file.
 
 ## Skill Index
 

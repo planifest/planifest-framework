@@ -93,6 +93,12 @@ assert_equals "yes" "$(grep_has "include-full-skill-library" "$SETUP_SH")" \
 assert_equals "yes" "$(grep_has "copy_external_skills" "$SETUP_SH")" \
   "REQ-004: setup.sh calls copy_external_skills"
 
+assert_equals "yes" "$(grep_has "include-full-skill-library" "$SETUP_PS1")" \
+  "REQ-004: setup.ps1 has --include-full-skill-library flag"
+
+assert_equals "yes" "$(grep_has "Copy-ExternalSkills" "$SETUP_PS1")" \
+  "REQ-004: setup.ps1 has Copy-ExternalSkills function"
+
 # ── REQ-005: pause/resume ────────────────────────────────────────────────────
 
 echo ""
