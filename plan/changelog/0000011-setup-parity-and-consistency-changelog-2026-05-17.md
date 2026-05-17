@@ -1,8 +1,8 @@
 # Changelog — 0000011-setup-parity-and-consistency — 17 May 2026
 
 **Feature:** Setup parity and consistency — setup.ps1 gaps, hook adapter fixes, template alignment, archive rename
-**Pipeline run:** P0 (Assess), P1 (Spec), P2 (ADRs), P3 (Codegen), P4 (Validate), P5 (Security), P6 (Docs), P7 (Ship), P8 (Build Assessment — pending)
-**PR:** pending — updated after PR is raised in Step 9
+**Pipeline run:** P0 (Assess), P1 (Spec), P2 (ADRs), P3 (Codegen), P4 (Validate), P5 (Security), P6 (Docs), P7 (Ship), P8 (Build Assessment — complete)
+**PR:** pending — branch `feat/ext-skill-fixes` ready for human push and PR creation
 
 ## What Was Built
 
