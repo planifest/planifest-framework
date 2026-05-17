@@ -17,4 +17,7 @@
     HookAdapterDest  = '.cursor\hooks\adapters\cursor.mjs'
     HooksInstallDir  = '.cursor\hooks'
     SettingsFile     = '.cursor\settings.json'
+
+    # Register check-design for beforeSubmitPrompt in addition to gate-write for PreToolUse (REQ-018)
+    BeforeSubmitHook = $true
 }

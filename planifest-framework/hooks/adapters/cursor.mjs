@@ -1,15 +1,18 @@
 #!/usr/bin/env node
 /**
- * Cursor hook adapter — Tier 1 (ADR-001, ADR-002).
+ * Cursor hook adapter — Tier 1 (ADR-001, ADR-002, REQ-018).
  *
  * Translates Cursor's native hook envelope to the Planifest common envelope,
  * then delegates to the appropriate shared hook script.
  *
- * Cursor PreToolUse envelope shape:
- *   { toolName, toolInput, sessionId?, workspaceRoot? }
+ * Cursor PreToolUse envelope shape (current):
+ *   { toolName, toolInput, conversation_id?, workspace_roots?: string[] }
+ * Legacy fields also supported:
+ *   { sessionId, workspaceRoot }
  *
  * Usage: node cursor.mjs <script> [phase]
  *   e.g.  node cursor.mjs gate-write
+ *         node cursor.mjs check-design
  *         node cursor.mjs emit-phase-start spec
  *
  * Exit codes are passed through from the delegate script.
@@ -18,9 +21,8 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { createInterface } from "node:readline";
 
-const SCRIPT_NAME = process.argv[2]; // e.g. "gate-write" or "emit-phase-start"
+const SCRIPT_NAME = process.argv[2]; // e.g. "gate-write" or "check-design"
 const PHASE_ARG = process.argv[3];   // e.g. "spec" (for telemetry scripts only)
 
 const ADAPTER_DIR = dirname(new URL(import.meta.url).pathname);
@@ -31,7 +33,7 @@ async function readStdin() {
     let data = "";
     process.stdin.setEncoding("utf-8");
     process.stdin.on("data", (c) => { data += c; });
-    process.stdin.on("end", () => resolve(data.replace(/^\uFEFF/, "")));
+    process.stdin.on("end", () => resolve(data.replace(/^﻿/, "")));
     process.stdin.resume();
   });
 }
@@ -42,12 +44,22 @@ try {
   const raw = await readStdin();
   const cursorInput = JSON.parse(raw);
 
-  // Translate Cursor envelope → Planifest common envelope (ADR-002)
+  // Translate Cursor envelope → Planifest common envelope (ADR-002, REQ-018)
+  // workspace_roots is an array in current Cursor API; fall back to legacy workspaceRoot/cwd
+  const cwd =
+    (Array.isArray(cursorInput.workspace_roots) ? cursorInput.workspace_roots[0] : null) ??
+    cursorInput.workspaceRoot ??
+    cursorInput.cwd ??
+    process.cwd();
+
+  // check-design is called from beforeSubmitPrompt, not PreToolUse
+  const event = SCRIPT_NAME === "check-design" ? "UserPromptSubmit" : "PreToolUse";
+
   const envelope = {
-    session_id: cursorInput.sessionId ?? cursorInput.session_id,
-    cwd: cursorInput.workspaceRoot ?? cursorInput.cwd ?? process.cwd(),
+    session_id: cursorInput.conversation_id ?? cursorInput.sessionId ?? cursorInput.session_id,
+    cwd,
     tool_input: cursorInput.toolInput ?? cursorInput.tool_input ?? {},
-    event: "PreToolUse",
+    event,
   };
 
   // Locate the target script

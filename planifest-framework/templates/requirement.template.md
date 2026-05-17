@@ -6,12 +6,18 @@ version: "0.1.0"
 ---
 # Requirement: {{req-id}} - {{feature-name}}
 
-**Skill:** [spec-agent](../skills/spec-agent-SKILL.md) 
+**Skill:** [spec-agent](../skills/planifest-spec-agent/SKILL.md)
 **Feature:** {{feature-id}}
-**Source:** {{user story or acceptance criterion}}
+**Source:** {{user story ID from design.md — e.g. US-001}}
 **Priority:** must-have | should-have
 
-> Written by the spec-agent. This file contains the requirements for a single feature so that agents can build it without loading the entire project scope.
+---
+
+## User Story
+
+> One requirement doc = one user story. If this story implies more than 3 acceptance criteria, split it into two requirement docs.
+
+As a [role], I [action], so that [outcome].
 
 ---
 

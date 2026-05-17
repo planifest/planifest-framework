@@ -120,6 +120,8 @@ Independent spec artifacts MUST be written in parallel. Apply the dependency tes
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
+**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+
 **`spec_gap`** — when the spec cannot proceed without human input:
 ```json
 { "question": "<blocking question>", "phase_name": "spec" }
