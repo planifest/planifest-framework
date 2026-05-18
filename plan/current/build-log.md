@@ -35,6 +35,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T08:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `0` |
+| MCP calls | `3` |
+| Parallel task batches | `3` |
+| Notes | 10 requirement files written. Execution plan, scope, risk register, domain glossary, operational model, SLO definitions, cost model produced. No OpenAPI or data contract (docs-only feature). |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
