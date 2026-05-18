@@ -77,6 +77,48 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T11:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | `0` |
+| MCP calls | `4` |
+| Parallel task batches | `1` |
+| Notes | Semantic-only validation (docs/SKILL.md, no runtime). All 10 REQ ACs covered. 0 self-correction cycles. |
+
+---
+
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T11:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Notes | 0 critical, 0 high, 0 medium findings. No runtime surface. Input validation confirmed for branch name, run-mode sentinel, SHA inputs. |
+
+---
+
+### P6 — Docs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T11:45:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `0` |
+| MCP calls | `2` |
+| Parallel task batches | `1` |
+| Notes | decisions-index updated (6 new ADRs). architecture-overview updated (P0–P9, build-assessment-agent added). component-registry Last updated bumped. recommendations.md and iteration log produced. No src/ components — per-component docs not applicable. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}

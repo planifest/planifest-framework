@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 0000011-setup-parity-and-consistency (17 May 2026)
+**Last updated:** 0000012-docs-restructure-commit-directives (18 May 2026)
 **Maintained by:** planifest-docs-agent
 
 ---

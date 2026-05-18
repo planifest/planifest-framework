@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000011-setup-parity-and-consistency
+Last updated: 0000012-docs-restructure-commit-directives
 
 ---
 
@@ -48,15 +48,16 @@ flowchart TD
         SS["skill-sync.sh / skill-sync.ps1"]
     end
 
-    subgraph Skills["Pipeline Skills"]
-        ORCH["planifest-orchestrator"]
-        SPEC["planifest-spec-agent"]
-        ADR["planifest-adr-agent"]
-        CG["planifest-codegen-agent"]
-        VAL["planifest-validate-agent"]
-        SEC["planifest-security-agent"]
-        DOCS["planifest-docs-agent"]
-        SHIP["planifest-ship-agent"]
+    subgraph Skills["Pipeline Skills (P0–P9)"]
+        ORCH["planifest-orchestrator\n(P0)"]
+        SPEC["planifest-spec-agent\n(P1)"]
+        ADR["planifest-adr-agent\n(P2)"]
+        CG["planifest-codegen-agent\n(P3)"]
+        VAL["planifest-validate-agent\n(P4)"]
+        SEC["planifest-security-agent\n(P5)"]
+        DOCS["planifest-docs-agent\n(P6)"]
+        SHIP["planifest-ship-agent\n(P7–P9)"]
+        BA["planifest-build-assessment-agent\n(P8, sub-agent of ship-agent)"]
     end
 
     Agent -->|"plans Write/Edit"| HookRunner

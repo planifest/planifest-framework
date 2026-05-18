@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000011-setup-parity-and-consistency
+Last updated: 0000012-docs-restructure-commit-directives
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -106,6 +106,17 @@ Last updated: 0000011-setup-parity-and-consistency
 | ADR-001 | Hook deny response format | active | Copilot/Codex use `{ permissionDecision, permissionDecisionReason }` JSON deny; Claude Code uses exit 2 + stdout message |
 | ADR-002 | Workspace hook config write strategy | active | Tool-specific hook configs (`.cursor/hooks.json`, `.codex/hooks.json`) are written by setup scripts using merge-not-overwrite |
 | ADR-003 | Hook adapter architecture | active | All adapters are delegating (translate envelope → call enforcement script); no inline enforcement logic in adapters |
+
+### Feature 0000012 — docs-restructure-commit-directives
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Three-file documentation architecture | active | Framework docs split into `getting-started.md` (entry point), `pipeline-reference.md` (deep reference), `project-operations.md` (operational guide); no single monolithic file |
+| ADR-002 | Formal P9 Ship phase | active | Ship is a discrete phase (P9) separate from Archive (P7); pipeline is exactly P0–P9; no phase beyond P9 |
+| ADR-003 | Ship-agent orchestrates P7–P9 | active | ship-agent owns the complete close-out sequence: P7 Archive, P8 Build Assessment (sub-agent), P9 Ship |
+| ADR-004 | P9 human push/PR decision protocol | active | P9 always presents a push/PR choice to the human; agent never pushes without awareness; local-git-only defaults to PR description output |
+| ADR-005 | Run-mode sentinel file | active | `plan/.run-mode` written at P0 persists the run mode across session boundaries; any value other than `continuous` defaults to `interactive` |
+| ADR-006 | Retroactive tags via Planifest migration | active | Historical release tags applied through a migration file, not a script; human-confirmed per tag; tags are local-only until human pushes |
 
 ---
 
