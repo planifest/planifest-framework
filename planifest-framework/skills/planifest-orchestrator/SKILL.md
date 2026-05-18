@@ -80,8 +80,9 @@ On every session start, before taking any action:
 3. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
 4. Check for `plan/current/.skips` file — if present, read and acknowledge skipped phases at the top of your response
 5. Check for `plan/current/pause.md` file — if present, open with `Px: Resuming — {active_task from pause.md}`, restore in-progress state from the file, delete `plan/current/pause.md`, and continue from where the session paused
-6. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
-7. If no artifacts: open with `P0:` and begin coaching
+6. Read `plan/.run-mode` if present — restore run mode (`continuous` or `interactive`) without re-asking the human. Any value other than `continuous` defaults to `interactive`. If the file is absent or unreadable, default to `interactive`.
+7. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
+8. If no artifacts: open with `P0:` and begin coaching
 
 ---
 

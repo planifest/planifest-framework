@@ -46,6 +46,8 @@ Work through these steps in order. Write each artifact to disk before proceeding
 
 ### Step 1 — Write changelog
 
+> **Audience:** PR reviewers and team members. This is the human-readable audit trail for the PR — it records *what* was built and *why*. It is NOT the execution trace. The iteration log (written by docs-agent at P6) is the machine-readable execution trace for build-assessment-agent and post-run technical review.
+
 Write `plan/changelog/{feature-id}-{YYYY-MM-DD}.md` as the permanent audit trail (filename uses `YYYY-MM-DD`; body uses `DD MMM YYYY`):
 
 ```markdown
@@ -132,6 +134,14 @@ git commit -m "plan(p7): archive {feature-id}"
 
 1. Confirm the archive path from Step 6 exists
 2. Invoke the build-assessment-agent as a sub-agent, passing the archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/`
+   ```
+   Agent({
+     subagent_type: "general-purpose",
+     model: "claude-haiku-4-5",
+     description: "Build assessment for {feature-id}",
+     prompt: "Load the planifest-build-assessment-agent skill. Archive path: plan/_archive/{feature-id}-{YYYY-MM-DD}/. Read build-log.md from the archive and write build-report.md to the same directory. Confirm with P8: Complete when done."
+   })
+   ```
 3. The build-assessment-agent reads `build-log.md` from the archive and writes `build-report.md` to the same directory
 4. Wait for `P8: Complete` before proceeding to P9
 
