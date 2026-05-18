@@ -1,5 +1,7 @@
 # Recommendations — 0000012-docs-restructure-commit-directives
 
+> All recommendations from the initial P6 run have been implemented as REQ-011, REQ-012, and REQ-013 and shipped in a second P3–P6 cycle. No open recommendations remain.
+
 > Produced by docs-agent at P6. These are not blockers — they are flagged for future iteration consideration.
 
 ---

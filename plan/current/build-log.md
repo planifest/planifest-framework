@@ -119,6 +119,62 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P3 (cycle 2) — Codegen — REQ-011/012/013
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T12:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Notes | REQ-011: explicit model tier added to ship-agent P8 Agent call. REQ-012: run-mode read step added to orchestrator Resume Detection (step 6). REQ-013: ownership preamble added to iteration-log template and ship-agent Step 1. |
+
+---
+
+### P4 (cycle 2) — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T12:45:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Notes | All 3 REQ ACs covered. 0 self-corrections. |
+
+---
+
+### P5 (cycle 2) — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T12:50:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Notes | Prose-only changes. 0 findings. |
+
+---
+
+### P6 (cycle 2) — Docs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T12:55:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Notes | recommendations.md updated (all 3 recs implemented — none open). Build log updated with cycle 2 entries. No new ADRs (no architectural decisions). |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
