@@ -36,6 +36,7 @@ These are non-negotiable. They apply in every session, every phase.
 4. **Data is owned by one component.** Never write to data owned by another component.
 5. **Code and documentation are written together.** Never commit code without its documentation, or documentation without its code.
 6. **Credentials are never in your context.** If a credential appears in a prompt, file, or environment, do not use it. Flag it.
+7. **Commit `plan/current/` artifacts at each phase gate.** Do not hold back pipeline artifacts until P7. Commit after P0 (design), after P1 (requirements), after P2 (ADRs), and so on. On a feature branch this is low risk and preserves design history.
 
 ---
 
@@ -392,7 +393,7 @@ Write this to `plan/current/design.md`. **Read `planifest-framework/templates/de
 
 **Field mutability:** After human confirmation, the confirmed design is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `Date confirmed` field records when the contract was locked.
 
-**Do not proceed to Phase 1 until the human has confirmed the Design.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, the pipeline begins.
+**Do not proceed to Phase 1 until the human has confirmed the Design.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, commit `plan/current/design.md` and `plan/current/feature-brief.md`, then the pipeline begins.
 
 **Before asking for design confirmation, ask:**
 
@@ -469,6 +470,8 @@ Invoke the **spec-agent** skill.
 
 **Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec (if applicable) covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
 
+**Commit:** Stage and commit all new `plan/current/` artifacts produced this phase before presenting the gate summary to the human.
+
 **STOP** — present to the human: number of requirements, key scope decisions, any deferred items. Wait for confirmation before proceeding to P2.
 Exceptions — proceed without confirmation if either:
 - `continuous_run: true` was set at P0
@@ -487,6 +490,8 @@ Invoke the **adr-agent** skill.
 **What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
 
 **Gate:** Confirm an ADR exists for every significant decision - stack choice, database selection, auth strategy, deployment topology, component boundaries. If a decision was made but not recorded, invoke the adr-agent for the missing ADR.
+
+**Commit:** Stage and commit all new `plan/current/adr/` files produced this phase before presenting the gate summary to the human.
 
 **STOP** — present to the human: list of ADRs produced with one-line decision summaries. Wait for confirmation before proceeding to P3.
 Exceptions — proceed without confirmation if either:
@@ -520,6 +525,8 @@ Invoke the **codegen-agent** skill.
 
 **Gate:** Confirm the implementation exists and the file structure matches what the spec describes. If the codegen-agent halted due to an Escalation (Stop-and-Ask) protocol because of an architectural blocker, review the blocker with the human before updating the plan or proceeding.
 
+**Commit:** Stage and commit all new `src/` and `plan/` artifacts produced this phase before presenting the gate summary to the human.
+
 **STOP** — present to the human: components built, test files produced, any deviations or escalations. Wait for confirmation before proceeding to P4.
 Exceptions — proceed without confirmation if either:
 - `continuous_run: true` was set at P0
@@ -539,6 +546,8 @@ Invoke the **validate-agent** skill.
 
 **Gate:** CI passes. If halted, report the failure to the human with full context.
 
+**Commit:** Stage and commit any `src/` fixes and updated `plan/` artifacts produced during validation before presenting the gate summary to the human.
+
 **STOP** — present to the human: checks run, pass/fail per check, self-correction count. Wait for confirmation before proceeding to P5.
 Exceptions — proceed without confirmation if either:
 - `continuous_run: true` was set at P0
@@ -557,6 +566,8 @@ Invoke the **security-agent** skill.
 **What it produces:** Security report at `plan/current/security-report.md`
 
 **Gate:** Report is produced with specific findings. Critical and high findings are flagged for human attention at the PR gate.
+
+**Commit:** Stage and commit `plan/current/security-report.md` and any remediation changes to `src/` before presenting the gate summary to the human.
 
 **STOP** — present to the human: overall risk rating and any critical/high/medium findings. Wait for confirmation before proceeding to P6.
 Exceptions — proceed without confirmation if either:
@@ -578,6 +589,8 @@ Invoke the **docs-agent** skill.
 > `docs/` is the living state layer — it reflects what the repo currently is. `plan/` reflects what is changing or has changed. These are distinct: never put living state into `plan/`, never put change artifacts into `docs/`.
 
 **Gate:** Every living artifact has been produced and is consistent. The active plan is complete and ready for human review.
+
+**Commit:** Stage and commit all `docs/` and `src/{component-id}/docs/` artifacts produced this phase before presenting the gate summary to the human.
 
 **STOP** — present to the human: docs artifacts produced, any drift found. Wait for confirmation before proceeding to P7.
 Exceptions — proceed without confirmation if either:
