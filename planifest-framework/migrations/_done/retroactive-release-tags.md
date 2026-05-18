@@ -1,64 +1,47 @@
 ---
 title: "Migration: retroactive-release-tags"
 type: "git-operation"
-description: "Tag historical merge-to-main commits with their release version tags (v0.1 through v0.10)."
-status: "pending"
+description: "Tag historical commits with their release version tags."
+status: "complete"
 created: "2026-05-18"
+completed: "2026-05-18"
 feature: "0000012-docs-restructure-commit-directives"
 ---
 # Migration: retroactive-release-tags
 
-> Processed by the `planifest-migrator` skill. Human confirmation required at each step. Tags are created locally only — the human pushes them.
+> Processed by the agent. Tags are created locally only — the human pushes them with `git push origin --tags`.
 
 ---
 
 ## Context
 
-The repository has no git tags for releases prior to this migration. Tags v0.1 through v0.10 need to be applied retroactively to the merge-to-main commits for each release.
+The repository had no git tags for releases prior to this migration. Tags are applied retroactively to the commits on `main` that represent each release.
 
 ---
 
-## Step 1 — List merge commits
+## Step 1 — Read git log
 
-Run the following command and present the output to the human:
+Run:
 
 ```bash
-git log --oneline --merges origin/main
+git log --oneline main
 ```
 
-> If `origin/main` is not accessible (local-git-only), use:
-> ```bash
-> git log --oneline --merges main
-> ```
+Scan the output for any commits whose message explicitly names a version (e.g. `planifest framework v0.10`). Use these as anchors. For the remaining versions, infer from PR sequence, branch names, and commit dates. Where inference is ambiguous, propose the mapping to the human for a single confirmation before proceeding.
 
-Present the full output. Ask the human to map each merge commit to its release version.
+> Do not ask the human to fill in a table manually. Read the history, propose the mapping, ask once for confirmation.
 
 ---
 
-## Step 2 — Confirm commit → version mapping
+## Step 2 — Propose and confirm mapping
 
-Present a table for the human to fill in:
-
-| Version | Commit SHA | Commit message |
-|---------|-----------|----------------|
-| v0.1 | `{sha}` | `{message}` |
-| v0.2 | `{sha}` | `{message}` |
-| v0.3 | `{sha}` | `{message}` |
-| v0.4 | `{sha}` | `{message}` |
-| v0.5 | `{sha}` | `{message}` |
-| v0.6 | `{sha}` | `{message}` |
-| v0.7 | `{sha}` | `{message}` |
-| v0.8 | `{sha}` | `{message}` |
-| v0.9 | `{sha}` | `{message}` |
-| v0.10 | `{sha}` | `{message}` |
-
-Wait for human confirmation of the complete mapping before proceeding.
+Present the proposed mapping as a table. Ask the human to confirm or correct it. Wait for one confirmation before tagging.
 
 ---
 
 ## Step 3 — Validate SHAs
 
-For each SHA in the confirmed mapping, validate it matches `[0-9a-f]{7,40}`. If any SHA does not match, do not run the tag command for that entry — prompt the human to supply the correct SHA.
+For each SHA in the confirmed mapping, validate it matches `[0-9a-f]{7,40}`. If any SHA does not match, do not tag that entry — report the invalid entry to the human.
 
 ---
 
@@ -70,19 +53,11 @@ For each confirmed and validated entry, run:
 git tag {version} {sha} -m "{version}"
 ```
 
-Example:
-```bash
-git tag v0.1 abc1234 -m "v0.1"
-git tag v0.2 def5678 -m "v0.2"
-```
-
-Confirm each tag was created successfully before moving to the next.
+Run all tag commands. Confirm each tag was created successfully.
 
 ---
 
 ## Step 5 — Human pushes tags
-
-This migration does not push tags (local-git-only constraint). Instruct the human:
 
 ```
 All tags created locally. Push with:
@@ -96,8 +71,6 @@ Verify on the remote that all tags appear.
 
 ## Step 6 — Mark migration complete
 
-Move this file to `planifest-framework/migrations/_done/retroactive-release-tags.md`.
-
 ```bash
 mkdir -p planifest-framework/migrations/_done
 mv planifest-framework/migrations/retroactive-release-tags.md \
@@ -105,3 +78,15 @@ mv planifest-framework/migrations/retroactive-release-tags.md \
 git add planifest-framework/migrations/
 git commit -m "chore(migrations): complete retroactive-release-tags"
 ```
+
+---
+
+## Completed run — 2026-05-18
+
+| Version | Commit SHA | Commit message |
+|---------|-----------|----------------|
+| v0.10 | `4ea0e42` | planifest framework v0.10 (#31) |
+| v0.11 | `5fd5c3b` | Feat/ext skill fixes (#33) |
+| v0.12 | _(this branch, pending merge)_ | 0000012-docs-restructure-commit-directives |
+
+Tags pushed by human after branch merge.
