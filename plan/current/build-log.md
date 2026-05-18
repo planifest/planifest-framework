@@ -49,6 +49,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-18T09:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `2` |
+| Notes | 6 ADRs produced. Batch 1 (parallel): ADR-001 docs architecture, ADR-002 P9 phase, ADR-005 run-mode sentinel, ADR-006 retroactive tags migration. Batch 2 (parallel): ADR-003 ship-agent orchestration, ADR-004 P9 PR protocol. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
