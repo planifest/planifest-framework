@@ -103,7 +103,7 @@ After updating, check `planifest-framework/migrations/` for any pending `.md` fi
 | `planifest-framework/` | ✅ | Source of truth — shared with team |
 | `planifest-framework/hooks/` | ✅ | Git hooks and CI workflow — applied by setup scripts |
 | `.github/workflows/planifest.yml` | ✅ | CI/CD strict gate — must be committed to take effect |
-| `plan/` | ✅ | Feature briefs, execution plans, ADRs, scope docs |
+| `plan/` | ✅ | Feature briefs, execution plans, ADRs, scope docs — commit throughout the pipeline run, not just at P7 |
 | `src/` | ✅ | Component code and manifests |
 | `docs/` | ✅ | Repo-wide registry and dependency graph |
 | `planifest-overrides/` | ✅ | Team customisations — commit to share with the team |
