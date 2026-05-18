@@ -17,8 +17,9 @@ Every agent response begins with a phase prefix. You always know where you are.
 | `P4:` | Validate | Running CI checks; self-correcting |
 | `P5:` | Security | Security review; STRIDE threat model |
 | `P6:` | Docs | Documentation artifacts; drift checks |
-| `P7:` | Ship | PR, changelog, archive |
-| `P8:` | Build Assessment | Efficiency audit: model routing, parallelism, self-corrections |
+| `P7:` | Archive | Changelog, skips, archive plan/current/, regression confirmation, test report |
+| `P8:` | Build Assessment | Efficiency audit: model routing, parallelism, self-corrections (sub-agent of ship-agent) |
+| `P9:` | Ship | Git tag, push/PR decision, PR raised or PR description output |
 | `PC:` | Change Pipeline | Change to an existing feature |
 
 Standard response formats:
@@ -48,13 +49,17 @@ Per-phase exceptions — the orchestrator may skip the stop if **both** conditio
 - You chose continuous run, AND
 - There is genuinely nothing to check (e.g. P5 with zero security findings, P4 with all checks passing first attempt)
 
-**P7 always stops.** Raising a PR is an external action — it is never auto-confirmed, even in continuous run mode.
+**P9 always stops.** Raising a PR is an external action — it is never auto-confirmed, even in continuous run mode.
 
 ---
 
 ## Phase 8 — Build Assessment
 
-P8 runs automatically after P7 archives the plan. The `planifest-build-assessment-agent` reads `plan/current/build-log.md` (archived alongside the plan artifacts) and produces a structured efficiency report at `plan/_archive/{feature-id}-{date}/build-report.md`.
+P8 runs automatically after P7 archives the plan. The ship-agent spawns the `planifest-build-assessment-agent` as a sub-agent, passing the archive path. The agent reads the archived `build-log.md` and produces a structured efficiency report at `plan/_archive/{feature-id}-{date}/build-report.md`. Once P8 completes, the ship-agent proceeds to P9.
+
+## Phase 9 — Ship
+
+P9 is the terminal phase. The ship-agent reads the version from `planifest-framework/component.yml`, creates a local git tag (`v{version}`), then asks the human whether to push and raise the PR or output a PR description for manual use. If `local-git-only` is active in `planifest-overrides/instructions/`, the agent skips the prompt and outputs a PR description directly.
 
 ### Build Log
 

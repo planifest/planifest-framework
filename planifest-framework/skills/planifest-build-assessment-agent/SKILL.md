@@ -160,6 +160,6 @@ Once the report is written, confirm to the orchestrator:
 P8: Complete — build-report.md filed to {archive-path}
 ```
 
-The orchestrator then delivers the final P7 confirmation to the human.
+The ship-agent receives this confirmation and proceeds to P9 Ship.
 
 ---

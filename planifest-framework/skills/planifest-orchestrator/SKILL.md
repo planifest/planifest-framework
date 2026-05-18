@@ -37,12 +37,16 @@ These are non-negotiable. They apply in every session, every phase.
 5. **Code and documentation are written together.** Never commit code without its documentation, or documentation without its code.
 6. **Credentials are never in your context.** If a credential appears in a prompt, file, or environment, do not use it. Flag it.
 7. **Commit `plan/current/` artifacts at each phase gate.** Do not hold back pipeline artifacts until P7. Commit after P0 (design), after P1 (requirements), after P2 (ADRs), and so on. On a feature branch this is low risk and preserves design history.
+8. **Write a build log entry at every phase start and gate.** Create `plan/current/build-log.md` at P0 if absent. Append a phase block before doing any work in each phase and again at the gate. A missing entry is a pipeline error — stop and write it before proceeding.
+9. **The pipeline has exactly 10 phases: P0–P9. There is no phase beyond P9.** P9 (Ship) is the terminal phase. Never cite a phase number outside P0–P9 in any output.
 
 ---
 
 ## Response Prefix Convention
 
 Every response you produce **must** begin with the phase prefix below. This is non-negotiable — it lets the human orient instantly without reading prose.
+
+This table is the **complete and exhaustive** list of pipeline phases. No phase exists outside it.
 
 | Prefix | Phase |
 |--------|-------|
@@ -53,8 +57,9 @@ Every response you produce **must** begin with the phase prefix below. This is n
 | `P4:` | Validate |
 | `P5:` | Security |
 | `P6:` | Docs |
-| `P7:` | Ship |
+| `P7:` | Archive |
 | `P8:` | Build Assessment |
+| `P9:` | Ship |
 | `PC:` | Change Pipeline |
 
 Standard formats:
@@ -101,8 +106,9 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Begin Phase 4 (validation) | Load the `planifest-validate-agent` skill |
 | Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
 | Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
-| Begin Phase 7 (ship) | Load the `planifest-ship-agent` skill |
-| Begin Phase 8 (build assessment) | Load the `planifest-build-assessment-agent` skill |
+| Begin Phase 7 (archive) | Load the `planifest-ship-agent` skill |
+| Begin Phase 8 (build assessment) | Invoked by ship-agent as sub-agent — load `planifest-build-assessment-agent` skill |
+| Begin Phase 9 (ship) | Continues within ship-agent — no additional skill load required |
 | Handle a change request | Load the `planifest-change-agent` skill |
 | Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
 | Write confirmed design to `plan/current/design.md` | `planifest-framework/templates/design.template.md` |
@@ -216,7 +222,7 @@ When starting a new session (no resume detected), open with this structured brie
 ```
 P0: Starting
 
-Pipeline phases: P0 Assess → P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Ship → P8 Build Assessment
+Pipeline phases: P0 Assess → P1 Spec → P2 ADRs → P3 Codegen → P4 Validate → P5 Security → P6 Docs → P7 Archive → P8 Build Assessment → P9 Ship
 
 Tool detected: {tool name or "unknown — checking..."}
 Hooks status:
@@ -343,9 +349,15 @@ The [Feature Brief Template](../templates/feature-brief.template.md) guides the 
 
 At the very start of Phase 0 (before coaching begins), perform these actions in order:
 
+0. **Pre-flight check** (fresh starts only — skip if `plan/current/pause.md` was detected):
+   1. Run `git branch --show-current`. Validate the output matches `[a-zA-Z0-9/_\-.]`; truncate beyond 255 chars; substitute "unknown branch" on error. Report the result to the human.
+   2. Ask: "Are all previous PRs merged and is main up to date?" — wait for confirmation. Note: `git pull` is not attempted (no remote passphrase).
+   3. If not on `main`: offer `git checkout main` — execute if human accepts.
+   4. After confirming main (or if already on main): offer `git checkout -b feat/{feature-id}` — execute if human accepts. (Feature-id may be `pending` at this point; update the branch name once confirmed.)
+
 1. **Write the sentinel** — write `plan/.orchestrator-active` containing the feature-id (or `pending` if the feature-id is not yet known). This unlocks `plan/current/` writes for the duration of the pipeline run. Update the file with the confirmed feature-id once it is known.
 
-2. **Create build log** — copy `planifest-framework/templates/build-log.template.md` to `plan/current/build-log.md`. Fill in the header fields: feature-id, start timestamp (ISO 8601 UTC), tool name, primary model name, cheaper model name. If `plan/current/build-log.md` already exists (resume), do not overwrite — append to it. At the start of every phase (P0–P8), append a new phase block to the build log before doing any phase work. Record: model tier used, skills loaded, agent count, MCP call count, parallel task batch count. At P7 after archiving, fill in the Summary table with totals.
+2. **Create build log** — copy `planifest-framework/templates/build-log.template.md` to `plan/current/build-log.md`. Fill in the header fields: feature-id, start timestamp (ISO 8601 UTC), tool name, primary model name, cheaper model name. If `plan/current/build-log.md` already exists (resume), do not overwrite — append to it. At the start of every phase (P0–P9), append a new phase block to the build log before doing any phase work. Record: model tier used, skills loaded, agent count, MCP call count, parallel task batch count. This is mandatory — a missing phase block is a pipeline error (Hard Limit 8). At P7 after archiving, fill in the Summary table with totals.
 
 3. **Load repo instructions** — check `planifest-overrides/instructions/` (if the directory exists). Read all `.md` files. Write their contents to `plan/current/design.md` under `## Repo Instructions` once design.md is created. If the directory is absent or empty, write `## Repo Instructions: None`.
 
@@ -408,6 +420,13 @@ stopping)?
 
 Record their answer. If [2], set `continuous_run: true` for this session and do
 not stop at per-phase gates. If [1], honour every STOP gate below.
+
+Immediately after recording the answer, write `plan/.run-mode` containing either `continuous` or `interactive`. Include this file in the P0 commit. On resume, read `plan/.run-mode` to restore run mode without re-asking; any value other than `continuous` defaults to `interactive`.
+
+In **interactive** mode: at each phase gate where the human confirms, append to `plan/current/build-log.md`:
+```
+Gate accepted: P{N} — {ISO-8601 timestamp}
+```
 
 ### Phase 0 → Phase 1 Gate Checklist
 
@@ -599,34 +618,38 @@ Exceptions — proceed without confirmation if either:
 
 ---
 
-## Phase 7 - Ship
+## Phase 7 - Archive
 
-**Before acting:** Load the `planifest-ship-agent` skill now. Do not begin ship actions until you have read it.
+**Before acting:** Load the `planifest-ship-agent` skill now. Do not begin archive actions until you have read it.
 
-Invoke the **ship-agent** skill.
+Invoke the **ship-agent** skill. The ship-agent owns the complete close-out sequence: P7 Archive → P8 Build Assessment (sub-agent) → P9 Ship. You make one call; the ship-agent emits P7, P8, and P9 prefixes as it moves through each step.
 
 **Input:** All artifacts from all phases; `plan/current/.skips` file (if any)
 
-**What it produces:** changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written, P8 build assessment invoked, then PR raised via `gh pr create` after archive and build-report are on the branch (REQ-020).
+**What P7 produces:** changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written, regression confirmation, test report. The ship-agent then transitions to P8.
 
-**Gate:** PR URL returned, archive path confirmed, changelog confirmed. P8 is invoked by the ship-agent — you do not invoke it directly. The ship-agent raises the PR after `P8: Complete`, then reports the PR URL.
-
-**STOP** — present to the human: PR URL, archive path, changelog path, build report path. This is always a confirmation stop — ship actions are external and irreversible.
-Exception: `continuous_run: true` does NOT bypass this gate. Raising a PR is always confirmed with the human first.
+**Gate (after P9 completes):** archive path confirmed, changelog confirmed, build report confirmed, git tag created, PR URL or PR description provided. This is always a confirmation stop — ship actions are external and irreversible.
+Exception: `continuous_run: true` does NOT bypass this gate. Shipping is always confirmed with the human first.
 
 ---
 
 ## Phase 8 - Build Assessment
 
-**Before acting:** Load the `planifest-build-assessment-agent` skill now. This phase is invoked by the ship-agent, not directly by you — but you must be aware of it for build log maintenance and the final gate.
-
-The ship-agent invokes the build-assessment-agent after the archive is confirmed. You own the final human-facing confirmation once P8 reports complete.
+This phase is invoked by the ship-agent as a sub-agent — you do not invoke it directly. The ship-agent spawns `planifest-build-assessment-agent`, passing the archive path, and waits for `P8: Complete` before proceeding to P9.
 
 **Input:** `plan/_archive/{feature-id}-{date}/build-log.md` (the archived build log)
 
 **What it produces:** `plan/_archive/{feature-id}-{date}/build-report.md`
 
-**Gate:** Confirm the build report exists in the archive. Report the archive path and any efficiency observations to the human.
+---
+
+## Phase 9 - Ship
+
+This phase is executed by the ship-agent immediately after P8 completes. You do not invoke it separately.
+
+**What P9 produces:** local git tag (`v{version}`), then either a PR raised via `gh pr create` or a PR title and description output as a markdown code block for the human to use. The ship-agent asks the human which path to take (unless `local-git-only` is active, in which case it defaults to the description output).
+
+**Gate:** Confirm the archive path, changelog path, build report path, git tag, and PR URL or PR description. Report all to the human.
 
 ---
 
