@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 0000012-docs-restructure-commit-directives (18 May 2026)
+**Last updated:** 0000013-codegen-component-version-bump (18 May 2026)
 **Maintained by:** planifest-docs-agent
 
 ---

@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000012-docs-restructure-commit-directives
+Last updated: 0000013-codegen-component-version-bump
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 

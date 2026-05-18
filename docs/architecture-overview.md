@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000012-docs-restructure-commit-directives
+Last updated: 0000013-codegen-component-version-bump
 
 ---
 

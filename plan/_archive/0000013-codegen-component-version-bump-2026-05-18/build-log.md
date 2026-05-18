@@ -110,11 +110,11 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `` |
-| Total agents spawned | `` |
-| Total MCP calls | `` |
-| Phases using parallelism | `` |
-| Primary tier agent calls | `` |
-| Cheaper tier agent calls | `` |
-| Self-corrections | `` |
-| Phases skipped | `` |
+| Total phases completed | `5` (P0, P1, P3, P4, P6) |
+| Total agents spawned | `0` |
+| Total MCP calls | `0` |
+| Phases using parallelism | `0` |
+| Primary tier agent calls | `1` (orchestrator) |
+| Cheaper tier agent calls | `0` |
+| Self-corrections | `0` |
+| Phases skipped | `2` (P2, P5) |
