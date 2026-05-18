@@ -206,6 +206,13 @@ Recommended action: {what the human should do}
 - Increment `version` to `0.1.0` on first build.
 - See the [Component Template](../templates/component.template.yml) for the full schema.
 
+**Framework component.yml close-out:**
+- If any file under `planifest-framework/` was modified during this P3 run, update `planifest-framework/component.yml` before committing:
+  - Increment the minor version (e.g. `0.12.0` → `0.13.0`)
+  - Set the `feature` field to the current feature ID (e.g. `0000013-codegen-component-version-bump`)
+- Include `planifest-framework/component.yml` in the P3 commit so the ship-agent reads the correct version when creating the git tag.
+- This applies to all framework-modifying features — docs-only, SKILL.md, template, migration, and code changes alike.
+
 **Quirks and tech debt:**
 - If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.yml`. Do not silently work around it.
 - If you discover tech debt, write it to `src/{component-id}/docs/tech-debt.md` and add it to the `quality.techDebt` array in `component.yml`.
