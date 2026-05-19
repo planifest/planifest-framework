@@ -77,6 +77,14 @@ On every session start, before taking any action:
 
 1. **Scan for pending migrations** — check `planifest-framework/migrations/` for any `.md` files not in `_done/`. If found, invoke the `planifest-migrator` skill for each pending migration before any other phase work. Migrations take priority.
 2. Check `plan/current/` for existing artifacts (`design.md`, `requirements/`, `adr/`, etc.)
+
+2a. **Interrupted P9 detection:** If `plan/.orchestrator-active` is present AND `plan/current/` is empty (no `design.md`, no `requirements/` directory, no `adr/` directory), P9 was interrupted after archiving `plan/current/` but before sentinel cleanup. Run the cleanup sequence immediately:
+   1. Delete `plan/.orchestrator-active`
+   2. Delete `plan/.orchestrator-ack` if present
+   3. Delete `plan/.run-mode` if present
+   4. Confirm to the human: `P0: Interrupted P9 detected — archive completed but sentinels not cleared. Cleanup complete. Starting fresh.`
+   5. Proceed as a fresh start — open with `P0:` and begin coaching.
+
 3. Check for `.feature-id` file — if present, verify it matches the feature you are working on; if stale (contents differ from current work), flag it for human review before proceeding
 4. Check for `plan/current/.skips` file — if present, read and acknowledge skipped phases at the top of your response
 5. Check for `plan/current/pause.md` file — if present, open with `Px: Resuming — {active_task from pause.md}`, restore in-progress state from the file, delete `plan/current/pause.md`, and continue from where the session paused
@@ -364,6 +372,13 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
    3. If not on `main`: offer `git checkout main` — execute if human accepts.
    4. After confirming main (or if already on main): offer `git checkout -b feat/{feature-id}` — execute if human accepts. (Feature-id may be `pending` at this point; update the branch name once confirmed.)
 
+0b. **Stale run-mode check (fresh starts only — skip on resume):** Before writing the sentinel, check for `plan/.run-mode`. If the file is present and this is a fresh start (no existing `plan/current/` artifacts), it is stale from a prior P9 that did not complete cleanup. Warn and clear automatically — do not block:
+   ```
+   ⚠ Stale run-mode detected — plan/.run-mode was not cleared by the previous P9 run.
+   Clearing it now. No action required from you.
+   ```
+   Delete `plan/.run-mode` and continue.
+
 1. **Write the sentinel** — write `plan/.orchestrator-active` containing the feature-id (or `pending` if the feature-id is not yet known). This unlocks `plan/current/` writes for the duration of the pipeline run. Update the file with the confirmed feature-id once it is known.
 
 2. **Create build log** — copy `planifest-framework/templates/build-log.template.md` to `plan/current/build-log.md`. Fill in the header fields: feature-id, start timestamp (ISO 8601 UTC), tool name, primary model name, cheaper model name. If `plan/current/build-log.md` already exists (resume), do not overwrite — append to it. At the start of every phase (P0–P9), append a new phase block to the build log before doing any phase work. Record: model tier used, skills loaded, agent count, MCP call count, parallel task batch count. This is mandatory — a missing phase block is a pipeline error (Hard Limit 8). At P7 after archiving, fill in the Summary table with totals.
@@ -402,14 +417,14 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
    Present to the human:
    ```
-   P0: Current version is {version} (from docs/about.md).
+   P0: Last known version: {version} (from docs/about.md).
    Suggested version for this {track}: {suggested version}.
-   Confirm version? ({suggested} / [alternative])
+   Confirm? ({suggested} / [alternative])
    ```
 
-   **Hard block:** If the human proposes a version lower than the current recorded version, refuse and explain:
+   **Hard block:** If the human proposes a version lower than the last known version, refuse and explain:
    ```
-   P0: Blocked — {proposed} is lower than the current recorded version ({current}).
+   P0: Blocked — {proposed} is lower than the last known version ({current}).
    To reset the version history, archives must be re-versioned manually.
    Please provide a version ≥ {current}.
    ```
@@ -584,6 +599,8 @@ This step is non-blocking. If skill installation fails (network error, skill not
 
 ## Phase 1 - Requirements
 
+**Build log first:** Append a P1 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
+
 **Before acting:** Load the `planifest-spec-agent` skill now. Do not begin requirement work until you have read it.
 
 Invoke the **spec-agent** skill.
@@ -605,6 +622,8 @@ Exceptions — proceed without confirmation if either:
 
 ## Phase 2 - Architecture Decisions
 
+**Build log first:** Append a P2 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
+
 **Before acting:** Load the `planifest-adr-agent` skill now. Do not begin ADR work until you have read it.
 
 Invoke the **adr-agent** skill.
@@ -625,6 +644,8 @@ Exceptions — proceed without confirmation if either:
 ---
 
 ## Phase 3 - Code Generation
+
+**Build log first:** Append a P3 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
 
 **Before acting:** Load the `planifest-codegen-agent` skill now. Do not begin code generation until you have read it.
 
@@ -660,6 +681,8 @@ Exceptions — proceed without confirmation if either:
 
 ## Phase 4 - Validate
 
+**Build log first:** Append a P4 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
+
 **Before acting:** Load the `planifest-validate-agent` skill now. Do not begin validation until you have read it.
 
 Invoke the **validate-agent** skill.
@@ -681,6 +704,8 @@ Exceptions — proceed without confirmation if either:
 
 ## Phase 5 - Security
 
+**Build log first:** Append a P5 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
+
 **Before acting:** Load the `planifest-security-agent` skill now. Do not begin security review until you have read it.
 
 Invoke the **security-agent** skill.
@@ -701,6 +726,8 @@ Exceptions — proceed without confirmation if either:
 ---
 
 ## Phase 6 - Documentation
+
+**Build log first:** Append a P6 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
 
 **Before acting:** Load the `planifest-docs-agent` skill now. Do not begin documentation until you have read it.
 
@@ -725,6 +752,8 @@ Exceptions — proceed without confirmation if either:
 
 ## Phase 7 - Archive
 
+**Build log first:** Append a P7 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
+
 **Before acting:** Load the `planifest-ship-agent` skill now. Do not begin archive actions until you have read it.
 
 Invoke the **ship-agent** skill. The ship-agent owns the complete close-out sequence: P7 Archive → P8 Build Assessment (sub-agent) → P9 Ship. You make one call; the ship-agent emits P7, P8, and P9 prefixes as it moves through each step.
@@ -739,6 +768,8 @@ Exception: `continuous_run: true` does NOT bypass this gate. Shipping is always 
 ---
 
 ## Phase 8 - Build Assessment
+
+**Build log:** The ship-agent is responsible for appending P8 and P9 phase blocks to the build log. You do not write them here.
 
 This phase is invoked by the ship-agent as a sub-agent — you do not invoke it directly. The ship-agent spawns `planifest-build-assessment-agent`, passing the archive path, and waits for `P8: Complete` before proceeding to P9.
 
