@@ -7,7 +7,7 @@ version: "0.1.0"
 
 ## Feature
 - **Problem:** Seven governance gaps — non-deterministic library choices, bypassable orchestrator, no capability skill intake path, inconsistent date formats, no migration system, undeclared locale standard, verbose agent responses
-- **Adoption mode:** retrofit
+- **Adoption mode:** standard-iterative
 - **Feature ID:** 0000005-framework-governance
 
 ---

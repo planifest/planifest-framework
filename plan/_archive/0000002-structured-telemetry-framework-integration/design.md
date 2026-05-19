@@ -8,7 +8,7 @@
 ## Feature
 
 - **Problem:** Agent behaviour across pipeline phases is unobservable. No structured telemetry is emitted by framework skills. Deviations, spec gaps, self-corrections, and validation failures are invisible unless printed to the conversation.
-- **Adoption mode:** retrofit (existing setup scripts + skill files)
+- **Adoption mode:** standard-iterative
 - **Feature ID:** 0000002-structured-telemetry-framework-integration
 
 ---

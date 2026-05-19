@@ -2,6 +2,7 @@
 
 **Status:** Design confirmed
 **Feature ID:** 0000003-hook-based-enforcement
+**Adoption mode:** standard-iterative
 **Date:** 18 Apr 2026
 
 ---

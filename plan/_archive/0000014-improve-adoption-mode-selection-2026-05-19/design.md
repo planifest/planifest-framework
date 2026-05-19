@@ -3,7 +3,7 @@
 ## Feature
 - Problem: Phase 0 adoption mode selection is not surfaced as an explicit guided step; adoption mode is always incorrectly persisted as "retrofit" in design.md; no version suggestion mechanism exists across the pipeline
 - Confirmed version: 0.14.0
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000014-improve-adoption-mode-selection
 
 ## Product Layer

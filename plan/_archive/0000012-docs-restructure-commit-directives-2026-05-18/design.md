@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Framework docs were monolithic; build logs skipped; run mode not persisted; agents invented phase numbers; no formal ship phase; no P0 branch pre-flight.
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000012-docs-restructure-commit-directives
 
 ## Product Layer

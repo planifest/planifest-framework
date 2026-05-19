@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Orchestrator spec/implementation drift, bash/PS1 setup parity gaps, incomplete platform coverage (Windows Tier 1 tools), gate-write Windows path bug blocking P7 archive writes
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000009-framework-rail-tightening
 
 ## Product Layer

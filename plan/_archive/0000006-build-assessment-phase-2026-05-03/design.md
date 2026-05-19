@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Pipeline runs produce no structured record of build efficiency; model selection defaults to primary model for all tasks; parallelism is not explicitly directed
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000006-build-assessment-phase
 
 ## Product Layer
