@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: {one-line problem statement}
-- Adoption mode: greenfield | retrofit | agent-interface
+- Adoption mode: greenfield | standard-iterative | retrofit | external-anchor
 - Feature ID: {0000000}-{kebab-case-name}
 
 ## Product Layer

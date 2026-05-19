@@ -57,6 +57,7 @@ Do not exhaust token limits by loading all files. Read top-down selectively:
 Implement the minimum necessary change.
 
 **Rules:**
+- **One question at a time.** When you need human input — to resolve an ambiguity, confirm a migration proposal, or clarify scope — ask one question, wait for the answer, then continue. Lead with a recommendation where you can derive one. Never present a list of questions.
 - Do not refactor code outside the scope of the change request. Scope creep is a process violation.
 - If the change request is ambiguous, implement the narrowest interpretation and document your reasoning.
 - If you discover tech debt or quirks while working, write them to `src/{component-id}/docs/quirks.md` or `src/{component-id}/docs/tech-debt.md` - do not fix them as part of this change.

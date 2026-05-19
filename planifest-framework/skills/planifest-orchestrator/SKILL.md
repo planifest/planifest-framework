@@ -292,6 +292,14 @@ Planifest describes three layers of every feature. Each must be covered.
 
 **One question at a time.** Assess the brief. Identify the most foundational gap. Ask about it. Wait for the answer. Assess again. Move to the next gap. Never present a list of everything that's missing.
 
+**Recommend, then confirm.** For every decision (adoption mode, version, stack choice, scope boundary), lead with a specific recommendation before asking the human to confirm. Do not ask open-ended questions when you can derive a best answer from the signals available. Format:
+```
+P0: [Observation]. I recommend [X] because [one-line reason].
+Confirm? ([X] / [alternative])
+```
+
+This pattern applies across all pipeline phases (P0–P9), not just during P0 coaching. Any phase skill that needs a decision from the human should recommend first, then ask for confirmation — one decision per message.
+
 **Priority order:**
 
 1. Problem statement and user stories - if these are unclear, nothing downstream is derivable
@@ -362,6 +370,53 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
 3. **Load repo instructions** — check `planifest-overrides/instructions/` (if the directory exists). Read all `.md` files. Write their contents to `plan/current/design.md` under `## Repo Instructions` once design.md is created. If the directory is absent or empty, write `## Repo Instructions: None`.
 
+3a. **Detect adoption mode** — before coaching begins, scan for the following signals in priority order (highest priority first):
+
+   | Priority | Signal | Mode |
+   |----------|--------|------|
+   | 1 (highest) | `planifest-overrides/instructions/external-versioning.md` exists | External Anchor |
+   | 2 | `plan/_archive/` contains at least one feature dir OR `docs/about.md` exists | Standard Iterative |
+   | 3 | Any source code exists in `src/` (without archive or overrides) | Retrofit |
+   | 4 (default) | None of the above | Greenfield |
+
+   Apply the **highest-priority signal only** — do not combine signals. If conflicting signals are present (e.g., human says Greenfield but `external-versioning.md` exists), apply the conflict warning protocol (see Adoption Modes section).
+
+   After detection, present a recommendation to the human:
+   ```
+   P0: Adoption mode detected as {mode} because {signal found}.
+   Does this match your intent? ({mode} / [alternative] / explain)
+   ```
+   Record the confirmed mode in `plan/current/design.md` under `Adoption mode:`.
+   Append to the P0 build log block: `Adoption mode: {mode} — confirmed by human on {date}`.
+
+3b. **Read version** — read `docs/about.md` if it exists. Extract the `version` field from the frontmatter. Also scan `plan/_archive/` for the most recent feature's `design.md` or `about.md` and cross-reference to verify the version.
+
+   After adoption mode is confirmed, suggest a version bump per the pipeline track being used:
+
+   | Pipeline Track | Default Bump | Example |
+   |----------------|-------------|---------|
+   | Fast Path | Patch (x.y.Z) | 0.3.1 → 0.3.2 |
+   | Change Pipeline | Patch (x.y.Z) | 0.3.1 → 0.3.2 |
+   | Feature Pipeline | Minor (x.Y.0) | 0.3.1 → 0.4.0 |
+   | Breaking change | Major (X.0.0) | 0.3.1 → 1.0.0 |
+
+   Present to the human:
+   ```
+   P0: Current version is {version} (from docs/about.md).
+   Suggested version for this {track}: {suggested version}.
+   Confirm version? ({suggested} / [alternative])
+   ```
+
+   **Hard block:** If the human proposes a version lower than the current recorded version, refuse and explain:
+   ```
+   P0: Blocked — {proposed} is lower than the current recorded version ({current}).
+   To reset the version history, archives must be re-versioned manually.
+   Please provide a version ≥ {current}.
+   ```
+   Do not record a version lower than the current. Do not proceed until a valid version is confirmed.
+
+   Record the confirmed version in `plan/current/design.md`. Append to the P0 build log block: `Version confirmed: {version}`.
+
 4. **Produce Skill Map** — after the confirmed design is written and before presenting it for human confirmation, produce a `## Skill Map` section in `plan/current/design.md`. For each functional requirement, identify the best-fit Planifest skill from `planifest-framework/skills/`. Format:
 
    ```markdown
@@ -429,6 +484,53 @@ In **interactive** mode: at each phase gate where the human confirms, append to 
 Gate accepted: P{N} — {ISO-8601 timestamp}
 ```
 
+### Scope Lock Challenge
+
+Run this immediately after the coaching Q&A is complete and before presenting the design for confirmation. It is a mandatory gate — not optional.
+
+**Purpose:** Derive the scenario paths specific to this feature and surface scope gaps that a generic checklist would miss.
+
+**How it works:**
+
+Read `plan/current/feature-brief.md`. Check whether `## Scenario Paths` has been filled in. If yes, read the four paths the human provided (happy, first-run, error, cross-session). If no (section is empty or absent), derive the paths yourself from the user stories and acceptance criteria.
+
+Then ask each of these four questions **one at a time**, waiting for a human answer before asking the next:
+
+1. **Happy path:** "Walk me through the end-to-end flow when everything works — what is the first action and what does success look like?"
+2. **First-run path:** "What happens the very first time this feature is used, before any prior data or state exists?"
+3. **Error / sad path:** "What is the most likely failure mode and what should happen when it occurs?"
+4. **Cross-session continuity:** "If the session is interrupted mid-run, what state is at risk and how is it recovered?"
+
+**After each answer:**
+
+- Capture the scenario: append it to `plan/current/build-log.md` under the P0 phase block:
+  ```
+  Scope Lock — {path type}: {one-sentence summary of the human's answer}
+  ```
+- If the answer reveals a scope gap: surface it immediately as a clarifying question (one question only). After the human answers, capture the clarification in the same format, then return to the next scenario path question.
+- If an item is explicitly deferred by the human: record it formally as:
+  ```
+  Scope Lock — deferred: {description} — blocked until {dependency}
+  ```
+
+After all four paths are answered and captured, confirm: "Scope Lock complete. All four scenario paths captured."
+
+---
+
+### P0 Audit Trail
+
+At every point during Phase 0 coaching where a question is asked and answered, immediately append to `plan/current/build-log.md` under the active P0 phase block:
+
+```
+P0 exchange — {topic}: Q: {question asked} / A: {human answer (summarised)}
+```
+
+This is written incrementally — one entry per exchange, not batched at the end. Do not wait until the design is confirmed. If the session is interrupted, the build log must reflect all exchanges that occurred.
+
+The Scope Lock Challenge entries (above) are part of this audit trail.
+
+---
+
 ### Phase 0 → Phase 1 Gate Checklist
 
 Before presenting the confirmed design for confirmation, verify every item:
@@ -444,7 +546,9 @@ Before presenting the confirmed design for confirmation, verify every item:
 - [ ] Risks section has at least one entry with likelihood and impact
 - [ ] If multi-component: dependency order is stated
 - [ ] If phased: features are grouped into phases with dependency rationale
-- [ ] Adoption mode is confirmed (greenfield, retrofit, or agent-interface)
+- [ ] Adoption mode is confirmed: `greenfield`, `standard-iterative`, `retrofit`, or `external-anchor`
+- [ ] Version is confirmed and recorded (not lower than current `docs/about.md` version)
+- [ ] Scope Lock Challenge is complete (all four scenario paths captured in build log)
 - [ ] Feature ID follows the format `{0000000}-{kebab-case-name}`
 
 If any item cannot be checked, coach the human on that specific gap before proceeding.
@@ -814,26 +918,61 @@ If the human asks for a change that would fundamentally alter the feature (diffe
 
 ## Adoption Modes
 
-The coaching conversation in Phase 0 and the pipeline phases are the same regardless of mode. What differs is the starting point.
+The coaching conversation in Phase 0 and the pipeline phases are the same regardless of mode. What differs is the starting point and the version suggestion.
 
-**Greenfield** - The human provides an Feature Brief. You assess it from scratch.
+Adoption mode is detected automatically from filesystem signals (see Phase 0 Start Actions, step 3a). The human always confirms. If the human's stated intent conflicts with the detected signal, apply the conflict warning before proceeding.
 
-**Retrofit** - An existing codebase exists. Before coaching, perform a structured discovery:
+### Mode Taxonomy
 
-> **Context-Mode Protocol:** When `ctx_batch_execute` is available, run all discovery steps as a single batch call — pass shell commands in the `commands` array and your key questions in the `queries` array. Raw output stays in the sandbox; only the indexed summary enters context.
+**Greenfield** — No prior codebase, no archive, no overrides. Starting from zero.
+- Version starts at `0.1.0`
+- No discovery pass needed
+- Coach from the Feature Brief directly
 
-1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` - these reveal the stack
-2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.yml` for each.
-3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
-4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists (if applicable).
-5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record these in the design requirements as existing constraints.
-6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
+**Standard Iterative** — This system has been through at least one Planifest pipeline run. `plan/_archive/` or `docs/about.md` exists.
+- Read `docs/about.md` for current version; suggest minor bump for Feature Pipeline, patch for Change Pipeline
+- Domain knowledge is accumulated in `plan/`; read it before coaching begins
+- Prior decisions are constraints unless an ADR supersedes them
 
-Present the discovery summary to the human before coaching. The human may need to answer fewer questions because the codebase already answers them - or more, because the codebase reveals conflicts.
+**Retrofit** — Source code exists but has never been through a Planifest pipeline run. No archive, no `docs/about.md`.
+- Read other markers: version strings in `package.json`, `go.mod`, git tags, README. Suggest a version that reflects the project's current maturity; human confirms.
+- Before coaching, perform a structured discovery:
 
-**Agent Interface Layer** - An interface specification exists for a complex domain. Read it first. Your coaching is scoped to the interface - you develop against it, not the internals.
+  > **Context-Mode Protocol:** When `ctx_batch_execute` is available, run all discovery steps as a single batch call. Raw output stays in the sandbox; only the indexed summary enters context.
 
-The adoption mode is one of the first things you confirm with the human: "Is this a new system, a change to an existing one, or are you working against a defined interface?"
+  1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — reveal the stack
+  2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.yml` for each.
+  3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
+  4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists (if applicable).
+  5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record as existing constraints in the design.
+  6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
+
+  Present the discovery summary to the human before coaching. The human may need fewer questions (codebase answered them) or more (codebase reveals conflicts).
+
+**External Anchor** — An external system or organisation dictates the version. `planifest-overrides/instructions/external-versioning.md` exists and describes the constraint.
+- Read `external-versioning.md` and merge its instructions into the coaching workflow as additional constraints
+- Do not suggest a version based on pipeline track alone — present the constraint and ask the human for the version
+- External Anchor takes priority over all other signals. If `external-versioning.md` exists, the mode is External Anchor regardless of what else is present.
+
+### Signal Priority Order
+
+If multiple signals are present simultaneously, apply the highest-priority signal:
+
+```
+External Anchor  >  Standard Iterative  >  Retrofit  >  Greenfield
+```
+
+### Conflict Warnings
+
+When the human's stated intent conflicts with the detected signal, warn before proceeding. One warning per conflict:
+
+```
+P0: ⚠ Conflict — You selected {human's stated mode}, but {signal} indicates {detected mode}.
+{Consequence of proceeding with the wrong mode — one sentence.}
+Confirm you want to proceed as {human's stated mode}? (yes / use detected mode)
+```
+
+Do not block if the human explicitly confirms their intent after a warning. Record the confirmed mode in the build log even if it differs from the detected signal.
 
 ---
 

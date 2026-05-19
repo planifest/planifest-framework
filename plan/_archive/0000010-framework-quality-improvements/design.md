@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Four pipeline quality gaps identified in 0000009 P8 build report: Agent tool never invoked (missing allowedTools entry + no dispatch template), sequential execution where parallel was required, external-skill directory names inconsistent with SKILL.md name fields, and high-signal repos only partially extracted.
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000010-framework-quality-improvements
 
 ## Product Layer

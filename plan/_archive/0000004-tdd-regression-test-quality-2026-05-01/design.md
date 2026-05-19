@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Planifest pipelines generate code and tests together in P3, with no structured red-green-refactor discipline, no distinction between long-term regression tests and feature-specific tests, and no consolidated test report showing regression health across features.
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000004-tdd-regression-test-quality
 
 ## Product Layer

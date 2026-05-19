@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: setup.ps1 has multiple parity gaps vs setup.sh, and broader framework inconsistencies exist in tests and docs
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000011-setup-parity-and-consistency
 
 ## Product Layer

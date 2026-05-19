@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Agents check host runtimes when building in Docker (irrelevant); skill files contain implicit model knowledge and hook-duplicated instructions that add token cost without value
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000007-agent-optimisation
 
 ## Product Layer
