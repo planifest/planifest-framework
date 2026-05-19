@@ -2,6 +2,7 @@
 
 ## Feature
 - Problem: Phase 0 adoption mode selection is not surfaced as an explicit guided step; adoption mode is always incorrectly persisted as "retrofit" in design.md; no version suggestion mechanism exists across the pipeline
+- Confirmed version: 0.14.0
 - Adoption mode: retrofit
 - Feature ID: 0000014-improve-adoption-mode-selection
 
@@ -50,6 +51,10 @@
   - All other artifacts owned by their respective phase agents
 - Deployment: framework files — no deployment topology
 - API versioning: not applicable
+
+## Component Paths
+- planifest-framework/
+- docs/
 
 ## Scope
 - In:

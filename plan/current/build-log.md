@@ -31,7 +31,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | `0` |
 | MCP calls | `2` |
 | Parallel task batches | `3` |
-| Notes | `Fresh start — branch feat/improve-adoption-mode-selection, continuous run mode restored` |
+| Notes | `Fresh start — branch feat/improve-adoption-mode-selection, continuous run mode restored. Confirmed version: 0.14.0 (minor bump from 0.13.0, Feature Pipeline)` |
 
 ---
 
