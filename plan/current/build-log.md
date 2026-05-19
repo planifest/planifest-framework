@@ -49,6 +49,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-19T02:00:00Z` |
+| Model tier | primary |
+| Skills loaded | `planifest-adr-agent` |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Notes | `4 ADRs: ADR-001 interrupted P9 detection signal, ADR-002 new session recommendation not block, ADR-003 stale run-mode warn-and-clear, ADR-004 run-mode deletion owned by P9.` |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
