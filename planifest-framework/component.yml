@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000014-improve-adoption-mode-selection"
-version: "0.14.0"
+feature: "0000015-pipeline-session-cleanup"
+version: "0.15.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -29,6 +29,11 @@ responsibilities:
   - "Run Scope Lock Challenge before design confirmation to surface happy/sad/bad path gaps"
   - "Enforce one-question-at-a-time across all phase skills"
   - "Maintain docs/about.md for project version tracking (read at P0, written at P7)"
+  - "Delete plan/.run-mode at P9 so next P0 always asks run-mode fresh"
+  - "Detect stale plan/.run-mode at P0 fresh start and auto-clear with visible warning"
+  - "Detect interrupted P9 on resume (empty plan/current/ + .orchestrator-active present) and complete cleanup"
+  - "Recommend new session to human after P9 completes (advisory, not blocking)"
+  - "Enforce build log phase block at every phase P0–P9 before doing phase work"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -122,6 +127,7 @@ pipeline:
 metadata:
   createdAt: "2026-05-02"
   updatedAt: "2026-05-19"
+  # Updated by 0000015-pipeline-session-cleanup
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-docs-agent"
