@@ -18,7 +18,7 @@ hooks:
 Emit the correct phase prefix as you move through each step:
 - `P7:` for all archive work (Steps 1–7)
 - `P8:` for build assessment (Step 8)
-- `P9:` for the ship step (Step 9)
+- `P9:` for ship steps (Steps 8–11)
 
 No exceptions. Including single-line acknowledgements.
 
@@ -42,6 +42,8 @@ No exceptions. Including single-line acknowledgements.
 ---
 
 ## P7 — Archive
+
+**Build log first:** Append a P7 phase block to `plan/current/build-log.md` before doing any work in this phase.
 
 Work through these steps in order. Write each artifact to disk before proceeding to the next step.
 
@@ -117,6 +119,7 @@ Generate the test report artifact before archiving.
 6. Confirm `plan/current/` is empty
 7. Delete `plan/.orchestrator-active` — this sentinel must be removed last, after archive is confirmed complete
 8. Delete `plan/.orchestrator-ack` if it exists — removes the strict-mode session ack so the next pipeline starts clean
+9. Delete `plan/.run-mode` if it exists — removes the run-mode preference so the next P0 always asks fresh
 
 ### Step 6b — Write docs/about.md
 
@@ -159,6 +162,8 @@ git commit -m "plan(p7): archive {feature-id}"
 
 ## P8 — Build Assessment
 
+**Build log:** Append a P8 phase block to `plan/current/build-log.md` before invoking the build-assessment-agent. Note: at this point `plan/current/` has been archived — append to `plan/_archive/{feature-id}-{YYYY-MM-DD}/build-log.md` instead (that is the copy). The original `plan/current/build-log.md` no longer exists.
+
 **Before acting:** Load the `planifest-build-assessment-agent` skill now.
 
 1. Confirm the archive path from Step 6 exists
@@ -177,6 +182,8 @@ git commit -m "plan(p7): archive {feature-id}"
 ---
 
 ## P9 — Ship
+
+**Build log:** Append a P9 phase block to `plan/_archive/{feature-id}-{YYYY-MM-DD}/build-log.md` before beginning ship steps.
 
 ### Step 8 — Create git tag
 
@@ -258,6 +265,18 @@ Build report: plan/_archive/{feature-id}-{YYYY-MM-DD}/build-report.md
 
 plan/current/ is empty and ready for the next feature.
 ```
+
+### Step 11 — New session recommendation
+
+After the confirmation above, emit this advisory message:
+
+```
+⚡ For best results on your next feature, start a fresh session before beginning P0.
+   Context from this run may reduce P0 coaching quality. This is advisory — continuing
+   in this session is fine if you prefer.
+```
+
+This is a recommendation only — do not block, do not ask for confirmation, do not repeat it.
 
 ---
 
