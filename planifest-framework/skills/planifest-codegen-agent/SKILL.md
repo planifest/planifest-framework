@@ -110,6 +110,8 @@ If `planifest-overrides/` does not exist or the language subdir is a stub (conta
 
 ## Rules
 
+**One question at a time.** When you need human input — to resolve a blocker, escalate a TDD failure, or confirm a deviation — ask one question, wait for the answer, then continue. Lead with a recommendation where you can derive one. Never present a list of questions.
+
 **Implement against the requirements:**
 - If building an API, the OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
 - The ADRs define the decisions. Follow them. If an ADR is wrong, flag it - do not override it silently.

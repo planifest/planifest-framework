@@ -43,6 +43,8 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 ## Rules
 
+**One question at a time.** When you need human input — to resolve an ambiguity, confirm a gap, or clarify a requirement — ask one question, wait for the answer, then continue. Lead with a recommendation where you can derive one. Never present a list of questions.
+
 **Functional requirements:**
 - Derive directly from user stories in the brief. Do not invent requirements not stated or implied.
 - Distribute functional requirements into individual granular files at `plan/current/requirements/{req-id}-{slug}.md` using the [Requirement Template](../templates/requirement.template.md).

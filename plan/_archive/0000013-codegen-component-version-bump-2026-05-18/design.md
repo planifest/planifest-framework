@@ -1,6 +1,6 @@
 ---
 feature_id: "0000013-codegen-component-version-bump"
-adoption_mode: "retrofit"
+adoption_mode: "standard-iterative"
 date_confirmed: "2026-05-18"
 continuous_run: true
 ---

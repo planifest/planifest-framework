@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: Context-mode routing rules are advisory — agents ignore them. PreToolUse hooks warn but do not block. Context window protection is best-effort.
-- Adoption mode: retrofit
+- Adoption mode: greenfield
 - Feature ID: 0000001-context-mode-enforcement-hooks
 
 ## Product Layer

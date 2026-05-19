@@ -61,6 +61,7 @@ Follow the [ADR Template](../templates/adr.template.md). Key sections:
 
 ## Rules
 
+- **One question at a time.** When you need human input to resolve an ambiguous decision or confirm a trade-off, ask one question, wait for the answer, then continue. Lead with a recommendation where you can derive one from the signals available.
 - Be specific. Vague ADRs are useless. "We chose PostgreSQL" is not an ADR. "We chose PostgreSQL over DynamoDB because the data model is relational and the team has existing expertise" is.
 - Consequences must include at least one positive and one negative consequence. Every decision has trade-offs.
 - Do not write ADRs for decisions that are fixed by the stack declaration - those are already decided. Write one ADR that records the stack choice itself, referencing the design.

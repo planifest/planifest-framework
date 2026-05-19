@@ -2,7 +2,7 @@
 
 ## Feature
 - Problem: context-mode routing rules were duplicated between a framework-managed template file and the plugin's own system prompt; plugin is now the canonical source
-- Adoption mode: retrofit
+- Adoption mode: standard-iterative
 - Feature ID: 0000008-context-mode-plugin-routing-rules
 
 ## Product Layer
