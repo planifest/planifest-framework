@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000013-codegen-component-version-bump
+Last updated: 0000014-improve-adoption-mode-selection
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -127,6 +127,23 @@ Last updated: 0000013-codegen-component-version-bump
 | active | Decision stands; implementation follows it |
 | superseded | Replaced by a later ADR (reference provided in the ADR body) |
 | amended | Core decision unchanged but conditions or scope updated |
+
+---
+
+### Feature 0000014 — improve-adoption-mode-selection
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Four Adoption Mode Taxonomy | accepted | Replace three-mode model with four signal-driven modes: Greenfield, Standard Iterative, Retrofit, External Anchor |
+| ADR-002 | Signal Conflict Priority Order | accepted | External Anchor > Standard Iterative > Retrofit > Greenfield — highest-priority signal wins when multiple signals present |
+| ADR-003 | docs/about.md as Canonical Version Source | accepted | `docs/about.md` with YAML frontmatter is the single source of truth for the current project version |
+| ADR-004 | Version Bump Rules by Pipeline Track | accepted | Fast Path/Change Pipeline → patch; Feature Pipeline → minor; breaking change → major; human always confirms |
+| ADR-005 | Version Regression Hard Block | accepted | Orchestrator refuses versions lower than current recorded version; hard block, not a warning |
+| ADR-006 | Resumable Migration with Progress File | accepted | Migrations track state in `migrations/_progress/{name}.json` so they can resume across sessions |
+| ADR-007 | Derived Scope Lock Scenarios over Fixed Checklist | accepted | Orchestrator generates scenario questions specific to the feature from requirements, not a generic checklist |
+| ADR-008 | One-Question-at-a-Time as Framework-Wide Instruction | accepted | Every phase skill states the one-question rule explicitly; recommend-then-confirm pattern throughout |
+| ADR-009 | Incremental P0 Audit Trail Writes | accepted | Build log is appended after each coaching exchange, not batched at the end of P0 |
+| ADR-010 | docs/ Lifecycle Ownership | accepted | Docs-agent (P6) owns living docs updates; ship-agent (P7) owns docs/about.md creation as a blocking step |
 
 ---
 
