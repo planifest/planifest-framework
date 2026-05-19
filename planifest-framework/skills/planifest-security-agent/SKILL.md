@@ -88,6 +88,7 @@ Top actions before production:
 
 ## Rules
 
+- **One question at a time.** When you need human input — to clarify a risk tolerance, confirm a finding's severity, or resolve an ambiguity — ask one question, wait for the answer, then continue. Lead with a recommendation where you can derive one.
 - **Be specific.** Every finding must reference a specific file, endpoint, or configuration in the implementation. "SQL injection is a risk" is not a finding. "The `/api/orders` endpoint at `apps/api/src/routes/orders.ts:42` accepts a `sortBy` parameter that is interpolated into a query without sanitisation" is.
 - **Base your assessment on the actual code.** Do not fabricate findings. If the code correctly validates all inputs, say so - do not invent a hypothetical bypass.
 - **If you cannot assess a risk area due to missing information**, say so explicitly rather than guessing.

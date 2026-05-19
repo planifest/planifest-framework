@@ -42,6 +42,43 @@ Read the relevant template before writing any living doc for the first time:
 
 ---
 
+## P6 Gate
+
+Before doing any docs work, run both gate checks in order:
+
+### Gate A — docs/ must exist
+
+Check whether `docs/` exists at the repository root.
+
+**If `docs/` is absent:** Fail immediately.
+
+```
+P6: Gate A failed — docs/ does not exist.
+No docs directory found. The ship-agent cannot archive without docs/.
+Create docs/ and the mandatory living docs before proceeding.
+```
+
+Do not proceed to any other docs work until this is resolved.
+
+### Gate B — assess whether a docs update is needed
+
+Read the feature brief and design to understand the scope of this pipeline run. Assess whether the living docs (`docs/architecture-overview.md`, `docs/component-registry.md`, `docs/dependency-graph.md`, `docs/decisions-index.md`, `docs/api-index.md`) require updating based on what was built.
+
+Present your assessment and a recommendation to the human:
+
+```
+P6: Gate B — docs update assessment.
+[Summary of what changed in this run — one sentence.]
+I recommend [updating / no update needed for] the following docs: [list or "none"].
+Confirm? (proceed / skip docs update / update different docs)
+```
+
+Wait for the human to confirm before proceeding. Record the confirmed decision in the P6 build log block.
+
+**One question at a time.** If any clarification is needed, ask one question, wait for the answer, then continue. Never present a list of questions.
+
+---
+
 ## Input
 
 - All artifacts produced by prior phases at `plan/`

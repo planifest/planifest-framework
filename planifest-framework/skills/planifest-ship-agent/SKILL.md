@@ -30,6 +30,7 @@ No exceptions. Including single-line acknowledgements.
 2. Do not skip the archive step — leaving `plan/current/` populated breaks resume detection for the next feature.
 3. Credentials are never in your context.
 4. Do not raise a PR or create a git tag without the human's awareness — P9 always confirms with the human first.
+5. **One question at a time.** When you need input from the human (version confirmation, PR decision, regression confirmation), ask one question, wait for the answer, then ask the next. Never present a list of questions. Lead with a recommendation where possible.
 
 ---
 
@@ -117,12 +118,40 @@ Generate the test report artifact before archiving.
 7. Delete `plan/.orchestrator-active` — this sentinel must be removed last, after archive is confirmed complete
 8. Delete `plan/.orchestrator-ack` if it exists — removes the strict-mode session ack so the next pipeline starts clean
 
+### Step 6b — Write docs/about.md
+
+**This is a blocking step.** Do not proceed to Step 7 until `docs/about.md` is written.
+
+1. Create `docs/` if it does not exist
+2. Read `planifest-framework/templates/about.template.md` for the exact format
+3. Write `docs/about.md` with:
+   - `version`: the human-confirmed version from `plan/current/design.md` (the value confirmed at P0)
+   - `feature`: the current feature ID
+   - `updated`: today's date in `DD MMM YYYY` format (e.g. `19 May 2026`)
+
+```markdown
+---
+version: "{confirmed-version}"
+feature: "{feature-id}"
+updated: "{DD MMM YYYY}"
+---
+# About
+
+| Field | Value |
+|-------|-------|
+| Version | `{confirmed-version}` |
+| Last feature | `{feature-id}` |
+| Updated | `{DD MMM YYYY}` |
+```
+
+Do not copy the template comment block (`> This file is the canonical version record...`) into the output — write only the table.
+
 ### Step 7 — Commit archive
 
-Commit the archive and changelog to the branch:
+Commit the archive, changelog, and `docs/about.md` to the branch:
 
 ```
-git add plan/_archive/ plan/changelog/
+git add plan/_archive/ plan/changelog/ docs/about.md
 git commit -m "plan(p7): archive {feature-id}"
 ```
 

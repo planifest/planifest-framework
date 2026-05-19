@@ -147,6 +147,28 @@ Anything the agents need to know that doesn't fit elsewhere.
 
 ---
 
+## Scenario Paths
+
+Before writing acceptance criteria, consider the paths your feature must handle. The orchestrator will read these answers and use them to reduce coaching questions and run a more targeted Scope Lock Challenge. Empty entries will be treated as gaps to fill during P0.
+
+**Happy path:** What does success look like end-to-end? Describe the flow from first action to final outcome when everything works.
+
+> {{happy-path}}
+
+**First-run path:** What happens the very first time this feature is used, before any data, state, or prior runs exist? Are there initialisation steps, seed data requirements, or bootstrap sequences?
+
+> {{first-run-path}}
+
+**Error / sad path:** What are the most likely failure modes? What should happen when they occur — fail silently, surface an error, retry, or degrade gracefully?
+
+> {{error-sad-path}}
+
+**Cross-session continuity:** If the pipeline or user session is interrupted mid-run, what state is at risk? How is it recovered? Are there partial-write scenarios that leave inconsistent state?
+
+> {{cross-session-continuity}}
+
+---
+
 ## Acceptance Criteria
 
 How do you know this feature is done?

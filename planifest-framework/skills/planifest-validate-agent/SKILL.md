@@ -99,6 +99,7 @@ Do NOT proceed to the next pipeline phase if any check is failing. The pipeline 
 
 ## Rules
 
+- **One question at a time.** When you need human input — to confirm a fix approach, escalate an unresolvable failure, or clarify a requirement ambiguity — ask one question, wait for the answer, then continue. Lead with a recommendation where you can derive one.
 - **Fix the actual bug.** Do not suppress linting rules, skip failing tests, or weaken type checks to make errors go away.
 - **Do not widen scope.** Fix the failure. Do not refactor adjacent code, improve test coverage beyond what failed, or restructure the project.
 - **If a test failure reveals a requirements ambiguity**, record it in `src/{component-id}/docs/quirks.md` and note it for the human. Fix the test to match your best interpretation of the requirements, but flag the ambiguity.

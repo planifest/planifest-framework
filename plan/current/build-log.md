@@ -35,6 +35,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P3 — Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-05-19T01:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `0` |
+| MCP calls | `6` |
+| Parallel task batches | `3` |
+| Notes | All changes are markdown skill files and templates — no runtime, no TDD loop. Batch 1: templates (design.template.md, about.template.md, feature-brief.template.md). Batch 2: orchestrator skill — adoption modes (four-mode taxonomy + priority), version detection (P0 step 3b), scope lock challenge, P0 audit trail, one-question+recommend-then-confirm rule. Batch 3: ship-agent (docs/about.md write step 6b), docs-agent (P6 Gate A/B), 6 phase skills (one-question rule), migration file. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
