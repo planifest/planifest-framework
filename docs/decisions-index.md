@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000014-improve-adoption-mode-selection
+Last updated: 0000015-pipeline-session-cleanup
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -144,6 +144,15 @@ Last updated: 0000014-improve-adoption-mode-selection
 | ADR-008 | One-Question-at-a-Time as Framework-Wide Instruction | accepted | Every phase skill states the one-question rule explicitly; recommend-then-confirm pattern throughout |
 | ADR-009 | Incremental P0 Audit Trail Writes | accepted | Build log is appended after each coaching exchange, not batched at the end of P0 |
 | ADR-010 | docs/ Lifecycle Ownership | accepted | Docs-agent (P6) owns living docs updates; ship-agent (P7) owns docs/about.md creation as a blocking step |
+
+### Feature 0000015 — pipeline-session-cleanup
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Interrupted P9 Detection Signal | accepted | Combined signal: `.orchestrator-active` present AND `plan/current/` empty uniquely identifies an interrupted P9 |
+| ADR-002 | New Session Recommendation Not Block | accepted | Post-P9 advisory message recommends a new session but does not enforce it — human retains control |
+| ADR-003 | Stale Run-Mode Warn-and-Clear at P0 | accepted | Stale `plan/.run-mode` at fresh P0 start is auto-cleared with a visible warning; no blocking |
+| ADR-004 | Run-Mode Deletion Owned by P9 | accepted | P9 (ship-agent Step 6) deletes `plan/.run-mode`; P0 handles the recovery case only |
 
 ---
 
