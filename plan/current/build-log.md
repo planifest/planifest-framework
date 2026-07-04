@@ -1,8 +1,8 @@
 ---
-title: "Build Log - 0000015-pipeline-session-cleanup"
+title: "Build Log - 0000016-pipeline-governance-and-loop-engineering"
 summary: "Working telemetry file maintained by the orchestrator throughout the pipeline run."
 ---
-# Build Log - 0000015-pipeline-session-cleanup
+# Build Log - 0000016-pipeline-governance-and-loop-engineering
 
 > Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
 > Filed to the archive at P7. Read by the build-assessment-agent at P8.
@@ -11,10 +11,10 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Field | Value |
 |-------|-------|
-| Feature ID | `0000015-pipeline-session-cleanup` |
-| Pipeline start | `2026-05-19T00:00:00Z` |
+| Feature ID | `0000016-pipeline-governance-and-loop-engineering` |
+| Pipeline start | `2026-07-04T13:53:53Z` |
 | Tool | `Claude Code` |
-| Primary model | `claude-sonnet-4-6` |
+| Primary model | `claude-sonnet-5` |
 | Cheaper model | `claude-haiku-4-5` |
 
 ---
@@ -25,127 +25,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Field | Value |
 |-------|-------|
-| Start | `2026-05-19T00:00:00Z` |
+| Start | `2026-07-04T13:53:53Z` |
 | Model tier | primary |
-| Skills loaded | `planifest-orchestrator` |
+| Skills loaded | planifest-orchestrator |
 | Agents spawned | `0` |
-| MCP calls | `0` |
+| MCP calls | `several (context-mode search/batch-execute during discovery)` |
 | Parallel task batches | `0` |
-| Notes | `Fresh start — branch feat/pipeline-session-cleanup. Adoption mode: standard-iterative. Version confirmed: 0.15.0 (minor bump from 0.14.0).` |
+| Notes | Feature originated from three merged threads: (1) portable fixes reviewed from bug-bounty-hunter PR #4 (product.yml/versionPolicy concept adopted; editable-P7-P9 ship-agent lifecycle explicitly rejected in favor of a backlog mechanism), (2) a pre-existing human-authored feature brief for agentic loop engineering (trimmed from 3 waves to 1 core wave — dropped design-critic and governed-reversal machinery as unproven/heavy given no staged evidence-gating was wanted), (3) new backlog-folder mechanism designed in dialogue. Reference material moved to plan/current/_refs/agentic-loops/. Interrupted-P9 sentinel cleanup performed for a prior stale run before this feature started. |
 
----
+P0 exchange — PR review: Q: what changes from the bug-bounty-hunter PR should be upstreamed? / A: product.yml + versionPolicy concept adopted generically; editable-P9-lifecycle and its resume-detection change rejected — no loop-back at P7-P9, use a backlog folder instead.
 
-### P1 — Spec
+P0 exchange — backlog mechanism: Q: how should late-discovered, non-blocking issues be handled without looping back? / A: new `plan/backlog/{id}-{slug}/` folder, one entry per deferred item, picked up and offered to the human at the start of every subsequent P0; naming corrected from "next-steps" to "backlog".
 
-| Field | Value |
-|-------|-------|
-| Start | `2026-05-19T01:00:00Z` |
-| Model tier | primary |
-| Skills loaded | `planifest-spec-agent` |
-| Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `1` |
-| Notes | `6 requirements, scope, risk register, glossary, execution plan, operational model, SLO, cost model. No OpenAPI (docs-only). No component manifest (planifest-framework existing).` |
+P0 exchange — agentic-loop scope: Q: keep all 3 waves of the pre-drafted loop-engineering brief? / A: no — keep only the loop-runner skill, telemetry/toggles, verify-by-execution, and cross-model review gate (highest-fit per the research, and needed regardless since the review gate is itself a loop); drop the design-critic hardening loop and the full governed-reversal/ratchet-hook machinery as unproven and structurally similar to the rejected P9 loop-back pattern. P0 completeness loop left open for explicit confirmation.
 
----
+P0 exchange — naming: Q: does "agentic-loop-engineering" name fit the bundled scope? / A: no — renamed to "pipeline-governance-and-loop-engineering"; internal "Phase 1/2/3" grouping renamed to "Wave" to avoid collision with Planifest's own P0-P9 phase terminology (collision already existed in the framework's own Decomposition section and template, flagged for correction in this feature too).
 
-### P2 — ADRs
-
-| Field | Value |
-|-------|-------|
-| Start | `2026-05-19T02:00:00Z` |
-| Model tier | primary |
-| Skills loaded | `planifest-adr-agent` |
-| Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `1` |
-| Notes | `4 ADRs: ADR-001 interrupted P9 detection signal, ADR-002 new session recommendation not block, ADR-003 stale run-mode warn-and-clear, ADR-004 run-mode deletion owned by P9.` |
-
----
-
-### P3 — Codegen
-
-| Field | Value |
-|-------|-------|
-| Start | `2026-05-19T03:00:00Z` |
-| Model tier | primary |
-| Skills loaded | `planifest-codegen-agent` |
-| Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `0` |
-| Notes | `Edited planifest-orchestrator/SKILL.md (REQ-001, REQ-003, REQ-005, REQ-006) and planifest-ship-agent/SKILL.md (REQ-002, REQ-004). Updated component.yml to v0.15.0.` |
-
----
-
-### P4 — Validate
-
-| Field | Value |
-|-------|-------|
-| Start | `2026-05-19T04:00:00Z` |
-| Model tier | primary |
-| Skills loaded | `planifest-validate-agent` |
-| Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `0` |
-| Notes | `All 6 requirements verified via grep. No runtime tests — docs-only feature. Validation passed.` |
-
----
-
-### P5 — Security
-
-| Field | Value |
-|-------|-------|
-| Start | `2026-05-19T05:00:00Z` |
-| Model tier | primary |
-| Skills loaded | `planifest-security-agent` |
-| Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `0` |
-| Notes | `No security surface — sentinel file deletions, local filesystem only. No findings.` |
-
----
-
-### P6 — Docs
-
-| Field | Value |
-|-------|-------|
-| Start | `2026-05-19T06:00:00Z` |
-| Model tier | primary |
-| Skills loaded | `planifest-docs-agent` |
-| Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `0` |
-| Notes | `docs/decisions-index.md updated with 4 ADRs. docs/about.md updated at P7. No component docs change needed (no src/ changes).` |
-
----
-
-<!-- Copy and fill in this block at each phase boundary:
-
-### Px — {Phase Name}
-
-| Field | Value |
-|-------|-------|
-| Start | `{{timestamp}}` |
-| Model tier | primary / cheaper |
-| Skills loaded | `{{skill names}}` |
-| Agents spawned | `{{count}}` |
-| MCP calls | `{{count}}` |
-| Parallel task batches | `{{count}}` |
-| Notes | `{{free text or "none"}}` |
-
--->
-
----
-
-## Summary (filled at P7)
-
-| Metric | Value |
-|--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
+P0 correction — scope: the orchestrator's initial cut of the design-critic skill and the full governed-reversal protocol (defect report, reversal-assessor, ratchet hook, human gates) was based on a flawed analogy to the rejected P7-P9 editable-lifecycle pattern. Human corrected: those loops operate entirely within P0-P6, before anything is archived/committed, which is a fundamentally different (much lower) risk profile than looping back into already-shipped state. Restored to full scope as Wave 1. Cross-model review gate repositioned from "before P9" to "before P7 archive" (end of P6) to remain consistent with the ship-agent's Hard Limit against touching code after P7, since P7 already archives/deletes plan/current under the unmodified (non-editable) ship-agent design. P0 completeness loop confirmed in scope.
