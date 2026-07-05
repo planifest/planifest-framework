@@ -1,8 +1,6 @@
-# Feature Brief - Agentic Loop Engineering
+# Feature Idea - Agentic Loop Engineering
 
-**Feature ID:** 0000016-agentic-loop-engineering
-
-> Written by a human (drafted with agent assistance from the research in `references/agentic-loops/deep-dive-adding-agentic-loops.md` and the design discussion of 2026-07-04). This is the input document that kicks off the confirmed design Agentic Iteration Loop.
+> Background idea only — not a feature brief and not authoritative. Originally drafted by a human (with agent assistance from the research in `references/agentic-loops/deep-dive-adding-agentic-loops.md` and the design discussion of 2026-07-04) as an early sketch of loop-engineering scope. Superseded by the canonical `plan/current/feature-brief.md` for `0000016-pipeline-governance-and-loop-engineering`, which merged, trimmed, and re-scoped this idea alongside other work. Kept here for background context only — do not cite this document's "Feature ID," waves, or acceptance criteria as current or binding.
 
 ---
 
