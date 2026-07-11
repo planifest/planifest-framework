@@ -1,72 +1,64 @@
 # Planifest
 
-**Because AI agents build from context, not assumptions.**
+Planifest is a specification-first framework for agentic coding tools. It requires an agent to produce a complete, reviewable execution plan — validated against templates and schemas — before it generates code.
 
-Planifest is an Agile context framework for AI development. It uses Just-in-Time planning to ensure your agents build from a solid Execution Plan rather than hallucinating in the dark.
+It treats the human as product owner and architect, and the agent as the implementer working within constraints the human sets.
 
-Code is ephemeral; architecture is permanent. Planifest's paper trail gives you the ultimate choice: refactor what you can, or confidently rewrite what you must.
-
-Planifest gives AI agents the structure they need to build software that a senior engineer would approve. It treats the human as the Product Owner and Technical Architect. The agent is the Tech Lead: highly capable, but operating within constraints the human sets.
-
-The framework is LLM-agnostic and tool-agnostic. It works with any model (Claude, GPT, Gemini, etc.) and any agentic coding tool (Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, etc.).
-
-Planifest fully supports the [Agent Skills specification](https://agentskills.io/specification) and is designed for use with any tool that implements it.
+The framework is LLM-agnostic and tool-agnostic. It works with any model (Claude, GPT, Gemini, etc.) and any agentic coding tool (Claude Code, Cursor, Codex, Antigravity, GitHub Copilot, etc.), and supports the [Agent Skills specification](https://agentskills.io/specification).
 
 ---
 
-## The Post-Agile Philosophy: Why Planifest Demands a Plan
+## Rationale
 
-Agile methodologies were invented to solve a human bottleneck: typing is slow. Because execution took months, heavy upfront planning was dangerous. The market would change before the code was finished.
+Agile practice discourages heavy upfront planning because, when implementation takes weeks or months, detailed plans go stale before they're delivered. Agentic development changes that calculation: implementation is cheap and fast, so the dominant risk shifts from *stale plans* to *plausible-but-wrong output* built on unstated assumptions.
 
-**In the AI era, execution takes minutes.** When an agent can generate a 10,000-line feature in the time it takes to get coffee, the cost of execution drops to zero. But the cost of *hallucination* skyrockets. If an agent builds the wrong architecture at lightspeed, you spend days untangling it.
+Planifest responds to that shift in three ways:
 
-Planifest is built on three core realities of agentic development:
+1. **The plan is the reviewable artifact.** When an agent writes the code, the prompt and plan largely determine the output. Planifest makes the plan explicit and reviewable, so architectural choices are visible before code exists.
+2. **Context is recorded per component.** Each component keeps a manifest, and each feature keeps its execution plans and ADRs. This gives an agent (or a human) the historical context to modify a component — or the specification to rebuild it.
+3. **Gaps trigger questions, not guesses.** If the feature brief has gaps, the agent is instructed to stop and ask rather than fill them with assumptions.
 
-1. **Transparency beats brevity.** When AI writes the code, the code is just the compiled output. The *actual* source code is your prompt and your plan. If your plan is vague, the AI will invent the missing pieces, leaving you with zero transparency into its architectural choices.
-2. **Context makes refactoring safe (and rewriting trivial).** AI struggles to safely modify large, undocumented codebases. Planifest makes your code ephemeral and your architecture permanent. With a perfect architectural record, you get the best of both worlds: the precise historical context an agent needs to confidently refactor existing code, and the full specification required to burn a component down and build it better from scratch.
-3. **Agents build from context, not assumptions.** Before a single line of code is generated, the agent must document its Execution Plan. If there are gaps in the Story Context, the agent stops and asks the human. It does not assume.
-
----
-
-## How It Works: The Agentic Iteration Loop
-
-Planifest enforces a strict, fast-paced iteration loop to keep the AI aligned with human intent.
-
-1. **Human writes a Feature Brief** — What to build, why, and within what constraints.
-2. **Agent interrogates** — The Orchestrator Skill assesses the brief and asks focused questions until the context is complete.
-3. **Agent plans** — The agent generates an **Execution Plan** and an **ADR** (Architectural Decision Record).
-4. **Agent builds** — The agent executes the plan: code generation → validation → security checks → documentation updates.
-5. **Human reviews** — The Pull Request is the universal backstop.
-
-*(Note: Every artifact the agent produces follows a strict template, ensuring consistency across tools, models, and teams.)*
+Whether this trade-off pays off depends on the work — see [Limitations](#limitations-and-non-goals).
 
 ---
 
-## Repository Structure
+## How it works: the iteration loop
+
+1. **Human writes a feature brief** — what to build, why, and within what constraints.
+2. **Agent interrogates** — the orchestrator skill assesses the brief and asks questions until the context is complete.
+3. **Agent plans** — it generates an execution plan and an ADR (Architectural Decision Record).
+4. **Agent builds** — code generation → validation → security checks → documentation updates.
+5. **Human reviews** — the pull request is the backstop.
+
+Every artifact the agent produces follows a template, so output is consistent across tools, models, and teams.
+
+---
+
+## Repository structure
 
 ```
 repo/
-├── planifest-framework/        ← The framework (drop in, don't modify per-project)
-│   ├── skills/       ← Agent instructions (orchestrator + 7 phase skills)
-│   ├── templates/    ← File format templates for every artifact
-│   ├── schemas/      ← JSON Schema validation definitions
-│   ├── standards/    ← Code quality standards
-│   └── [feature-structure.md](plan/feature-structure.md)  ← Canonical directory layout
+├── planifest-framework/   ← The framework (drop in, don't modify per-project)
+│   ├── skills/            ← Agent instructions (orchestrator + 7 phase skills)
+│   ├── templates/         ← File format templates for every artifact
+│   ├── schemas/           ← JSON Schema validation definitions
+│   ├── standards/         ← Code quality standards
+│   └── feature-structure.md  ← Canonical directory layout
 │
-├── plan/             ← Feature briefs, execution plans, ADRs, risk registers, scope docs.
-│                       Organized by feature. Everything that describes WHAT to build and WHY.
+├── plan/                  ← Feature briefs, execution plans, ADRs, risk registers,
+│                            scope docs. Organised by feature. Everything that
+│                            describes WHAT to build and WHY.
 │
-├── src/              ← Code (organized by component)
-│                       Implementation, tests, config, manifests.
-│                       Each component has a component.yml at its root.
+├── src/                   ← Code (organised by component). Implementation, tests,
+│                            config, manifests. Each component has a component.yml.
 │
-└── planifest-docs/        ← Project documentation (for humans, not agents)
-                        Architecture notes, research, roadmap.
+└── planifest-docs/        ← Project documentation (for humans, not agents).
+                             Architecture notes, research, roadmap.
 ```
 
 ---
 
-## Getting Started
+## Getting started
 
 See **[getting-started.md](planifest-framework/getting-started.md)** for step-by-step setup instructions.
 
@@ -86,13 +78,13 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 ---
 
-## Key Principles
+## Key principles
 
-**Specification before code.** The agent does not write code until the spec is complete. If the spec has gaps, it stops and asks — it does not guess.
+**Specification before code.** The agent does not write code until the spec is complete. If the spec has gaps, it stops and asks.
 
 **Human decides, agent executes.** The human chooses the architecture, the stack, the data ownership, and the scope. The agent implements within those constraints.
 
-**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential Agentic Iteration Loop runs). This is how Planifest manages context at scale.
+**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential iteration loop runs). This is how Planifest manages context at scale.
 
 **Everything is traced.** Every agent-produced artifact records the skill that produced it, the tool it ran in, and the model that generated it.
 
@@ -100,7 +92,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 ---
 
-## The Framework
+## The framework
 
 | Folder | Contents | Count |
 |--------|----------|-------|
@@ -114,53 +106,57 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 ---
 
-## Hard Limits
+## Hard limits
 
-These are non-negotiable, regardless of tool, model, or configuration:
+These apply regardless of tool, model, or configuration:
 
 1. **Requirements must be complete before codegen begins**
 2. **No direct schema modification** — migration proposal required, human approves
-3. **Destructive schema operations require human approval** — no exceptions
+3. **Destructive schema operations require human approval**
 4. **Data is owned by one component** — never write to another component's data
 5. **Code and documentation are written together** — never one without the other
 6. **Credentials are never in the agent's context** — capabilities only
 
 ---
 
+## Limitations and non-goals
+
+Planifest is a deliberate trade-off: it exchanges upfront ceremony for traceability and reviewability. That trade-off is not always worth making.
+
+- **Overhead is real.** For small changes, prototypes, or exploratory work, the full pipeline is disproportionate. The fast-path workflow reduces this, but doesn't eliminate it.
+- **It depends on review discipline.** The PR gate is only a backstop if humans actually read the plans and the diffs. Planifest structures the review; it can't perform it.
+- **Plans don't prevent all bad output.** A complete specification reduces assumption-driven errors; it doesn't guarantee correct code. Validation and security skills catch classes of problems, not all of them.
+- **No comparative benchmarks yet.** We have not published measurements comparing outcomes with and without the framework. Claims about quality improvement are, at this stage, based on design rationale and our own use.
+- **It's not a project management method.** Planifest structures agent sessions, not teams. It sits alongside whatever delivery process you already use.
+
+---
+
+## Status
+
+Planifest is under active development. Template and skill formats may change between versions; check the [roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) for planned changes and deferred items.
+
+## Contributing
+
+Issues and pull requests are welcome. Agent skills, templates, and per-tool setup files are the areas most likely to benefit from outside contributions — particularly support for additional agentic tools.
+
+---
+
 ## Documentation
 
-**Planifest Docs* contains human documentation — architecture notes, research, and the project roadmap. Agents don't need these; they work from the skills and templates in `planifest-framework/`. There is a [git repository](https://github.com/planifest/planifest-docs) and also a [GitHub Pages website](https://planifest.github.io/planifest-docs/) for these docs.
+`planifest-docs` contains human documentation — architecture notes, research, and the project roadmap. Agents don't need these; they work from the skills and templates in `planifest-framework/`. Available as a [git repository](https://github.com/planifest/planifest-docs) and a [GitHub Pages site](https://planifest.github.io/planifest-docs/).
 
 | Document | Purpose |
 |----------|---------|
 | [Master Plan](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p001-planifest-master-plan.md) | Architecture overview |
 | [Product Concept](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p002-planifest-product-concept.md) | Vision and commercial model |
 | [Functional Decisions](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p003-planifest-functional-decisions.md) | Decision log with rationale |
-| [Pathway to Agentic Development](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p004-the-pathway-to-agentic-development.md) | Philosophical foundation |
+| [Pathway to Agentic Development](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p004-the-pathway-to-agentic-development.md) | Background and rationale |
 | [Agentic Tool Runbook](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p010-planifest-agentic-tool-runbook.md) | Per-tool setup guides |
 | [Pipeline](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p015-planifest-pipeline.md) | Pipeline phase descriptions |
 | [Roadmap](https://github.com/planifest/planifest-docs/blob/main/planifest-docs/p014-planifest-roadmap.md) | Deferred items and future features |
 
-
-[Read more on the website](https://planifest.github.io/planifest-docs/)
-
-
 ---
 
-## License
+## Licence
 
-[Apache License Version 2.0](LICENSE.txt)
-
-### Why we chose the Apache 2.0 License
-
-We want the Planifest community to build with total confidence. While we considered the MIT license for its simplicity, we chose Apache 2.0 because it offers superior long-term protection for our users and contributors:
-
-- **Explicit Patent Rights:** Unlike other permissive licenses, Apache 2.0 grants you an explicit license to any patents covered by the software. This means you can use, modify, and distribute Planifest without worrying about "hidden" patent claims.
-
-- **Contributor Protection:** It ensures that every contribution made to the framework comes with the same patent grants. This prevents "patent trolling" within the ecosystem and keeps the code free for everyone, forever.
-
-- **Community Safety (The "Retaliation" Clause):** The license includes a defense mechanism: if anyone sues a Planifest user over patent infringement related to this software, they automatically lose their own license to use it. This keeps the community collaborative and legally "polite."
-
-- **Commercial Friendly:** It remains a permissive, open-source license. You are free to use Planifest for commercial projects, ship it in proprietary products, and build your business on it with zero royalties.
-
-**TL;DR:** We chose Apache 2.0 so you can focus on building great things, knowing the legal foundation of your framework is rock-solid and community-first.
+[Apache License 2.0](LICENSE.txt) — chosen over MIT primarily for its explicit patent grant.
