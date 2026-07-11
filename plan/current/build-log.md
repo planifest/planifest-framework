@@ -118,3 +118,19 @@ Gate accepted: P3 — 2026-07-11 (continuous run)
 P4 notes — all checks pass, 0 self-correction cycles. Full harness: 7/9 suites green; 2 pre-existing macOS-only failures (BSD head -n -1 GNU-ism + pipefail SIGPIPE in suite-local plumbing, files untouched since branch base, Linux CI green) — backlog entry 0000001 updated with corrected root cause. Coverage + verify-by-execution observations in plan/current/verification-report.md (toggle off per ADR-003 — method demonstration + REQ-020 AC evidence, non-gating).
 
 Gate accepted: P4 — 2026-07-11 (continuous run; zero self-corrections)
+
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T02:30:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `0` |
+| MCP calls | `0 (telemetry suspended per R-009)` |
+| Parallel task batches | `1 (STRIDE + secrets/deps scans over known-small diff, inline)` |
+| Notes | Surface: ratchet-check.mjs (PreToolUse), consistency-check.mjs + product-version.mjs (local file parsers), setup.sh settings wiring, markdown skills/templates. Zero new dependencies (node built-ins only); no network, credentials, or schema surface. |
+
+P5 notes — overall risk Low; zero critical/high. Two medium residual findings, both with documented compensating controls: (1) ratchet marker forgery is audit-detected (ratchet-log + P8), not prevented — same-changeset detection from ADR-004 not implemented in 0.16.0, now recorded in component.yml quirks; (2) backlog entry prompt-injection defended at instruction level (never-parse rule + IV spec + one-at-a-time human review). security_finding telemetry skipped per R-009.
+
+Gate accepted: P5 — 2026-07-11 (continuous run; risk Low, no critical/high/medium-unmitigated)
