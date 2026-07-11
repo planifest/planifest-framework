@@ -174,3 +174,15 @@ Gate accepted: P6 — 2026-07-11 (continuous run)
 | MCP calls | `0` |
 | Parallel task batches | `0 (single sub-agent, sequential by definition)` |
 | Notes | Sub-agent reads this archived build-log.md and writes build-report.md alongside it. |
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T04:15:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-ship-agent (continued) |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Notes | Single-component path: no product.yml (exit-4 fallback per ADR-002) — version read from planifest-framework/component.yml (0.16.0). local-git-only active with no per-session push grant: local tag only, PR description output for the human. |
