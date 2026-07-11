@@ -20,9 +20,11 @@ status: "open"
 
 The commit-msg hook itself works (verified live on macOS: it blocked a 73-char subject during the 0000016 run) — these are test-infrastructure portability defects, not product defects.
 
+**Addendum (2026-07-11, post-ship review):** `tests/test-skill-sync-security.sh` fails the same way (4 fails, `head: illegal line count -- -1` visible in its output) — same BSD `head -n -1` family. Include it in the fix.
+
 ## Suggested Action
 
-Replace `head -n -1` with a portable equivalent (e.g. `sed '$d'`) and rework the exit-code capture to avoid piping through `tail` under pipefail (capture output and `$?` into separate variables), in both suites.
+Replace `head -n -1` with a portable equivalent (e.g. `sed '$d'`) and rework the exit-code capture to avoid piping through `tail` under pipefail (capture output and `$?` into separate variables), in all three suites: `test-regression-pack.sh`, `test-commit-msg-hook.sh`, `test-skill-sync-security.sh`.
 
 ## Why Deferred
 
