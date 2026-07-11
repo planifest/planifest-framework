@@ -86,3 +86,15 @@ P2 notes — 8 ADRs accepted. Q-001→ADR-003 (toggles in planifest-overrides/lo
 Gate accepted: P2 — 2026-07-11 (continuous run; every significant decision has an ADR)
 
 P3 pre-start — deferred confirmations resolved by human (2026-07-11): version 0.16.0 confirmed; push policy = per-session grant (custom-001 override NOT extended for push; no remote push this session unless expressly authorized — Q-004 closed); adoption mode standard-iterative confirmed.
+
+### P3 — Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T01:00:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `0 — see parallelism note` |
+| MCP calls | `~3 (ctx discovery)` |
+| Parallel task batches | `4 planned (templates → scripts/hooks+tests → new skills → SKILL.md edits)` |
+| Notes | Parallelism decision: implemented inline with parallel native tool batches rather than per-requirement subagent spawns. Justification: 16 of 21 requirements are edits/additions to a shared set of framework markdown files (orchestrator/ship/validate SKILL.md, templates) — per-requirement subagents would each need the same heavy cross-file context and would collide on the same files; the two deterministic deliverables (.mjs hook + consistency script) get test-first treatment inline. TDD applies to executable artifacts (shell tests RED→GREEN); markdown deliverables verified by pattern-check tests. |
