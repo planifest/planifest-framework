@@ -22,6 +22,8 @@ hooks:
 
 ## Rubric — ALL five must be evidenced to grant (REJECT-default)
 
+The five questions in brief: real blocker? shallowest owning phase? blast radius? budget remaining? additive vs. altering?
+
 | # | Question | Grant requires |
 |---|----------|----------------|
 | 1 | **Real blocker?** | The evidence shows the work *cannot* proceed as specified — not that another design would be nicer. A workaround existing within the current design = DENY. |
