@@ -124,7 +124,11 @@ for dir in "$EXT"/*/; do
   skill_file="$dir/SKILL.md"
   [ -f "$skill_file" ] || continue
   total=$((total+1))
-  name_field=$(grep "^name:" "$skill_file" | head -1 | sed 's/^name: *//;s/["\r]//g' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g;s/--*/-/g;s/^-//;s/-$//')
+  # NB: quote/CR stripping uses tr, not a sed [".."] bracket class — on BSD
+  # sed, `\r` inside [...] is NOT a carriage-return escape, it's the literal
+  # characters `\` and `r`, which silently deleted every "r" from every name
+  # field (279 false-positive mismatches on macOS before this fix).
+  name_field=$(grep "^name:" "$skill_file" | head -1 | sed 's/^name: *//' | tr -d '"\r' | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g;s/--*/-/g;s/^-//;s/-$//')
   dir_name=$(basename "$dir")
   if [ "$dir_name" != "$name_field" ] && [ -n "$name_field" ]; then
     mismatch_count=$((mismatch_count+1))

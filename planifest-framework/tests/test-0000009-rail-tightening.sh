@@ -19,6 +19,7 @@ DESIGN_TPL="$FRAMEWORK/templates/design.template.md"
 PAUSE_TPL="$FRAMEWORK/templates/pause.template.md"
 STANDARD_BOOT="$FRAMEWORK/templates/standard-boot.md"
 GETTING_STARTED="$FRAMEWORK/getting-started.md"
+PIPELINE_REFERENCE="$FRAMEWORK/pipeline-reference.md"
 
 file_exists() { [ -f "$1" ] && echo "yes" || echo "no"; }
 grep_has()    { grep -q "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
@@ -277,10 +278,13 @@ assert_equals "yes" "$(grep_has "orchestrator-ack" "$ORCHESTRATOR")" \
 assert_equals "yes" "$(grep_has "orchestrator-ack" "$SHIP_AGENT")" \
   "REQ-008p: ship-agent deletes .orchestrator-ack at P7"
 
-assert_equals "yes" "$(grep_has "check-orchestrator-presence\|orchestrator-presence" "$GETTING_STARTED")" \
-  "REQ-008p: getting-started.md documents presence check hook"
+# getting-started.md is the entry-point file (deliberately terse, per the
+# 0000012 three-file docs architecture, ADR-001); presence-check/strict-mode
+# is deep-reference material and lives in pipeline-reference.md instead.
+assert_equals "yes" "$(grep_has "check-orchestrator-presence\|orchestrator-presence" "$PIPELINE_REFERENCE")" \
+  "REQ-008p: pipeline-reference.md documents presence check hook"
 
-assert_equals "yes" "$(grep_has "strict-orchestrator" "$GETTING_STARTED")" \
-  "REQ-008p: getting-started.md documents --strict-orchestrator flag"
+assert_equals "yes" "$(grep_has "strict-orchestrator" "$PIPELINE_REFERENCE")" \
+  "REQ-008p: pipeline-reference.md documents --strict-orchestrator flag"
 
 print_summary
