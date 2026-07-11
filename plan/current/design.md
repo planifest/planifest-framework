@@ -79,5 +79,6 @@ The exception to the rule is that you can operate with git and GitHub commands i
 > Note: this feature's own fine-grained-commit/push-cadence requirement (US-007/008) may prompt an update to this override file to make feature-branch push standing rather than per-ask. That decision is deferred to implementation per human instruction.
 
 ## Confirmation
-Human confirmed this design before proceeding: no
-Date confirmed: pending
+Human confirmed this design before proceeding: yes ("build this in continuous mode", 2026-07-11)
+Date confirmed: 2026-07-11
+Run mode: continuous (authorized 2026-07-11; human gates mandated by the brief — altering reversals, re-exit from P0, budget exhaustion, large cascades, destructive schema ops — still stop regardless)
