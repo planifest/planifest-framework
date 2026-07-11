@@ -526,14 +526,16 @@ install_enforcement_hooks() {
 
   # Wire into settings.json (requires node; jq fallback not needed — node is always available)
   local gate_cmd="$hooks_dir_rel/gate-write.mjs"
+  local ratchet_cmd="$hooks_dir_rel/ratchet-check.mjs"
   local trigger_cmd="$hooks_dir_rel/auto-trigger-orchestrator.mjs"
   local presence_cmd="$hooks_dir_rel/check-orchestrator-presence.mjs"
   local design_cmd="$hooks_dir_rel/check-design.mjs"
 
   if command -v node >/dev/null 2>&1; then
-    PLANIFEST_GATE="$gate_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+    PLANIFEST_GATE="$gate_cmd" PLANIFEST_RATCHET="$ratchet_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_SETTINGS="$settings" node -e '
       const fs = require("fs"), path = require("path");
       const gate     = process.env.PLANIFEST_GATE;
+      const ratchet  = process.env.PLANIFEST_RATCHET;
       const trigger  = process.env.PLANIFEST_TRIGGER;
       const presence = process.env.PLANIFEST_PRESENCE;
       const design   = process.env.PLANIFEST_DESIGN;
@@ -541,13 +543,16 @@ install_enforcement_hooks() {
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
       s.hooks = s.hooks || {};
-      // PreToolUse: gate-write for Write and Edit (idempotent: remove then re-add)
+      // PreToolUse: gate-write + ratchet-check for Write and Edit (idempotent: remove then re-add)
       s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
         .filter(h => !["Write","Edit"].includes(h.matcher) ||
-                     !(h.hooks||[]).some(e => (e.command||"").includes("gate-write")));
+                     !(h.hooks||[]).some(e => (e.command||"").includes("gate-write") ||
+                                              (e.command||"").includes("ratchet-check")));
       s.hooks.PreToolUse.push(
         {matcher:"Write", hooks:[{type:"command",command:gate}]},
-        {matcher:"Edit",  hooks:[{type:"command",command:gate}]}
+        {matcher:"Edit",  hooks:[{type:"command",command:gate}]},
+        {matcher:"Write", hooks:[{type:"command",command:ratchet}]},
+        {matcher:"Edit",  hooks:[{type:"command",command:ratchet}]}
       );
       // UserPromptSubmit: auto-trigger first, then presence check, then check-design (REQ-002, REQ-008, idempotent)
       s.hooks.UserPromptSubmit = (s.hooks.UserPromptSubmit || [])
