@@ -162,3 +162,15 @@ Gate accepted: P6 — 2026-07-11 (continuous run)
 | MCP calls | `0 (telemetry suspended per R-009)` |
 | Parallel task batches | `1 (template reads)` |
 | Notes | Human confirmed ship at the P7 gate ("Ship it and store any gaps discovered as backlog changes"). No .skips. Cross-model review gate not run (toggle off — machinery ships in this feature). Push: none (per-session grant policy, no grant); P9 will output PR description and create local tag v0.16.0 only. |
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T04:00:00Z` |
+| Model tier | cheaper (claude-haiku-4-5 sub-agent) |
+| Skills loaded | planifest-build-assessment-agent (in sub-agent) |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0 (single sub-agent, sequential by definition)` |
+| Notes | Sub-agent reads this archived build-log.md and writes build-report.md alongside it. |
