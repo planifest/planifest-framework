@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000015-pipeline-session-cleanup"
-version: "0.15.0"
+feature: "0000016-pipeline-governance-and-loop-engineering"
+version: "0.16.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -34,6 +34,14 @@ responsibilities:
   - "Detect interrupted P9 on resume (empty plan/current/ + .orchestrator-active present) and complete cleanup"
   - "Recommend new session to human after P9 completes (advisory, not blocking)"
   - "Enforce build log phase block at every phase P0–P9 before doing phase work"
+  - "Provide plan/backlog/ convention for deferred work with P0 pickup protocol"
+  - "Derive product-level release version from product.yml per versionPolicy at P9"
+  - "Commit after every meaningful artifact write, not only at phase gates (Hard Limit 7)"
+  - "Provide canonical loop mechanics (state, run log, stop rules, toggles) via planifest-loop-runner"
+  - "Run REJECT-default fresh-context verifiers: design-critic, reversal-assessor, cross-model review gate (pre-P7)"
+  - "Govern P0-P6 phase reversals: defect report, assessor verdict, scoped correction, 2/feature budget"
+  - "Block silent weakening of acceptance criteria/scope during loops via ratchet-check hook"
+  - "Verify acceptance criteria by executing the software at P4 via planifest-verify-by-execution"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -96,6 +104,10 @@ scope:
     - "planifest-optimise-agent skill for interactive skill file review"
     - "design.template.md extracted from orchestrator inline block"
     - "setup.sh/.ps1 .planifest-manifest tracking for idempotent re-runs"
+    - "plan/backlog/ entries, product.yml template, loop-state/run-log/defect-report/revision-log templates"
+    - "ratchet-check.mjs enforcement hook, consistency-check.mjs and product-version.mjs scripts"
+    - "planifest-loop-runner, planifest-design-critic, planifest-reversal-assessor, planifest-verify-by-execution skills"
+    - "Loop/reversal telemetry event types and planifest-overrides/loop-toggles.yml (all default off)"
   outOfScope:
     - "Application-level code generation (handled by planifest-codegen-agent)"
     - "CI pipeline configuration for consumer projects"
@@ -118,6 +130,8 @@ quality:
   quirks:
     - "context-pressure fill% is a proxy metric based on transcript file size, not actual token count"
     - "gate-write component path matching is prefix-based; very short prefixes may over-permit"
+    - "ratchet-check treats a reworded criterion as remove+add and blocks it (conservative); the .ratchet-approve marker is the intended path for legitimate rewording"
+    - "product-version.mjs parses only the constrained product.template.yml shape, not arbitrary YAML"
 
 pipeline:
   templateVersion: "1.0.0"
@@ -126,10 +140,10 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-05-19"
-  # Updated by 0000015-pipeline-session-cleanup
+  updatedAt: "2026-07-11"
+  # Updated by 0000016-pipeline-governance-and-loop-engineering
   createdBy: "agent"
   lastModifiedBy: "agent"
-  skill: "planifest-docs-agent"
+  skill: "planifest-codegen-agent"
   tool: "claude-code"
-  model: "claude-sonnet-4-6"
+  model: "claude-fable-5"
