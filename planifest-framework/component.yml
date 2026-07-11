@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000016-pipeline-governance-and-loop-engineering"
-version: "0.16.0"
+feature: "backlog-triage-2026-07-11"
+version: "0.16.1"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -142,9 +142,10 @@ pipeline:
 metadata:
   createdAt: "2026-05-02"
   updatedAt: "2026-07-11"
-  # Updated by 0000016-pipeline-governance-and-loop-engineering
+  # Updated by backlog-triage-2026-07-11 (change-agent): fixed test-harness
+  # portability bugs and doc drift from backlog 0000001/0000003/0000004/0000006/0000007
   createdBy: "agent"
   lastModifiedBy: "agent"
-  skill: "planifest-codegen-agent"
+  skill: "planifest-change-agent"
   tool: "claude-code"
-  model: "claude-fable-5"
+  model: "claude-sonnet-5"

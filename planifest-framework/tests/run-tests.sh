@@ -22,15 +22,13 @@ run_suite() {
   fi
 }
 
-run_suite "$SCRIPT_DIR/test-setup-telemetry.sh"
-run_suite "$SCRIPT_DIR/test-context-pressure.sh"
-run_suite "$SCRIPT_DIR/test-skill-telemetry.sh"
-run_suite "$SCRIPT_DIR/test-regression-pack.sh"
-run_suite "$SCRIPT_DIR/test-0000005-framework-governance.sh"
-run_suite "$SCRIPT_DIR/test-0000006-build-assessment.sh"
-run_suite "$SCRIPT_DIR/test-0000009-rail-tightening.sh"
-run_suite "$SCRIPT_DIR/test-gate-write-windows.sh"
-run_suite "$SCRIPT_DIR/test-attribution-validation.sh"
+# Every test-*.sh in this directory is discovered and run automatically —
+# no suite needs to be registered by hand. Add a new test-*.sh file and it
+# runs on the next invocation (backlog 0000004: hardcoded list silently
+# skipped 5 of 14 suites, including this feature's own).
+for suite in "$SCRIPT_DIR"/test-*.sh; do
+  run_suite "$suite"
+done
 
 # ── Regression Suite ──────────────────────────────────────────────────────────
 

@@ -47,20 +47,20 @@ echo "--- F-002: validate_skill_name (path traversal guard) ---"
 PROJ="$TMPDIR_BASE/proj1"
 make_env "$PROJ"
 
-output=$(run_sync "$PROJ" remove "../etc/passwd" claude-code 2>&1 | head -n -1)
+output=$(run_sync "$PROJ" remove "../etc/passwd" claude-code 2>&1 | sed '$d')
 code=$(run_sync "$PROJ" remove "../etc/passwd" claude-code | tail -n1)
 assert_equals "1" "$code" "remove with ../ name exits 1"
 assert_contains "Invalid skill name" "$output" "remove with ../ prints invalid name error"
 
-output=$(run_sync "$PROJ" remove "../../root" claude-code 2>&1 | head -n -1)
+output=$(run_sync "$PROJ" remove "../../root" claude-code 2>&1 | sed '$d')
 code=$(run_sync "$PROJ" remove "../../root" claude-code | tail -n1)
 assert_equals "1" "$code" "remove with deep traversal exits 1"
 
-output=$(run_sync "$PROJ" install "bad/name" claude-code 2>&1 | head -n -1)
+output=$(run_sync "$PROJ" install "bad/name" claude-code 2>&1 | sed '$d')
 code=$(run_sync "$PROJ" install "bad/name" claude-code | tail -n1)
 assert_equals "1" "$code" "install with slash in name exits 1"
 
-output=$(run_sync "$PROJ" install "valid-skill_123" claude-code 2>&1 | head -n -1)
+output=$(run_sync "$PROJ" install "valid-skill_123" claude-code 2>&1 | sed '$d')
 # valid name — fails for "not found", not for name validation
 if [[ "$output" != *"Invalid skill name"* ]]; then
   echo "  PASS: valid name 'valid-skill_123' passes name validation"
@@ -77,22 +77,22 @@ echo "--- F-003: --from URL scheme validation ---"
 PROJ2="$TMPDIR_BASE/proj2"
 make_env "$PROJ2"
 
-output=$(run_sync "$PROJ2" add my-skill claude-code --from "file:///etc/passwd" --authorized 2>&1 | head -n -1)
+output=$(run_sync "$PROJ2" add my-skill claude-code --from "file:///etc/passwd" --authorized 2>&1 | sed '$d')
 code=$(run_sync "$PROJ2" add my-skill claude-code --from "file:///etc/passwd" --authorized | tail -n1)
 assert_equals "1" "$code" "file:// URL rejected"
 assert_contains "must use https://" "$output" "file:// error message mentions https"
 
-output=$(run_sync "$PROJ2" add my-skill claude-code --from "ftp://example.com/skill" --authorized 2>&1 | head -n -1)
+output=$(run_sync "$PROJ2" add my-skill claude-code --from "ftp://example.com/skill" --authorized 2>&1 | sed '$d')
 code=$(run_sync "$PROJ2" add my-skill claude-code --from "ftp://example.com/skill" --authorized | tail -n1)
 assert_equals "1" "$code" "ftp:// URL rejected"
 
-output=$(run_sync "$PROJ2" add my-skill claude-code --from "http://example.com/skill" --authorized 2>&1 | head -n -1)
+output=$(run_sync "$PROJ2" add my-skill claude-code --from "http://example.com/skill" --authorized 2>&1 | sed '$d')
 code=$(run_sync "$PROJ2" add my-skill claude-code --from "http://example.com/skill" --authorized | tail -n1)
 assert_equals "1" "$code" "http:// (non-TLS) URL rejected"
 assert_contains "must use https://" "$output" "http:// error message mentions https"
 
 # https:// passes scheme check (will fail at network fetch, not at validation)
-output=$(run_sync "$PROJ2" add my-skill claude-code --from "https://example.com/skill" --authorized 2>&1 | head -n -1)
+output=$(run_sync "$PROJ2" add my-skill claude-code --from "https://example.com/skill" --authorized 2>&1 | sed '$d')
 [[ "$output" != *"must use https://"* ]]
 echo "  PASS: https:// URL passes scheme validation"
 ((PASS++)) || true
@@ -106,7 +106,7 @@ make_env "$PROJ3"
 
 # Craft a name that would break out of a JS string literal if interpolated
 INJECTION="'); process.exit(0); //'"
-output=$(run_sync "$PROJ3" remove "$INJECTION" claude-code 2>&1 | head -n -1)
+output=$(run_sync "$PROJ3" remove "$INJECTION" claude-code 2>&1 | sed '$d')
 code=$(run_sync "$PROJ3" remove "$INJECTION" claude-code | tail -n1)
 assert_equals "1" "$code" "JS injection attempt blocked by name validation"
 assert_contains "Invalid skill name" "$output" "injection attempt reports invalid name"

@@ -1,6 +1,6 @@
 # Dependency Graph
 
-**Last updated:** 0000011-setup-parity-and-consistency (17 May 2026)
+**Last updated:** backlog-triage-2026-07-11 (fixed drift: planifest-framework and setup-hook-integration were registered in component-registry.md but never added here)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -9,6 +9,12 @@
 
 ```mermaid
 graph TD
+    subgraph "planifest-framework (component-pack)"
+        SKILLS["skills/ (orchestrator + phase agents)"]
+        STANDARDS["standards/, templates/"]
+        ENFORCE["hooks/enforcement/\n(gate-write, ratchet-check, check-design)"]
+    end
+
     subgraph "Claude Code Runtime"
         CC[Claude Code Agent]
         HookRunner["PreToolUse Hook Runner\n(Claude Code internal)"]
@@ -24,8 +30,9 @@ graph TD
         CTX["ctx_execute\nctx_fetch_and_index\nctx_search"]
     end
 
-    subgraph "Setup"
-        SH["setup.sh / setup.ps1\n(planifest-framework)"]
+    subgraph "setup-hook-integration (component-pack)"
+        SH["setup.sh / setup.ps1"]
+        SKS["skill-sync.sh"]
     end
 
     subgraph "System Tools (runtime deps)"
@@ -53,6 +60,12 @@ graph TD
     SH -->|"copies scripts + writes settings.json"| BG
     SH -->|"copies scripts + writes settings.json"| BB
     SH -->|"copies scripts + writes settings.json"| BW
+    SH -->|"reads hooks/skills/templates from"| ENFORCE
+    SH -->|"copies skills into IDE-discovered dir"| SKILLS
+    SKS -->|"syncs external skills for"| SKILLS
+    ENFORCE -->|"wired via"| HookRunner
+    HookRunner -->|"PreToolUse Write/Edit"| ENFORCE
+    ENFORCE -->|"reads Component Paths from"| STANDARDS
 
     BG --- JQ
     BG --- NODE
@@ -71,7 +84,9 @@ graph TD
 - `context-mode-hooks` → `jq` / `node` / `awk` / `grep`: runtime shell tools. No build-time imports.
 - `context-mode-hooks` → `Claude Code hook runner`: platform dependency. Hook scripts are useless without it.
 - `context-mode-hooks` → `context-mode MCP server`: conceptual dependency only. Hooks emit redirect text; they do not call the MCP server directly.
-- `setup.sh` → `context-mode-hooks`: installer reads from `planifest-framework/hooks/context-mode/` and copies to target project. One-way.
+- `setup-hook-integration` → `context-mode-hooks`: installer reads from `planifest-framework/hooks/context-mode/` and copies to target project. One-way.
+- `setup-hook-integration` → `planifest-framework`: `setup.sh`/`setup.ps1` are the sole distribution mechanism — they copy `skills/`, `hooks/enforcement/`, `templates/`, and `standards/` into whichever directory the target agentic tool auto-discovers. One-way; `planifest-framework` has no dependency back on `setup-hook-integration`.
+- `planifest-framework`'s `hooks/enforcement/` → Claude Code's PreToolUse hook runner: `gate-write.mjs` and `ratchet-check.mjs` are invoked on every Write/Edit; `ratchet-check.mjs` additionally reads `plan/current/loop-state-*.md` (not shown — not a component, a runtime artifact) to decide whether it is armed.
 
 ---
 
