@@ -102,3 +102,19 @@ P3 pre-start — deferred confirmations resolved by human (2026-07-11): version 
 P3 notes — 21 requirements implemented inline across 10 commits: 6 templates; ratchet-check.mjs + consistency-check.mjs + product-version.mjs (TDD: suite committed RED at ea81276, GREEN at ee0dc16 after a macOS /var symlink realpath fix); setup.sh hook wiring; 4 new skills; orchestrator/ship/validate/spec + 6-skill commit-directive edits; component.yml 0.16.0. Deviations: (1) REQ-006 executed by codegen inline rather than docs-agent per skill map — terminology edits landed alongside adjacent skill edits, no behaviour difference; (2) discovered+fixed latent SIGPIPE-under-pipefail bug in tests/helpers/assert.sh (haystacks >64KB) — in-scope fix, it blocked this feature's own suite; same family in 2 pre-existing suites (commit-msg-hook, regression-pack) filed to plan/backlog/0000001-flaky-test-suite-sigpipe (first live use of the backlog mechanism). Feature suite: 97/97.
 
 Gate accepted: P3 — 2026-07-11 (continuous run)
+
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T02:00:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-validate-agent, planifest-verify-by-execution (method demonstrated; toggle file absent = off per ADR-003) |
+| Agents spawned | `0` |
+| MCP calls | `~3 (ctx_execute check batches)` |
+| Parallel task batches | `1 (syntax checks batched)` |
+| Notes | Checks: library audit (vacuous — no dependency manifest changes), semantic AC coverage, node --check on 3 new .mjs, bash -n on setup.sh + test suite, full shell harness. No build step (markdown component-pack). |
+
+P4 notes — all checks pass, 0 self-correction cycles. Full harness: 7/9 suites green; 2 pre-existing macOS-only failures (BSD head -n -1 GNU-ism + pipefail SIGPIPE in suite-local plumbing, files untouched since branch base, Linux CI green) — backlog entry 0000001 updated with corrected root cause. Coverage + verify-by-execution observations in plan/current/verification-report.md (toggle off per ADR-003 — method demonstration + REQ-020 AC evidence, non-gating).
+
+Gate accepted: P4 — 2026-07-11 (continuous run; zero self-corrections)
