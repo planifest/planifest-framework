@@ -86,15 +86,15 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 ---
 
-## Phased Features
+## Waved Features
 
-When the confirmed design indicates a phased feature (features grouped into phases):
+When the confirmed design indicates a waved feature (features grouped into waves — the decomposition grouping formerly called "phases", renamed to avoid collision with the P0–P9 pipeline phases):
 
-- **Produce spec artifacts for the current phase only.** Do not spec features in later phases - they may change based on what Phase 1 reveals.
-- **Name phase-specific artifacts with the phase suffix:** `execution-plan-phase-2.md`, `scope-phase-2.md`, etc. The confirmed design itself is updated per phase, not duplicated.
-- **Reference prior phase artifacts.** Phase 2's design requirements should reference Phase 1's component manifests and data contracts as existing context, not re-specify them.
-- **Carry forward the domain glossary.** The glossary is cumulative - add new terms from each phase, never remove terms from prior phases.
-- **Carry forward the risk register.** Prior phase risks remain unless explicitly mitigated. Add new risks from the current phase.
+- **Produce spec artifacts for the current wave only.** Do not spec features in later waves - they may change based on what Wave 1 reveals.
+- **Name wave-specific artifacts with the wave suffix:** `execution-plan-wave-2.md`, `scope-wave-2.md`, etc. The confirmed design itself is updated per wave, not duplicated.
+- **Reference prior wave artifacts.** Wave 2's design requirements should reference Wave 1's component manifests and data contracts as existing context, not re-specify them.
+- **Carry forward the domain glossary.** The glossary is cumulative - add new terms from each wave, never remove terms from prior waves.
+- **Carry forward the risk register.** Prior wave risks remain unless explicitly mitigated. Add new risks from the current wave.
 
 ---
 
@@ -128,3 +128,9 @@ See `planifest-framework/standards/telemetry-standards.md` for the full event en
 ```json
 { "question": "<blocking question>", "phase_name": "spec" }
 ```
+
+---
+
+## Commit Cadence (Hard Limit 7)
+
+Commit after every meaningful artifact write — each requirement doc, ADR, completed TDD cycle, fix batch, or report — not batched to the phase gate. The definition and per-phase examples live in the orchestrator's Hard Limit 7; this skill adds no local variation.
