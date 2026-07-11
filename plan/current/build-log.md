@@ -48,3 +48,7 @@ P0 exchange — commit/push discipline: Q: (raised by human, not asked) agents d
 P0 commit — plan(0000016): draft P0 brief for pipeline governance and loops (9e13b3d), scoped to plan/ only per human instruction (framework/overrides pending changes committed at P3 instead). Branch pushed to origin with upstream tracking.
 
 P0 exchange — deferred confirmations: Q: confirm adoption mode / version / run mode / push-override now? / A: human deferred all four to implementation (P3). design.md written using working recommendations (standard-iterative, 0.16.0-equivalent Feature Pipeline bump, interactive default) marked provisional; Confirmation field left "no" pending human sign-off on the design itself, which remains a hard gate before P1.
+
+P0 exchange — deferred confirmations resolved: Q: confirm design + run mode? / A: human confirmed design ("build this in continuous mode", 2026-07-11); run mode = continuous. Remaining deferred items (adoption mode standard-iterative, version bump, push-override wording) proceed on working recommendations, finalized at P3 per prior instruction.
+
+Gate accepted: P0 — 2026-07-11 (design confirmed by human; continuous run authorized)
