@@ -150,3 +150,15 @@ Gate accepted: P5 — 2026-07-11 (continuous run; risk Low, no critical/high/med
 P6 notes — living docs updated: component-registry (planifest-framework row added, was missing entirely — drift found and fixed), decisions-index (+8 ADRs), architecture-overview (ratchet in enforcement diagram + Governance Loops section + data-ownership additions). Dependency graph unchanged (no component relationships changed). Drift checks: no API/schema surface; component.yml matches implementation; ADR compliance verified (pre-P7 gate placement, toggles location, marker mechanism as decided). recommendations.md (6 recs) + iteration log written. Feature-level artifact completeness: all present.
 
 Gate accepted: P6 — 2026-07-11 (continuous run)
+
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T03:30:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `1 planned (P8 build-assessment sub-agent, cheaper tier)` |
+| MCP calls | `0 (telemetry suspended per R-009)` |
+| Parallel task batches | `1 (template reads)` |
+| Notes | Human confirmed ship at the P7 gate ("Ship it and store any gaps discovered as backlog changes"). No .skips. Cross-model review gate not run (toggle off — machinery ships in this feature). Push: none (per-session grant policy, no grant); P9 will output PR description and create local tag v0.16.0 only. |
