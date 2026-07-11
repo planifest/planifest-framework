@@ -1,5 +1,7 @@
 # Roadmap Item: Structured Telemetry MCP — Changes and Fixes (0008c)
 
+> **Status: still open, tracked in `plan/backlog/0000005-telemetry-schema-blocks-emit-event/` (filed 2026-07-11).** Live-verified during feature 0000016: `emit_event` rejects every call with `"(root): must be object"` — schema gaps documented below are the leading suspect. This file remains the technical reference (schema definitions, event types, exact `$defs`); the backlog entry is where pickup/status now lives, since the fix is cross-repo (`structured-telemetry-mcp`, not this repo) and this file predates the `plan/backlog/` mechanism.
+
 ## Source
 Live exploration of the deployed 0008a MCP server — April 2026
 Derived from: plan/current/mcp-exploration.md and direct source review of `C:/d/planifest/structured-telemetry-mcp/`
