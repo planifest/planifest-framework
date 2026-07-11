@@ -32,22 +32,24 @@ Break the feature into discrete features. Each feature should be small enough th
 >
 > **User story format:** Write each story as "As a [role], I [action], so that [outcome]." Each story becomes one requirement doc. If a story implies more than 3 acceptance criteria, split it into two stories.
 
-| Feature | User Stories | Priority | Phase |
-|---------|-------------|----------|-------|
+| Feature | User Stories | Priority | Wave |
+|---------|-------------|----------|------|
 | {{feature-name}} | As a developer, I can run setup.ps1 with --include-full-skill-library, so that external skills are installed without manual copying | must-have | 1 |
 | {{feature-name}} | As a [role], I [action], so that [outcome] | should-have | 1 |
 | {{feature-name}} | As a [role], I [action], so that [outcome] | could-have | 2 |
 
 ---
 
-## Phases
+## Waves
 
-If the feature has more than 5-6 features, split it into phases. Each phase becomes a separate iteration of the Agentic Iteration Loop with its own execution plan, ADRs, and codegen pass. Earlier phases ship before later phases begin.
+If the feature has more than 5-6 features, split it into waves. Each wave becomes a separate iteration of the Agentic Iteration Loop with its own execution plan, ADRs, and codegen pass. Earlier waves ship before later waves begin.
 
-> **Why phases matter:** An agent working on phase 2 only needs the context from phase 2's brief plus the component manifests from phase 1. It doesn't need to hold the entire feature in context. This is how Planifest manages context at scale.
+> **Why waves matter:** An agent working on wave 2 only needs the context from wave 2's brief plus the component manifests from wave 1. It doesn't need to hold the entire feature in context. This is how Planifest manages context at scale.
+>
+> (Waves were previously called "Phases" in this template — renamed to avoid collision with the P0–P9 pipeline phases.)
 
-| Phase | Features Included | Ships When |
-|-------|-------------------|------------|
+| Wave | Features Included | Ships When |
+|------|-------------------|------------|
 | 1 | {{feature-list}} | {{criteria}} |
 | 2 | {{feature-list}} | {{criteria}} |
 
