@@ -64,3 +64,7 @@ Gate accepted: P0 — 2026-07-11 (design confirmed by human; continuous run auth
 | MCP calls | `~4 (ctx_execute discovery, emit_event)` |
 | Parallel task batches | `3 (requirement file batches + spec artifact batch)` |
 | Notes | 21 user stories → 21 requirement files (Wave 0: REQ-001–008, Wave 1: REQ-009–021). No OpenAPI (component-pack, no API surface). No data contract (no schema-owning changes; all artifacts plain markdown/YAML). Executable-bit fix (should-have) already delivered during P0 (commit 8b6a7da) — recorded in scope, no req file. |
+
+P1 notes — OpenAPI omitted (component-pack, no API surface; spec-agent conditional). Data contract omitted (no schema-owning changes; file conventions documented in execution-plan Data Model Summary). component.yml purpose/version updates deferred to P3 per feature-0000013 convention (codegen owns the version bump). Telemetry emit_event rejected the envelope with "(root): must be object" on 3 attempts — non-blocking per standards; logged as risk R-009 for investigation; phase_start/phase_end events for this run are therefore missing from the backend.
+
+Gate accepted: P1 — 2026-07-11 (continuous run; 21 requirement files + 7 spec artifacts committed across 3 granular commits)
