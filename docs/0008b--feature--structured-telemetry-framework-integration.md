@@ -1,5 +1,7 @@
 # Roadmap Item: Structured Telemetry Framework Integration (0008b)
 
+> **Status: resolved (2026-07-11).** Every deliverable below shipped, incrementally, across several features rather than as this single roadmap item — which is why this file sat unactioned since April while the work happened anyway. Verified live in the current framework: `--structured-telemetry-mcp` / `--backend-url` flags in `planifest-framework/setup.sh`; `hooks/telemetry/context-pressure.mjs`; the event envelope and emission gate in `standards/telemetry-standards.md`; a `## Telemetry` section in every phase skill (orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, docs-agent, ship-agent). Field names and the emission-gate mechanism diverged slightly from this spec (the shipped gate combines tool-presence *and* a `.claude/telemetry-enabled` sentinel, stronger than the tool-presence-only design here) — treat this file as historical context, not the current contract; `standards/telemetry-standards.md` is the source of truth. Filed via `plan/backlog/0000007-migrate-roadmap-docs-to-backlog/`.
+
 ## Source
 Planifest Framework Review (April 2026) → Section 4: The Tooling Ecosystem & Observability
 
