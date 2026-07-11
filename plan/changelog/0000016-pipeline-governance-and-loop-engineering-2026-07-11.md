@@ -2,7 +2,7 @@
 
 **Feature:** Pipeline Governance and Loop Engineering
 **Pipeline run:** P0–P9 completed, no phases skipped (continuous run authorized at design confirmation; P7 ship gate human-confirmed)
-**PR:** pending — human raises PR (local-git-only; no per-session push grant)
+**PR:** [#38](https://github.com/planifest/planifest-framework/pull/38)
 
 ## What Was Built
 
