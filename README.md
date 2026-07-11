@@ -10,9 +10,9 @@ The framework is LLM-agnostic and tool-agnostic. It works with any model (Claude
 
 ## Rationale
 
-Agile practice discourages heavy upfront planning because, when implementation takes weeks or months, detailed plans go stale before they're delivered. Agentic development changes that calculation: implementation is cheap and fast, so the dominant risk shifts from *stale plans* to *plausible-but-wrong output* built on unstated assumptions.
+Agile's preference for iterating over heavy upfront planning is a judgment call tuned to a specific bottleneck: when implementation takes weeks or months, a detailed plan goes stale before it ships, so small reversible steps beat big upfront documents. Agentic coding tools don't remove that bottleneck — they move it. Implementation itself is now cheap and fast, so waste shows up earlier: as *plausible-but-wrong output* built on unstated assumptions, rather than as a plan that aged out before delivery.
 
-Planifest responds to that shift in three ways:
+Planifest applies agile's own underlying instinct — don't do work that won't survive contact with reality — to that new bottleneck. Three mechanisms follow from that:
 
 1. **The plan is the reviewable artifact.** When an agent writes the code, the prompt and plan largely determine the output. Planifest makes the plan explicit and reviewable, so architectural choices are visible before code exists.
 2. **Context is recorded per component.** Each component keeps a manifest, and each feature keeps its execution plans and ADRs. This gives an agent (or a human) the historical context to modify a component — or the specification to rebuild it.
@@ -84,7 +84,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 **Human decides, agent executes.** The human chooses the architecture, the stack, the data ownership, and the scope. The agent implements within those constraints.
 
-**Decompose big initiatives.** Split into features (small enough for one agent session) and phases (sequential iteration loop runs). This is how Planifest manages context at scale.
+**Decompose big initiatives.** Split into features (small enough for one agent session) and waves (sequential iteration loop runs). This is how Planifest manages context at scale.
 
 **Everything is traced.** Every agent-produced artifact records the skill that produced it, the tool it ran in, and the model that generated it.
 
