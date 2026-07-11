@@ -68,3 +68,15 @@ Gate accepted: P0 — 2026-07-11 (design confirmed by human; continuous run auth
 P1 notes — OpenAPI omitted (component-pack, no API surface; spec-agent conditional). Data contract omitted (no schema-owning changes; file conventions documented in execution-plan Data Model Summary). component.yml purpose/version updates deferred to P3 per feature-0000013 convention (codegen owns the version bump). Telemetry emit_event rejected the envelope with "(root): must be object" on 3 attempts — non-blocking per standards; logged as risk R-009 for investigation; phase_start/phase_end events for this run are therefore missing from the backend.
 
 Gate accepted: P1 — 2026-07-11 (continuous run; 21 requirement files + 7 spec artifacts committed across 3 granular commits)
+
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T00:30:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | `0` |
+| MCP calls | `0 (telemetry suspended per R-009)` |
+| Parallel task batches | `1 (independent ADR batch)` |
+| Notes | 8 ADRs planned: backlog-vs-editable-lifecycle, product.yml/versionPolicy, toggle location (Q-001), ratchet approval marker (Q-002), cascade threshold (Q-003), maker-checker separation, deterministic caps/budget enforcement, cross-model gate placement. Q-001–003 resolved by ADR per execution-plan Open Questions — working decisions, human can override at review. |
