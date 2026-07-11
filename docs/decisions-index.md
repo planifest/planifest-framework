@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000015-pipeline-session-cleanup
+Last updated: 0000016-pipeline-governance-and-loop-engineering
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -153,6 +153,19 @@ Last updated: 0000015-pipeline-session-cleanup
 | ADR-002 | New Session Recommendation Not Block | accepted | Post-P9 advisory message recommends a new session but does not enforce it — human retains control |
 | ADR-003 | Stale Run-Mode Warn-and-Clear at P0 | accepted | Stale `plan/.run-mode` at fresh P0 start is auto-cleared with a visible warning; no blocking |
 | ADR-004 | Run-Mode Deletion Owned by P9 | accepted | P9 (ship-agent Step 6) deletes `plan/.run-mode`; P0 handles the recovery case only |
+
+### Feature 0000016 — pipeline-governance-and-loop-engineering
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Backlog Folder Instead of Editable Post-Archive Lifecycle | accepted | Deferred work lives in `plan/backlog/{id}-{slug}/`, surfaced at the next P0; P7 stays the lock line — bug-bounty-hunter PR #4's editable-P7–P9 design rejected |
+| ADR-002 | product.yml with versionPolicy | accepted | Root `product.yml` aggregates one release version across components (`max-component-version` \| `explicit` \| `external`); single-component projects keep component.yml behaviour |
+| ADR-003 | Loop Toggles in planifest-overrides/loop-toggles.yml | accepted | Per-loop `off \| report-only \| on`; user-owned directory so agents cannot self-enable; absent = all off |
+| ADR-004 | Single-Use Marker File for Approved Weakening | accepted | Human-created `plan/current/.ratchet-approve` (path per line, consumed on use) is the only path past the ratchet; agents prohibited from writing it |
+| ADR-005 | Cascade Threshold of 3 Artifacts | accepted | A reversal invalidating >3 downstream artifacts always stops for the human, regardless of run mode |
+| ADR-006 | Verifiers as Fresh-Context REJECT-Default Subagents | accepted | Critic, assessor, and cross-model reviewer never share context with the maker; approval requires cited positive evidence |
+| ADR-007 | Deterministic Caps, Budget, and Ratchet Enforcement | accepted | Iteration caps (3 default, P4 keeps 5), reversal budget (2/feature), and weakening blocks are enforced by hooks + control flow over git-tracked state, never skill prose alone |
+| ADR-008 | Cross-Model Review Gate at End of P6, Pre-Archive | accepted | The second-model review runs while implementation is live and editable; the brief's original "before P9" placement was structurally self-contradictory and is corrected |
 
 ---
 
