@@ -59,7 +59,7 @@ printf '#!/usr/bin/env bash\necho "test"\n' > "$TEST_SRC"
 
 full_out=$(run_promote "$ENV1/regression" "$TEST_SRC" "0000004-test" "human")
 code=$(printf '%s' "$full_out" | tail -n1 | sed 's/EXIT://')
-output=$(printf '%s' "$full_out" | head -n -1)
+output=$(printf '%s' "$full_out" | sed '$d')
 
 assert_equals "0" "$code" "promote exits 0 on happy path"
 assert_contains "Promotion complete" "$output" "promote reports completion"
@@ -87,7 +87,7 @@ echo "--- promote-to-regression.sh: idempotency ---"
 
 full_out2=$(run_promote "$ENV1/regression" "$TEST_SRC" "0000004-test" "human")
 code2=$(printf '%s' "$full_out2" | tail -n1 | sed 's/EXIT://')
-output2=$(printf '%s' "$full_out2" | head -n -1)
+output2=$(printf '%s' "$full_out2" | sed '$d')
 
 assert_equals "0" "$code2" "second promotion run exits 0 (idempotent)"
 assert_contains "already in the regression pack" "$output2" "second run reports already promoted"
@@ -104,7 +104,7 @@ make_env "$ENV3"
 
 full_out3=$(run_promote "$ENV3/regression" "/nonexistent/file.sh" "0000004-test" "human")
 code3=$(printf '%s' "$full_out3" | tail -n1 | sed 's/EXIT://')
-output3=$(printf '%s' "$full_out3" | head -n -1)
+output3=$(printf '%s' "$full_out3" | sed '$d')
 
 assert_equals "1" "$code3" "promote exits 1 when source file missing"
 assert_contains "not found" "$output3" "promote reports file not found"

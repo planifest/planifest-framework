@@ -72,11 +72,11 @@ assert_equals "1" "$code" "working now blocks"
 echo ""
 echo "--- Subject line length (should exit 1 when >72) ---"
 
-SHORT="feat(scope): exactly seventy-two characters right here ok done now!!"   # 72
+SHORT="feat(scope): boundary test subject line padded to length 72!!!!!!!!!!!!!"   # verified 72 chars (bash ${#})
 code=$(exit_of "$SHORT")
 assert_equals "0" "$code" "72-char subject exits 0 (boundary)"
 
-LONG="feat(scope): this subject line is seventy-three characters long — block"  # 73
+LONG="feat(scope): boundary test subject line padded to length 73!!!!!!!!!!!!!!"  # verified 73 chars (bash ${#})
 code=$(exit_of "$LONG")
 assert_equals "1" "$code" "73-char subject exits 1 (over limit)"
 
@@ -84,7 +84,7 @@ assert_equals "1" "$code" "73-char subject exits 1 (over limit)"
 echo ""
 echo "--- Block output includes guidance ---"
 
-output=$(run_hook "$(printf 'feat(x): ok\n\nCo-Authored-By: Claude <noreply@anthropic.com>')" | head -n -1)
+output=$(run_hook "$(printf 'feat(x): ok\n\nCo-Authored-By: Claude <noreply@anthropic.com>')" | sed '$d')
 assert_contains "Commit blocked" "$output" "block output says 'Commit blocked'"
 assert_contains "no-verify"       "$output" "block output mentions --no-verify bypass"
 
