@@ -187,9 +187,17 @@ git commit -m "plan(p7): archive {feature-id}"
 
 ### Step 8 — Create git tag
 
-Read the `version` field from `planifest-framework/component.yml`.
+Determine the release version (ADR-002, product-level versioning):
 
-Validate: value must match `[0-9]+\.[0-9]+(\.[0-9]+)?` and be ≤20 characters. If validation fails, prompt the human to supply the version manually — do not create the tag with an unvalidated value.
+1. **`product.yml` exists at the project root** — derive the version from it:
+   ```bash
+   node planifest-framework/scripts/product-version.mjs
+   ```
+   Exit 0 → use the printed version. Exit 5 (`versionPolicy: external`) → present the external-anchor constraint and ask the human for the version. Exit 2 (invalid version or unknown policy) → show the script's reason and prompt the human for a manual value — never tag a fabricated version. Before tagging, update `product.yml`'s `components[]` versions and `feature` field to reflect this release.
+2. **No `product.yml` and the project has exactly one component** (exit 4) — read the `version` field from the single `component.yml` (for this repo: `planifest-framework/component.yml`). This is the unchanged pre-0000016 behaviour.
+3. **No `product.yml` and the project has 2+ components** — create `product.yml` from `planifest-framework/templates/product.template.yml` with `versionPolicy: max-component-version`, populate `components[]` from the component manifests, then derive as in case 1.
+
+Validate the final value: must match `[0-9]+\.[0-9]+(\.[0-9]+)?` and be ≤20 characters, and must not be lower than the last release tag. If validation fails, prompt the human to supply the version manually — do not create the tag with an unvalidated value.
 
 ```bash
 git tag v{version} -m "{feature-id}"

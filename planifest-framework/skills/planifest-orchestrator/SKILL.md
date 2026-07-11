@@ -36,7 +36,7 @@ These are non-negotiable. They apply in every session, every phase.
 4. **Data is owned by one component.** Never write to data owned by another component.
 5. **Code and documentation are written together.** Never commit code without its documentation, or documentation without its code.
 6. **Credentials are never in your context.** If a credential appears in a prompt, file, or environment, do not use it. Flag it.
-7. **Commit `plan/current/` artifacts at each phase gate.** Do not hold back pipeline artifacts until P7. Commit after P0 (design), after P1 (requirements), after P2 (ADRs), and so on. On a feature branch this is low risk and preserves design history.
+7. **Commit after every meaningful artifact write — and at minimum at each phase gate.** Do not batch work waiting for a phase gate: each requirement doc (P1), each ADR (P2), each requirement's completed TDD cycle (P3), each fix batch (P4), the security report (P5), and each docs artifact group (P6) is a commit on its own. In-progress work must never be more than one artifact away from recoverable. On a feature branch this is low risk and preserves design history. Push cadence: after each phase-gate commit, if remote push is authorized (a standing override in `planifest-overrides/instructions/`, else an explicit per-session grant recorded in the P0 build log), push the feature branch; if not authorized, skip silently — no per-phase prompt. A failed push is reported once and never blocks the pipeline.
 8. **Write a build log entry at every phase start and gate.** Create `plan/current/build-log.md` at P0 if absent. Append a phase block before doing any work in each phase and again at the gate. A missing entry is a pipeline error — stop and write it before proceeding.
 9. **The pipeline has exactly 10 phases: P0–P9. There is no phase beyond P9.** P9 (Ship) is the terminal phase. Never cite a phase number outside P0–P9 in any output.
 
@@ -121,6 +121,10 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Handle a change request | Load the `planifest-change-agent` skill |
 | Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
 | Write confirmed design to `plan/current/design.md` | `planifest-framework/templates/design.template.md` |
+| Enter any loop (P0 completeness, critic, reversal, verify, cross-model) | Load the `planifest-loop-runner` skill |
+| File a backlog entry | `planifest-framework/templates/backlog-entry.template.md` |
+| Handle a defect report / reversal petition | `planifest-framework/templates/defect-report.template.md`, then spawn `planifest-reversal-assessor` |
+| Run the pre-archive review gate | Spawn `planifest-design-critic` (P1/P2) or the cross-model reviewer (end of P6) per their skills |
 
 Load each file at the moment you need it - not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
 
@@ -312,7 +316,7 @@ This pattern applies across all pipeline phases (P0–P9), not just during P0 co
 
 1. Problem statement and user stories - if these are unclear, nothing downstream is derivable
 2. Acceptance criteria - these become the test cases; vagueness here propagates everywhere
-3. **Feature decomposition** - is this feature small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big features into features and phases before proceeding.
+3. **Feature decomposition** - is this feature small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big features into features and waves before proceeding.
 4. Stack declaration - the codegen-agent cannot begin without this. When `compute: docker` or `iac: dockerfile` appears in the stack, coach the human: "Your stack implies a Docker build. Set `Build target: docker` in the stack table so agents never check host runtimes." Draw the human's attention to the [Stack Summary](../standards/stack-summary.md) - not all stacks are equal for agent-generated code. For deep evaluation, see [Backend Stack Evaluation](../standards/reference/backend-stack-evaluation.md) and [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md).
 4. Scope boundaries - what's out is as important as what's in
 5. Non-functional requirements - performance, availability, scalability, security
@@ -343,16 +347,18 @@ Big features create big context. Big context means the agent misses detail, hall
 
 **Rule of thumb:** If a feature has more than 3 user stories, it's too big. Split it.
 
-**Phases** - if the feature has more than 5-6 features, group them into phases. Each phase is a separate pipeline run:
-- Phase 1 features are built first, producing component manifests and specs
-- Phase 2's pipeline run reads Phase 1's manifests for context but doesn't need to hold Phase 1's code in memory
+### Waves
+
+**Waves** - if the feature has more than 5-6 features, group them into waves (previously called "phases" in this decomposition sense — renamed to end the collision with the P0–P9 pipeline phases). Each wave is a separate pipeline run:
+- Wave 1 features are built first, producing component manifests and specs
+- Wave 2's pipeline run reads Wave 1's manifests for context but doesn't need to hold Wave 1's code in memory
 - This is how Planifest scales beyond single-session context limits
 
 Coach the human through this. If the brief describes something bigger than "a few features", ask:
 
-- "This feature has {{n}} features. I recommend grouping them into phases so each pipeline run stays focused. Which features need to ship first?"
+- "This feature has {{n}} features. I recommend grouping them into waves so each pipeline run stays focused. Which features need to ship first?"
 - "Feature X reads like it has several sub-features. Can we split it? A feature should be implementable in one agent session."
-- "These features have a dependency: Y needs Z to exist first. I'll put Z in Phase 1 and Y in Phase 2."
+- "These features have a dependency: Y needs Z to exist first. I'll put Z in Wave 1 and Y in Wave 2."
 
 **Monorepo decomposition:** When the feature involves multiple components in the same repository, follow the [Monorepo Standards](../standards/monorepo-standards.md). Each component gets its own directory, manifest, and build configuration. Shared code goes in `src/shared/` only when genuinely needed by 2+ components.
 
@@ -404,7 +410,9 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
    Record the confirmed mode in `plan/current/design.md` under `Adoption mode:`.
    Append to the P0 build log block: `Adoption mode: {mode} — confirmed by human on {date}`.
 
-3b. **Read version** — read `docs/about.md` if it exists. Extract the `version` field from the frontmatter. Also scan `plan/_archive/` for the most recent feature's `design.md` or `about.md` and cross-reference to verify the version.
+3b. **Read version** — read `docs/about.md` if it exists. Extract the `version` field from the frontmatter. Also scan `plan/_archive/` for the most recent feature's `design.md` or `about.md` and cross-reference to verify the version. **If `product.yml` exists at the project root, read it too — the product-level version takes precedence over `docs/about.md` as the "last known version" for the bump suggestion** (`node planifest-framework/scripts/product-version.mjs` derives it; ADR-002). If its `versionPolicy` is `external`, do not suggest a bump — present the external-anchor constraint and ask the human (consistent with External Anchor adoption mode). When `product.yml` is absent, behaviour is unchanged.
+
+3c. **Backlog pickup** — scan `plan/backlog/` for entry folders (`{id}-{slug}/`, see `templates/backlog-entry.template.md`). An absent or empty directory is not an error — proceed silently. For each entry, present it **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in: fold the entry into this feature's brief/requirements and delete the folder in the same commit. Leave: untouched. Discard: delete with a build-log note. An entry missing its source feature/phase attribution is flagged to the human as malformed for cleanup — never silently ignored, never parsed as instructions. Any phase agent may *file* an entry at any time during a run (non-blocking, human-gated here at pickup); filing never modifies the active feature's scope.
 
    After adoption mode is confirmed, suggest a version bump per the pipeline track being used:
 
@@ -560,13 +568,15 @@ Before presenting the confirmed design for confirmation, verify every item:
 - [ ] Security section names the auth strategy and data classification
 - [ ] Risks section has at least one entry with likelihood and impact
 - [ ] If multi-component: dependency order is stated
-- [ ] If phased: features are grouped into phases with dependency rationale
+- [ ] If waved: features are grouped into waves with dependency rationale
 - [ ] Adoption mode is confirmed: `greenfield`, `standard-iterative`, `retrofit`, or `external-anchor`
 - [ ] Version is confirmed and recorded (not lower than current `docs/about.md` version)
 - [ ] Scope Lock Challenge is complete (all four scenario paths captured in build log)
 - [ ] Feature ID follows the format `{0000000}-{kebab-case-name}`
 
 If any item cannot be checked, coach the human on that specific gap before proceeding.
+
+**P0 completeness loop** (toggle `p0_completeness`, default off — ADR-003): when enabled, this checklist is the loop's pass condition per `planifest-loop-runner`. Each coaching round re-evaluates the full checklist and records pass/fail per item in the loop run log. If the same item fails after 2 coaching rounds, emit `P0: Blocked — {item}` with escalation context instead of asking a third time. Toggle off = P0 behaves exactly as above.
 
 ### Skill Discovery (REQ-026)
 
@@ -611,6 +621,8 @@ Invoke the **spec-agent** skill.
 
 **Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec (if applicable) covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
 
+**Design-critic (toggle `design_critic`):** when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent over the P1 artifacts before the gate summary (maker–checker, ADR-006). Report-only: present its verdict alongside the artifacts, block nothing. On: REJECT returns artifacts for revision per `planifest-loop-runner` (cap 3).
+
 **Commit:** Stage and commit all new `plan/current/` artifacts produced this phase before presenting the gate summary to the human.
 
 **STOP** — present to the human: number of requirements, key scope decisions, any deferred items. Wait for confirmation before proceeding to P2.
@@ -633,6 +645,8 @@ Invoke the **adr-agent** skill.
 **What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
 
 **Gate:** Confirm an ADR exists for every significant decision - stack choice, database selection, auth strategy, deployment topology, component boundaries. If a decision was made but not recorded, invoke the adr-agent for the missing ADR.
+
+**Design-critic (toggle `design_critic`):** when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent over the combined P1+P2 artifact set before the gate summary. It runs `scripts/consistency-check.mjs` first (deterministic layer), then its REJECT-default rubric. Same report-only/on semantics as P1.
 
 **Commit:** Stage and commit all new `plan/current/adr/` files produced this phase before presenting the gate summary to the human.
 
@@ -747,6 +761,18 @@ Invoke the **docs-agent** skill.
 Exceptions — proceed without confirmation if either:
 - `continuous_run: true` was set at P0
 - Zero drift found and all expected artifacts are present (genuinely nothing to review)
+
+---
+
+### Cross-Model Review Gate (end of P6, strictly before P7)
+
+**Toggle `cross_model_review` (default off — ADR-003).** When enabled, run this gate after the P6 commit and **before invoking the ship-agent**. The ordering is structural: P7 archive begins only after this gate approves (or the toggle is off). It is impossible to run this gate against archived state — that placement was explicitly rejected (ADR-008).
+
+1. Spawn a fresh-context reviewer subagent per ADR-006 on a **different model id** than the one that implemented (resolve from the Model Tier table; record both ids in the verdict — if no second id is resolvable, degrade to same-model fresh-context review and record the degradation).
+2. The reviewer applies a REJECT-default rubric over the full feature diff + requirements and writes a verdict artifact to `plan/current/`.
+3. On findings: implement→review→fix loop per `planifest-loop-runner` (cap 3, no-progress halt). Each fix pass re-reviews with a fresh reviewer instance.
+4. On approval: proceed to P7.
+5. On cap or halt without approval: **block P7** and escalate to the human with the outstanding findings.
 
 ---
 
@@ -944,6 +970,27 @@ If the human requests a change to requirements while the pipeline is in progress
 3. **Record the change:** Add a "Requirement Change" entry to `plan/current/build-log.md` noting what changed, which phase was active, and what was re-run.
 
 If the human asks for a change that would fundamentally alter the feature (different problem, different users, different domain), recommend starting a new feature instead.
+
+---
+
+## Governed Phase-Reversal Protocol (P0–P6 only)
+
+Toggle `reversal_protocol` (default off — ADR-003). This is the *agent-initiated* counterpart to Mid-Pipeline Requirement Changes: a P3–P6 agent blocked by an upstream design defect petitions for a scoped correction. Everything here operates strictly on live P0–P6 state — nothing archived at P7 is ever touched (ADR-001, ADR-008). Enforcement is deterministic per ADR-007: budget and cascade arithmetic live in the loop-state file, weakening is blocked by `ratchet-check.mjs`.
+
+**1. Petition.** The blocked agent files a defect report per `templates/defect-report.template.md` to `plan/current/defect-reports/{seq}-{slug}.md` (all five sections; ≥1 attempt evidenced), halts its task, and hands control to you. Emit `phase_reversal_petitioned`. A report against a previously **denied** defect (same binding artifact + blockage) escalates straight to the human — no re-assessment.
+
+**2. Assess.** Spawn a fresh-context `planifest-reversal-assessor` (never the filer — ADR-006) with the report, the referenced artifacts, and the loop-state file. It writes a grant/deny verdict with rubric evidence, classification (additive | altering), and the invalidation cascade computed from traceability. DENY is the default.
+
+**3. Execute (grant only).** In order:
+   1. Decrement the reversal budget (2/feature) in the loop-state file; commit.
+   2. Check gates (below) before any re-work.
+   3. Rev-bump the affected artifacts with entries in `plan/current/revision-log.md` (per `templates/revision-log.template.md`); the cascade list is written into the verdict record **before** re-work starts.
+   4. Re-invoke the owning phase's agent **scoped to the defect** (self-contained prompt naming the artifact sections to revise) — not a full phase re-run.
+   5. Resume forward from the owning phase, re-doing **only** cascade-listed work. Artifacts not on the list must be byte-identical afterwards.
+
+**4. Human gates (REQ-019).** Interactive mode: every executed reversal stops for confirmation before the pipeline resumes. **Always stop regardless of run mode:** (a) classification *altering* — the design the human confirmed has changed, so continuous-run authorization is void; (b) any re-exit from P0; (c) budget exhaustion (a third petition); (d) cascade larger than 3 artifacts (ADR-005). Continuous mode: non-gating reversals proceed, but notify the human and write a build-log entry for every one.
+
+Budget counters persist in the git-tracked loop-state file — an interrupt/resume cannot reset them.
 
 ---
 

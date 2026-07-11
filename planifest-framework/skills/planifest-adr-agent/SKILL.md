@@ -94,3 +94,9 @@ See `planifest-framework/standards/telemetry-standards.md` for the full event en
 ```json
 { "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }
 ```
+
+---
+
+## Commit Cadence (Hard Limit 7)
+
+Commit after every meaningful artifact write — each requirement doc, ADR, completed TDD cycle, fix batch, or report — not batched to the phase gate. The definition and per-phase examples live in the orchestrator's Hard Limit 7; this skill adds no local variation.

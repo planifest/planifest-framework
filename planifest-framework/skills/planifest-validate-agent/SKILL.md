@@ -54,6 +54,8 @@ Run the project's CI checks in this strict order:
 4. **Test** - unit tests, integration tests, contract tests (MUST pass and report the tracked req-IDs)
 5. **Build** - confirm the project compiles and builds cleanly
 
+6. **Verify by execution** (toggle `verify_by_execution`, default off — ADR-003) — after all CI checks pass, load the `planifest-verify-by-execution` skill and verify acceptance criteria by running the software (browser click-through, real API calls, CLI invocation, log/file inspection). Reading test output alone never counts. A behavioural `failed` outcome is a validation failure and enters the self-correct cycle below (in `report-only` mode it is reported but does not gate). Results go to `plan/current/verification-report.md`.
+
 If all checks pass (including semantic traceability) -> report success, proceed to the next phase.
 
 If any check fails -> self-correct:
@@ -64,7 +66,7 @@ If any check fails -> self-correct:
 4. Re-run the failing check
 5. If the fix introduces new failures, address those too
 
-Maximum **5 self-correct cycles**. Track each cycle:
+Maximum **5 self-correct cycles**. The mechanics of this loop (state file, run-log records, stop rules, escalation format) follow `planifest-loop-runner` — load it when entering self-correction. Your cap stays **5** (loop-runner's default of 3 does not apply to P4) and your halt/escalate behaviour is unchanged. Track each cycle:
 
 ```
 Cycle N:
@@ -171,3 +173,9 @@ See `planifest-framework/standards/telemetry-standards.md` for the full event en
 ```json
 { "phase_name": "validate", "action_id": "<action>", "attempt_count": 5 }
 ```
+
+---
+
+## Commit Cadence (Hard Limit 7)
+
+Commit after every meaningful artifact write — each requirement doc, ADR, completed TDD cycle, fix batch, or report — not batched to the phase gate. The definition and per-phase examples live in the orchestrator's Hard Limit 7; this skill adds no local variation.

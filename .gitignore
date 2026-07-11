@@ -14,3 +14,6 @@ GEMINI.md
 # Temporary local dirs
 _temp/*
 !_temp/.gitkeep
+
+# OS
+.DS_Store
