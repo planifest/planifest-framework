@@ -134,3 +134,19 @@ Gate accepted: P4 — 2026-07-11 (continuous run; zero self-corrections)
 P5 notes — overall risk Low; zero critical/high. Two medium residual findings, both with documented compensating controls: (1) ratchet marker forgery is audit-detected (ratchet-log + P8), not prevented — same-changeset detection from ADR-004 not implemented in 0.16.0, now recorded in component.yml quirks; (2) backlog entry prompt-injection defended at instruction level (never-parse rule + IV spec + one-at-a-time human review). security_finding telemetry skipped per R-009.
 
 Gate accepted: P5 — 2026-07-11 (continuous run; risk Low, no critical/high/medium-unmitigated)
+
+### P6 — Docs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T03:00:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `0` |
+| MCP calls | `~2 (ctx discovery + drift checks)` |
+| Parallel task batches | `2 (living-doc reads; recommendations+iteration-log writes)` |
+| Notes | Gate A pass (docs/ exists). Gate B decision (continuous run, recommendation recorded): update component-registry, decisions-index, architecture-overview; dependency-graph unchanged (no component relationships changed); api-index legitimately absent (no API). Per-component src/{id}/docs/ not applicable — this component-pack keeps component-level docs in component.yml per prior-feature convention. |
+
+P6 notes — living docs updated: component-registry (planifest-framework row added, was missing entirely — drift found and fixed), decisions-index (+8 ADRs), architecture-overview (ratchet in enforcement diagram + Governance Loops section + data-ownership additions). Dependency graph unchanged (no component relationships changed). Drift checks: no API/schema surface; component.yml matches implementation; ADR compliance verified (pre-P7 gate placement, toggles location, marker mechanism as decided). recommendations.md (6 recs) + iteration log written. Feature-level artifact completeness: all present.
+
+Gate accepted: P6 — 2026-07-11 (continuous run)
