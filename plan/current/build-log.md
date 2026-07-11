@@ -80,3 +80,7 @@ Gate accepted: P1 — 2026-07-11 (continuous run; 21 requirement files + 7 spec 
 | MCP calls | `0 (telemetry suspended per R-009)` |
 | Parallel task batches | `1 (independent ADR batch)` |
 | Notes | 8 ADRs planned: backlog-vs-editable-lifecycle, product.yml/versionPolicy, toggle location (Q-001), ratchet approval marker (Q-002), cascade threshold (Q-003), maker-checker separation, deterministic caps/budget enforcement, cross-model gate placement. Q-001–003 resolved by ADR per execution-plan Open Questions — working decisions, human can override at review. |
+
+P2 notes — 8 ADRs accepted. Q-001→ADR-003 (toggles in planifest-overrides/loop-toggles.yml), Q-002→ADR-004 (single-use .ratchet-approve marker), Q-003→ADR-005 (cascade >3 artifacts gates). No stack ADR: this feature inherits the established stack (markdown skills + Node .mjs hooks) with no new choice. Skill Map re-evaluated: unchanged. Telemetry adr_decision events skipped per R-009.
+
+Gate accepted: P2 — 2026-07-11 (continuous run; every significant decision has an ADR)
