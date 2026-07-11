@@ -77,7 +77,10 @@ assert_contains() {
   local haystack="$2"
   local message="${3:-contains assertion}"
 
-  if printf '%s' "$haystack" | grep -qF "$needle"; then
+  # Pure-builtin substring check. The previous `printf | grep -qF` pattern broke
+  # under `set -o pipefail` for haystacks >64KB (pipe buffer): grep -q exits on
+  # an early match, printf takes SIGPIPE (141), pipefail fails the pipeline.
+  if [[ "$haystack" == *"$needle"* ]]; then
     echo "  PASS: $message"
     ((PASS++)) || true
   else

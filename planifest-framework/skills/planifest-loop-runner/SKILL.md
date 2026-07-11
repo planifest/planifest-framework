@@ -63,7 +63,7 @@ Armed on every loop, checked at every DECIDE:
 |------|---------|--------|
 | Pass | The owning skill's pass condition is met | `done` — set state, disarm |
 | Iteration cap | iteration == cap (default **3**; P4 validate keeps its existing **5**; a skill may declare its own) | `escalate` |
-| No-progress | The same gap/finding survives **2 consecutive iterations** without measurable change | `escalate` — do not spend the remaining cap restating the problem |
+| no-progress | The same gap/finding survives **2 consecutive iterations** without measurable change | `escalate` — do not spend the remaining cap restating the problem |
 | Budget | The relevant budget counter (e.g. reversal budget 2/feature) is exhausted | `escalate` — always to the human, regardless of run mode |
 
 Caps and budgets are enforced by orchestrator control flow reading the state file — not by this text (ADR-007). If you find yourself rationalizing "one more iteration past the cap", the control flow will stop you; file what you have.
