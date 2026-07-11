@@ -166,7 +166,19 @@ Deferred beyond this feature: `planifest-loop-designer` meta-skill; cross-vendor
 
 ## Scenario Paths
 
-**Happy path:** A phase agent discovers a non-blocking improvement, files it to `plan/backlog/`, and the current feature ships unaffected; at the next feature's P0 the human decides whether to pull it in. Separately: P0 coaches against the gap checklist and exits clean; P1/P2 artifacts are drafted, pass mechanical checks, survive the critic (or are revised ≤3 iterations until they do); P3/P4 hits no design defect requiring reversal (or, if one occurs, petition → assessor grant → scoped re-run → ratchet-checked → human gate all complete cleanly); verify-by-execution and the cross-model gate pass before P7 archive; a multi-component project's ship-agent reads `product.yml` and tags correctly per `versionPolicy`.
+**Happy path:**
+
+1. A developer starts a new feature. At P0, the orchestrator checks `plan/backlog/` — one item exists from a prior feature — and asks whether to pull it in; the developer declines for now.
+2. P0 coaches against the completeness checklist and exits clean.
+3. P1 produces requirements; P2 produces ADRs.
+4. At the end of P2, the design-critic runs its review-and-revise loop: it critiques the spec and ADR drafts, and if it finds a problem, the artifact is revised and re-reviewed — up to 3 attempts before escalating to the human. In the happy path, the critic approves on its first pass, so the loop exits after one iteration and the human reviews an already-hardened draft, not a first draft.
+5. P3 implements each requirement via TDD, committing after every requirement's cycle rather than batching to one commit at the end. No upstream design defect surfaces, so the separate correction loop (defect report → assessor decision → scoped fix → re-check, capped at 2 corrections per feature) is never entered.
+6. P4 runs lint/test/build, then verify-by-execution actually runs the software (browser clicks, real API calls) to confirm each acceptance criterion holds in practice, not just in test output. A failure here would feed into P4's existing self-correction loop (already capped at 5 attempts); in the happy path everything passes on the first try.
+7. At the end of P6, before archive, the cross-model review gate runs its own loop: a different model reviews the diff, and if it objects, the implementation is revised and reviewed again, up to a cap, before the gate blocks progress. In the happy path it approves on the first review, so this loop also exits after one iteration.
+8. P7 archives; the ship-agent reads `product.yml`, derives the release version from its `versionPolicy`, and tags correctly.
+9. Throughout, the feature branch was pushed to remote after every phase-gate commit, so progress was visible the whole way, not just at the end.
+
+Every loop above (steps 4, 5, 6, 7) has a defined exit condition (pass, cap, or escalation) and a named cap — none can run indefinitely.
 
 **First-run path:** A project has no `plan/backlog/` and no `product.yml` yet — the P0 scan finds nothing to present (not an error) and the ship-agent creates `product.yml` on first use with the default `versionPolicy: max-component-version`. All loop toggles default off; enabling `design_critic: report-only` requires no other change.
 
