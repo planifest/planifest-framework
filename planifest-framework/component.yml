@@ -131,6 +131,7 @@ quality:
     - "context-pressure fill% is a proxy metric based on transcript file size, not actual token count"
     - "gate-write component path matching is prefix-based; very short prefixes may over-permit"
     - "ratchet-check treats a reworded criterion as remove+add and blocks it (conservative); the .ratchet-approve marker is the intended path for legitimate rewording"
+    - "ratchet-check cannot verify who wrote .ratchet-approve (ADR-004 same-changeset detection not implemented in 0.16.0); marker forgery is audit-detected via ratchet-log.md and P8, not prevented"
     - "product-version.mjs parses only the constrained product.template.yml shape, not arbitrary YAML"
 
 pipeline:
