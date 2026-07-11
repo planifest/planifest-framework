@@ -84,3 +84,5 @@ Gate accepted: P1 — 2026-07-11 (continuous run; 21 requirement files + 7 spec 
 P2 notes — 8 ADRs accepted. Q-001→ADR-003 (toggles in planifest-overrides/loop-toggles.yml), Q-002→ADR-004 (single-use .ratchet-approve marker), Q-003→ADR-005 (cascade >3 artifacts gates). No stack ADR: this feature inherits the established stack (markdown skills + Node .mjs hooks) with no new choice. Skill Map re-evaluated: unchanged. Telemetry adr_decision events skipped per R-009.
 
 Gate accepted: P2 — 2026-07-11 (continuous run; every significant decision has an ADR)
+
+P3 pre-start — deferred confirmations resolved by human (2026-07-11): version 0.16.0 confirmed; push policy = per-session grant (custom-001 override NOT extended for push; no remote push this session unless expressly authorized — Q-004 closed); adoption mode standard-iterative confirmed.
