@@ -52,3 +52,15 @@ P0 exchange — deferred confirmations: Q: confirm adoption mode / version / run
 P0 exchange — deferred confirmations resolved: Q: confirm design + run mode? / A: human confirmed design ("build this in continuous mode", 2026-07-11); run mode = continuous. Remaining deferred items (adoption mode standard-iterative, version bump, push-override wording) proceed on working recommendations, finalized at P3 per prior instruction.
 
 Gate accepted: P0 — 2026-07-11 (design confirmed by human; continuous run authorized)
+
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-11T00:00:00Z` |
+| Model tier | primary (claude-fable-5) |
+| Skills loaded | planifest-orchestrator, planifest-spec-agent |
+| Agents spawned | `0` |
+| MCP calls | `~4 (ctx_execute discovery, emit_event)` |
+| Parallel task batches | `3 (requirement file batches + spec artifact batch)` |
+| Notes | 21 user stories → 21 requirement files (Wave 0: REQ-001–008, Wave 1: REQ-009–021). No OpenAPI (component-pack, no API surface). No data contract (no schema-owning changes; all artifacts plain markdown/YAML). Executable-bit fix (should-have) already delivered during P0 (commit 8b6a7da) — recorded in scope, no req file. |
