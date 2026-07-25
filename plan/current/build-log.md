@@ -77,6 +77,22 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-25T00:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active — no per-phase stop required. Producing Execution Plan, Scope, Risk Register, Domain Glossary for the 6 confirmed items from design.md. No OpenAPI spec — no API surface in this release. |
+| P1 exchange — component manifest scoping: `src/context-mode-hooks/component.yml` (the real existing manifest req-004 will modify) is NOT edited at P1. Per the spec-agent skill, component.yml creation/updates belong to P3 codegen (or P6 docs-agent consistency check) — editing it now would document the `.mjs`/quirk-removal end-state ahead of the code that implements it. req-004's acceptance criteria already record the required end-state for P3 to fulfill. |
+| P1 COMPLETE — artifacts produced: 6 requirement files (req-001..006), execution-plan.md, scope.md, risk-register.md (4 risks + 2 logged assumptions), domain-glossary.md (11 terms), operational-model.md, slo-definitions.md, cost-model.md (all 3 adapted to framework-tooling convention per 0000016 precedent — no runtime service, quality-of-governance objectives instead of latency/availability). Continuous run — proceeding to P2 without a stop. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
