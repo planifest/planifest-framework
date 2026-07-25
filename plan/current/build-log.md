@@ -93,6 +93,22 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-25T00:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active. Key decision requiring an ADR: req-002's `.ratchet-approve` mechanism amends ADR-004 (supersedes its original hard-block forgery-detection design). Other requirements assessed for ADR-worthiness per significance. |
+| P2 assessment: req-001 (regression promotion) and req-003 (terminology sweep) are mechanical/documentation-only — no architectural decision, no ADR. req-002, req-004, req-005, req-006 each meet ADR criteria (security trade-off / stack deviation / process constraint / new artifact type respectively) — 4 ADRs produced. |
+| P2 COMPLETE — ADR-001 (ratchet-approve agent-write-on-instruction, supersedes 0000016's ADR-004), ADR-002 (cross-platform hook runtime unification, .sh→.mjs), ADR-003 (Scope Lock suggested-answers on-demand subagent, extends 0000014's ADR-007/ADR-008), ADR-004 (structured P0 discovery pass + discovery.md lifecycle). All written to `plan/current/adr/`. Continuous run — proceeding to P3 without a stop. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
