@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Tests for block-webfetch.sh — REQ-003
+# Tests for block-webfetch.mjs — REQ-003 (ported to .mjs in 0000017 req-004)
 # Usage: bash src/context-mode-hooks/tests/test-block-webfetch.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-HOOK="$PROJECT_ROOT/planifest-framework/hooks/context-mode/block-webfetch.sh"
+HOOK="$PROJECT_ROOT/planifest-framework/hooks/context-mode/block-webfetch.mjs"
 # shellcheck source=helpers/assert.sh
 source "$SCRIPT_DIR/helpers/assert.sh"
 
@@ -15,7 +15,7 @@ WEBFETCH_INPUT='{"session_id":"test-003","hook_event_name":"PreToolUse","tool_na
 WEBFETCH_INPUT_HTTP='{"session_id":"test-004","hook_event_name":"PreToolUse","tool_name":"WebFetch","tool_input":{"url":"http://example.com/api"}}'
 
 # --- AC-1: WebFetch with any URL → block ---
-output=$(printf '%s' "$WEBFETCH_INPUT" | bash "$HOOK")
+output=$(printf '%s' "$WEBFETCH_INPUT" | node "$HOOK")
 exit_code=$?
 
 assert_exit_zero "$exit_code" "req-003 AC-1: script exits 0"
@@ -36,7 +36,7 @@ event=$(get_hook_event_name "$output")
 assert_equals "PreToolUse" "$event" "req-003: hookEventName is PreToolUse"
 
 # --- http:// URL also blocked ---
-output2=$(printf '%s' "$WEBFETCH_INPUT_HTTP" | bash "$HOOK")
+output2=$(printf '%s' "$WEBFETCH_INPUT_HTTP" | node "$HOOK")
 decision2=$(get_permission_decision "$output2")
 assert_equals "deny" "$decision2" "req-003: http:// URL also denied"
 
@@ -49,7 +49,7 @@ assert_exit_zero $? "req-003 AC-4: output is valid JSON"
 
 # --- NFR-001: Latency < 50ms ---
 start_ns=$(date +%s%N 2>/dev/null || echo "0")
-printf '%s' "$WEBFETCH_INPUT" | bash "$HOOK" > /dev/null
+printf '%s' "$WEBFETCH_INPUT" | node "$HOOK" > /dev/null
 end_ns=$(date +%s%N 2>/dev/null || echo "0")
 if [ "$start_ns" != "0" ] && [ "$end_ns" != "0" ]; then
   elapsed_ms=$(( (end_ns - start_ns) / 1000000 ))
@@ -57,7 +57,7 @@ if [ "$start_ns" != "0" ] && [ "$end_ns" != "0" ]; then
     echo "  PASS: req-003 NFR-001: latency ${elapsed_ms}ms < 50ms"
     ((PASS++)) || true
   else
-    echo "  WARN: req-003 NFR-001: latency ${elapsed_ms}ms >= 50ms (node cold start — see quirks Q-002)"
+    echo "  WARN: req-003 NFR-001: latency ${elapsed_ms}ms >= 50ms (node cold start)"
     ((PASS++)) || true
   fi
 fi

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Tests for block-grep.sh — REQ-001
+# Tests for block-grep.mjs — REQ-001 (ported to .mjs in 0000017 req-004)
 # Usage: bash src/context-mode-hooks/tests/test-block-grep.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
-HOOK="$PROJECT_ROOT/planifest-framework/hooks/context-mode/block-grep.sh"
+HOOK="$PROJECT_ROOT/planifest-framework/hooks/context-mode/block-grep.mjs"
 # shellcheck source=helpers/assert.sh
 source "$SCRIPT_DIR/helpers/assert.sh"
 
@@ -15,7 +15,7 @@ GREP_INPUT='{"session_id":"test-001","hook_event_name":"PreToolUse","tool_name":
 GREP_INPUT_NO_PATH='{"session_id":"test-002","hook_event_name":"PreToolUse","tool_name":"Grep","tool_input":{"pattern":"error"}}'
 
 # --- AC-1: Grep call returns permissionDecision: deny ---
-output=$(printf '%s' "$GREP_INPUT" | bash "$HOOK")
+output=$(printf '%s' "$GREP_INPUT" | node "$HOOK")
 exit_code=$?
 
 assert_exit_zero "$exit_code" "req-001 AC-1: script exits 0"
@@ -42,7 +42,7 @@ assert_exit_zero $? "req-001 AC-4: output is valid JSON"
 
 # --- AC-3 (NFR-001): Latency < 50ms ---
 start_ns=$(date +%s%N 2>/dev/null || echo "0")
-printf '%s' "$GREP_INPUT" | bash "$HOOK" > /dev/null
+printf '%s' "$GREP_INPUT" | node "$HOOK" > /dev/null
 end_ns=$(date +%s%N 2>/dev/null || echo "0")
 if [ "$start_ns" != "0" ] && [ "$end_ns" != "0" ]; then
   elapsed_ms=$(( (end_ns - start_ns) / 1000000 ))
@@ -50,7 +50,7 @@ if [ "$start_ns" != "0" ] && [ "$end_ns" != "0" ]; then
     echo "  PASS: req-001 AC-3 NFR-001: latency ${elapsed_ms}ms < 50ms"
     ((PASS++)) || true
   else
-    echo "  WARN: req-001 AC-3 NFR-001: latency ${elapsed_ms}ms >= 50ms (node cold start — see quirks Q-002)"
+    echo "  WARN: req-001 AC-3 NFR-001: latency ${elapsed_ms}ms >= 50ms (node cold start)"
     ((PASS++)) || true
   fi
 else
@@ -58,7 +58,7 @@ else
 fi
 
 # --- Fallback input (no path field) still denies ---
-output2=$(printf '%s' "$GREP_INPUT_NO_PATH" | bash "$HOOK")
+output2=$(printf '%s' "$GREP_INPUT_NO_PATH" | node "$HOOK")
 decision2=$(get_permission_decision "$output2")
 assert_equals "deny" "$decision2" "req-001: deny when tool_input.path absent"
 
