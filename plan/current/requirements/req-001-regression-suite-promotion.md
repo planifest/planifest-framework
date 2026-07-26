@@ -20,11 +20,11 @@ As a maintainer running the regression suite, I see all governance assertions (r
 ---
 
 ## Functional Requirements
-- Promote the 97 governance assertions (ratchet/product-version/consistency-check) from 0000016 into the permanent regression pack via `scripts/promote-to-regression.sh`
+- Promote the governance assertions (ratchet/product-version/consistency-check) from 0000016 into the permanent regression pack via `scripts/promote-to-regression.sh` — 87 assertions (the "97" figure carried from P0 coaching was an estimate; the actual count in `test-0000016-pipeline-governance.sh` is 87, corrected at P3)
 - Promoted assertions run automatically as part of the standard regression suite invocation — no separate manual step to include them
 
 ## Acceptance Criteria
-- [ ] All 97 assertions execute when the regression suite is run
+- [ ] All 87 assertions execute when the regression suite is run
 - [ ] Promoted assertions pass with zero false positives
 - [ ] No manual step required to include them in future regression runs
 

@@ -17,7 +17,7 @@ version: "0.1.0"
 
 ## In Scope
 
-- Promoting 0000016's 97 governance assertions (ratchet/product-version/consistency-check) into the permanent regression pack (req-001)
+- Promoting 0000016's 87 governance assertions (ratchet/product-version/consistency-check) into the permanent regression pack (req-001)
 - The final ratchet-approve human-approval mechanism: agent-may-write-on-instruction, immediate dedicated commit, same-uncommitted-changeset backstop with an explicit approver-facing message, permanent audit log (req-002)
 - Intelligent Phase/Wave terminology review and correction across `plan/current/`, `docs/`, `planifest-framework/`, and root `README.md`, with a full instance-by-instance report (req-003)
 - Porting `block-bash.sh`, `block-grep.sh`, `block-webfetch.sh` to `.mjs`, removing the `jq` and Unix-shell dependency entirely, updating `setup.sh`/`setup.ps1` wiring (req-004)
