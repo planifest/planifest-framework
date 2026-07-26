@@ -177,6 +177,24 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P6 — Docs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-26T15:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run. Living docs to reconcile: docs/component-registry.md + docs/dependency-graph.md + docs/decisions-index.md (new ADRs, .mjs port, new scope-lock-agent/discovery artifacts), src/context-mode-hooks/docs/ (quirks Q-002/Q-005 resolution), approver-facing ratchet doc note from P5. |
+| P6 Gate A: docs/ exists — pass. Gate B: recommend updating component-registry.md, dependency-graph.md, decisions-index.md, architecture-overview.md (all touched this run) plus src/context-mode-hooks/docs/ (7 of 8 files) and planifest-loop-runner/SKILL.md (Hard Limit 2 referenced the superseded ADR-004 restriction). No api-index.md update — no API surface in this release. Continuous run — proceeding without a stop. |
+| P6: component docs synced — dependencies.md (sole runtime dep now node, bash/jq/awk/grep removed), scope.md (in-scope renamed to .mjs, 2 deferred items closed), tech-debt.md (TD-003 resolved), risk.md (R-004 resolved), quirks.md (Q-002/Q-002b/Q-005 marked resolved with history retained), interface-contract.md + purpose.md + test-coverage.md (script names, version 0.1.0→0.2.0). loop-runner Hard Limit 2 rewritten to match ADR-001 (agent-write-on-instruction, new marker format, `\|`-in-reason caveat). Commit 0fc8aaa. |
+| P6: living docs synced — component-registry.md (both context-mode-hooks and planifest-framework summaries updated, version 0.17.0), dependency-graph.md (block-*.mjs, jq/awk/grep nodes removed, node-only), decisions-index.md (4 new ADRs added under Feature 0000017, ADR-004 marked "amended by 0000017 ADR-001"), architecture-overview.md (Last updated stamp). Drift checks: no API surface (n/a), domain terms consistent with code, no cross-component data writes, ADR compliance confirmed (0000016 ADR-004 explicitly marked amended not silently overwritten), dependency direction consistent (context-mode-hooks → node only). recommendations.md and plan/changelog/0000017-...-2026-07-26.md written. |
+| P6 COMPLETE — all mandatory living docs updated; all component docs synced; recommendations + changelog produced; no drift found beyond what was reconciled. Continuous run — proceeding to P7 without a stop (P7 is always a confirmation gate per Hard Limit, but the ship-agent handles that directly). |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |

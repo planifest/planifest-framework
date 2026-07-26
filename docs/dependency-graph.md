@@ -1,6 +1,6 @@
 # Dependency Graph
 
-**Last updated:** backlog-triage-2026-07-11 (fixed drift: planifest-framework and setup-hook-integration were registered in component-registry.md but never added here)
+**Last updated:** 0000017-ratchet-forgery-detection-and-telemetry-schema-spec (26 Jul 2026 — context-mode hooks ported to `.mjs`, `jq`/`awk`/`grep` runtime deps removed)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -21,9 +21,9 @@ graph TD
     end
 
     subgraph "context-mode-hooks (this component)"
-        BG["block-grep.sh"]
-        BB["block-bash.sh"]
-        BW["block-webfetch.sh"]
+        BG["block-grep.mjs"]
+        BB["block-bash.mjs"]
+        BW["block-webfetch.mjs"]
     end
 
     subgraph "context-mode MCP Server (external)"
@@ -36,10 +36,7 @@ graph TD
     end
 
     subgraph "System Tools (runtime deps)"
-        JQ["jq (recommended)"]
-        NODE["node (fallback)"]
-        AWK["awk"]
-        GREP_BIN["grep"]
+        NODE["node (required — sole runtime)"]
     end
 
     CC -->|"plans Grep call"| HookRunner
@@ -67,13 +64,8 @@ graph TD
     HookRunner -->|"PreToolUse Write/Edit"| ENFORCE
     ENFORCE -->|"reads Component Paths from"| STANDARDS
 
-    BG --- JQ
     BG --- NODE
-    BB --- JQ
     BB --- NODE
-    BB --- AWK
-    BB --- GREP_BIN
-    BW --- JQ
     BW --- NODE
 ```
 
@@ -81,7 +73,7 @@ graph TD
 
 ## Dependency Direction Notes
 
-- `context-mode-hooks` → `jq` / `node` / `awk` / `grep`: runtime shell tools. No build-time imports.
+- `context-mode-hooks` → `node`: sole runtime dependency since the 0000017 `.mjs` port (req-004, ADR-002) — `jq`, `awk`, and `grep` removed; parsing and matching are native JavaScript. If Node is missing, setup warns and the wired command fails open with a runtime message.
 - `context-mode-hooks` → `Claude Code hook runner`: platform dependency. Hook scripts are useless without it.
 - `context-mode-hooks` → `context-mode MCP server`: conceptual dependency only. Hooks emit redirect text; they do not call the MCP server directly.
 - `setup-hook-integration` → `context-mode-hooks`: installer reads from `planifest-framework/hooks/context-mode/` and copies to target project. One-way.

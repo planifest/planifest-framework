@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000016-pipeline-governance-and-loop-engineering
+Last updated: 0000017-ratchet-forgery-detection-and-telemetry-schema-spec
 
 ---
 
