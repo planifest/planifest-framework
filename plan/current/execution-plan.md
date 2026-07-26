@@ -30,6 +30,7 @@ Functional requirements are split into individual files — one user story per f
 | [req-004-cross-platform-hook-ports.md](requirements/req-004-cross-platform-hook-ports.md) | Port 3 shell hooks to `.mjs`, removing the `jq`/Unix-shell dependency entirely |
 | [req-005-scope-lock-suggested-answers.md](requirements/req-005-scope-lock-suggested-answers.md) | Scope Lock Challenge suggested-answers mechanism and new `planifest-scope-lock-agent` skill |
 | [req-006-structured-p0-discovery-pass.md](requirements/req-006-structured-p0-discovery-pass.md) | Structured P0 discovery pass for all 4 adoption modes, writing to `discovery.md` |
+| [req-007-change-agent-archive-step.md](requirements/req-007-change-agent-archive-step.md) | change-agent Phase 6 - Archive step, ship-agent cross-reference check, 10th orchestrator Hard Limit (picked up from backlog 0000011) |
 
 ---
 

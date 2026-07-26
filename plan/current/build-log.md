@@ -109,6 +109,23 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P3 — Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-25T00:00:00Z` |
+| Model tier | primary + cheaper (per Model Tier Decision Table) |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | TBD |
+| MCP calls | 0 |
+| Parallel task batches | TBD |
+| Notes | Continuous run mode active. 6 independent requirements, no cross-dependencies — dispatching in parallel per the Parallelism Directive. Note: req-006 and req-005 modify the live `planifest-orchestrator` skill this very session is operating under — self-modifying change, handled carefully. |
+| P3 pre-flight finding: `planifest-framework/skills/` (canonical source) and `.claude/skills/` (distributed copy this session reads from) have drifted — 10 of 14 skills differ, 4 skills (`planifest-design-critic`, `planifest-loop-runner`, `planifest-reversal-assessor`, `planifest-verify-by-execution`) are missing from `.claude/skills/` entirely. The canonical source already has the Phase→Wave rename in its own `planifest-orchestrator/SKILL.md` (0000016 apparently landed this without a subsequent `setup.sh` skill-sync). req-003's real remaining scope, re-verified: `feature-brief-guide.md`'s `### Phases` section (and its "Phase 1 ships before Phase 2 begins" body text) and `scope-guide.md`'s "deferred to Phase 2" example are still decomposition-sense "Phase" and need the same Wave rename; PLUS a full `.claude/skills/` re-sync from canonical is needed regardless, since 0000016 shipped without it. |
+| P0 exchange — backlog pickup: Human instructed picking up all outstanding backlog items for this release. `plan/backlog/` scan: 0000002/0000008/0000009/0000010 already in scope (items 1-4); 0000005 already assessed and deferred (cross-repo, separate pipeline run). 0000011-change-agent-missing-archive-step (filed 25 Jul 2026 by a cross-repo investigation in `structured-telemetry-mcp`, read-only) was NOT yet picked up — folded in now as req-007. Entry comes with two ready-to-apply diffs (`change-agent-SKILL.md.diff`, `ship-agent-SKILL.md.diff`) adding a Phase 6 - Archive step to `planifest-change-agent` (mirroring ship-agent's P7 Step 6 copy-then-delete pattern, trimmed of Feature-Pipeline-only artifacts) plus a cross-reference check (fixing stale `docs/decisions-index.md` links after an archive move) added to BOTH change-agent's new step and ship-agent's existing P7 Step 6. Entry's own two open sub-decisions resolved: (1) apply both diffs as specified — closes the actual gap; (2) also add a Hard Limit entry (10th) mandating archiving for both pipeline routes, since this is the exact repeat-failure-mode already observed once (an agent inferring convention from disk layout) and the addition is small and directly preventative. |
+| P3 pre-flight resolved: ran `bash planifest-framework/setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp` per human instruction ("run setup with all mcp options... to check what's covered"). Result: `.claude/` is entirely gitignored (generated output, confirmed via `.gitignore`) — the drift found earlier was local-environment staleness on this machine only, not a repo-tracked bug; re-running setup.sh resynced all 19 skill directories (including the 4 previously-missing: design-critic, loop-runner, reversal-assessor, verify-by-execution) with zero git diff produced. MCP coverage confirmed for claude-code: `--context-mode-mcp` installs the 3 context-mode blocking hooks (still `.sh` — req-004 not yet implemented, expected) into `.claude/hooks/context-mode/` wired via `.claude/settings.json`; `--structured-telemetry-mcp` (combined with context-mode-mcp) installs the 3 telemetry hooks + `.claude/telemetry-enabled` sentinel. No `.mcp.json` is written by setup — the actual MCP server connections (context-mode, structured-telemetry-mcp) are configured at the Claude Code app level already; these flags only govern which enforcement/telemetry hook scripts get wired to integrate with them. req-003's real remaining scope, now fully re-verified: canonical `planifest-orchestrator/SKILL.md`'s own Phase→Wave rename is already correct-as-is (done in 0000016); `planifest-framework/templates/feature-brief-guide.md`'s `### Phases` section (and "Phase 1 ships before Phase 2 begins" / "Phase 2's agent reads Phase 1's...") and `planifest-framework/templates/scope-guide.md`'s "deferred to Phase 2" example are still decomposition-sense "Phase" and need the Wave rename — these are the concrete remaining fixes for req-003, alongside producing the full instance-by-instance report as originally speced. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}

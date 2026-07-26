@@ -13,7 +13,8 @@
   - US-004: As a Windows user without Git Bash or WSL, enforcement hooks work identically to every other platform, so that I get the same protection regardless of what shell tooling I happen to have installed.
   - US-005: As a human being coached through a Scope Lock Challenge question, I'm always offered a suggested answer I can accept, edit, or reject — never one silently assumed on my behalf — so that I keep full control over scope decisions while still getting drafting help on request.
   - US-006: As a human starting P0 in any adoption mode, I see a structured discovery pass run before coaching begins, with its findings written to `discovery.md` — separate from the audit trail and the confirmed design — so that I can see exactly what the orchestrator already knows before it starts asking me questions.
-- Acceptance criteria confirmed: 6 items, each mechanism-confirmed through full Scope Lock Challenge (happy/first-run/error/cross-session) — see `build-log.md` P0 exchange entries for the complete record.
+  - US-007: As anyone reading this framework's documentation after a Change Pipeline run, I find `plan/current/` archived exactly like a Feature Pipeline run, with no stale links left behind, so the repo's `plan/` layout is always consistent and no agent infers archiving is optional.
+- Acceptance criteria confirmed: 7 items, each mechanism-confirmed through full Scope Lock Challenge (happy/first-run/error/cross-session) for items 1-6; item 7 (req-007) picked up from backlog mid-P3 with diffs already drafted by the filing investigation — see `build-log.md` P0 exchange entries for the complete record.
 - Constraints: Local Git Only (no remote git operations; commit to feature branch, human pushes/PRs) — `planifest-overrides/instructions/custom-001-local-git-only.md`. Commit granularly and continuously — same file.
 - Integrations: `structured-telemetry-mcp` (sibling repo) — RCA and fix spec handed off there for backlog 0000005; human confirmed that work is complete and running. No further integration required in this release.
 
@@ -36,13 +37,14 @@
   - `block-bash.mjs`, `block-grep.mjs`, `block-webfetch.mjs` (replacing the `.sh` originals) + `setup.sh`/`setup.ps1` wiring + `src/context-mode-hooks/component.yml` — cross-platform hook execution (0000010)
   - `planifest-scope-lock-agent` (new skill) + `planifest-orchestrator` Scope Lock Challenge section — suggested-answers mechanism (item 5)
   - `planifest-orchestrator` Adoption Modes section (all 4 modes) + `design.template.md` + `plan/current/discovery.md` lifecycle (created fresh each P0, archived at P7) — structured discovery pass (item 6)
+  - `planifest-change-agent` (new Phase 6 - Archive step) + `planifest-ship-agent` (P7 Step 6 cross-reference check) + `planifest-orchestrator` (10th Hard Limit) — change-agent archive step (item 7, picked up from backlog 0000011)
 - Data ownership: not applicable — no data model
 - Deployment: not applicable — framework tooling distributed via `setup.sh`/`setup.ps1` to consuming projects
 - API versioning: not applicable
 - Dependency order: none of the 6 items depend on each other's implementation — all independently buildable/committable in any order. Not phased; single pipeline run.
 
 ## Scope
-- In: 0000002 (regression suite promotion), 0000008 (ratchet marker human-approval mechanism, final design), 0000009 (Phase/Wave terminology sweep + report), 0000010 (cross-platform `.mjs` hook ports), Scope Lock suggested-answers requirement (`planifest-scope-lock-agent`), structured P0 discovery pass + `discovery.md` for all 4 adoption modes
+- In: 0000002 (regression suite promotion), 0000008 (ratchet marker human-approval mechanism, final design), 0000009 (Phase/Wave terminology sweep + report), 0000010 (cross-platform `.mjs` hook ports), Scope Lock suggested-answers requirement (`planifest-scope-lock-agent`), structured P0 discovery pass + `discovery.md` for all 4 adoption modes, 0000011 (change-agent Phase 6 - Archive step + ship-agent cross-reference check + 10th Hard Limit)
 - Out: `setup.sh` itself remaining bash-only (one-time install step, explicitly out of scope for 0000010); any change to `structured-telemetry-mcp` internals (separate repo, separate pipeline run)
 - Deferred: 0000005 (telemetry schema gaps) — cross-repo, RCA and fix spec handed off to `structured-telemetry-mcp/plan/current/emit-event-rca-and-fix-spec.md`; human has confirmed that work is complete and running, so this item requires no further action in this repo
 
@@ -71,8 +73,9 @@ None — no external capability-skill intake this session. `planifest-scope-lock
 | REQ-004 - cross-platform-hook-ports (0000010) | planifest-codegen-agent | Ports 3 shell hooks to `.mjs`, updates setup.sh/setup.ps1 wiring and component.yml quirks |
 | REQ-005 - scope-lock-suggested-answers | planifest-codegen-agent | Authors the new `planifest-scope-lock-agent` skill file and the orchestrator's Scope Lock Challenge section updates |
 | REQ-006 - structured-p0-discovery-pass | planifest-codegen-agent | Rewrites the orchestrator's Adoption Modes section (all 4 modes) and `design.template.md`/build-log wiring for `discovery.md`'s create-at-P0/archive-at-P7 lifecycle |
+| REQ-007 - change-agent-archive-step | planifest-codegen-agent | Applies the two pre-drafted diffs (change-agent Phase 6, ship-agent P7 cross-reference check) plus a new orchestrator Hard Limit |
 
-Final REQ-NNN numbering will be assigned by the spec-agent at P1; this table uses placeholder ordering matching the 6 scope items above.
+Final REQ-NNN numbering will be assigned by the spec-agent at P1; this table uses placeholder ordering matching the 7 scope items above.
 
 ## Repo Instructions
 ### Local Git Only
