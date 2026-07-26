@@ -30,6 +30,8 @@ version: "0.1.0"
 | Consistency check | The step where a suggested answer is checked against an item's latest confirmed decisions before being presented, flagging any contradiction or gap exposed by plain-usage phrasing | — | req-005 |
 | Fail-open | The convention that a tool call proceeds even when its associated enforcement check could not run (e.g. missing runtime) — governs whether the call is blocked, not whether the human is told what happened | — | req-004 |
 | Regression pack | The permanent, always-run test suite that governance and quality assertions are promoted into, as distinct from a feature's own transient test set | regression suite | req-001 |
+| Backlog entry | A discovered-but-out-of-scope item filed to `plan/backlog/{id}-{slug}/` by any phase agent at any time, non-blocking, human-gated at pickup — never actioned unilaterally by the filing agent | — | req-007 |
+| Cross-reference check | The step of searching the repo for links pointing at a pre-archive path (`docs/*.md`, `src/*/docs/*.md`, etc.) and updating them to the post-archive path in the same commit as the archive move | — | req-007 |
 
 ---
 

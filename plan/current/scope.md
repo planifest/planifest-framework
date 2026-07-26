@@ -23,6 +23,7 @@ version: "0.1.0"
 - Porting `block-bash.sh`, `block-grep.sh`, `block-webfetch.sh` to `.mjs`, removing the `jq` and Unix-shell dependency entirely, updating `setup.sh`/`setup.ps1` wiring (req-004)
 - The Scope Lock Challenge suggested-answers mechanism and the new `planifest-scope-lock-agent` skill (req-005)
 - A structured P0 discovery pass for all four adoption modes, writing to a new `plan/current/discovery.md`, archived at P7 and recreated fresh at each P0 (req-006)
+- A `Phase 6 - Archive` step for `planifest-change-agent`, a matching cross-reference check for `planifest-ship-agent`'s P7 Step 6, and a 10th orchestrator Hard Limit mandating archiving for both pipeline routes (req-007, picked up from backlog 0000011)
 
 ---
 
@@ -38,6 +39,7 @@ version: "0.1.0"
 
 ## Deferred
 
+- Whether other Planifest skills have similar "no close-out step" gaps beyond change-agent/ship-agent (explicitly left for a future audit by backlog entry 0000011 itself — not actioned here, no urgency)
 - Backlog 0000005 (telemetry schema gaps: R-009 tool-argument schema issue, 4 missing framework event types) — cross-repo, requires changes in `structured-telemetry-mcp`. RCA and fix spec were handed off there; human has confirmed that separate pipeline run is complete and running. No further action blocked on this repo — deferred item is closed out by the sibling repo's own completion, not by future work here.
 
 ---
