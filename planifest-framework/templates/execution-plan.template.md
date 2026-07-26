@@ -6,7 +6,7 @@
 **Tool:** {{agentic-tool-name}}
 **Model:** {{model-name-and-version}}
 **Feature:** {{feature-id}}
-**Phase:** {{phase-number}} (if phased)
+**Wave:** {{wave-number}} (if waved)
 **Version:** {{semver}}
 **Status:** draft | active | superseded
 

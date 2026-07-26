@@ -4,7 +4,7 @@
 **Tool:** {{agentic-tool-name}}
 **Model:** {{model-name-and-version}}
 **Feature:** {{feature-id}}
-**Phase:** {{phase-number}} (if phased)
+**Wave:** {{wave-number}} (if waved)
 **Version:** {{semver}}
 
 > This report is produced by the security-agent during Phase 5. It is advisory - no code changes are made. All findings require human review before action.

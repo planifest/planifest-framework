@@ -12,7 +12,7 @@ version: "0.1.0"
 **Date:** {{ISO-8601}}
 **Tool:** {{agentic-tool-name}} (local)
 **Model:** {{model-name-and-version, e.g. claude-sonnet-4-20250514, gpt-4.1, gemini-2.5-pro}}
-**Phase:** {{phase-number}} (if phased)
+**Wave:** {{wave-number}} (if waved)
 
 ---
 
