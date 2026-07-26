@@ -24,7 +24,7 @@ Functional requirements are split into individual files — one user story per f
 
 | File | Requirement |
 |------|------------|
-| [req-001-regression-suite-promotion.md](requirements/req-001-regression-suite-promotion.md) | Promote 0000016's 97 governance assertions into the permanent regression pack |
+| [req-001-regression-suite-promotion.md](requirements/req-001-regression-suite-promotion.md) | Promote 0000016's 87 governance assertions into the permanent regression pack |
 | [req-002-ratchet-marker-approval-mechanism.md](requirements/req-002-ratchet-marker-approval-mechanism.md) | Final `.ratchet-approve` human-approval mechanism: agent-may-write-on-instruction, immediate commit, backstopped with an explicit message |
 | [req-003-phase-wave-terminology-sweep.md](requirements/req-003-phase-wave-terminology-sweep.md) | Intelligent Phase/Wave terminology review and correction, with a full report |
 | [req-004-cross-platform-hook-ports.md](requirements/req-004-cross-platform-hook-ports.md) | Port 3 shell hooks to `.mjs`, removing the `jq`/Unix-shell dependency entirely |
@@ -39,7 +39,7 @@ Functional requirements are split into individual files — one user story per f
 | ID | Category | Requirement | Target | Measurement |
 |----|----------|------------|--------|-------------|
 | NFR-001 | Reliability | Enforcement hook behavior identical across platforms | 100% parity with/without WSL or Git Bash present | Cross-platform test run of `block-bash.mjs`/`block-grep.mjs`/`block-webfetch.mjs` (req-004) |
-| NFR-002 | Quality | Promoted governance assertions pass reliably | 97/97 passing, 0 false positives | Regression suite run (req-001) |
+| NFR-002 | Quality | Promoted governance assertions pass reliably | 87/87 passing, 0 false positives | Regression suite run (req-001) |
 | NFR-003 | Auditability | Every ratchet-approve consumption is fully reconstructable | 100% of consumed approvals have path/reason/timestamp in the permanent audit log | Audit log presence check per consumption (req-002) |
 
 > Framework tooling with no runtime request path — no latency/availability/scalability targets apply (per confirmed design). These are quality-of-governance objectives instead, consistent with 0000016's precedent.

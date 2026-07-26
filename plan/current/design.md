@@ -22,7 +22,7 @@
 - Latency target: not applicable — framework tooling, no runtime request path
 - Availability target: not applicable
 - Scalability target: not applicable
-- Reliability (measurable NFR): 100% cross-platform hook parity (0000010) — enforcement behavior must be identical whether or not WSL/Git Bash is present; 97/97 promoted governance assertions passing with zero false positives (0000002)
+- Reliability (measurable NFR): 100% cross-platform hook parity (0000010) — enforcement behavior must be identical whether or not WSL/Git Bash is present; 87/87 promoted governance assertions passing with zero false positives (0000002 — count corrected from the P0 estimate of 97 at P3)
 - Security: the ratchet-approve mechanism (US-002) is the security-relevant surface — governs who can authorize weakening a governance guardrail. No new auth/authz model; existing hook-based enforcement extended.
 - Data privacy: no regulated data — this release touches only framework skills, hooks, docs, and test harness
 - Observability: no new telemetry events required by this release; existing `phase_start`/`phase_end`/`adr_decision` emission unaffected
@@ -31,7 +31,7 @@
 ## Engineering Layer
 - Stack: bash → `.mjs` (Node) for hooks; Markdown for skills/templates/docs; shell scripts for the regression-pack promotion. No new external dependencies, no database, no IaC. Build target: n/a (framework tooling, not a deployed service).
 - Components:
-  - `scripts/promote-to-regression.sh` + regression suite membership — reclassifies 0000016's 97 governance assertions (0000002)
+  - `scripts/promote-to-regression.sh` + regression suite membership — reclassifies 0000016's 87 governance assertions (0000002)
   - `.ratchet-approve` marker format + `ratchet-check.mjs` consumption logic + audit log — human-approval mechanism (0000008)
   - `planifest-framework/`, `docs/`, root `README.md` — Phase/Wave terminology sweep + report (0000009)
   - `block-bash.mjs`, `block-grep.mjs`, `block-webfetch.mjs` (replacing the `.sh` originals) + `setup.sh`/`setup.ps1` wiring + `src/context-mode-hooks/component.yml` — cross-platform hook execution (0000010)

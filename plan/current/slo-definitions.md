@@ -14,7 +14,7 @@
 
 | SLO ID | Service / Component | SLI (what is measured) | Target | Window | Error Budget |
 |--------|-------------------|----------------------|--------|--------|-------------|
-| SLO-001 | Regression pack (req-001) | Proportion of promoted governance assertions passing | 100% (97/97) | Per regression run | 0 — any failure is a defect (NFR-002) |
+| SLO-001 | Regression pack (req-001) | Proportion of promoted governance assertions passing | 100% (87/87) | Per regression run | 0 — any failure is a defect (NFR-002) |
 | SLO-002 | `.ratchet-approve` backstop (req-002) | Proportion of uncommitted-approval attempts correctly blocked with an explicit message | 100% | Per test run | 0 — a silent block or a missed block is a defect (NFR-003) |
 | SLO-003 | Cross-platform hooks (req-004) | Proportion of hook invocations behaviorally identical with/without WSL or Git Bash | 100% | Per cross-platform test run | 0 (NFR-001) |
 | SLO-004 | Missing-runtime messaging (req-004) | Proportion of missing-Node scenarios producing both a setup-time and a runtime message | 100% | Per test run | 0 — silent failure defeats the requirement's purpose |
@@ -26,7 +26,7 @@
 
 | SLI ID | Name | Measurement Method | Data Source | Good Event Definition | Valid Event Definition |
 |--------|------|-------------------|-------------|----------------------|----------------------|
-| SLI-001 | Regression pass rate | Test suite run count | `run-tests.sh` output | All 97 promoted assertions pass | Each regression suite invocation |
+| SLI-001 | Regression pass rate | Test suite run count | `run-tests.sh` output | All 87 promoted assertions pass | Each regression suite invocation |
 | SLI-002 | Backstop message delivery | Seeded uncommitted-approval fixture | Hook test suite | Explicit message shown, edit blocked | Each seeded uncommitted-approval scenario |
 | SLI-003 | Hook parity | Diff of hook decision output across platforms | Cross-platform CI matrix | Identical decision for identical input | Each hook invocation per platform |
 | SLI-004 | Discovery.md presence | File-existence + section-completeness check | `plan/current/discovery.md` | File exists, mode-appropriate sections populated | Each P0 start, per adoption mode |
