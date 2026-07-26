@@ -228,8 +228,23 @@ function Copy-PlanifestWorkflow {
     Write-Host "  + workflows/$name.md"
 }
 
+function Get-ContextModeHookCommand {
+    # Builds the PreToolUse command string for a context-mode .mjs hook
+    # (REQ-004, 0000017 ADR-002). No Unix-shell dependency: `node <script>` is
+    # plain-invocation syntax understood by cmd.exe, PowerShell, and POSIX
+    # shells alike — no bash entry point, no jq. The `||` fallback surfaces a
+    # clear runtime message and still fails open (exit 0, no deny JSON) when
+    # the Node.js runtime itself is missing. Mirrors setup.sh exactly.
+    param(
+        [string]$HooksDir,
+        [string]$ScriptName
+    )
+    $scriptPath = "$HooksDir/$ScriptName"
+    return "node `"$scriptPath`" || echo `"[Planifest] context-mode enforcement ($ScriptName) did not run: Node.js runtime not found. Tool call proceeded unblocked.`" 1>&2"
+}
+
 function Merge-HookSettings {
-    # Merge PreToolUse hook entries into .claude/settings.json (REQ-004)
+    # Merge PreToolUse hook entries into .claude/settings.json (REQ-004, 0000017 req-004)
     # Additive merge: existing content preserved; Grep/Bash/WebFetch entries
     # removed then re-added for idempotency on re-run.
     param(
@@ -237,10 +252,14 @@ function Merge-HookSettings {
         [string]$HooksDir   # relative path used in command values
     )
 
+    $grepCmd  = Get-ContextModeHookCommand -HooksDir $HooksDir -ScriptName 'block-grep.mjs'
+    $bashCmd  = Get-ContextModeHookCommand -HooksDir $HooksDir -ScriptName 'block-bash.mjs'
+    $fetchCmd = Get-ContextModeHookCommand -HooksDir $HooksDir -ScriptName 'block-webfetch.mjs'
+
     $newEntries = @(
-        @{ matcher = "Grep";     hooks = @(@{ type = "command"; command = "$HooksDir/block-grep.sh" }) }
-        @{ matcher = "Bash";     hooks = @(@{ type = "command"; command = "$HooksDir/block-bash.sh" }) }
-        @{ matcher = "WebFetch"; hooks = @(@{ type = "command"; command = "$HooksDir/block-webfetch.sh" }) }
+        @{ matcher = "Grep";     hooks = @(@{ type = "command"; command = $grepCmd }) }
+        @{ matcher = "Bash";     hooks = @(@{ type = "command"; command = $bashCmd }) }
+        @{ matcher = "WebFetch"; hooks = @(@{ type = "command"; command = $fetchCmd }) }
     )
 
     if (Test-Path $SettingsPath) {
@@ -278,7 +297,8 @@ function Merge-HookSettings {
 }
 
 function Install-ContextModeHooks {
-    # Copy enforcement hook scripts and wire settings.json (REQ-004)
+    # Copy enforcement hook scripts and wire settings.json
+    # (REQ-004; ported to .mjs in 0000017 req-004 — no bash entry point, no jq).
     param(
         [string]$HooksSrcRel,    # relative to ScriptDir  e.g. hooks/context-mode
         [string]$HooksDirRel,    # relative to ProjectRoot e.g. .claude/hooks/context-mode
@@ -297,11 +317,21 @@ function Install-ContextModeHooks {
     Write-Host ""
     Write-Host "  Installing context-mode enforcement hooks"
 
+    # Setup-time Node.js runtime check (0000017 req-004): these hooks are .mjs —
+    # Node is required to run them at all. Warn clearly but still install and
+    # wire the hooks; the wired command itself fails open with a runtime
+    # message if Node turns out to be missing when Claude Code invokes it.
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Write-Host "  ! Warning: Node.js runtime not found on this machine."
+        Write-Host "  ! context-mode enforcement hooks (block-grep/block-bash/block-webfetch) require Node.js."
+        Write-Host "  ! Hooks will be installed and wired, but will not enforce anything until Node.js is installed."
+    }
+
     # Create target directory
     New-Item -ItemType Directory -Path $dest -Force | Out-Null
 
     # Copy each script
-    Get-ChildItem -Path $src -Filter '*.sh' | ForEach-Object {
+    Get-ChildItem -Path $src -Filter '*.mjs' | ForEach-Object {
         $destFile = Join-Path $dest $_.Name
         Copy-Item -Path $_.FullName -Destination $destFile -Force
         Write-Host "  + $HooksDirRel/$($_.Name)"

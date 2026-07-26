@@ -1,8 +1,10 @@
 # Interface Contract — context-mode-hooks
 
 **Component:** context-mode-hooks
-**Version:** 0.1.0
+**Version:** 0.2.0
 **Breaking Change Policy:** requires-human-approval
+
+> Contract unchanged by the 0000017 `.mjs` port (req-004, ADR-002) — same stdin schema, same stdout decision format, same exit-code semantics. Only the implementation language and invocation (`node <script>`) changed.
 
 ---
 
@@ -27,10 +29,10 @@ Each hook script reads a single JSON object from **stdin**, provided by Claude C
 
 | Hook | Field | Type | Used For |
 |------|-------|------|---------|
-| `block-grep.sh` | `tool_input.pattern` | string | Included in redirect message |
-| `block-grep.sh` | `tool_input.path` | string | Included in redirect message |
-| `block-bash.sh` | `tool_input.command` | string | Allowlist check + pattern match |
-| `block-webfetch.sh` | `tool_input.url` | string | Included in redirect message |
+| `block-grep.mjs` | `tool_input.pattern` | string | Included in redirect message |
+| `block-grep.mjs` | `tool_input.path` | string | Included in redirect message |
+| `block-bash.mjs` | `tool_input.command` | string | Allowlist check + pattern match |
+| `block-webfetch.mjs` | `tool_input.url` | string | Included in redirect message |
 
 **Defaults:** If any field is absent or null, hooks default to `"PATTERN"`, `"PATH"`, `"COMMAND"`, or `"URL"` respectively — no crash.
 
@@ -78,10 +80,10 @@ The `permissionDecisionReason` field is the primary communication channel back t
 
 | Hook | Redirect tools named |
 |------|---------------------|
-| `block-grep.sh` | `ctx_execute(language:"shell", code:"grep '<pattern>' <path>")` |
-| `block-bash.sh` (grep/rg) | `ctx_execute(language:"shell", code:"<original command>")` |
-| `block-bash.sh` (curl/wget) | `ctx_fetch_and_index(url:"<url>")` + `ctx_search(queries:["..."])` |
-| `block-webfetch.sh` | `ctx_fetch_and_index(url:"<url>")` + `ctx_search(queries:["..."])` |
+| `block-grep.mjs` | `ctx_execute(language:"shell", code:"grep '<pattern>' <path>")` |
+| `block-bash.mjs` (grep/rg) | `ctx_execute(language:"shell", code:"<original command>")` |
+| `block-bash.mjs` (curl/wget) | `ctx_fetch_and_index(url:"<url>")` + `ctx_search(queries:["..."])` |
+| `block-webfetch.mjs` | `ctx_fetch_and_index(url:"<url>")` + `ctx_search(queries:["..."])` |
 
 ---
 

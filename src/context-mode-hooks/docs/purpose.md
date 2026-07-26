@@ -46,9 +46,11 @@ PreToolUse hook (this component)
 
 | Script | Tool Intercepted | Strategy |
 |--------|-----------------|----------|
-| `block-grep.sh` | `Grep` | Unconditional block; redirect to `ctx_execute(language:"shell", code:"grep ...")` |
-| `block-bash.sh` | `Bash` | Pattern-matched block; redirect to `ctx_execute` or `ctx_fetch_and_index`; allowlist permits safe low-output commands |
-| `block-webfetch.sh` | `WebFetch` | Unconditional block; redirect to `ctx_fetch_and_index` + `ctx_search` |
+| `block-grep.mjs` | `Grep` | Unconditional block; redirect to `ctx_execute(language:"shell", code:"grep ...")` |
+| `block-bash.mjs` | `Bash` | Pattern-matched block; redirect to `ctx_execute` or `ctx_fetch_and_index`; allowlist permits safe low-output commands |
+| `block-webfetch.mjs` | `WebFetch` | Unconditional block; redirect to `ctx_fetch_and_index` + `ctx_search` |
+
+> Ported from `.sh` to `.mjs` in 0000017 (req-004, ADR-002) — Node-only, no `jq`, no Unix-shell requirement, identical behavior on every platform.
 
 ---
 

@@ -1,7 +1,7 @@
 # Dependencies — context-mode-hooks
 
 **Component:** context-mode-hooks
-**Version:** 0.1.0
+**Version:** 0.2.0
 
 ---
 
@@ -9,11 +9,9 @@
 
 | Dependency | Type | Required | Version | Notes |
 |------------|------|----------|---------|-------|
-| `bash` | System tool | Yes | ≥ 4.0 | Scripts use `#!/usr/bin/env bash` and `set -euo pipefail`. Bash 4+ is standard on Linux/macOS. On Windows, Git Bash or WSL required. |
-| `jq` | System tool | Recommended | any | Used for JSON parsing and output construction. If absent, falls back to Node.js. Install via `brew install jq` / `scoop install jq`. See quirks Q-002. |
-| `node` (Node.js) | System tool | Fallback | ≥ 18 | Used as `jq` fallback. Available wherever Claude Code is installed. |
-| `awk` | System tool | Yes | any | Used in `block-bash.sh` for leading-token extraction. Present on all POSIX systems including Git Bash. |
-| `grep` | System tool | Yes | any | Used in `block-bash.sh` for pattern matching against the command string. Standard system tool. |
+| `node` (Node.js) | System tool | Yes | ≥ 18 | Sole runtime — hooks are `.mjs`, invoked as `node <script>` on every platform (0000017 req-004, ADR-002). Available wherever Claude Code is installed. If missing, setup warns at install time and the wired command surfaces a runtime message while failing open. |
+
+> `bash`, `jq`, `awk`, and `grep` were removed as dependencies by the 0000017 `.mjs` port — parsing, token extraction, and pattern matching are native JavaScript. (The component's *test suite* still uses bash, as does the rest of the framework's test harness — a dev-time dependency only, not a runtime one.)
 
 ---
 
@@ -39,10 +37,10 @@
 
 ## Declared vs. Actual Dependencies (Drift Check)
 
-No drift detected. All runtime dependencies declared above are consistent with the shell scripts at `planifest-framework/hooks/context-mode/`.
+No drift detected (re-verified 0000017 P6). The sole runtime dependency declared above is consistent with the `.mjs` scripts at `planifest-framework/hooks/context-mode/` — Node built-ins only, no external imports.
 
 ---
 
 ## Dependency Direction Rule
 
-This component has no import/require statements. It has no build system. All dependencies are invoked as shell commands (`jq`, `node`, `awk`, `grep`). No direction violations possible.
+This component imports only Node.js built-ins. It has no build system and no external packages. No direction violations possible.

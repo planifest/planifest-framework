@@ -21,7 +21,9 @@ The allowlist check in `block-bash.sh` examines only the leading command token (
 
 ---
 
-## Q-002: NFR-001 latency target not met on Windows when using node fallback
+## Q-002 (RESOLVED, 0000017): NFR-001 latency target not met on Windows when using node fallback
+
+> **Resolution (0000017 req-004, ADR-002):** the hooks are now `.mjs`, invoked via `node` on every platform — the node startup cost is the uniform baseline, not a fallback path, and `jq` is no longer used at all. The latency observation below is retained for history; tests continue to WARN (not FAIL) on the node cold-start overhead.
 
 **Observed:** Hook execution takes 250–310ms on Windows (Git Bash) when `node` is used as the JSON tool (no `jq` in PATH). NFR-001 target is < 50ms.
 
@@ -38,7 +40,9 @@ The allowlist check in `block-bash.sh` examines only the leading command token (
 
 ---
 
-## Q-002b: `jq` is a recommended dependency, not strictly required
+## Q-002b (RESOLVED, 0000017): `jq` is a recommended dependency, not strictly required
+
+> **Resolution (0000017 req-004, ADR-002):** `jq` is no longer used by any hook — the `.mjs` implementations parse stdin and construct the response natively. Retained for history.
 
 **Files:** `block-grep.sh`, `block-bash.sh`, `block-webfetch.sh`
 
@@ -72,8 +76,8 @@ The hook scripts were authored in `planifest-framework/hooks/context-mode/` for 
 
 ---
 
-## Q-005: Windows — scripts require bash-compatible environment
+## Q-005 (RESOLVED, 0000017): Windows — scripts require bash-compatible environment
 
-The hook scripts use `#!/usr/bin/env bash` and require a POSIX shell. On Windows, this means Git Bash, WSL, or another bash environment must be in PATH when Claude Code invokes the hooks. The setup scripts (`.ps1`) copy the `.sh` files verbatim — no PowerShell equivalents are provided in v1.
+> **Resolution (0000017 req-004, ADR-002):** the hooks were ported to `.mjs` and are invoked as `node <script>` — plain-invocation syntax understood by cmd.exe, PowerShell, and POSIX shells alike. No Git Bash or WSL is required on any platform. If Node.js itself is missing, setup warns at install time and the wired command surfaces a runtime message while failing open. Risk R-004 closed.
 
-This is an accepted limitation for v1, tracked in the risk register as R-004.
+The original limitation, for history: the `.sh` hook scripts used `#!/usr/bin/env bash` and required a POSIX shell in PATH on Windows (Git Bash or WSL); the `.ps1` setup script copied the `.sh` files verbatim with no PowerShell equivalents.

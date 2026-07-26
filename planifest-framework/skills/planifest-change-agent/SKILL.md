@@ -104,6 +104,26 @@ Update every artifact affected by the change:
 
 Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md` as the audit trail for this change.
 
+### Phase 6 - Archive
+
+The Change Pipeline has no ship-agent hand-off — this phase is the change-agent's own close-out. Do not skip it: leaving `plan/current/` in place as a permanent `plan/{feature-id}/` folder produces an inconsistent `plan/` layout — repo structure is load-bearing context, not cosmetic, and a mixed archived/unarchived layout misleads future adoption-mode detection (Standard Iterative mode is detected by scanning `plan/_archive/`) and any agent inferring convention from what it finds on disk.
+
+**Copy-then-delete** (never use atomic move — mirrors the ship-agent's P7 Step 6):
+
+1. Determine archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/` (today's date).
+2. If the path exists, use `{feature-id}-{YYYY-MM-DD}-2/`, `-3/`, etc.
+3. Recursively copy all files from `plan/current/` (or wherever the working folder currently is) to the archive path.
+4. Confirm the copy is complete before proceeding.
+5. Delete the original folder's contents.
+6. Confirm the original location is empty.
+7. Delete `plan/.orchestrator-active` last, after the archive is confirmed complete.
+
+**Cross-reference check (before moving, not after):**
+
+Search the repo for links pointing at the pre-move path — `docs/*.md`, `src/*/docs/*.md`, `plan/changelog/*.md`, and any other living doc that might reference `plan/current/adr/`, `plan/current/...`, or the feature's slug directly. Update every found reference to the new archive path in the **same commit** as the move. A moved folder with stale incoming links is worse than an unarchived one — it silently breaks navigation instead of just being inconsistently placed.
+
+This applies to Feature Pipeline archiving too (ship-agent P7 Step 6) — see the companion change to that skill.
+
 ---
 
 ## New Component Handoff

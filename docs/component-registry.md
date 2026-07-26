@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 0000016-pipeline-governance-and-loop-engineering (11 Jul 2026)
+**Last updated:** 0000017-ratchet-forgery-detection-and-telemetry-schema-spec (26 Jul 2026)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -9,9 +9,9 @@
 
 | ID | Name | Type | Domain | Status | Summary | Docs |
 |----|------|------|--------|--------|---------|------|
-| `context-mode-hooks` | context-mode Enforcement Hook Scripts | component-pack | developer-tooling | active | Blocking PreToolUse hook scripts that enforce context-mode routing rules by intercepting Grep, Bash (pattern-matched), and WebFetch tool calls. | [purpose](../src/context-mode-hooks/docs/purpose.md) |
+| `context-mode-hooks` | context-mode Enforcement Hook Scripts | component-pack | developer-tooling | active | Blocking PreToolUse hook scripts (`.mjs`, Node-only since v0.2.0 — no `jq`, no Unix-shell requirement) that enforce context-mode routing rules by intercepting Grep, Bash (pattern-matched), and WebFetch tool calls. | [purpose](../src/context-mode-hooks/docs/purpose.md) |
 | `setup-hook-integration` | Setup Hook Integration | component-pack | developer-tooling | active | setup.sh/ps1, skill-sync, and hook adapters (copilot, cursor, windsurf, codex) — installs and configures enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project. | [purpose](../src/setup-hook-integration/docs/purpose.md) |
-| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.16.0: adds backlog convention, product.yml versioning, loop-runner/critic/assessor/verify skills, ratchet-check hook, governed reversal protocol). | [component.yml](../planifest-framework/component.yml) |
+| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.17.0: agent-writable ratchet-approve on instruction with audit log, structured P0 discovery pass + discovery.md for all adoption modes, scope-lock-agent suggested answers, change-agent archive step, governance suite in regression pack). | [component.yml](../planifest-framework/component.yml) |
 
 ---
 

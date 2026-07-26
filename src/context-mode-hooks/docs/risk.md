@@ -14,7 +14,7 @@ Cross-references `plan/current/risk-register.md` and `plan/current/security-repo
 | R-001 | Allowlist too narrow — legitimate Bash commands blocked | Low | Open | Conservative v1 list. Agent can work around by using ctx_execute. Future: configurable allowlist. |
 | R-002 | settings.json schema assumption — Claude Code changes format silently | Low | Open | Verified against current Claude Code docs (Q-001 resolved). Smoke test open item. |
 | R-003 | Hook stdin payload scope — full tool_input may not be available | Low | Resolved | Confirmed: full tool_input is present on stdin for PreToolUse hooks. |
-| R-004 | Windows bash shebang resolution — scripts may not invoke correctly | Low | Open/Accepted | Git Bash / WSL required. Documented in quirks Q-005. PowerShell equivalents deferred to v2. |
+| R-004 | Windows bash shebang resolution — scripts may not invoke correctly | Low | Resolved | Hooks ported to `.mjs` invoked via `node` (0000017 req-004, ADR-002) — no shell resolution involved on any platform. Quirk Q-005 closed. |
 | R-005 | settings.json merge overwrites existing hooks | Low | Mitigated | Additive merge implemented in `merge_hook_settings`. Re-run idempotent. |
 | R-006 | Agent ignores block message — compliance not guaranteed | Low | Open | Quality concern, not security. Addressed by block message design (explicit ctx_* call shown). |
 | R-007 | Upstream script divergence — planifest-framework and mksglu/context-mode drift | Low | Open | Roadmap item. ADR-004 documents split. Contribution planned post-pipeline. |
