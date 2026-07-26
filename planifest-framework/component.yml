@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "backlog-triage-2026-07-11"
-version: "0.16.1"
+feature: "0000017-ratchet-forgery-detection-and-telemetry-schema-spec"
+version: "0.17.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -124,7 +124,7 @@ risk:
 quality:
   testCoverage:
     unit: 0
-    integration: 316
+    integration: 414
     e2e: 0
   techDebt: []
   quirks:
@@ -141,11 +141,11 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-07-11"
-  # Updated by backlog-triage-2026-07-11 (change-agent): fixed test-harness
-  # portability bugs and doc drift from backlog 0000001/0000003/0000004/0000006/0000007
+  updatedAt: "2026-07-26"
+  # Updated by 0000017 (codegen-agent): promoted 0000016 governance suite
+  # to regression pack; added regression-promotion verification test
   createdBy: "agent"
   lastModifiedBy: "agent"
-  skill: "planifest-change-agent"
+  skill: "planifest-codegen-agent"
   tool: "claude-code"
   model: "claude-sonnet-5"
