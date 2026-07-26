@@ -1,8 +1,10 @@
 # Test Coverage — context-mode-hooks
 
 **Component:** context-mode-hooks
-**Version:** 0.1.0
-**Coverage state as of:** 2026-04-12 (updated with live E2E results)
+**Version:** 0.2.0
+**Coverage state as of:** 2026-07-26 (0000017 `.mjs` port)
+
+> **0000017 update (req-004):** all 3 component test files now invoke the `.mjs` hooks via `node` (10 assertions currently registered in the component runner, all passing) and the framework suite adds `test-0000017-req-004-cross-platform-hooks.sh` (25 assertions: file presence, setup.sh/setup.ps1 wiring, missing-runtime messaging, behavioral parity, fail-open). Historical run records below predate the port and refer to the former `.sh` scripts — retained as point-in-time records, not current state.
 
 ---
 
