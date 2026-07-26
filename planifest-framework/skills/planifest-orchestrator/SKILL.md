@@ -125,6 +125,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | File a backlog entry | `planifest-framework/templates/backlog-entry.template.md` |
 | Handle a defect report / reversal petition | `planifest-framework/templates/defect-report.template.md`, then spawn `planifest-reversal-assessor` |
 | Run the pre-archive review gate | Spawn `planifest-design-critic` (P1/P2) or the cross-model reviewer (end of P6) per their skills |
+| Draft a suggested Scope Lock Challenge answer (only on explicit human request) | Spawn `planifest-scope-lock-agent` |
 
 Load each file at the moment you need it - not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
 
@@ -517,18 +518,26 @@ Run this immediately after the coaching Q&A is complete and before presenting th
 
 Read `plan/current/feature-brief.md`. Check whether `## Scenario Paths` has been filled in. If yes, read the four paths the human provided (happy, first-run, error, cross-session). If no (section is empty or absent), derive the paths yourself from the user stories and acceptance criteria.
 
-Then ask each of these four questions **one at a time**, waiting for a human answer before asking the next:
+Then ask each of these four questions **one at a time**, waiting for a human answer before asking the next. **The human is always asked first, and every question always carries the suggested-answer offer in the same turn — this offer is never silently skipped, no matter how routine the item looks** (ADR-003):
 
-1. **Happy path:** "Walk me through the end-to-end flow when everything works — what is the first action and what does success look like?"
-2. **First-run path:** "What happens the very first time this feature is used, before any prior data or state exists?"
-3. **Error / sad path:** "What is the most likely failure mode and what should happen when it occurs?"
-4. **Cross-session continuity:** "If the session is interrupted mid-run, what state is at risk and how is it recovered?"
+1. **Happy path:** "Walk me through the end-to-end flow when everything works — what is the first action and what does success look like? (Want me to suggest an answer first? yes/no)"
+2. **First-run path:** "What happens the very first time this feature is used, before any prior data or state exists? (Want me to suggest an answer first? yes/no)"
+3. **Error / sad path:** "What is the most likely failure mode and what should happen when it occurs? (Want me to suggest an answer first? yes/no)"
+4. **Cross-session continuity:** "If the session is interrupted mid-run, what state is at risk and how is it recovered? (Want me to suggest an answer first? yes/no)"
+
+**Suggested-answer option (ADR-003 — always offered, only drafted on explicit request):**
+
+- Never pre-draft a suggested answer automatically. Until the human explicitly asks for one, the offer above is the entire extent of what is presented — the question stands on its own.
+- If the human explicitly requests a suggestion, spawn the `planifest-scope-lock-agent` skill as a fresh-context subagent, scoped to this single question only. Pass it: the scenario-path question, the feature brief, the requirements/ADRs confirmed so far, and — if any exist yet for this item — the latest confirmed decisions to check against. Do not pass the coaching conversation history.
+- Present the returned draft to the human labelled explicitly as a draft, never as an already-decided answer. If the subagent flagged a contradiction, unresolved concern, or gap, surface that flag alongside the draft as-is — do not resolve it or soften it yourself.
+- The human must give an explicit affirmative for that item specifically — **accept** (as drafted), **edit** (revised text), or **reject** (discard and answer from scratch) — before anything is treated as the scope answer. Silence, the conversation moving on, or an implied "looks fine" is never read as approval.
+- The moment the human gives that explicit affirmative, record it as its own `plan/current/build-log.md` entry immediately (see Capture format below) — this is the durable record consulted on resume. Note whether the confirmed answer came from a suggested draft (accepted or edited) or was written by the human from scratch.
 
 **After each answer:**
 
 - Capture the scenario: append it to `plan/current/build-log.md` under the P0 phase block:
   ```
-  Scope Lock — {path type}: {one-sentence summary of the human's answer}
+  Scope Lock — {path type}: {one-sentence summary of the human's answer} [source: human | agent-draft-accepted | agent-draft-edited]
   ```
 - If the answer reveals a scope gap: surface it immediately as a clarifying question (one question only). After the human answers, capture the clarification in the same format, then return to the next scenario path question.
 - If an item is explicitly deferred by the human: record it formally as:
@@ -1078,7 +1087,7 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 - Artifact Types: Distinct and independently versioned (Brief, Spec, ADR, etc.).
 - Three Layers: Product, Architecture, Engineering.
 
-**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`
+**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`, `planifest-scope-lock-agent`
 
 ---
 
