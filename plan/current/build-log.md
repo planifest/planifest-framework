@@ -192,6 +192,21 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | P6: component docs synced — dependencies.md (sole runtime dep now node, bash/jq/awk/grep removed), scope.md (in-scope renamed to .mjs, 2 deferred items closed), tech-debt.md (TD-003 resolved), risk.md (R-004 resolved), quirks.md (Q-002/Q-002b/Q-005 marked resolved with history retained), interface-contract.md + purpose.md + test-coverage.md (script names, version 0.1.0→0.2.0). loop-runner Hard Limit 2 rewritten to match ADR-001 (agent-write-on-instruction, new marker format, `\|`-in-reason caveat). Commit 0fc8aaa. |
 | P6: living docs synced — component-registry.md (both context-mode-hooks and planifest-framework summaries updated, version 0.17.0), dependency-graph.md (block-*.mjs, jq/awk/grep nodes removed, node-only), decisions-index.md (4 new ADRs added under Feature 0000017, ADR-004 marked "amended by 0000017 ADR-001"), architecture-overview.md (Last updated stamp). Drift checks: no API surface (n/a), domain terms consistent with code, no cross-component data writes, ADR compliance confirmed (0000016 ADR-004 explicitly marked amended not silently overwritten), dependency direction consistent (context-mode-hooks → node only). recommendations.md and plan/changelog/0000017-...-2026-07-26.md written. |
 | P6 COMPLETE — all mandatory living docs updated; all component docs synced; recommendations + changelog produced; no drift found beyond what was reconciled. Continuous run — proceeding to P7 without a stop (P7 is always a confirmation gate per Hard Limit, but the ship-agent handles that directly). |
+| Cross-Model Review Gate: `planifest-overrides/loop-toggles.yml` absent — `cross_model_review` toggle defaults off (ADR-003, 0000016). Gate skipped, proceeding directly to P7. |
+
+---
+
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-26T15:20:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | P7/P8/P9 owned by ship-agent in one invocation. P7 is always a confirmation gate (Hard Limit exception — continuous_run does not bypass shipping). |
 
 ---
 
