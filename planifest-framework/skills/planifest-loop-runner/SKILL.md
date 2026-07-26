@@ -16,7 +16,7 @@ hooks:
 ## Hard Limits
 
 1. **Every loop has an armed stop rule before its first iteration.** No cap, no loop.
-2. **Agents never write `plan/current/.ratchet-approve`.** That marker is the human's approval instrument (ADR-004). Writing it yourself is a violation, not a workaround.
+2. **Agents write `plan/current/.ratchet-approve` only on explicit human instruction — never on their own initiative.** The human must state the path, the reason, and the go-ahead in the same turn (0000017 ADR-001, superseding ADR-004's blanket prohibition). The line format is `path | reason | timestamp` with the human's exact reason text transcribed verbatim — note a reason containing a `|` character invalidates the line (strict 3-field parse, fails closed). The write is committed immediately, in its own dedicated commit, before any further work proceeds — the hook's same-uncommitted-changeset backstop blocks the guarded edit with an explicit message if this step is skipped. Writing the marker without that explicit in-the-moment instruction remains a violation, not a workaround.
 3. **Budget counters are never reset by an agent.** They live in the loop-state file, are git-tracked, and survive interrupt/resume (ADR-007).
 4. **Run-log records are append-only.** Never rewrite a prior iteration's record.
 
