@@ -169,7 +169,7 @@ Last updated: 0000017-ratchet-forgery-detection-and-telemetry-schema-spec
 
 ### Feature 0000017 — ratchet-forgery-detection-and-telemetry-schema-spec
 
-ADR files: [plan/current/adr/](../plan/current/adr/) (moves to `plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema-spec-{date}/adr/` at P7 — ship-agent updates these links at archive time per its cross-reference check).
+ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema-spec-2026-07-26/adr/](../plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema-spec-2026-07-26/adr/)
 
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|

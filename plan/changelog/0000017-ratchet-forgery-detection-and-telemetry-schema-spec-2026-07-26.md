@@ -1,8 +1,9 @@
 # Changelog — 0000017-ratchet-forgery-detection-and-telemetry-schema-spec — 26 Jul 2026
 
 **Feature:** Ratchet Forgery Detection and Telemetry Schema Spec
-**Pipeline run:** P0–P6 completed, continuous run authorized at design confirmation; no phases skipped
+**Pipeline run:** P0–P9 completed, continuous run authorized at design confirmation; no phases skipped
 **Version:** 0.16.0 → 0.17.0
+**PR:** pending — updated after PR is raised in P9 Step 9
 
 ## What Was Built
 
