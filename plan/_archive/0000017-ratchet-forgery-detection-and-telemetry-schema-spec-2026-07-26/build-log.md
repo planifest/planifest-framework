@@ -207,6 +207,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | P7/P8/P9 owned by ship-agent in one invocation. P7 is always a confirmation gate (Hard Limit exception — continuous_run does not bypass shipping). |
+| P7 archive: copy-then-delete verified via `diff -rq` (identical). Cross-reference check found and fixed one stale-link risk (this feature's own ADR links in `docs/decisions-index.md`), fixed in the same commit as the move. Sentinels removed last. `docs/about.md` updated to 0.17.0. Archived to `plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema-spec-2026-07-26/`. Note: `plan/current/change-summary.md` and `plan/current/telemetry-mcp-rca-and-fix-spec.md` were pre-existing leftover files (change-summary.md from an already-merged, pre-req-007 Change Pipeline run that had no archive step of its own) — both folded into this archive as a side effect of the wholesale copy; flagged for the human, not a defect introduced by this run. Commit c965564. |
 
 ---
 
@@ -214,11 +215,25 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
+| Total phases completed | 7 (P0-P6); P7-P9 completing now |
+| Total agents spawned | 13 (≈8 scope-lock-agent draft dispatches at P0; 5 codegen dispatches at P3 — 3 background batch + 1 background + 1 foreground) |
+| Total MCP calls | Not separately tracked — numerous read-only `ctx_execute` calls throughout for analysis/grep, no file-write MCP calls |
+| Phases using parallelism | 1 (P3: req-001/002/004 dispatched as one 3-agent background batch) |
+| Primary tier agent calls | 12 |
+| Cheaper tier agent calls | 1 (req-001, haiku) |
+| Self-corrections | 4 (3 inline recoveries at P3 after the session's spend limit interrupted req-002/003/004's background agents; 1 at P4 for the missing req-003 traceability test) |
+| Phases skipped | none |
+
+---
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-26T15:35:00Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | 1 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Invoked as a sub-agent per ship-agent P8, reading this file and writing build-report.md to the same archive directory. |
