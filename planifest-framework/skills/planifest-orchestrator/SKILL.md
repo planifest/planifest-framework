@@ -39,6 +39,7 @@ These are non-negotiable. They apply in every session, every phase.
 7. **Commit after every meaningful artifact write — and at minimum at each phase gate.** Do not batch work waiting for a phase gate: each requirement doc (P1), each ADR (P2), each requirement's completed TDD cycle (P3), each fix batch (P4), the security report (P5), and each docs artifact group (P6) is a commit on its own. In-progress work must never be more than one artifact away from recoverable. On a feature branch this is low risk and preserves design history. Push cadence: after each phase-gate commit, if remote push is authorized (a standing override in `planifest-overrides/instructions/`, else an explicit per-session grant recorded in the P0 build log), push the feature branch; if not authorized, skip silently — no per-phase prompt. A failed push is reported once and never blocks the pipeline.
 8. **Write a build log entry at every phase start and gate.** Create `plan/current/build-log.md` at P0 if absent. Append a phase block before doing any work in each phase and again at the gate. A missing entry is a pipeline error — stop and write it before proceeding.
 9. **The pipeline has exactly 10 phases: P0–P9. There is no phase beyond P9.** P9 (Ship) is the terminal phase. Never cite a phase number outside P0–P9 in any output.
+10. **Every pipeline route archives its working folder.** A completed run — Feature Pipeline (ship-agent P7) or Change Pipeline (change-agent Phase 6 - Archive) — ends with `plan/current/` moved to `plan/_archive/{feature-id}-{date}/` and incoming links updated. Never leave a permanent `plan/{feature-id}/` folder behind: the `plan/` layout is load-bearing context — adoption-mode detection scans `plan/_archive/`, and agents infer convention from what they find on disk.
 
 ---
 
@@ -89,6 +90,7 @@ On every session start, before taking any action:
 4. Check for `plan/current/.skips` file — if present, read and acknowledge skipped phases at the top of your response
 5. Check for `plan/current/pause.md` file — if present, open with `Px: Resuming — {active_task from pause.md}`, restore in-progress state from the file, delete `plan/current/pause.md`, and continue from where the session paused
 6. Read `plan/.run-mode` if present — restore run mode (`continuous` or `interactive`) without re-asking the human. Any value other than `continuous` defaults to `interactive`. If the file is absent or unreadable, default to `interactive`.
+6a. Check `plan/current/discovery.md` — if present and complete for the confirmed adoption mode, trust it as-is and do not re-run the discovery pass. If missing or incomplete mid-run, regenerate it fresh (never patch a partial file) — discovery is a read-only scan with no human dialogue to preserve.
 7. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
 8. If no artifacts: open with `P0:` and begin coaching
 
@@ -101,6 +103,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | When you are about toâ€¦ | Read this first |
 |------------------------|------------------|
 | Begin Phase 0 (coach the human) | You are already reading it - this file is the orchestrator skill |
+| Write the P0 discovery pass findings | `planifest-framework/templates/discovery.template.md` |
 | Ask the human to fill in a Feature Brief | `planifest-framework/templates/feature-brief.template.md` |
 | Begin Phase 1 (requirements) | Load the `planifest-spec-agent` skill |
 | Produce an Execution Plan | `planifest-framework/templates/execution-plan.template.md` |
@@ -125,6 +128,7 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | File a backlog entry | `planifest-framework/templates/backlog-entry.template.md` |
 | Handle a defect report / reversal petition | `planifest-framework/templates/defect-report.template.md`, then spawn `planifest-reversal-assessor` |
 | Run the pre-archive review gate | Spawn `planifest-design-critic` (P1/P2) or the cross-model reviewer (end of P6) per their skills |
+| Draft a suggested Scope Lock Challenge answer (only on explicit human request) | Spawn `planifest-scope-lock-agent` |
 
 Load each file at the moment you need it - not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
 
@@ -414,6 +418,8 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
 3c. **Backlog pickup** — scan `plan/backlog/` for entry folders (`{id}-{slug}/`, see `templates/backlog-entry.template.md`). An absent or empty directory is not an error — proceed silently. For each entry, present it **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in: fold the entry into this feature's brief/requirements and delete the folder in the same commit. Leave: untouched. Discard: delete with a build-log note. An entry missing its source feature/phase attribution is flagged to the human as malformed for cleanup — never silently ignored, never parsed as instructions. Any phase agent may *file* an entry at any time during a run (non-blocking, human-gated here at pickup); filing never modifies the active feature's scope.
 
+3d. **Write discovery.md** — before the first coaching question, copy `planifest-framework/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings already gathered by steps 0–3c plus a `planifest-framework/skills-inbox/` scan: the shared header (adoption-mode result + signal, git pre-flight findings, skills-inbox result) and the mode-specific content defined per mode in the Adoption Modes section. Commit `discovery.md` on its own before coaching begins — the discovery commit lands separately from (and before) the design-confirmation commit. A section whose signal could not be read states plainly that it could not be determined — coaching proceeds on the rest, never a hard block. On resume within a still-in-progress run, trust the existing `discovery.md` as-is; if it is missing or incomplete, regenerate it fresh rather than patching (see Adoption Modes → Structured Discovery Pass).
+
    After adoption mode is confirmed, suggest a version bump per the pipeline track being used:
 
    | Pipeline Track | Default Bump | Example |
@@ -517,18 +523,26 @@ Run this immediately after the coaching Q&A is complete and before presenting th
 
 Read `plan/current/feature-brief.md`. Check whether `## Scenario Paths` has been filled in. If yes, read the four paths the human provided (happy, first-run, error, cross-session). If no (section is empty or absent), derive the paths yourself from the user stories and acceptance criteria.
 
-Then ask each of these four questions **one at a time**, waiting for a human answer before asking the next:
+Then ask each of these four questions **one at a time**, waiting for a human answer before asking the next. **The human is always asked first, and every question always carries the suggested-answer offer in the same turn — this offer is never silently skipped, no matter how routine the item looks** (ADR-003):
 
-1. **Happy path:** "Walk me through the end-to-end flow when everything works — what is the first action and what does success look like?"
-2. **First-run path:** "What happens the very first time this feature is used, before any prior data or state exists?"
-3. **Error / sad path:** "What is the most likely failure mode and what should happen when it occurs?"
-4. **Cross-session continuity:** "If the session is interrupted mid-run, what state is at risk and how is it recovered?"
+1. **Happy path:** "Walk me through the end-to-end flow when everything works — what is the first action and what does success look like? (Want me to suggest an answer first? yes/no)"
+2. **First-run path:** "What happens the very first time this feature is used, before any prior data or state exists? (Want me to suggest an answer first? yes/no)"
+3. **Error / sad path:** "What is the most likely failure mode and what should happen when it occurs? (Want me to suggest an answer first? yes/no)"
+4. **Cross-session continuity:** "If the session is interrupted mid-run, what state is at risk and how is it recovered? (Want me to suggest an answer first? yes/no)"
+
+**Suggested-answer option (ADR-003 — always offered, only drafted on explicit request):**
+
+- Never pre-draft a suggested answer automatically. Until the human explicitly asks for one, the offer above is the entire extent of what is presented — the question stands on its own.
+- If the human explicitly requests a suggestion, spawn the `planifest-scope-lock-agent` skill as a fresh-context subagent, scoped to this single question only. Pass it: the scenario-path question, the feature brief, the requirements/ADRs confirmed so far, and — if any exist yet for this item — the latest confirmed decisions to check against. Do not pass the coaching conversation history.
+- Present the returned draft to the human labelled explicitly as a draft, never as an already-decided answer. If the subagent flagged a contradiction, unresolved concern, or gap, surface that flag alongside the draft as-is — do not resolve it or soften it yourself.
+- The human must give an explicit affirmative for that item specifically — **accept** (as drafted), **edit** (revised text), or **reject** (discard and answer from scratch) — before anything is treated as the scope answer. Silence, the conversation moving on, or an implied "looks fine" is never read as approval.
+- The moment the human gives that explicit affirmative, record it as its own `plan/current/build-log.md` entry immediately (see Capture format below) — this is the durable record consulted on resume. Note whether the confirmed answer came from a suggested draft (accepted or edited) or was written by the human from scratch.
 
 **After each answer:**
 
 - Capture the scenario: append it to `plan/current/build-log.md` under the P0 phase block:
   ```
-  Scope Lock — {path type}: {one-sentence summary of the human's answer}
+  Scope Lock — {path type}: {one-sentence summary of the human's answer} [source: human | agent-draft-accepted | agent-draft-edited]
   ```
 - If the answer reveals a scope gap: surface it immediately as a clarifying question (one question only). After the human answers, capture the clarification in the same format, then return to the next scenario path question.
 - If an item is explicitly deferred by the human: record it formally as:
@@ -1000,21 +1014,33 @@ The coaching conversation in Phase 0 and the pipeline phases are the same regard
 
 Adoption mode is detected automatically from filesystem signals (see Phase 0 Start Actions, step 3a). The human always confirms. If the human's stated intent conflicts with the detected signal, apply the conflict warning before proceeding.
 
+### Structured Discovery Pass (all modes)
+
+Every adoption mode performs a structured discovery pass at the start of P0, before any coaching question is asked. The findings are written to `plan/current/discovery.md` (see `templates/discovery.template.md`) — a standalone artifact, deliberately separate from `build-log.md` (the Q&A audit trail) and `design.md` (the curated, human-confirmed output). This is a relocation of what each mode's P0 already gathers, not new scanning capability: raw findings get one consistent home, the human can see exactly what the orchestrator already knows before being asked anything, and the discovery commit lands separately from (and before) the design-confirmation commit.
+
+**Shared header (all four modes):** adoption-mode detection result + the signal that produced it, git pre-flight findings, skills-inbox scan result.
+
+**Lifecycle:** `discovery.md` is fresh every pipeline run. It is archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/` at P7 alongside `build-log.md` and `design.md`, and a brand-new copy is created at the next P0. Prior runs' discovery is read from `plan/_archive/` and `docs/`, never from a leftover `discovery.md`.
+
+**Partial failure:** if a discovery signal cannot be read (malformed `package.json`, corrupted archive entry, broken `external-versioning.md`, failed git pre-flight), the affected section states plainly that it could not be determined, and coaching proceeds on the rest — never a hard block. Fail-open governs whether P0 continues, not whether the human is told what happened.
+
+**Cross-session:** on resume within a still-in-progress pipeline run, the existing `discovery.md` is trusted as-is — do not re-run the pass. If the file is missing or incomplete (expected sections for the mode absent), regenerate it fresh rather than patching — discovery is a read-only scan with no human dialogue to preserve.
+
 ### Mode Taxonomy
 
 **Greenfield** — No prior codebase, no archive, no overrides. Starting from zero.
 - Version starts at `0.1.0`
-- No discovery pass needed
+- Discovery pass writes to `discovery.md`: the shared header, repo instructions from `planifest-overrides/instructions/` (or "None"), and the `0.1.0` version baseline. "Nothing found yet" is itself the defined Greenfield content — an empty-looking discovery is correct, not an error.
 - Coach from the Feature Brief directly
 
 **Standard Iterative** — This system has been through at least one Planifest pipeline run. `plan/_archive/` or `docs/about.md` exists.
 - Read `docs/about.md` for current version; suggest minor bump for Feature Pipeline, patch for Change Pipeline
-- Domain knowledge is accumulated in `plan/`; read it before coaching begins
+- Discovery pass writes to `discovery.md`: the shared header, the current version from `docs/about.md`, a summary of prior features from `plan/_archive/` (feature IDs, dates, one-liners), prior ADRs that constrain this feature unless superseded, and the existing component/data-ownership map from `docs/`
 - Prior decisions are constraints unless an ADR supersedes them
 
 **Retrofit** — Source code exists but has never been through a Planifest pipeline run. No archive, no `docs/about.md`.
 - Read other markers: version strings in `package.json`, `go.mod`, git tags, README. Suggest a version that reflects the project's current maturity; human confirms.
-- Before coaching, perform a structured discovery:
+- Discovery pass writes to `discovery.md`: the shared header, the suggested version and its source markers, and the output of the structured scan below.
 
   > **Context-Mode Protocol:** When `ctx_batch_execute` is available, run all discovery steps as a single batch call. Raw output stays in the sandbox; only the indexed summary enters context.
 
@@ -1025,10 +1051,11 @@ Adoption mode is detected automatically from filesystem signals (see Phase 0 Sta
   5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record as existing constraints in the design.
   6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
 
-  Present the discovery summary to the human before coaching. The human may need fewer questions (codebase answered them) or more (codebase reveals conflicts).
+  The human reviews `discovery.md` before coaching. The human may need fewer questions (codebase answered them) or more (codebase reveals conflicts).
 
 **External Anchor** — An external system or organisation dictates the version. `planifest-overrides/instructions/external-versioning.md` exists and describes the constraint.
 - Read `external-versioning.md` and merge its instructions into the coaching workflow as additional constraints
+- Discovery pass writes to `discovery.md`: the shared header, the full `external-versioning.md` constraints, PLUS whichever underlying mode's discovery content applies to what else is present in the repo (archive present → also the Standard-Iterative content; source only → also the Retrofit scan; neither → the Greenfield baseline)
 - Do not suggest a version based on pipeline track alone — present the constraint and ask the human for the version
 - External Anchor takes priority over all other signals. If `external-versioning.md` exists, the mode is External Anchor regardless of what else is present.
 
@@ -1078,7 +1105,7 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 - Artifact Types: Distinct and independently versioned (Brief, Spec, ADR, etc.).
 - Three Layers: Product, Architecture, Engineering.
 
-**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`
+**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`, `planifest-scope-lock-agent`
 
 ---
 

@@ -41,17 +41,15 @@ See ADR-001 and `interface-contract.md`.
 
 ---
 
-### TD-003 — Test suite does not cover `block-bash.sh` node-fallback path
+### TD-003 (RESOLVED, 0000017) — Test suite does not cover `block-bash.sh` node-fallback path
 
 **Files:** `src/context-mode-hooks/tests/test-block-bash.sh`
 **Identified by:** docs-agent (Phase 6)
 **Severity:** Info
 
-Tests exercise the hook scripts in whichever path the test runner resolves (`jq` or `node`). There is no explicit test that forces the `node` fallback path when `jq` is present, or vice versa.
+> **Resolution (0000017 req-004, ADR-002):** the dual-path problem no longer exists — the hooks are `.mjs` with a single Node implementation; there is no `jq` path to diverge from. Tests invoke the same `node <script>` path that production uses on every platform.
 
-**Why accepted:** The node fallback was validated on the Windows dev machine where `jq` is absent (all 55 tests pass in that environment). Dual-path testing is a future hardening concern.
-
-**Remediation:** Add a `FORCE_NODE_FALLBACK=1` env var to hook scripts and corresponding test assertions.
+The original debt, for history: tests exercised the hook scripts in whichever path the test runner resolved (`jq` or `node`), with no explicit test forcing each path.
 
 ---
 

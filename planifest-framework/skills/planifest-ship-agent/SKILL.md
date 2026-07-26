@@ -121,6 +121,8 @@ Generate the test report artifact before archiving.
 8. Delete `plan/.orchestrator-ack` if it exists — removes the strict-mode session ack so the next pipeline starts clean
 9. Delete `plan/.run-mode` if it exists — removes the run-mode preference so the next P0 always asks fresh
 
+**Cross-reference check (before Step 1, not after Step 6):** Before writing the changelog, search the repo for links pointing at `plan/current/...` — `docs/*.md` (especially `docs/decisions-index.md`'s ADR links), `src/*/docs/*.md`, and any other living doc. Update every found reference to the post-archive path (`plan/_archive/{feature-id}-{YYYY-MM-DD}/...`) in the same commit as the archive move. A moved folder with stale incoming links silently breaks navigation for the next reader — confirmed in practice: a downstream repo's `decisions-index.md` ADR links were left pointing at `plan/current/adr/...` after P7 ran and had to be fixed retroactively in a later, unrelated feature.
+
 ### Step 6b — Write docs/about.md
 
 **This is a blocking step.** Do not proceed to Step 7 until `docs/about.md` is written.

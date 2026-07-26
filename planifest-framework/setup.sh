@@ -267,20 +267,39 @@ copy_workflow() {
   echo "  + workflows/${name}.md"
 }
 
+context_mode_hook_command() {
+  # Builds the PreToolUse command string for a context-mode .mjs hook
+  # (REQ-004, 0000017 ADR-002). No Unix-shell dependency: `node <script>` is
+  # plain-invocation syntax understood by cmd.exe, PowerShell, and POSIX
+  # shells alike — no bash entry point, no jq. The `||` fallback surfaces a
+  # clear runtime message and still fails open (exit 0, no deny JSON) when
+  # the Node.js runtime itself is missing.
+  local hooks_dir="$1"
+  local script_name="$2"
+  local script_path="$hooks_dir/$script_name"
+  printf 'node "%s" || echo "[Planifest] context-mode enforcement (%s) did not run: Node.js runtime not found. Tool call proceeded unblocked." 1>&2' \
+    "$script_path" "$script_name"
+}
+
 merge_hook_settings() {
-  # Merge PreToolUse hook entries into .claude/settings.json (REQ-004)
+  # Merge PreToolUse hook entries into .claude/settings.json (REQ-004, 0000017 req-004)
   # Uses additive merge: existing content is preserved; Grep/Bash/WebFetch entries
   # are removed then re-added to ensure idempotency on re-run.
-  # Requires jq or node.
+  # Requires jq or node (to edit settings.json) — the hooks themselves are .mjs.
   local settings_file="$1"
   local hooks_dir="$2"  # relative path used in the command value (e.g. .claude/hooks/context-mode)
+
+  local grep_cmd bash_cmd fetch_cmd
+  grep_cmd=$(context_mode_hook_command "$hooks_dir" "block-grep.mjs")
+  bash_cmd=$(context_mode_hook_command "$hooks_dir" "block-bash.mjs")
+  fetch_cmd=$(context_mode_hook_command "$hooks_dir" "block-webfetch.mjs")
 
   if command -v jq >/dev/null 2>&1; then
     local new_hooks
     new_hooks=$(jq -n \
-      --arg grep_cmd  "$hooks_dir/block-grep.sh" \
-      --arg bash_cmd  "$hooks_dir/block-bash.sh" \
-      --arg fetch_cmd "$hooks_dir/block-webfetch.sh" \
+      --arg grep_cmd  "$grep_cmd" \
+      --arg bash_cmd  "$bash_cmd" \
+      --arg fetch_cmd "$fetch_cmd" \
       '[
         {"matcher":"Grep",     "hooks":[{"type":"command","command":$grep_cmd}]},
         {"matcher":"Bash",     "hooks":[{"type":"command","command":$bash_cmd}]},
@@ -307,14 +326,14 @@ merge_hook_settings() {
       echo "  + .claude/settings.json (created with context-mode hook entries)"
     fi
   elif command -v node >/dev/null 2>&1; then
-    PLANIFEST_HOOKS_DIR="$hooks_dir" PLANIFEST_SETTINGS="$settings_file" node -e '
+    PLANIFEST_GREP_CMD="$grep_cmd" PLANIFEST_BASH_CMD="$bash_cmd" PLANIFEST_FETCH_CMD="$fetch_cmd" \
+    PLANIFEST_SETTINGS="$settings_file" node -e '
       const fs = require("fs"), path = require("path");
-      const hd = process.env.PLANIFEST_HOOKS_DIR;
       const sf = process.env.PLANIFEST_SETTINGS;
       const newHooks = [
-        {matcher:"Grep",     hooks:[{type:"command",command:hd+"/block-grep.sh"}]},
-        {matcher:"Bash",     hooks:[{type:"command",command:hd+"/block-bash.sh"}]},
-        {matcher:"WebFetch", hooks:[{type:"command",command:hd+"/block-webfetch.sh"}]}
+        {matcher:"Grep",     hooks:[{type:"command",command:process.env.PLANIFEST_GREP_CMD}]},
+        {matcher:"Bash",     hooks:[{type:"command",command:process.env.PLANIFEST_BASH_CMD}]},
+        {matcher:"WebFetch", hooks:[{type:"command",command:process.env.PLANIFEST_FETCH_CMD}]}
       ];
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
@@ -337,7 +356,8 @@ merge_hook_settings() {
 }
 
 install_context_mode_hooks() {
-  # Copy enforcement hook scripts to the target project and wire settings.json (REQ-004)
+  # Copy enforcement hook scripts to the target project and wire settings.json
+  # (REQ-004; ported to .mjs in 0000017 req-004 — no bash entry point, no jq).
   local hooks_src_rel="$1"   # relative to SCRIPT_DIR  e.g. hooks/context-mode
   local hooks_dir_rel="$2"   # relative to PROJECT_ROOT e.g. .claude/hooks/context-mode
   local settings_rel="$3"    # relative to PROJECT_ROOT e.g. .claude/settings.json
@@ -354,16 +374,25 @@ install_context_mode_hooks() {
   echo ""
   echo "  Installing context-mode enforcement hooks"
 
+  # Setup-time Node.js runtime check (0000017 req-004): these hooks are .mjs —
+  # Node is required to run them at all. Warn clearly but still install and
+  # wire the hooks; the wired command itself fails open with a runtime
+  # message if Node turns out to be missing when Claude Code invokes it.
+  if ! command -v node >/dev/null 2>&1; then
+    echo "  ! Warning: Node.js runtime not found on this machine."
+    echo "  ! context-mode enforcement hooks (block-grep/block-bash/block-webfetch) require Node.js."
+    echo "  ! Hooks will be installed and wired, but will not enforce anything until Node.js is installed."
+  fi
+
   # Create target directory
   mkdir -p "$dest"
 
-  # Copy and chmod each script
-  for script in "$src"/*.sh; do
+  # Copy each script
+  for script in "$src"/*.mjs; do
     [ -f "$script" ] || continue
     local script_name
     script_name="$(basename "$script")"
     cp "$script" "$dest/$script_name"
-    chmod +x "$dest/$script_name"
     echo "  + $hooks_dir_rel/$script_name"
   done
 

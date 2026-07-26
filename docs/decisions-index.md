@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000016-pipeline-governance-and-loop-engineering
+Last updated: 0000017-ratchet-forgery-detection-and-telemetry-schema-spec
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -161,11 +161,22 @@ Last updated: 0000016-pipeline-governance-and-loop-engineering
 | ADR-001 | Backlog Folder Instead of Editable Post-Archive Lifecycle | accepted | Deferred work lives in `plan/backlog/{id}-{slug}/`, surfaced at the next P0; P7 stays the lock line — bug-bounty-hunter PR #4's editable-P7–P9 design rejected |
 | ADR-002 | product.yml with versionPolicy | accepted | Root `product.yml` aggregates one release version across components (`max-component-version` \| `explicit` \| `external`); single-component projects keep component.yml behaviour |
 | ADR-003 | Loop Toggles in planifest-overrides/loop-toggles.yml | accepted | Per-loop `off \| report-only \| on`; user-owned directory so agents cannot self-enable; absent = all off |
-| ADR-004 | Single-Use Marker File for Approved Weakening | accepted | Human-created `plan/current/.ratchet-approve` (path per line, consumed on use) is the only path past the ratchet; agents prohibited from writing it |
+| ADR-004 | Single-Use Marker File for Approved Weakening | amended by 0000017 ADR-001 | Human-created `plan/current/.ratchet-approve` (path per line, consumed on use) is the only path past the ratchet; agents prohibited from writing it. **Amended:** 0000017 ADR-001 permits the agent to write the marker on explicit in-the-moment human instruction, extends the format to `path \| reason \| timestamp`, and keeps the same-changeset backstop with an explicit approver message. |
 | ADR-005 | Cascade Threshold of 3 Artifacts | accepted | A reversal invalidating >3 downstream artifacts always stops for the human, regardless of run mode |
 | ADR-006 | Verifiers as Fresh-Context REJECT-Default Subagents | accepted | Critic, assessor, and cross-model reviewer never share context with the maker; approval requires cited positive evidence |
 | ADR-007 | Deterministic Caps, Budget, and Ratchet Enforcement | accepted | Iteration caps (3 default, P4 keeps 5), reversal budget (2/feature), and weakening blocks are enforced by hooks + control flow over git-tracked state, never skill prose alone |
 | ADR-008 | Cross-Model Review Gate at End of P6, Pre-Archive | accepted | The second-model review runs while implementation is live and editable; the brief's original "before P9" placement was structurally self-contradictory and is corrected |
+
+### Feature 0000017 — ratchet-forgery-detection-and-telemetry-schema-spec
+
+ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema-spec-2026-07-26/adr/](../plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema-spec-2026-07-26/adr/)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Ratchet-Approve — Agent Write on Explicit Instruction | accepted | Amends 0000016 ADR-004: agent may write `.ratchet-approve` only when the human states path, reason, and go-ahead in the same turn; format `path \| reason \| timestamp`; immediate dedicated commit; backstop kept with an explicit approver-facing message; consumption copied to `plan/ratchet-audit-log.md` |
+| ADR-002 | Cross-Platform Hook Runtime Unification (.sh → .mjs) | accepted | The 3 context-mode hooks become `.mjs` (Node-only) — removes `jq` and the Git Bash/WSL requirement entirely; missing Node surfaces a message at setup and runtime while failing open |
+| ADR-003 | Scope Lock Suggested Answers via On-Demand Subagent | accepted | The orchestrator always offers "want me to suggest an answer?" at each Scope Lock question but only dispatches `planifest-scope-lock-agent` on explicit request; drafts are usage-only, consistency-checked, flagged, and never self-confirming |
+| ADR-004 | Structured P0 Discovery Pass and discovery.md Lifecycle | accepted | Every adoption mode runs a structured discovery pass before coaching, writing to `plan/current/discovery.md` — fresh each run, archived at P7; partial failures noted inline, never a hard block |
 
 ---
 

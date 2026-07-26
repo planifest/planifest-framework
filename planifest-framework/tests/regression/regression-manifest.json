@@ -8,5 +8,13 @@
     "promotedBy": "agent | human",
     "filePath": "Relative path to the test file within tests/regression/"
   },
-  "tests": []
+  "tests": [
+    {
+      "name": "test-0000016-pipeline-governance.sh",
+      "sourceFeature": "0000016-pipeline-governance-and-loop-engineering",
+      "promotionDate": "2026-07-26",
+      "promotedBy": "agent",
+      "filePath": "tests/regression/test-0000016-pipeline-governance.sh"
+    }
+  ]
 }
