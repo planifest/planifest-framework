@@ -237,3 +237,21 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | Invoked as a sub-agent per ship-agent P8, reading this file and writing build-report.md to the same archive directory. |
+| P8 COMPLETE — overall rating "GOOD with Data-Collection Gaps". 5 findings: P1/P2 parallelism not evidenced (accountability gap, not necessarily absent), MCP usage not tracked per-phase, model-tier decision rationale under-documented, spend-limit exigency correctly assessed as external (not a design error), req-003 traceability gap assessed as avoidable-but-low-severity. Recommendations logged for future releases' build-log data collection. |
+
+---
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-26T15:40:00Z` |
+| Model tier | primary |
+| Skills loaded | continues under planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Local Git Only override active (`planifest-overrides/instructions/custom-001-local-git-only.md`) — push/PR prompt skipped per ship-agent Step 9, defaults to PR description output. |
+| P9 Step 8: no `product.yml` at repo root; `node planifest-framework/scripts/product-version.mjs` exits 4 (single-component fallback) — version read from `planifest-framework/component.yml`: `0.17.0`. Validated: matches semver pattern, ≤20 chars, higher than last tag `v0.16.0`. Tag `v0.17.0` created locally. |
+| P9 Step 9: Local Git Only detected — skipped the push/PR prompt, defaulted to option [2] (PR title + description output for the human). No `git push`, no `gh pr create` attempted. |
+| P9 COMPLETE — tag v0.17.0 created locally; PR description output to the human; archive/changelog/build-report paths confirmed. plan/current/ empty, ready for the next feature. |
