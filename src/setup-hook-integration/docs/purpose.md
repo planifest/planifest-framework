@@ -13,5 +13,6 @@ When a developer runs `setup.sh <tool>`, this component:
 5. **Syncs external skills** — calls `skill-sync.sh sync <tool>` to re-install any skills registered in `external-skills.json`.
 6. **Copies skills to the tool's skills directory** — SKILL.md files from `planifest-framework/skills/` copied to `.claude/skills/`, `.cursor/rules/`, etc.
 7. **Writes the boot template** — generates `CLAUDE.md`, `AGENTS.md`, etc. from `templates/standard-boot.md`.
+8. **Records the flags used** (0000020), writes `<tool-dir>/.planifest-setup-flags` on successful completion, so the `planifest-refresh-setup` skill can reconstruct and re-apply the same flags later without the human on the loop having to remember or reverse-engineer them.
 
 It is designed to be re-run safely (idempotent) and is the single entry point for all tool-specific configuration.

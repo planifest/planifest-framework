@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000018-telemetry-emission-consistency
+Last updated: 0000020-setup-refresh-skill
 
 ---
 
@@ -18,7 +18,8 @@ Planifest is a CLI tooling framework that enforces a structured design pipeline 
 | Component | Type | Purpose | Status |
 |-----------|------|---------|--------|
 | `context-mode-hooks` | component-pack | PreToolUse hook scripts blocking Grep, Bash, and WebFetch when context-mode routing rules apply | active |
-| `setup-hook-integration` | component-pack | setup.sh/ps1 and skill-sync — installs enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project | active |
+| `setup-hook-integration` | component-pack | setup.sh/ps1 and skill-sync — installs enforcement hooks, telemetry hooks, context-mode hooks, commit standards, external skill management, and (0000020) a per-tool flags-used marker into any Planifest-managed project | active |
+| `planifest-refresh-setup` | skill (standalone, not a src/ component) | Detects a Planifest install's target tool, reconstructs the setup flags in effect from the flags-used marker or hook wiring, confirms with the human on the loop, and safely re-invokes setup.sh/setup.ps1; see `planifest-framework/skills/planifest-refresh-setup/SKILL.md` | active |
 
 ---
 
@@ -117,7 +118,7 @@ Full protocol and event envelope: `planifest-framework/standards/telemetry-stand
 
 ## Data Ownership
 
-No components own persistent data. Planifest operates on local filesystem artifacts (plan/ files, skill SKILL.md files) written and read during pipeline execution. No databases. New in 0000016 (all plain markdown/YAML, git-tracked): `plan/backlog/` entries (orchestrator-owned, filed by any phase agent), `product.yml` (ship-agent writes, orchestrator reads), and `plan/current/` loop-state/run-log/defect-report/revision-log artifacts (orchestrator-owned).
+No components own persistent data. Planifest operates on local filesystem artifacts (plan/ files, skill SKILL.md files) written and read during pipeline execution. No databases. New in 0000016 (all plain markdown/YAML, git-tracked): `plan/backlog/` entries (orchestrator-owned, filed by any phase agent), `product.yml` (ship-agent writes, orchestrator reads), and `plan/current/` loop-state/run-log/defect-report/revision-log artifacts (orchestrator-owned). New in 0000020 (local, gitignored, not version-tracked): `<tool-dir>/.planifest-setup-flags`, owned by `setup-hook-integration`, written on every successful install and read/updated by `planifest-refresh-setup`.
 
 ---
 
@@ -143,6 +144,11 @@ Reference `docs/decisions-index.md` for the full ADR list.
 - **ADR-001 (0000018):** Unified telemetry gating — `--structured-telemetry-mcp` alone wires telemetry hooks, removing the `--context-mode-mcp` coupling bug
 - **ADR-002 (0000018):** Telemetry failure detection and interactive recovery — durable failure markers plus block-or-proceed prompting, once per distinct root cause per run
 - **ADR-003 (0000018):** discovery.md elevated to Hard Limit status — matches build-log.md's Hard Limit 8 enforcement pattern
+- **ADR-001 (0000020):** Hardcoded, non-extensible deletion allowlist for the refresh skill, enforced in a dedicated script, not prose alone (P5 security finding)
+- **ADR-002 (0000020):** Single marker file (`.planifest-setup-flags`) serves as both install-time record and refresh retry cache, not two separate files
+- **ADR-003 (0000020):** Mandatory human confirmation gate before any refresh action, regardless of flag-reconstruction confidence
+- **ADR-004 (0000020):** Tool selection is explicit input to the refresh skill, never silently auto-resolved when multiple installs are present
+- **ADR-005 (0000020):** No automatic retry on a failed setup re-invocation; retry is always human-initiated
 
 ---
 

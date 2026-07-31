@@ -10,6 +10,7 @@
 - `planifest-framework/templates/standard-boot.md` — source template for generated boot files
 - `external-skills.json` manifest — records installed external skills
 - Claude Code, Cursor, Windsurf, Cline, Codex, OpenCode, Copilot, Antigravity, Roo Code tool targets
+- `<tool-dir>/.planifest-setup-flags` marker write on successful install, in parity between `setup.sh` and `setup.ps1` (0000020)
 
 ## Out of Scope
 
@@ -24,3 +25,4 @@
 - `setup.ps1` skill subcommand routing (TD-006) — add in next iteration
 - `validate_skill_name()` security guard (TD-001/002/003) — add via change-agent
 - Automated test coverage for `skill-sync.sh` operations — future iteration
+- `setup/copilot.sh`/`.ps1` `TOOL_HOOK_ADAPTER_DEST` self-copy bug (crashes `setup.sh copilot` on every run), discovered during 0000020 P5, filed as backlog `0000027`, not fixed in this feature
