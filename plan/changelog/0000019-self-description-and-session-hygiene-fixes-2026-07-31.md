@@ -3,7 +3,7 @@
 **Feature:** Self-Description and Session-Hygiene Fixes
 **Pipeline run:** P0–P9 completed, continuous run authorized at design confirmation; no phases skipped
 **Version:** 0.18.0 → 0.19.0
-**PR:** pending
+**PR:** [#44](https://github.com/planifest/planifest-framework/pull/44)
 
 ## What Was Built
 
