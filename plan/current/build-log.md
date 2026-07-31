@@ -86,4 +86,4 @@ Scope Lock complete. All four scenario paths captured.
 | MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | emitted |
-| Notes | Continuous run mode. |
+| Notes | Continuous run mode. Produced 5 ADRs: ADR-001 (hardcoded deletion allowlist), ADR-002 (single marker file, dual purpose), ADR-003 (mandatory confirmation gate regardless of confidence), ADR-004 (explicit tool selection, not auto-resolved), ADR-005 (no automatic retry on setup failure). All written in a single parallel batch, no cross-references requiring sequential drafting. |
