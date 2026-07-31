@@ -62,13 +62,29 @@ Gate accepted: P0 — 2026-07-31T21:13:00Z (design confirmed: "yes go.")
 | Field | Value |
 |-------|-------|
 | Start | `2026-07-31T21:18:14Z` |
+| End | `2026-07-31T21:22:15Z` |
 | Model tier | primary |
 | Skills loaded | planifest-spec-agent |
 | Agents spawned | `0` |
-| MCP calls | `2` |
+| MCP calls | `3` |
+| Parallel task batches | `2` (8 requirement docs in one batch; scope/risk-register/domain-glossary/execution-plan in a second) |
+| Telemetry | emitted |
+| Notes | 8 requirement docs (req-001..req-008), execution-plan, scope, risk-register, domain-glossary. No OpenAPI spec (no API surface), no component manifest (no src/ component in scope — root-level framework-authoring files only). Pulled in 0000014-0000018's `_reference/` material, folders deleted. 0000027 recorded as already-done, no requirement doc. `continuous_run: true` — proceeding to P2 without a stop-and-confirm gate. |
+
+Gate note: continuous_run active, P1→P2 proceeded without stopping per orchestrator exception rule.
+
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:22:15Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
 | Parallel task batches | `0` |
 | Telemetry | emitted |
-| Notes | Producing requirements set for 9 items, single wave, sequenced 0000018 after 0000014. |
+| Notes | Recording the two decisions worth an ADR: new self-description CI script as a separate script (not extending consistency-check.mjs), and context-pressure telemetry phase mapping. |
 
 ---
 
