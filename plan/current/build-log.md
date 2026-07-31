@@ -115,7 +115,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | TBD |
 | MCP calls | 0 |
 | Parallel task batches | TBD |
-| Notes | Continuous run mode active. 7 requirements; req-002→req-003 have a real dependency (marker format), req-004/006 depend on req-001/002/003/007 being defined (reference their mechanisms). req-004 and req-007 both touch planifest-orchestrator/SKILL.md — must sequence against each other to avoid write conflicts, same lesson as 0000017. |
+| Notes | Continuous run mode active. 7 requirements; req-002→req-003 have a real dependency (marker format), req-004/005/006 depend on req-003 being defined. req-003, req-004, AND req-007 all touch planifest-orchestrator/SKILL.md (3-way conflict risk, worse than 0000017's 2-way case) — must sequence all three against each other. Dispatch plan: batch 1 (background, parallel) req-001 (setup.sh/ps1) + req-002 (3 hook .mjs) — independent files, low risk given 0000017's spend-limit lesson. req-007 → req-003 → req-004 done inline by the orchestrator itself (sequential, same file, needs careful reading between each edit) rather than subagents, to avoid both file-conflict risk and repeat spend-limit interruption risk on the trickiest sequential part. req-005/006 done inline after, independent files. |
 
 ---
 
