@@ -15,5 +15,9 @@ GEMINI.md
 _temp/*
 !_temp/.gitkeep
 
+# Telemetry failure markers (0000018) - may echo user-configured URL/error
+# strings verbatim; never intended to be committed
+plan/.telemetry-failures/
+
 # OS
 .DS_Store

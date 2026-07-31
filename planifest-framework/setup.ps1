@@ -392,7 +392,7 @@ function Merge-TelemetryHookSettings {
 
 function Install-TelemetryHooks {
     # Copy context-pressure hook and wire PostToolUse in settings.json (REQ-008, REQ-010)
-    # Only called when both --structured-telemetry-mcp and --context-mode-mcp are active.
+    # Only called when --structured-telemetry-mcp is active (0000018 req-001).
     param(
         [string]$HooksSrcRel,    # relative to ScriptDir  e.g. hooks/telemetry
         [string]$HooksDirRel,    # relative to ProjectRoot e.g. .claude/hooks/telemetry
@@ -1176,8 +1176,10 @@ function Invoke-PlanifestSetup {
         }
     }
 
-    # Install telemetry hooks only when BOTH flags are active (REQ-010)
-    if ($StructuredTelemetryMcp -and $ContextModeMcp -and
+    # Install telemetry hooks whenever --structured-telemetry-mcp is active (0000018 req-001)
+    # No longer requires --context-mode-mcp — that AND-condition silently left telemetry
+    # hooks unwired for any project passing --structured-telemetry-mcp alone.
+    if ($StructuredTelemetryMcp -and
         $toolConfig.TelemetryHooksSrc -and $toolConfig.TelemetryHooksDir -and $toolConfig.SettingsFile) {
         Install-TelemetryHooks `
             -HooksSrcRel  $toolConfig.TelemetryHooksSrc `

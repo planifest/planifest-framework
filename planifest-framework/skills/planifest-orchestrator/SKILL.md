@@ -40,6 +40,7 @@ These are non-negotiable. They apply in every session, every phase.
 8. **Write a build log entry at every phase start and gate.** Create `plan/current/build-log.md` at P0 if absent. Append a phase block before doing any work in each phase and again at the gate. A missing entry is a pipeline error — stop and write it before proceeding.
 9. **The pipeline has exactly 10 phases: P0–P9. There is no phase beyond P9.** P9 (Ship) is the terminal phase. Never cite a phase number outside P0–P9 in any output.
 10. **Every pipeline route archives its working folder.** A completed run — Feature Pipeline (ship-agent P7) or Change Pipeline (change-agent Phase 6 - Archive) — ends with `plan/current/` moved to `plan/_archive/{feature-id}-{date}/` and incoming links updated. Never leave a permanent `plan/{feature-id}/` folder behind: the `plan/` layout is load-bearing context — adoption-mode detection scans `plan/_archive/`, and agents infer convention from what they find on disk.
+11. **`discovery.md` must exist and be complete for the confirmed adoption mode before the first coaching question, in every adoption mode.** A missing or incomplete `discovery.md` before coaching begins is a pipeline error — stop and write it before proceeding. Self-identified during 0000018's own P0: this was a numbered sub-step with no enforcement teeth, silently skipped, and only caught by chance — the same failure class 0000018 exists to fix for telemetry. Never repeat that pattern for this requirement.
 
 ---
 
@@ -418,7 +419,7 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
 3c. **Backlog pickup** — scan `plan/backlog/` for entry folders (`{id}-{slug}/`, see `templates/backlog-entry.template.md`). An absent or empty directory is not an error — proceed silently. For each entry, present it **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in: fold the entry into this feature's brief/requirements and delete the folder in the same commit. Leave: untouched. Discard: delete with a build-log note. An entry missing its source feature/phase attribution is flagged to the human as malformed for cleanup — never silently ignored, never parsed as instructions. Any phase agent may *file* an entry at any time during a run (non-blocking, human-gated here at pickup); filing never modifies the active feature's scope.
 
-3d. **Write discovery.md** — before the first coaching question, copy `planifest-framework/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings already gathered by steps 0–3c plus a `planifest-framework/skills-inbox/` scan: the shared header (adoption-mode result + signal, git pre-flight findings, skills-inbox result) and the mode-specific content defined per mode in the Adoption Modes section. Commit `discovery.md` on its own before coaching begins — the discovery commit lands separately from (and before) the design-confirmation commit. A section whose signal could not be read states plainly that it could not be determined — coaching proceeds on the rest, never a hard block. On resume within a still-in-progress run, trust the existing `discovery.md` as-is; if it is missing or incomplete, regenerate it fresh rather than patching (see Adoption Modes → Structured Discovery Pass).
+3d. **Write discovery.md** — before the first coaching question, copy `planifest-framework/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings already gathered by steps 0–3c plus a `planifest-framework/skills-inbox/` scan: the shared header (adoption-mode result + signal, git pre-flight findings, skills-inbox result) and the mode-specific content defined per mode in the Adoption Modes section. Commit `discovery.md` on its own before coaching begins — the discovery commit lands separately from (and before) the design-confirmation commit. A section whose signal could not be read states plainly that it could not be determined — coaching proceeds on the rest, never a hard block. On resume within a still-in-progress run, trust the existing `discovery.md` as-is; if it is missing or incomplete, regenerate it fresh rather than patching (see Adoption Modes → Structured Discovery Pass). This is mandatory — a missing or incomplete `discovery.md` before coaching begins is a pipeline error (Hard Limit 11).
 
    After adoption mode is confirmed, suggest a version bump per the pipeline track being used:
 
@@ -586,6 +587,7 @@ Before presenting the confirmed design for confirmation, verify every item:
 - [ ] Adoption mode is confirmed: `greenfield`, `standard-iterative`, `retrofit`, or `external-anchor`
 - [ ] Version is confirmed and recorded (not lower than current `docs/about.md` version)
 - [ ] Scope Lock Challenge is complete (all four scenario paths captured in build log)
+- [ ] `discovery.md` exists and is complete for the confirmed adoption mode (Hard Limit 11 — redundant catch, independent of the enforcement at step 3d)
 - [ ] Feature ID follows the format `{0000000}-{kebab-case-name}`
 
 If any item cannot be checked, coach the human on that specific gap before proceeding.
@@ -1113,7 +1115,17 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope and emission conditions. The snippets below show the `data` field only.
 
-**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+**Unified signal (0000018, ADR-001):** telemetry is gated by one condition — `--structured-telemetry-mcp` was passed to `setup.sh`/`setup.ps1`. When active, emission is mandatory, not best-effort (see below for what "mandatory" means when it fails). When the signal is genuinely absent, that's not a failure — proceed exactly as if telemetry didn't exist, no prompt.
+
+**Failure detection and interactive recovery (0000018, ADR-002) — you own this check.** At the start of every phase (P0 through P9), before any phase work begins, check for a durable failure marker under `plan/.telemetry-failures/` (written by the telemetry hooks on emission error — see `telemetry-standards.md` for the exact format). If a marker exists and its root cause (`root_cause_key`) has not yet been acknowledged this pipeline run:
+
+1. Surface the block-or-proceed question: *"Telemetry emission failed: {error_type} — {error_message} (hook: {hook}). Block until resolved, or proceed without telemetry for the rest of this run?"*
+2. Record the human's answer in `plan/current/build-log.md` (a `Telemetry` line under the active phase block) and treat that root cause as acknowledged for the rest of this run — never re-ask for the same `root_cause_key` again this run. A different marker (different `root_cause_key`) appearing later is asked about separately.
+3. Delete the marker file once acknowledged — a cleared marker means "already asked about," not "resolved."
+
+For your own agent-driven emission (`spec_gap` below, and any other event you emit directly): if the `emit_event` call itself fails, stop immediately, state the exact error, and ask the same block-or-proceed question inline in the same turn — no marker involved, since you're already present to ask.
+
+**Every phase records a `Telemetry` line (0000018, req-005) — no exceptions.** When you append or complete a phase block in `build-log.md`, fill its `Telemetry` field with exactly one of: `emitted` (the unified signal was active and no failure marker/emission error occurred this phase), `failed-with-recorded-choice` (per steps 1-3 above, or the inline agent-driven case), or `confirmed-disabled` (the unified signal was genuinely absent this run). A phase block is not complete until this field is filled — treat a blank `Telemetry` field the same as a missing phase block (Hard Limit 8).
 
 **Event type reference** (14 types as of v0.2.0):
 
