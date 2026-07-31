@@ -147,3 +147,18 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode. Gate A passed (docs/ exists). Gate B: docs update needed, confirmed via continuous-run authorization (not re-asked, per P0 authorization). Updated living docs: component-registry.md, dependency-graph.md, architecture-overview.md, decisions-index.md (no api-index.md, not an API feature). Updated src/setup-hook-integration/docs/: purpose.md, interface-contract.md, scope.md, risk.md, test-coverage.md (new data-contract.md and quirks.md additions were done at P1/P3, referenced here for completeness). No new src/{id} component created (planifest-refresh-setup is a skill under planifest-framework/, not a src/ component, consistent with how other standalone skills are documented). Wrote plan/current/recommendations.md (4 recommendations, 1 tech debt item). Did not write a separate plan/changelog/ iteration-log file at this phase: following the precedent set by the two most recent features (0000018, 0000019), which have no "-iteration-log-" file, only ship-agent's P7 changelog at plan/changelog/{feature-id}-{date}.md; build-log.md serves as this run's audit trail. Drift check: no domain-glossary/code mismatches found; no ADR-contradicting code found; component boundaries match src/ (2 components: context-mode-hooks unchanged, setup-hook-integration updated). No doc_gap events emitted, no gaps found. |
+
+---
+
+### P7 - Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T01:10:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode does not bypass this gate (Hard Limit); presenting full P7/P8/P9 outcome to human before considering shipped. Local Git Only override active, P9 will default to PR-description output, no push, no gh pr create. |

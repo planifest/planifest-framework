@@ -195,7 +195,7 @@ ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema
 
 ### Feature 0000020 - setup-refresh-skill
 
-ADR files: `plan/current/adr/` (this feature has not yet been archived)
+ADR files: [plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/](../plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/)
 
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|
