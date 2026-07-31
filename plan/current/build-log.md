@@ -92,13 +92,14 @@ Gate note: continuous_run active, P1→P2 proceeded without stopping per orchest
 | Field | Value |
 |-------|-------|
 | Start | `2026-07-31T21:23:48Z` |
-| Model tier | primary / cheaper (mixed — see notes) |
+| End | `2026-07-31T21:35:52Z` |
+| Model tier | primary |
 | Skills loaded | planifest-codegen-agent |
-| Agents spawned | `{{count}}` |
-| MCP calls | `{{count}}` |
-| Parallel task batches | `{{count}}` |
+| Agents spawned | `0` (implemented directly — 8 small, mostly-prose/regex requirements; spawning a subagent per item would have been pure process overhead for work this size, a documented deviation from the skill's default parallel-dispatch posture) |
+| MCP calls | `2` |
+| Parallel task batches | `0` (sequential by file-cluster: README+Hard-Limit, then CI/hooks, then self-description-check depending on README, then orchestrator/templates — see notes) |
 | Telemetry | emitted |
-| Notes | Implementing req-001..req-008 per the Skill Map / dependency order (req-005 after req-001). |
+| Notes | Implemented req-001+004 (README), req-002+003 (CI/hooks, with 2 new tests, RED verified against pre-fix hooks then GREEN after), req-005 (new self-description-check.mjs + wiring + 7-assertion test, RED/GREEN verified), req-006+007+008 (orchestrator SKILL.md + 2 templates). Deviation: discovered mid-req-005 that 5 planifest-framework/ folders (scripts, tests, external-skills, migrations, skills-inbox) had no README table row at all — extended req-001's table fix to cover them so the new CI check starts clean; recorded in the commit message and here. component.yml bumped to 0.19.0. Committed after each requirement group (Hard Limit 7) — 5 commits this phase. |
 
 ---
 
