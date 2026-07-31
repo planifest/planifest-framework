@@ -51,7 +51,7 @@ Single wave — all three stories are one cohesive feature (detect → reconstru
 
 | Data Store | Owner Component | Shared With |
 |------------|----------------|-------------|
-| `.claude/.planifest-setup-flags` (marker file, exact name TBD in spec) — doubles as install-time flag record AND the refresh skill's retry cache (holds reconstructed/confirmed flags + last attempted command) | `setup-hook-integration` | read/write by `planifest-refresh-setup` |
+| `.claude/.planifest-setup-flags` — doubles as install-time flag record AND the refresh skill's retry cache (holds reconstructed/confirmed flags + last attempted command) | `setup-hook-integration` | read/write by `planifest-refresh-setup` |
 
 ### Integration Points
 
