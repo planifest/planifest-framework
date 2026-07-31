@@ -161,6 +161,23 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | Continuous run mode active. No new auth/authz surface, no PII/credentials/regulated data (per design.md Architecture Layer). Review focuses on: the failure-marker mechanism (req-002, could it leak sensitive data into `plan/.telemetry-failures/`?), ADR-005 exit-zero preservation, and the removed `--context-mode-mcp` coupling (req-001, any unintended installer permission change). |
+| Finding (Low, Information Disclosure): `plan/.telemetry-failures/*.json` (req-002's marker files) stores `error_message` verbatim, untruncated, and the directory was not in `.gitignore` — a human-supplied `--backend-url` with embedded credentials could leak into git history via a broad `git add`. Fixed inline: added `plan/.telemetry-failures/` to `.gitignore`. Full suite re-verified green after the fix (28/1). Commit 5367353. |
+| Findings (all Low or N/A): path-traversal in marker filenames — not exploitable (fileSlug strips all non-`[a-zA-Z0-9_-]` chars per segment before use); setup.sh gating simplification — no privilege widening, only fixes the original bug; repudiation of block-or-proceed answers — already mitigated by req-003's build-log recording requirement. No Critical/High findings. Full STRIDE table, dependency audit, secrets scan, auth/input/network/IaC sections (all N/A or clean) written to `plan/current/security-report.md`. |
+| P5 COMPLETE — overall risk rating: Low. One finding acted on inline (gitignore fix); two minor recommendations left for docs-agent to note in `recommendations.md`. Continuous run — proceeding to P6 without a stop. |
+
+---
+
+### P6 — Docs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T02:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active. Framework-tooling feature, no `src/{component-id}` — Gate A (docs/ must exist) and per-component artifacts are not applicable in the usual sense; focus is on `planifest-framework/component.yml` version bump, `docs/decisions-index.md` (3 new ADRs), `plan/current/recommendations.md`, and the changelog entry. |
 
 ---
 
