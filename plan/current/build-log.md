@@ -147,7 +147,21 @@ Cycle 1:
 | MCP calls | `2` |
 | Parallel task batches | `0` |
 | Telemetry | emitted |
-| Notes | Updating docs/about.md version, docs/decisions-index.md, docs/component-registry.md as applicable. |
+| End | `2026-07-31T21:44:51Z` |
+| Notes | docs/about.md bumped to 0.19.0. docs/component-registry.md's planifest-framework row updated. docs/decisions-index.md gained the Feature 0000019 section (ADR-001, ADR-002). architecture-overview.md and dependency-graph.md checked for drift, none found, left untouched. recommendations.md produced. Gate B (docs-agent's own confirm-before-proceeding step) handled consistent with continuous_run — assessed and proceeded without an additional stop, same as every other phase gate this run. |
+
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:44:51Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `1` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Archiving plan/current/ to plan/_archive/, writing changelog, then P8 build assessment and P9 ship. |
 
 ---
 
