@@ -69,10 +69,10 @@ assert_contains "halt here and take no further action" "$STEP4" \
 echo ""
 echo "=== req-004: safe boot-file deletion ==="
 
-assert_contains "exactly \`CLAUDE.md\` and \`AGENTS.md\`" "$STEP6" \
-  "req-004: deletion allowlist is exactly CLAUDE.md and AGENTS.md"
-assert_contains "never extended, parameterised, or read from configuration" "$STEP6" \
-  "req-004: allowlist is fixed, non-extensible"
+assert_contains "refresh-delete-boot-files.sh" "$STEP6" \
+  "req-004: deletion runs through the hardcoded refresh-delete-boot-files script"
+assert_contains "cannot be told to delete anything else" "$STEP6" \
+  "req-004: allowlist is fixed, non-extensible in code"
 assert_contains "Never delete \`settings.local.json\`" "$STEP6" \
   "req-004: settings.local.json explicitly excluded"
 
