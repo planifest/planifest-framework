@@ -101,6 +101,21 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | Continuous run mode active. Key decisions requiring ADRs: req-002/003 (hook failure-marker + interactive prompt mechanism — new architecture, security/reliability trade-off), req-001 (setup.sh installer coupling removal — deviates from existing gating), req-007 (discovery.md Hard Limit — constrains future P0 behavior, per risk-register R-005's note that Hard Limit changes get dedicated ADRs elsewhere in this framework). req-004/005/006 assessed as documentation/mechanical, no dedicated ADR expected. |
+| P2 COMPLETE — ADR-001 (unify telemetry gating, remove --context-mode-mcp coupling), ADR-002 (telemetry failure detection and interactive recovery, req-002+003 combined, extends 0000003's ADR-005), ADR-003 (discovery.md elevated to Hard Limit status, extends 0000017's ADR-004). All 3 written in parallel (independent decisions) to plan/current/adr/. Continuous run — proceeding to P3 without a stop. |
+
+---
+
+### P3 — Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T00:30:00Z` |
+| Model tier | primary + cheaper (per Model Tier Decision Table) |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | TBD |
+| MCP calls | 0 |
+| Parallel task batches | TBD |
+| Notes | Continuous run mode active. 7 requirements; req-002→req-003 have a real dependency (marker format), req-004/006 depend on req-001/002/003/007 being defined (reference their mechanisms). req-004 and req-007 both touch planifest-orchestrator/SKILL.md — must sequence against each other to avoid write conflicts, same lesson as 0000017. |
 
 ---
 
