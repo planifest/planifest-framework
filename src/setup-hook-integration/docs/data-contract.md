@@ -23,7 +23,7 @@ version: "0.1.0"
 
 ### `.claude/.planifest-setup-flags`
 
-A single JSON file per repo (not a database table — a local, uncommitted, plain-text marker file). Written by `setup.sh`/`setup.ps1` on successful install (REQ-008), and by the `planifest-refresh-setup` skill before boot-file deletion begins (REQ-009). Read by `planifest-refresh-setup` for flag reconstruction (REQ-002) and cross-session recovery (REQ-010).
+A single JSON file per repo (not a database table, a local, uncommitted, plain-text marker file). Written by `setup.sh`/`setup.ps1` on successful install (REQ-008), and by the `planifest-refresh-setup` skill before boot-file deletion begins (REQ-009). Read by `planifest-refresh-setup` for flag reconstruction (REQ-002) and cross-session recovery (REQ-010).
 
 | Field | Type | Nullable | Default | Constraints |
 |-------|------|----------|---------|------------|
@@ -34,18 +34,18 @@ A single JSON file per repo (not a database table — a local, uncommitted, plai
 | `attemptStatus` | string enum: `completed` \| `pending` | no | `completed` | `completed` after a successful `setup.sh`/`setup.ps1` install write (REQ-008); `pending` after the refresh skill's pre-deletion write (REQ-009), until a subsequent `completed` write from a successful re-invocation (REQ-005) supersedes it |
 | `attemptedCommand` | string | yes | none | Present only when `attemptStatus` is `pending` or when the file was last written by the refresh skill; the exact command REQ-009 recorded and REQ-005/REQ-006 use for re-invocation or reporting |
 
-**Indexes:** not applicable — single-file, single-record store, one per repo.
+**Indexes:** not applicable, single-file, single-record store, one per repo.
 
-**Relationships:** none — this file has no foreign keys or relationships to other data stores. It is read and written entirely within this repo's local filesystem.
+**Relationships:** none, this file has no foreign keys or relationships to other data stores. It is read and written entirely within this repo's local filesystem.
 
 ---
 
 ## Invariants
 
-- The file, when present, always corresponds to the most recent install or refresh attempt for the tool named in `tool` — it is overwritten in place on every write, never appended to
+- The file, when present, always corresponds to the most recent install or refresh attempt for the tool named in `tool`, it is overwritten in place on every write, never appended to
 - `attemptStatus: pending` never persists past a successful `setup.sh`/`setup.ps1` completion; REQ-005 on success writes `attemptStatus: completed` (via the same REQ-008 write path), closing the window REQ-010 detects
-- `attemptedCommand` and `backendUrl`, when absent, mean exactly that (no flag/telemetry backend was in effect) — never inferred or defaulted from other state
-- The file is local, uncommitted repo state (not checked into version control) — it describes *this* repo's current install, not a shared or synced record
+- `attemptedCommand` and `backendUrl`, when absent, mean exactly that (no flag/telemetry backend was in effect), never inferred or defaulted from other state
+- The file is local, uncommitted repo state (not checked into version control), it describes *this* repo's current install, not a shared or synced record
 
 ---
 
@@ -53,7 +53,7 @@ A single JSON file per repo (not a database table — a local, uncommitted, plai
 
 | ID | Version | Description | Status | Destructive |
 |----|---------|------------|--------|------------|
-| M-001 | 0.1.0 | Initial schema — introduced by feature 0000020-setup-refresh-skill | proposed | no |
+| M-001 | 0.1.0 | Initial schema, introduced by feature 0000020-setup-refresh-skill | proposed | no |
 
 ---
 

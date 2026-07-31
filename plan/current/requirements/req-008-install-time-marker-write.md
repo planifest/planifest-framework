@@ -21,7 +21,7 @@ As a framework maintainer, I want `setup.sh`/`setup.ps1` to record the flags use
 
 ## Functional Requirements
 - On a successful `setup.sh` run for a given tool, the script writes (or overwrites) `.claude/.planifest-setup-flags` with the tool name, the full set of flags passed (including `--backend-url` value if `--structured-telemetry-mcp` was used), and a timestamp
-- `setup.ps1` performs the same write, in parity with `setup.sh` — same file, same schema, same field set
+- `setup.ps1` performs the same write, in parity with `setup.sh`, same file, same schema, same field set
 - The write happens only after the rest of setup completes successfully, so a failed install does not leave a marker claiming a flag set that was never actually applied
 - The marker file format is documented (see `src/setup-hook-integration/docs/data-contract.md`) so both scripts and the refresh skill (REQ-002) agree on its schema
 

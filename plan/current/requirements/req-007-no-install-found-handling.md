@@ -20,8 +20,8 @@ As a human on the loop, if I run the refresh skill on a repo with no Planifest i
 ---
 
 ## Functional Requirements
-- If a tool was named (REQ-001) and no install directory/state exists for that tool, the skill reports this and stops — it does not proceed to REQ-002 detection
-- If no tool was named and no install directory exists for any supported tool, the skill reports this and stops, rather than asking "which tool" (that question only applies when at least one install exists — see REQ-001)
+- If a tool was named (REQ-001) and no install directory/state exists for that tool, the skill reports this and stops, it does not proceed to REQ-002 detection
+- If no tool was named and no install directory exists for any supported tool, the skill reports this and stops, rather than asking "which tool" (that question only applies when at least one install exists, see REQ-001)
 - The skill's report in either case states plainly that this is an initial-setup scenario, not a refresh, and that `setup.sh`/`setup.ps1` should be run directly instead
 
 ## Acceptance Criteria

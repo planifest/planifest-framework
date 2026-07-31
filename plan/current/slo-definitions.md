@@ -12,7 +12,7 @@
 
 ## Service Level Objectives
 
-Not applicable — `planifest-refresh-setup` is an on-request, local CLI skill with no uptime, latency, or throughput profile to hold an SLO against. There is no "service" running to measure availability of. The confirmed design's Architecture Layer records this explicitly (latency/availability/scalability: not applicable).
+Not applicable. `planifest-refresh-setup` is an on-request, local CLI skill with no uptime, latency, or throughput profile to hold an SLO against. There is no "service" running to measure availability of. The confirmed design's Architecture Layer records this explicitly (latency/availability/scalability: not applicable).
 
 The execution plan's NFR-001 through NFR-003 (safety, correctness, recoverability) are the meaningful quality bar for this feature; they are enforced as test-traceable acceptance criteria per requirement, not as SLOs with an error budget, since there is no continuous service surface to burn a budget against.
 
@@ -26,7 +26,7 @@ Not applicable, for the same reason.
 
 ## Error Budget Policy
 
-Not applicable — no error budget exists for a CLI skill invoked on request.
+Not applicable, no error budget exists for a CLI skill invoked on request.
 
 ---
 

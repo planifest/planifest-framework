@@ -20,7 +20,7 @@ As a human on the loop, I can have the skill delete only the boot files `setup.s
 ---
 
 ## Functional Requirements
-- The deletion allowlist is hardcoded to exactly `CLAUDE.md` and `AGENTS.md` (whichever exist in the repo) — no other file is ever a candidate for deletion by this skill
+- The deletion allowlist is hardcoded to exactly `CLAUDE.md` and `AGENTS.md` (whichever exist in the repo), no other file is ever a candidate for deletion by this skill
 - `settings.local.json`, `.claude/settings.local.json`, and any other user-owned or tool-local file are never touched by this skill under any circumstance
 - Deletion only happens after REQ-003's confirmation, immediately before the setup script is re-invoked (REQ-005)
 - Before deleting, the skill writes the confirmed flags and the exact command it is about to run to `.claude/.planifest-setup-flags` (see REQ-009) so the action is recoverable if interrupted

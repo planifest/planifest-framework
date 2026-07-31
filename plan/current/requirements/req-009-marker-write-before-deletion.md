@@ -21,7 +21,7 @@ As a human on the loop, if my session or the refresh process is killed between d
 
 ## Functional Requirements
 - Immediately after REQ-003's human confirmation and before REQ-004's deletion, the skill writes the confirmed flag set and the exact command it is about to attempt into `.claude/.planifest-setup-flags`, using the same schema REQ-008 defines
-- This write uses the same file as the install-time marker (REQ-008) — there is no separate cache file
+- This write uses the same file as the install-time marker (REQ-008), there is no separate cache file
 - The write is synchronous and completes before the deletion step begins, so a process killed at any point after this write still has the recoverable state on disk
 
 ## Acceptance Criteria

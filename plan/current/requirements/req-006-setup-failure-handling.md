@@ -20,7 +20,7 @@ As a human on the loop, if the re-invoked setup script fails partway through, I 
 ---
 
 ## Functional Requirements
-- If the re-invoked `setup.sh`/`setup.ps1` exits non-zero or otherwise fails partway through, the skill stops immediately — it does not retry automatically
+- If the re-invoked `setup.sh`/`setup.ps1` exits non-zero or otherwise fails partway through, the skill stops immediately, it does not retry automatically
 - The skill investigates the likely cause available to it (e.g. checks whether the target path reported in the failure is locked, permission-denied, or held by another process) and includes that in its report
 - The skill reports: what the setup script's own output said, which step it reached, and that `CLAUDE.md`/`AGENTS.md` may now be missing pending a successful rerun
 - The skill prints the exact command it attempted as a copyable code block
