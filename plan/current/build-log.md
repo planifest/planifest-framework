@@ -58,3 +58,18 @@ Scope Lock — Cross-session continuity: Risk window is between CLAUDE.md/AGENTS
 
 Scope Lock complete. All four scenario paths captured.
 
+---
+
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T00:07:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode — proceeding without phase-gate stop per P0 authorization. Produced: execution-plan.md, 10 requirement files (req-001 through req-010), scope.md, risk-register.md (4 risks + 2 logged assumptions), domain-glossary.md (8 terms), operational-model.md, slo-definitions.md, cost-model.md (all "not applicable" — local CLI tool, no service surface), and src/setup-hook-integration/docs/data-contract.md for the new `.claude/.planifest-setup-flags` schema. Updated src/setup-hook-integration/component.yml scope/risk/data sections. No OpenAPI spec (not an API feature). No spec_gap — all material gaps resolved during P0 Scope Lock. |
+
