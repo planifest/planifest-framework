@@ -56,11 +56,11 @@ contract:
   breakingChangePolicy: "requires-human-approval"
 
 data:
-  ownsData: false
-  dataContract: "none"
-  tables: []
-  schemaVersion: "0.0.0"
-  migrationPath: "none"
+  ownsData: true
+  dataContract: "src/setup-hook-integration/docs/data-contract.md"
+  tables: [".claude/.planifest-setup-flags"]
+  schemaVersion: "1.0.0"
+  migrationPath: "src/setup-hook-integration/docs/data-contract.md#migration-history"
 
 scope:
   inScope:
@@ -68,9 +68,11 @@ scope:
     - "setup.ps1 changes for --context-mode-mcp flag processing"
     - "setup/claude-code.sh and setup/claude-code.ps1 hook path declarations"
     - "Claude Code only"
+    - "setup.sh/setup.ps1 write .claude/.planifest-setup-flags at install time, in parity (0000020-setup-refresh-skill, REQ-008)"
   outOfScope:
     - "Hook wiring for Cursor, Windsurf, Cline, Antigravity"
     - "Hook uninstall / removal logic"
+    - "General setup.sh/setup.ps1 parity fixes unrelated to the flags-used marker (0000020-setup-refresh-skill)"
   deferred:
     - "Hook wiring for other tools pending hook architecture confirmation"
 
@@ -80,6 +82,7 @@ risk:
     - "settings.json merge may overwrite existing hooks if not implemented carefully (R-005)"
     - "Bash shebang on Windows — chmod/path handling differs (R-004)"
     - "settings.json hook schema assumption may be wrong (R-002)"
+    - "setup.sh/setup.ps1 marker-write addition could drift out of parity between the two scripts (0000020-setup-refresh-skill, R-003)"
 
 quality:
   testCoverage:
