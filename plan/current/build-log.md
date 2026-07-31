@@ -1,8 +1,8 @@
 ---
-title: "Build Log - 0000019-framework-review-fixes"
+title: "Build Log - 0000019-self-description-and-session-hygiene-fixes"
 summary: "Working telemetry file maintained by the orchestrator throughout the pipeline run."
 ---
-# Build Log - 0000019-framework-review-fixes
+# Build Log - 0000019-self-description-and-session-hygiene-fixes
 
 > Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
 > Filed to the archive at P7. Read by the build-assessment-agent at P8.
@@ -11,7 +11,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Field | Value |
 |-------|-------|
-| Feature ID | `0000019-framework-review-fixes` |
+| Feature ID | `0000019-self-description-and-session-hygiene-fixes` |
 | Pipeline start | `2026-07-31T20:49:25Z` |
 | Tool | `Claude Code` |
 | Primary model | `claude-sonnet-5` |

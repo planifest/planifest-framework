@@ -1,8 +1,8 @@
 ---
-title: "Discovery - 0000019-framework-review-fixes"
+title: "Discovery - 0000019-self-description-and-session-hygiene-fixes"
 summary: "Raw P0 discovery-pass findings — what the orchestrator knew before coaching began."
 ---
-# Discovery - 0000019-framework-review-fixes
+# Discovery - 0000019-self-description-and-session-hygiene-fixes
 
 > Created at the start of P0, before the first coaching question, in every adoption mode.
 > Raw findings only — decisions belong in `design.md`, the Q&A audit trail in `build-log.md`.
