@@ -27,12 +27,12 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 |-------|-------|
 | Start | `2026-07-31T22:02:27Z` |
 | Model tier | primary |
-| Skills loaded | planifest-orchestrator |
-| Agents spawned | `0` |
+| Skills loaded | planifest-orchestrator, planifest-scope-lock-agent (x4, subagent) |
+| Agents spawned | `4` |
 | MCP calls | `0` |
-| Parallel task batches | `0` |
+| Parallel task batches | `0` (Scope Lock drafts dispatched sequentially, one item at a time, per planifest-scope-lock-agent's invocation contract) |
 | Telemetry | emitted |
-| Notes | Backlog item 0000013 pickup. Pre-flight: main confirmed up to date by human; branch feat/0000020-setup-refresh-skill created. |
+| Notes | Backlog item 0000013 pickup, folded into feature brief. Pre-flight: main confirmed up to date by human; branch feat/0000020-setup-refresh-skill created. Filed backlog 0000026 (AI writing-tells style guard) mid-session per human request. Run mode: continuous. Design confirmed 01 Aug 2026 @ 12:07 AM BST. |
 
 Pre-flight — git branch: `main` (before checkout). Human confirmed main up to date. Context reset: human chose to proceed without manual `/clear` (no programmatic clear available to the orchestrator).
 
