@@ -1200,6 +1200,48 @@ TOML
   echo "  Done."
 }
 
+# Write the flags-used marker recording what was applied at install time (REQ-008, ADR-002).
+# Called only after a tool's setup completes successfully. set -euo pipefail means a failed
+# setup_tool/opencode.sh call aborts the script before this function is ever reached, satisfying
+# REQ-008's "a failed install does not write the marker" requirement without extra bookkeeping.
+write_setup_flags_marker() {
+  local tool="$1"
+  local tool_dir="$2"
+
+  mkdir -p "$PROJECT_ROOT/$tool_dir"
+  local marker="$PROJECT_ROOT/$tool_dir/.planifest-setup-flags"
+
+  local flags=()
+  [ "$CONTEXT_MODE_MCP" = true ] && flags+=("--context-mode-mcp")
+  [ "$STRUCTURED_TELEMETRY_MCP" = true ] && flags+=("--structured-telemetry-mcp")
+  [ "$INCLUDE_FULL_SKILL_LIBRARY" = true ] && flags+=("--include-full-skill-library")
+  [ "$STRICT_ORCHESTRATOR" = true ] && flags+=("--strict-orchestrator")
+
+  local flags_json="[]"
+  if [ ${#flags[@]} -gt 0 ]; then
+    flags_json=$(printf '"%s",' "${flags[@]}")
+    flags_json="[${flags_json%,}]"
+  fi
+
+  local backend_url_json="null"
+  [ "$STRUCTURED_TELEMETRY_MCP" = true ] && backend_url_json="\"$BACKEND_URL\""
+
+  local written_at
+  written_at="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+
+  cat > "$marker" << MARKER_EOF
+{
+  "tool": "$tool",
+  "flags": $flags_json,
+  "backendUrl": $backend_url_json,
+  "writtenAt": "$written_at",
+  "attemptStatus": "completed"
+}
+MARKER_EOF
+
+  echo "  + $tool_dir/.planifest-setup-flags"
+}
+
 # --- Main ---
 
 # Skill subcommands — delegate to skill-sync.sh and exit immediately (REQ-024)
@@ -1281,8 +1323,12 @@ run_tool_setup() {
   # opencode has its own bespoke setup script (Tier 2: Bun plugin)
   if [ "$t" = "opencode" ]; then
     bash "$SETUP_DIR/opencode.sh"
+    write_setup_flags_marker "$t" ".opencode"
   else
     setup_tool "$t"
+    # TOOL_SKILLS_DIR is set globally by the tool config sourced inside setup_tool
+    # (e.g. ".claude/skills"); its parent is the tool's own config directory (REQ-008).
+    write_setup_flags_marker "$t" "$(dirname "$TOOL_SKILLS_DIR")"
   fi
   # Re-sync external skills after tool setup (REQ-024/REQ-025)
   local sync_script="$SCRIPT_DIR/scripts/skill-sync.sh"
