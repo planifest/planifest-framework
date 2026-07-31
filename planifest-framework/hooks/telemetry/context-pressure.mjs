@@ -163,7 +163,10 @@ try {
     schema_version: "1.0",
     event: "context_pressure",
     session_id: sessionId,
-    phase: "monitoring",
+    // "monitoring" is not a valid envelope `phase` value (see telemetry-standards.md's
+    // enum) — context-pressure is a session-wide check the orchestrator owns
+    // (see backlog 0000012), so it maps to "orchestrator" rather than a phase of its own.
+    phase: "orchestrator",
     agent: "context-pressure-hook",
     tool: "claude-code",
     model: process.env.CLAUDE_API_MODEL ?? "unknown",
