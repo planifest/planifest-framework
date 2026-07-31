@@ -1228,7 +1228,45 @@ function Invoke-PlanifestSetup {
         Write-Host "  + .planifest-manifest ($($installedDirs.Count) entries)"
     }
 
+    # Write the flags-used marker recording what was applied at install time (REQ-008, ADR-002).
+    # Guarded on SkillsDir being present: OpenCode's tool config does not return an object with
+    # a SkillsDir property (pre-existing setup.ps1/opencode gap, out of scope for this feature per
+    # scope.md), so this silently skips there rather than erroring under $ErrorActionPreference = 'Stop'.
+    if ($toolConfig -and $toolConfig.SkillsDir) {
+        $toolDir = Split-Path -Parent $toolConfig.SkillsDir
+        Write-SetupFlagsMarker -ToolName $ToolName -ToolDir $toolDir
+    }
+
     Write-Host "  Done."
+}
+
+# Write the flags-used marker recording what was applied at install time (REQ-008, ADR-002).
+# Called only after a tool's setup completes successfully. $ErrorActionPreference = 'Stop' means
+# a failed Invoke-PlanifestSetup call halts the script before this function is ever reached,
+# satisfying REQ-008's "a failed install does not write the marker" requirement.
+function Write-SetupFlagsMarker {
+    param($ToolName, $ToolDir)
+
+    $targetDir = Join-Path $ProjectRoot $ToolDir
+    New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+    $markerPath = Join-Path $targetDir '.planifest-setup-flags'
+
+    $flags = @()
+    if ($ContextModeMcp) { $flags += '--context-mode-mcp' }
+    if ($StructuredTelemetryMcp) { $flags += '--structured-telemetry-mcp' }
+    if ($IncludeFullSkillLibrary) { $flags += '--include-full-skill-library' }
+    if ($StrictOrchestrator) { $flags += '--strict-orchestrator' }
+
+    $marker = [ordered]@{
+        tool          = $ToolName
+        flags         = $flags
+        backendUrl    = if ($StructuredTelemetryMcp) { $BackendUrl } else { $null }
+        writtenAt     = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+        attemptStatus = 'completed'
+    }
+
+    $marker | ConvertTo-Json -Depth 10 | Set-Content -Path $markerPath -Encoding UTF8
+    Write-Host "  + $ToolDir\.planifest-setup-flags"
 }
 
 # --- Main ---
