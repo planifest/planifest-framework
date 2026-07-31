@@ -3,7 +3,7 @@
 **Feature:** Telemetry Emission Consistency
 **Pipeline run:** P0–P9 completed, continuous run authorized at design confirmation; no phases skipped
 **Version:** 0.17.0 → 0.18.0
-**PR:** TBD — filled in at P9
+**PR:** [#42](https://github.com/planifest/planifest-framework/pull/42)
 
 ## What Was Built
 
