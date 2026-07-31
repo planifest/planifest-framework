@@ -1125,6 +1125,8 @@ See `planifest-framework/standards/telemetry-standards.md` for the full event en
 
 For your own agent-driven emission (`spec_gap` below, and any other event you emit directly): if the `emit_event` call itself fails, stop immediately, state the exact error, and ask the same block-or-proceed question inline in the same turn — no marker involved, since you're already present to ask.
 
+**Every phase records a `Telemetry` line (0000018, req-005) — no exceptions.** When you append or complete a phase block in `build-log.md`, fill its `Telemetry` field with exactly one of: `emitted` (the unified signal was active and no failure marker/emission error occurred this phase), `failed-with-recorded-choice` (per steps 1-3 above, or the inline agent-driven case), or `confirmed-disabled` (the unified signal was genuinely absent this run). A phase block is not complete until this field is filled — treat a blank `Telemetry` field the same as a missing phase block (Hard Limit 8).
+
 **Event type reference** (14 types as of v0.2.0):
 
 | Category | Event | When |
