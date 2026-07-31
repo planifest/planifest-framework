@@ -16,6 +16,14 @@ else
 fi
 MOCK_PORT=19741
 
+# req-002: on emission failure the hook now writes a durable marker under
+# {cwd}/plan/.telemetry-failures/. Run from a scratch cwd (not the repo root)
+# so a forced failure below (dead backend) never writes into this repo's own
+# live plan/ directory.
+ORIG_PWD="$(pwd)"
+SCRATCH_CWD=$(mktemp -d -t planifest_ctxpressure_cwd_XXXXXX)
+cd "$SCRATCH_CWD"
+
 # Write the mock HTTP server to a temp file so it can be run as a plain node process.
 # Using -t flag for mktemp ensures the path lands in the real Windows temp dir on Git Bash.
 MOCK_SETUP_DIR=$(mktemp -d -t planifest_mock_XXXXXX)
@@ -161,4 +169,6 @@ rm -rf "$DEAD_DIR"
 # -----------------------------------------------------------------------
 
 rm -rf "$MOCK_SETUP_DIR"
+cd "$ORIG_PWD"
+rm -rf "$SCRATCH_CWD"
 print_summary
