@@ -23,7 +23,7 @@ jobs:
 
           if [ "$FAST_PATH_COUNT" -gt 0 ] && [ "$FAST_PATH_COUNT" -eq "$TOTAL_COUNT" ]; then
             if echo "$CHANGED_FILES" | grep -q "^src/"; then
-              if ! echo "$CHANGED_FILES" | grep -qE "(component\.json|plan/changelog/)"; then
+              if ! echo "$CHANGED_FILES" | grep -qE "(component\.yml|plan/changelog/)"; then
                 echo "::error title=Planifest Fast Path Violation::Fast Path commits must update component.yml or plan/changelog/."
                 exit 1
               fi
@@ -32,14 +32,30 @@ jobs:
             exit 0
           fi
 
-          # Standard check
+          # Standard check. This is a presence check, not a correspondence
+          # guarantee: it confirms a file under plan/, docs/, or a
+          # component.yml also changed in this diff — it does not verify
+          # that file's content actually corresponds to the src/ change.
           if echo "$CHANGED_FILES" | grep -q "^src/"; then
-            if ! echo "$CHANGED_FILES" | grep -qE "^(plan/|docs/|.*component\.json)"; then
-              echo "::error title=Planifest Strict Violation::Code modified without corresponding updates to plan/, docs/, or component.yml."
+            if ! echo "$CHANGED_FILES" | grep -qE "^(plan/|docs/|.*component\.yml)"; then
+              echo "::error title=Planifest Strict Violation::Code under src/ changed with no plan/, docs/, or component.yml file also touched in this diff. This checks presence only — it does not verify that content corresponds to your change."
               exit 1
             fi
           fi
           echo "✅ Planifest pipeline passed."
+
+  # This job is specific to this repository's own self-description and is
+  # deliberately NOT mirrored into planifest-framework/hooks/planifest.yml
+  # (the copy setup.sh ships to consumer repos) — a consuming repo's README
+  # doesn't have this repository's "## Repository structure" / "## The
+  # framework" sections to validate against. See ADR-001 (feature 0000019).
+  self-description-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify README matches repository structure
+        run: node planifest-framework/scripts/self-description-check.mjs .
 
   validate-telemetry-schema:
     runs-on: ubuntu-latest

@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000018-telemetry-emission-consistency"
-version: "0.18.0"
+feature: "0000019-self-description-and-session-hygiene-fixes"
+version: "0.19.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -141,9 +141,10 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-07-26"
-  # Updated by 0000017 (codegen-agent): promoted 0000016 governance suite
-  # to regression pack; added regression-promotion verification test
+  updatedAt: "2026-07-31"
+  # Updated by 0000019 (codegen-agent): README/CI/hook self-description
+  # accuracy fixes (req-001..005), orchestrator/template session-hygiene
+  # additions (req-006..008), and a telemetry hook fix (0000027)
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"
