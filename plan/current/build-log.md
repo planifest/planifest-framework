@@ -38,6 +38,8 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+Gate accepted: P0 — 2026-07-31T21:13:00Z (design confirmed: "yes go.")
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
@@ -54,6 +56,19 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Notes | `{{free text or "none"}}` |
 
 -->
+
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:18:14Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `0` |
+| MCP calls | `2` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Producing requirements set for 9 items, single wave, sequenced 0000018 after 0000014. |
 
 ---
 
