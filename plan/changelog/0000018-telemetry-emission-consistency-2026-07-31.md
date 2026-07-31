@@ -1,7 +1,7 @@
 # Changelog — 0000018-telemetry-emission-consistency — 31 Jul 2026
 
 **Feature:** Telemetry Emission Consistency
-**Pipeline run:** P0–P6 completed, continuous run authorized at design confirmation; no phases skipped
+**Pipeline run:** P0–P9 completed, continuous run authorized at design confirmation; no phases skipped
 **Version:** 0.17.0 → 0.18.0
 **PR:** TBD — filled in at P9
 
