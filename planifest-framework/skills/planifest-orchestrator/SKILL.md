@@ -1115,7 +1115,15 @@ You do not need to re-run Phase 0 coaching for a change - the requirements alrea
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope and emission conditions. The snippets below show the `data` field only.
 
-**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+**Unified signal (0000018, ADR-001):** telemetry is gated by one condition — `--structured-telemetry-mcp` was passed to `setup.sh`/`setup.ps1`. When active, emission is mandatory, not best-effort (see below for what "mandatory" means when it fails). When the signal is genuinely absent, that's not a failure — proceed exactly as if telemetry didn't exist, no prompt.
+
+**Failure detection and interactive recovery (0000018, ADR-002) — you own this check.** At the start of every phase (P0 through P9), before any phase work begins, check for a durable failure marker under `plan/.telemetry-failures/` (written by the telemetry hooks on emission error — see `telemetry-standards.md` for the exact format). If a marker exists and its root cause (`root_cause_key`) has not yet been acknowledged this pipeline run:
+
+1. Surface the block-or-proceed question: *"Telemetry emission failed: {error_type} — {error_message} (hook: {hook}). Block until resolved, or proceed without telemetry for the rest of this run?"*
+2. Record the human's answer in `plan/current/build-log.md` (a `Telemetry` line under the active phase block) and treat that root cause as acknowledged for the rest of this run — never re-ask for the same `root_cause_key` again this run. A different marker (different `root_cause_key`) appearing later is asked about separately.
+3. Delete the marker file once acknowledged — a cleared marker means "already asked about," not "resolved."
+
+For your own agent-driven emission (`spec_gap` below, and any other event you emit directly): if the `emit_event` call itself fails, stop immediately, state the exact error, and ask the same block-or-proceed question inline in the same turn — no marker involved, since you're already present to ask.
 
 **Event type reference** (14 types as of v0.2.0):
 
