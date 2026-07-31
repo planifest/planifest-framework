@@ -102,3 +102,18 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode. REQ-008 implemented directly (setup.sh/setup.ps1 marker write, generalised to per-tool-directory since REQ-001 established multi-tool support beyond the literal `.claude/` path locked in P0 chat) with live-verified bash tests (21 passing, tests/test-0000020-req-008-install-time-marker-write.sh) and statically-checked PowerShell (no pwsh available in this environment, see src/setup-hook-integration/docs/quirks.md Q-006/Q-007). REQ-001 through REQ-007, REQ-009, REQ-010 implemented as planifest-refresh-setup/SKILL.md (instructional skill content, not executable code, TDD red/green loop not applicable to Markdown skill authoring, same treatment as spec-agent/adr-agent output). Deviation emitted: design.md's Component Paths incorrectly listed .claude/skills/ as tracked (it is gitignored in this repo); corrected, see deviation event a49b975b-4ede-4f8c-86a4-26debcde1db7. Missed P0 step 5 (orchestrator-strict ack) caught and written late this phase, plan/.orchestrator-ack now present. |
+
+---
+
+### P4 - Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T00:50:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode. Semantic coverage: REQ-008 covered by 21 live-invocation assertions (test-0000020-req-008-install-time-marker-write.sh, parts a-e). REQ-001 through REQ-007, REQ-009, REQ-010 covered by 34 structural assertions over SKILL.md content (test-0000020-req-001-010-refresh-setup-skill.sh), the established pattern for skill-content requirements in this repo. Self-correct cycle 1: initial structural test had 3 failing assertions (literal-substring mismatches against markdown bold syntax and a mistaken belief that `.` matched any character in assert_contains, which is a plain substring check, not regex); fixed the needle text to match actual SKILL.md content and reran, all 34 passed. Full suite: bash planifest-framework/tests/run-tests.sh, 32 feature suites + 1 regression suite, 97+ assertions, 0 failures, no regressions from this feature's changes. bash -n syntax check clean on setup.sh; setup.ps1 checked statically only (no pwsh runtime, Q-006). Build: not applicable (no compiled artifact, shell/PowerShell/Markdown only). |
