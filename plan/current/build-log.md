@@ -125,6 +125,23 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | req-002 self-correct 2: test's "repeat failure" and "distinct root cause" scenarios reused the same `session_id` across supposedly-separate invocations. Root cause: `emit-phase-start.mjs`'s PRE-EXISTING dedup guard (ADR-003, 0000009-era) writes its flag unconditionally BEFORE attempting emission, keyed by session_id+phase — a second call with the same session_id+phase always short-circuits at the guard, never reaching the failure/marker-write path regardless of outcome. This is correct, intentional behavior the test's construction didn't account for, not a marker-mechanism bug. Fixed by using distinct session_ids per "repeat" call in the test. |
 | req-002 self-correct 3: even after fix 2, repeated invocations of the test FILE ITSELF (not within one run) were flaky — traced to `getFlagPath()` storing the dedup flag in the SYSTEM-WIDE temp directory (`os.tmpdir()/planifest-telemetry/`), not scoped to the test's own scratch cwd. Fixed session_ids (e.g. "sess-a") were colliding with flags left behind by a PRIOR run of the same test file, silently short-circuiting every subsequent run after the first. Fixed by adding a `RUN_ID` (PID + nanosecond timestamp) suffix to every session_id in the test, making each test execution collision-free against its own prior runs. Verified stable across 8 consecutive repeated runs (35/35 every time) after the fix, vs. ~50% failure rate before. Also hardened the mock-500-server port to be PID-derived rather than fixed, as defense-in-depth against port reuse. |
 | req-002 COMPLETE: marker format confirmed — JSON at `plan/.telemetry-failures/<hook>--<error_type>--<slug>.json` with fields `hook, root_cause_key, error_type, error_message, phase, session_id, first_seen, last_seen, occurrences`. Marker write is best-effort (never throws), ADR-005 exit-zero/never-block preserved exactly. 35/35 own assertions, full suite green (25 feature + 1 regression). Commit d01aad6. This marker format is load-bearing for req-003 (built next). |
+| req-003 COMPLETE (inline): `planifest-orchestrator/SKILL.md` telemetry section rewritten with "Unified signal (0000018, ADR-001)" and "Failure detection and interactive recovery (0000018, ADR-002)" subsections — orchestrator now checks `plan/.telemetry-failures/` markers from req-002, asks the exact block-or-proceed question once per distinct root cause per run, and records the answer in build-log.md so the same failure is never re-asked. 9/9 own assertions, full suite green. Commit 221139e. |
+| req-004 COMPLETE (inline): rewrote the Telemetry section's Emission gate line identically across the remaining 7 phase skills (`planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-change-agent`, `planifest-security-agent`, `planifest-docs-agent`) plus updated the shared `test-skill-telemetry.sh` to assert the new language instead of the old soft-skip framing. New test: 32/32. Shared test: all skills green. Commit b290037. **Scope-spec correction:** req-004's original requirement doc named `planifest-ship-agent` as the 8th affected skill; verification at implementation time showed `ship-agent` never had a local gate line (it already deferred fully to `telemetry-standards.md`), so the real 8th skill is `planifest-change-agent`. Corrected `plan/current/requirements/req-004-phase-skill-telemetry-rewrite.md` to reflect this (Hard Limit 7 — docs must match reality after a deviation). Commit 60517c9. |
+| P3 COMPLETE — all 7 requirements shipped: req-001 (setup.sh/ps1 gating unification), req-002 (hook failure markers), req-003 (orchestrator marker-check-and-prompt), req-004 (7 remaining phase skills rewritten), req-005 (build-log template field), req-006 (telemetry-standards.md v2.0.0), req-007 (discovery.md Hard Limit 11). Full suite green (27 feature suites + 1 regression) at time of req-004's commit. One scope-spec correction logged (req-004, ship-agent→change-agent). Continuous run — proceeding to P4 without a stop. |
+
+---
+
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T01:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active. Full test suite already confirmed green as of req-004's commit (b290037) — 27 feature suites + 1 regression. This phase re-runs and confirms CI-equivalent validation across all 7 requirements' combined changes before proceeding to Security. |
 
 ---
 
