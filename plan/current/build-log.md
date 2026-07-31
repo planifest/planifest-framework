@@ -75,6 +75,20 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ---
 
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T00:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active — no per-phase stop required. Producing Execution Plan, Scope, Risk Register, Domain Glossary for the 7 confirmed items from design.md. No OpenAPI spec — no API surface in this release. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
