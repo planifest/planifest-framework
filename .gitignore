@@ -11,6 +11,13 @@ CLAUDE.md
 AGENTS.md
 GEMINI.md
 
+# Flags-used marker (0000020) - local per-tool install state, not source. Matches
+# at any depth (e.g. .claude/.planifest-setup-flags, .github/.planifest-setup-flags)
+# since most tool directories above are gitignored wholesale but .github/skills/
+# and .opencode/ are narrower/absent patterns that would otherwise let this
+# specific file slip through untracked-but-not-ignored.
+.planifest-setup-flags
+
 # Temporary local dirs
 _temp/*
 !_temp/.gitkeep
