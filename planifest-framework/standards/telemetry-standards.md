@@ -1,6 +1,6 @@
 ---
 title: "Telemetry Standards"
-version: "1.0.0"
+version: "2.0.0"
 ---
 # Telemetry Standards
 
@@ -8,12 +8,46 @@ Shared telemetry rules for all Planifest skills that emit events via `emit_event
 
 ---
 
-## Emission Gate
+## Unified Telemetry Signal (0000018, ADR-001)
 
-**Emission is mandatory when both conditions are met. If either condition fails, skip silently — do not emit.**
+Telemetry is gated by a single condition: `--structured-telemetry-mcp` was passed to `setup.sh`/`setup.ps1`. This one flag is now sufficient on its own to:
 
-1. `emit_event` tool is present in this session.
-2. `.claude/telemetry-enabled` exists in the project root.
+1. Write the `.claude/telemetry-enabled` sentinel (gates agent-driven `emit_event` calls)
+2. Wire the telemetry hooks in `.claude/settings.json` with the backend URL embedded (gates hook-driven `phase_start`/`phase_end`/`context_pressure` posts)
+
+Prior to 0000018, hook wiring additionally required `--context-mode-mcp` to also be passed — an unrelated, accidental coupling that silently left `phase_start`/`phase_end` unwired for any project passing `--structured-telemetry-mcp` alone. That coupling is removed. The two mechanisms remain technically distinct (a sentinel file vs. a URL embedded in each hook's command), but they are now always set together by the same flag — never independently.
+
+**`emit_event` tool availability** is a separate, second condition for agent-driven calls specifically: the tool must be loaded/callable in the current session. Hook-driven emission has no equivalent "tool availability" condition — it posts directly via HTTP from the hook subprocess.
+
+---
+
+## Emission is Mandatory When Enabled — Failure is Never Silent (0000018, ADR-002)
+
+When the unified signal (above) is active, emission is mandatory, not best-effort. A failure to emit is never silently skipped — see "Failure Detection and Interactive Recovery" below for what happens instead. When the unified signal is genuinely absent (telemetry not enabled for this project), that is not a failure — no prompt, no marker, pipeline proceeds exactly as if telemetry didn't exist.
+
+---
+
+## Failure Detection and Interactive Recovery (0000018, ADR-002)
+
+Telemetry emission fails in two structurally different ways, handled differently:
+
+**Hook-driven emission** (`emit-phase-start.mjs`, `emit-phase-end.mjs`, `context-pressure.mjs`) stays fire-and-forget and exit-zero (ADR-005, 0000003 — hooks must never block the session or exit non-zero, regardless of emission outcome). On failure, the hook writes a durable failure marker recording the root cause (hook name + error identity) instead of swallowing the error. The marker write itself is also best-effort — its failure never causes the hook to throw or block either. The orchestrator checks for this marker at every phase-start checkpoint; if present and not yet acknowledged this run, it surfaces the block-or-proceed question (below) once for that root cause, then clears the marker.
+
+**Agent-driven emission** (`emit_event` calls made inline by a phase skill for `adr_decision`, `security_finding`, `self_correction`, `deviation`, `spec_gap`, `doc_gap`, `validation_failure`, `retry_limit_exceeded`) happens live in conversation. On failure, the calling skill stops immediately, states the exact error, and asks the block-or-proceed question inline in the same turn — no marker needed.
+
+**The block-or-proceed question**, either path: *"Telemetry emission failed: {error}. Block until resolved, or proceed without telemetry for the rest of this run?"* The human's answer is recorded in `plan/current/build-log.md` and honored for the rest of the pipeline run — the same root cause is never asked about twice in one run. A genuinely different, new root cause occurring later in the same run is asked about again, independently.
+
+---
+
+## Build Log Telemetry Record (0000018, ADR-002)
+
+Every phase's `build-log.md` block includes a `Telemetry` field recording one of: `emitted` (successful), `failed-with-recorded-choice` (a failure occurred, the human answered, recorded), or `confirmed-disabled` (the unified signal was genuinely absent — not a failure). This is the self-auditing trail: a human or the build-assessment-agent (P8) can verify, for any archived feature, that telemetry was never silently skipped.
+
+---
+
+## Emission Gate (Tool Availability, Agent-Driven Only)
+
+For agent-driven `emit_event` calls specifically: the tool must be present/loaded in the current session. If it is not (and the unified signal above is active), that is a failure per "Failure Detection and Interactive Recovery" above — not a silent skip.
 
 ---
 
