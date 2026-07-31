@@ -78,13 +78,27 @@ Gate note: continuous_run active, P1→P2 proceeded without stopping per orchest
 | Field | Value |
 |-------|-------|
 | Start | `2026-07-31T21:22:15Z` |
+| End | `2026-07-31T21:23:48Z` |
 | Model tier | primary |
 | Skills loaded | planifest-adr-agent |
 | Agents spawned | `0` |
-| MCP calls | `0` |
-| Parallel task batches | `0` |
+| MCP calls | `4` |
+| Parallel task batches | `1` (ADR-001, ADR-002 written together, no cross-reference) |
 | Telemetry | emitted |
-| Notes | Recording the two decisions worth an ADR: new self-description CI script as a separate script (not extending consistency-check.mjs), and context-pressure telemetry phase mapping. |
+| Notes | ADR-001: self-description CI check as separate script. ADR-002: context-pressure phase mapping. No ADR manufactured for the other 6 wording/regex-only requirements — correctly judged not to meet the ADR threshold. |
+
+### P3 — Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:23:48Z` |
+| Model tier | primary / cheaper (mixed — see notes) |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | emitted |
+| Notes | Implementing req-001..req-008 per the Skill Map / dependency order (req-005 after req-001). |
 
 ---
 
