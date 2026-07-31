@@ -161,7 +161,35 @@ Cycle 1:
 | MCP calls | `1` |
 | Parallel task batches | `0` |
 | Telemetry | emitted |
-| Notes | Archiving plan/current/ to plan/_archive/, writing changelog, then P8 build assessment and P9 ship. |
+| End | `2026-07-31T21:48:08Z` |
+| Notes | Archived to plan/_archive/0000019-self-description-and-session-hygiene-fixes-2026-07-31/. Changelog + test report written. No regression candidates tagged. Cross-reference check found no stale plan/current links in docs/ or src/*/docs/ (only generic prose mentions). One stray empty directory (plan/current/external-skills/, untracked, harmless — likely incidental tooling scratch) found and removed before archiving, not a real artifact. |
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:48:08Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent (sub-agent) |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| End | `2026-07-31T21:50:28Z` |
+| Notes | build-report.md filed. Findings: model routing optimal, parallelism applied correctly where independent, MCP usage systematic, 1 self-correction (test-bug, not spec/codegen defect), all phase gates enforced, no accountability gaps. Pipeline risk level: Low. |
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:50:28Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Creating git tag v0.19.0, confirming push/PR path with the human. |
 
 ---
 
