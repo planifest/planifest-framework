@@ -1,6 +1,6 @@
 # Dependency Graph
 
-**Last updated:** 0000017-ratchet-forgery-detection-and-telemetry-schema-spec (26 Jul 2026 — context-mode hooks ported to `.mjs`, `jq`/`awk`/`grep` runtime deps removed)
+**Last updated:** 0000020-setup-refresh-skill (01 Aug 2026, added planifest-refresh-setup skill and its dependency on setup-hook-integration's flags-used marker file)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -33,6 +33,12 @@ graph TD
     subgraph "setup-hook-integration (component-pack)"
         SH["setup.sh / setup.ps1"]
         SKS["skill-sync.sh"]
+        MARKER[".planifest-setup-flags\n(per tool dir)"]
+    end
+
+    subgraph "planifest-refresh-setup (skill, 0000020)"
+        RS["planifest-refresh-setup/SKILL.md"]
+        DEL["refresh-delete-boot-files.sh/.ps1"]
     end
 
     subgraph "System Tools (runtime deps)"
@@ -67,6 +73,11 @@ graph TD
     BG --- NODE
     BB --- NODE
     BW --- NODE
+
+    SH -->|"writes on successful install"| MARKER
+    RS -->|"reads (reconstruction) and writes (pre-deletion cache)"| MARKER
+    RS -->|"invokes"| DEL
+    RS -->|"re-invokes with confirmed flags"| SH
 ```
 
 ---
@@ -79,6 +90,7 @@ graph TD
 - `setup-hook-integration` → `context-mode-hooks`: installer reads from `planifest-framework/hooks/context-mode/` and copies to target project. One-way.
 - `setup-hook-integration` → `planifest-framework`: `setup.sh`/`setup.ps1` are the sole distribution mechanism — they copy `skills/`, `hooks/enforcement/`, `templates/`, and `standards/` into whichever directory the target agentic tool auto-discovers. One-way; `planifest-framework` has no dependency back on `setup-hook-integration`.
 - `planifest-framework`'s `hooks/enforcement/` → Claude Code's PreToolUse hook runner: `gate-write.mjs` and `ratchet-check.mjs` are invoked on every Write/Edit; `ratchet-check.mjs` additionally reads `plan/current/loop-state-*.md` (not shown — not a component, a runtime artifact) to decide whether it is armed.
+- `planifest-refresh-setup` (0000020) -> `setup-hook-integration`: two-way relationship via the `.planifest-setup-flags` marker file. `setup.sh`/`setup.ps1` write it on every successful install (producer); the refresh skill reads it for reconstruction and writes to it again before deletion (consumer and secondary writer of the same file, ADR-002). The refresh skill also re-invokes `setup.sh`/`setup.ps1` directly once flags are confirmed, and calls `refresh-delete-boot-files.sh`/`.ps1` (its own hardcoded deletion script, not a dependency on `setup-hook-integration`).
 
 ---
 
