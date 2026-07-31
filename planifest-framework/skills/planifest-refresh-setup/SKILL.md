@@ -119,7 +119,9 @@ This is the same file `setup.sh`/`setup.ps1` write to on successful completion (
 
 ## Step 6 - Delete the Boot Files (REQ-004, ADR-001)
 
-Delete exactly `CLAUDE.md` and `AGENTS.md` (whichever exist in the repo root) - this list is fixed and is never extended, parameterised, or read from configuration. Never delete `settings.local.json`, `.claude/settings.local.json`, or any other file, under any circumstance, regardless of what the flag reconstruction or human confirmation contained.
+Run `bash planifest-framework/scripts/refresh-delete-boot-files.sh` (or `planifest-framework/scripts/refresh-delete-boot-files.ps1` on Windows) from the repo root. Do not delete files directly (e.g. with a freeform `rm` command) - always invoke this script.
+
+The script hardcodes the exact allowlist (`CLAUDE.md`, `AGENTS.md`) in code, not in this skill's prose. This closes a gap identified in this feature's own security review: a deletion boundary described only in instructions has no deterministic backstop against agent error or a maliciously crafted repo file, the way `gate-write.mjs` backs the framework's write-scope guarantee for Write/Edit. The script takes no arguments and cannot be told to delete anything else. Never delete `settings.local.json`, `.claude/settings.local.json`, or any other file, under any circumstance, regardless of what the flag reconstruction or human confirmation contained.
 
 ---
 
