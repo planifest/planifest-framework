@@ -1,8 +1,8 @@
 ---
-title: "Build Log - pending"
+title: "Build Log - 0000018-telemetry-emission-consistency"
 summary: "Working telemetry file maintained by the orchestrator throughout the pipeline run."
 ---
-# Build Log - pending
+# Build Log - 0000018-telemetry-emission-consistency
 
 > Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
 > Filed to the archive at P7. Read by the build-assessment-agent at P8.
@@ -11,7 +11,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Field | Value |
 |-------|-------|
-| Feature ID | `pending` |
+| Feature ID | `0000018-telemetry-emission-consistency` |
 | Pipeline start | `2026-07-26T22:00:00Z` |
 | Tool | `Claude Code` |
 | Primary model | `claude-sonnet-5` |
@@ -50,6 +50,9 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | P0 exchange — sync-drift recurrence: one drafting subagent found `.claude/skills/planifest-scope-lock-agent/SKILL.md` missing (only `planifest-framework/skills/...` existed) — same local `.claude/` staleness class as 0000017 (gitignored, doesn't sync via git, needs `setup.sh` re-run per session/environment). Re-ran `setup.sh claude-code --context-mode-mcp --structured-telemetry-mcp`; confirmed fixed. Noted as a recurring pain point, not folded into this feature's scope. |
 | P0 exchange — first-run flag investigation: Q: how would a legacy single-signal state actually have arisen? / A: investigated setup.sh directly. Neither signal is a real persistent env var — `.claude/telemetry-enabled` is written whenever `--structured-telemetry-mcp` is passed, regardless of `--context-mode-mcp`; `PLANIFEST_TELEMETRY_URL` is embedded per-hook into the command string in `.claude/settings.json`, written only when BOTH `--structured-telemetry-mcp` AND `--context-mode-mcp` are passed together (existing REQ-010 gate). Confirmed via direct read of `.claude/settings.json`'s actual wired command and `setup.sh`'s `BACKEND_URL`/flag-parsing code. The only realistic legacy state: `--structured-telemetry-mcp` passed alone → sentinel written, hooks never wired, no URL, indefinitely, with no way to notice. The reverse (hooks wired, no sentinel) cannot happen — same flag gates both. This also corrected this session's own earlier 0000018 diagnosis: checking `PLANIFEST_TELEMETRY_URL` in the interactive shell was the wrong check — it isn't a shell variable, it's embedded per-hook in `settings.json`. |
 | P0 exchange — first-run flag resolution: Q: should a migration path be built for legacy single-signal projects? / A: no practical legacy user base exists (human confirmed: no other real installations, effectively zero external users) — no migration/detection mechanism needed. The actual fix is narrower than originally scoped: remove the `--context-mode-mcp` coupling from hook installation entirely — `--structured-telemetry-mcp` alone is sufficient to wire the hooks. CONFIRMED. This resolves the first-run flag; no unstated migration rule remains. |
+| Scope Lock Challenge — all 4 items EXPLICITLY CONFIRMED by human ("Ok so all good"): happy path, first-run path (flag resolved above), error path, cross-session path. This gate is closed. |
+| P0 exchange — self-audit finding, discovery.md skipped: while writing design.md, noticed `plan/current/discovery.md` (0000017 req-006's own Hard-Limit-adjacent requirement) was never created for this pipeline run's own P0. Root cause: it's step "3d" in `planifest-orchestrator/SKILL.md`'s Phase 0 Start Actions numbered list, with no enforcement teeth — unlike build-log.md, which is Hard Limit 8 (stated prominently, "a missing entry is a pipeline error — stop and write it before proceeding"). Same failure class as this feature's own core problem: a correctly-written requirement with no enforcement, silently skipped, unnoticed until self-caught. Backfilled `discovery.md` retroactively from the same signals it should have captured at P0 start (no coaching content lost — build-log.md already captured the full Q&A incrementally). |
+| P0 exchange — fix scope: Q: elevate to Hard Limit (option 2) and fold into this release, updating all current 0000018 docs to incorporate it? / A: yes to both. CONFIRMED. Added as US-003/AC9/REQ-007: elevate discovery.md to Hard Limit status in planifest-orchestrator/SKILL.md — new Hard Limit entry (matching build-log.md's Hard Limit 8 pattern), Phase 0 Start Actions step 3d text updated to reference it, new Phase 0 → Phase 1 Gate Checklist item added as a redundant catch. design.md updated: US-003 added, AC9 added, scope In: list updated, Skill Map REQ-007 added. |
 
 ---
 
