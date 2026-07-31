@@ -140,7 +140,11 @@ if [ -f "$RECEIVED_FILE" ]; then
   assert_contains '"threshold_exceeded"'  "$BODY" "REQ-008: trigger is threshold_exceeded"
   assert_contains '"unused_sources"'      "$BODY" "REQ-008: data includes unused_sources"
   assert_contains "$UUID"                 "$BODY" "REQ-008: session_id extracted from transcript UUID"
-  assert_contains '"monitoring"'          "$BODY" "REQ-008: phase is monitoring"
+  # phase: "orchestrator" (0000019, ADR-002) — "monitoring" was never a valid
+  # envelope `phase` enum value; every emission failed with HTTP 400 until
+  # this was fixed. See ADR-002 for why "orchestrator" is the correct value,
+  # not merely a schema-legal one.
+  assert_contains '"orchestrator"'        "$BODY" "REQ-008: phase is orchestrator (0000019 fix — was invalid \"monitoring\")"
 else
   echo "  FAIL: mock server did not receive a request within timeout"
   ((FAIL++)) || true
