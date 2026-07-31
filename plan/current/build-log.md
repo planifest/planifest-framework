@@ -86,6 +86,21 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | Continuous run mode active — no per-phase stop required. Producing Execution Plan, Scope, Risk Register, Domain Glossary for the 7 confirmed items from design.md. No OpenAPI spec — no API surface in this release. |
+| P1 COMPLETE — artifacts produced: 7 requirement files (req-001..007), execution-plan.md, scope.md, risk-register.md (5 risks + 2 logged assumptions), domain-glossary.md (9 terms), operational-model.md, slo-definitions.md, cost-model.md (framework-tooling convention, quality-of-governance NFRs). Continuous run — proceeding to P2 without a stop. |
+
+---
+
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T00:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active. Key decisions requiring ADRs: req-002/003 (hook failure-marker + interactive prompt mechanism — new architecture, security/reliability trade-off), req-001 (setup.sh installer coupling removal — deviates from existing gating), req-007 (discovery.md Hard Limit — constrains future P0 behavior, per risk-register R-005's note that Hard Limit changes get dedicated ADRs elsewhere in this framework). req-004/005/006 assessed as documentation/mechanical, no dedicated ADR expected. |
 
 ---
 
