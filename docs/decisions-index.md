@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000017-ratchet-forgery-detection-and-telemetry-schema-spec
+Last updated: 0000018-telemetry-emission-consistency
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -177,6 +177,14 @@ ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema
 | ADR-002 | Cross-Platform Hook Runtime Unification (.sh → .mjs) | accepted | The 3 context-mode hooks become `.mjs` (Node-only) — removes `jq` and the Git Bash/WSL requirement entirely; missing Node surfaces a message at setup and runtime while failing open |
 | ADR-003 | Scope Lock Suggested Answers via On-Demand Subagent | accepted | The orchestrator always offers "want me to suggest an answer?" at each Scope Lock question but only dispatches `planifest-scope-lock-agent` on explicit request; drafts are usage-only, consistency-checked, flagged, and never self-confirming |
 | ADR-004 | Structured P0 Discovery Pass and discovery.md Lifecycle | accepted | Every adoption mode runs a structured discovery pass before coaching, writing to `plan/current/discovery.md` — fresh each run, archived at P7; partial failures noted inline, never a hard block |
+
+### Feature 0000018 — telemetry-emission-consistency
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Unify Telemetry Gating by Removing the --context-mode-mcp Coupling | accepted | Removes the `--context-mode-mcp` AND-condition from telemetry hook installation — `--structured-telemetry-mcp` alone becomes sufficient, closing the exact gap that caused 0000017's telemetry loss |
+| ADR-002 | Telemetry Failure Detection and Interactive Recovery | accepted | Hook-driven emission stays fire-and-forget (ADR-005, 0000003, unchanged) but now writes a durable failure marker on error, checked by the orchestrator at phase-start checkpoints; agent-driven emission stops and asks immediately inline. Human is asked once per distinct root cause per run |
+| ADR-003 | discovery.md Elevated to Hard Limit Status | accepted | discovery.md's existence-and-completeness requirement elevated to Hard Limit status, matching build-log.md's Hard Limit 8 pattern — a self-audit finding from this feature's own P0 |
 
 ---
 

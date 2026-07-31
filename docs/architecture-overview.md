@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000017-ratchet-forgery-detection-and-telemetry-schema-spec
+Last updated: 0000018-telemetry-emission-consistency
 
 ---
 
@@ -102,6 +102,19 @@ Shared mechanics (state file, append-only run log, stop rules, escalation format
 
 ---
 
+## Telemetry (0000018)
+
+Telemetry emission is gated by one unified signal — `--structured-telemetry-mcp` passed to `setup.sh`/`setup.ps1` — which alone wires the 3 hook-driven emitters (`hooks/telemetry/emit-phase-start.mjs`, `emit-phase-end.mjs`, `context-pressure.mjs`) and writes the `.claude/telemetry-enabled` sentinel that agent-driven `emit_event` calls check. Prior to 0000018, hook installation additionally required `--context-mode-mcp`, an unrelated AND-condition that silently left telemetry unwired for any project passing `--structured-telemetry-mcp` alone (root cause of 0000017's fully-silent telemetry run).
+
+When the signal is active, emission is mandatory, not best-effort:
+- **Hook-driven failures** stay fire-and-forget (ADR-005, 0000003, unchanged — never blocks the session) but now write a durable JSON marker to `plan/.telemetry-failures/<hook>--<error_type>--<slug>.json` instead of swallowing the error with no trace.
+- **`planifest-orchestrator`** checks for markers at the start of every phase (P0–P9) and surfaces a block-or-proceed question to the human once per distinct root cause per run, recording the answer as a `Telemetry` field in the active `build-log.md` phase block.
+- **Agent-driven failures** (any phase skill's direct `emit_event` call) stop and ask the same question inline, in the same turn — no marker involved.
+
+Full protocol and event envelope: `planifest-framework/standards/telemetry-standards.md`.
+
+---
+
 ## Data Ownership
 
 No components own persistent data. Planifest operates on local filesystem artifacts (plan/ files, skill SKILL.md files) written and read during pipeline execution. No databases. New in 0000016 (all plain markdown/YAML, git-tracked): `plan/backlog/` entries (orchestrator-owned, filed by any phase agent), `product.yml` (ship-agent writes, orchestrator reads), and `plan/current/` loop-state/run-log/defect-report/revision-log artifacts (orchestrator-owned).
@@ -127,6 +140,9 @@ Reference `docs/decisions-index.md` for the full ADR list.
 - **ADR-002 (0000003):** Common envelope shape — all adapters normalise to `{ session_id, cwd, tool_input, event }` before delegating
 - **ADR-005 (0000003):** Exit-zero failure mode — hooks never block on unexpected errors (NFR-003)
 - **ADR-003 (0000011):** Hook adapter architecture — delegating pattern; adapters translate envelopes, enforcement logic lives only in shared scripts
+- **ADR-001 (0000018):** Unified telemetry gating — `--structured-telemetry-mcp` alone wires telemetry hooks, removing the `--context-mode-mcp` coupling bug
+- **ADR-002 (0000018):** Telemetry failure detection and interactive recovery — durable failure markers plus block-or-proceed prompting, once per distinct root cause per run
+- **ADR-003 (0000018):** discovery.md elevated to Hard Limit status — matches build-log.md's Hard Limit 8 enforcement pattern
 
 ---
 
