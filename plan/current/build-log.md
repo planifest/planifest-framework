@@ -87,3 +87,18 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode. Produced 5 ADRs: ADR-001 (hardcoded deletion allowlist), ADR-002 (single marker file, dual purpose), ADR-003 (mandatory confirmation gate regardless of confidence), ADR-004 (explicit tool selection, not auto-resolved), ADR-005 (no automatic retry on setup failure). All written in a single parallel batch, no cross-references requiring sequential drafting. |
+
+---
+
+### P3 - Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T00:36:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `0` |
+| MCP calls | `1` (deviation event) |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode. REQ-008 implemented directly (setup.sh/setup.ps1 marker write, generalised to per-tool-directory since REQ-001 established multi-tool support beyond the literal `.claude/` path locked in P0 chat) with live-verified bash tests (21 passing, tests/test-0000020-req-008-install-time-marker-write.sh) and statically-checked PowerShell (no pwsh available in this environment, see src/setup-hook-integration/docs/quirks.md Q-006/Q-007). REQ-001 through REQ-007, REQ-009, REQ-010 implemented as planifest-refresh-setup/SKILL.md (instructional skill content, not executable code, TDD red/green loop not applicable to Markdown skill authoring, same treatment as spec-agent/adr-agent output). Deviation emitted: design.md's Component Paths incorrectly listed .claude/skills/ as tracked (it is gitignored in this repo); corrected, see deviation event a49b975b-4ede-4f8c-86a4-26debcde1db7. Missed P0 step 5 (orchestrator-strict ack) caught and written late this phase, plan/.orchestrator-ack now present. |
