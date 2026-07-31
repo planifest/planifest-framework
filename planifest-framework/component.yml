@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000019-self-description-and-session-hygiene-fixes"
-version: "0.19.0"
+feature: "0000020-setup-refresh-skill"
+version: "0.20.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -42,6 +42,8 @@ responsibilities:
   - "Govern P0-P6 phase reversals: defect report, assessor verdict, scoped correction, 2/feature budget"
   - "Block silent weakening of acceptance criteria/scope during loops via ratchet-check hook"
   - "Verify acceptance criteria by executing the software at P4 via planifest-verify-by-execution"
+  - "Refresh an existing install without manual flag reverse-engineering via planifest-refresh-setup (standalone skill)"
+  - "Record the flags used at install time in a per-tool marker file (.planifest-setup-flags) at the end of setup.sh/setup.ps1"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
