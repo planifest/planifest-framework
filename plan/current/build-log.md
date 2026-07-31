@@ -142,6 +142,25 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | Continuous run mode active. Full test suite already confirmed green as of req-004's commit (b290037) — 27 feature suites + 1 regression. This phase re-runs and confirms CI-equivalent validation across all 7 requirements' combined changes before proceeding to Security. |
+| Semantic correctness check: req-001/002/003/004/006/007 each have a dedicated test file with req-ID-traceable assertions covering their Acceptance Criteria — pass. req-005 (build-log-telemetry-record) had NO test file at all — semantic validation failure per this phase's own rules ("if logic exists without a covering test, semantic validation fails"). |
+| Cycle 1 — Check: semantic correctness (req-005). Root cause: two real gaps, not just a missing test. (a) No test file existed for req-005's 3 ACs. (b) The orchestrator's Telemetry section (SKILL.md) only instructed recording a `Telemetry` build-log line in the failure path (ADR-002) — nothing told it to record `emitted` or `confirmed-disabled` in the normal case, so AC3 ("no phase can complete without one of these being recorded") was unimplemented, not just untested. Fix: added a new paragraph to the orchestrator's Telemetry section stating every phase must fill the `Telemetry` field with one of the 3 states and tying a blank field to Hard Limit 8 (missing phase block). Wrote `test-0000018-req-005-build-log-telemetry-record.sh` (6 assertions covering AC1/AC2/AC3). Result: pass, 6/6. Commit 4760f79. |
+| Library audit: N/A — no new dependencies, no dependency manifests touched (design.md confirms unchanged stack). |
+| Full suite re-run after fix: 28 feature suites + 1 regression, 97+ assertions in the combined skill-text/edited-skills block, all passing. |
+| P4 COMPLETE — semantic + full CI validation passing for all 7 requirements (28 feature suites, 1 regression). One self-correct cycle (req-005: missing test + missing every-phase instruction, both fixed). Continuous run — proceeding to P5 without a stop. |
+
+---
+
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T01:45:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Notes | Continuous run mode active. No new auth/authz surface, no PII/credentials/regulated data (per design.md Architecture Layer). Review focuses on: the failure-marker mechanism (req-002, could it leak sensitive data into `plan/.telemetry-failures/`?), ADR-005 exit-zero preservation, and the removed `--context-mode-mcp` coupling (req-001, any unintended installer permission change). |
 
 ---
 
