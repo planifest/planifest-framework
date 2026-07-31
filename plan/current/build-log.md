@@ -178,6 +178,10 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Notes | Continuous run mode active. Framework-tooling feature, no `src/{component-id}` — Gate A (docs/ must exist) and per-component artifacts are not applicable in the usual sense; focus is on `planifest-framework/component.yml` version bump, `docs/decisions-index.md` (3 new ADRs), `plan/current/recommendations.md`, and the changelog entry. |
+| Gate A: `docs/` exists at repo root — pass. Gate B assessment: unified telemetry architecture + 3 new ADRs + component.yml version bump (0.17.0→0.18.0) warrant updates to `docs/decisions-index.md`, `docs/component-registry.md`, and `docs/architecture-overview.md` (new Telemetry section); `docs/dependency-graph.md` and `docs/api-index.md` need no changes (no dependency/component/API surface changed this feature). Continuous run — proceeding without a stop, consistent with P1-P5. |
+| Drift detection: domain glossary terms (unified telemetry signal, failure marker, root_cause_key, block-or-proceed) confirmed present verbatim in the implementation (hooks + orchestrator SKILL.md) — no drift. No API, no data ownership, no new component boundaries, no undeclared dependencies — all N/A, none flagged as false drift. |
+| Artifacts produced: `docs/decisions-index.md` (+Feature 0000018 section, 3 ADRs), `docs/component-registry.md` (version + summary bump), `docs/architecture-overview.md` (+Telemetry section, +3 ADR references), `plan/current/recommendations.md` (4 items), `plan/changelog/0000018-telemetry-emission-consistency-2026-07-31.md` (PR field marked TBD, filled at P9). Full suite re-verified green after all doc writes (28/1). Commit 84c06a7. |
+| P6 COMPLETE — all mandatory living docs current, feature-level completeness confirmed (execution-plan, scope, risk-register, domain-glossary, operational-model, slo-definitions, cost-model, 3 ADRs, security-report, recommendations all present and consistent). Continuous run — proceeding to P7 without a stop. |
 
 ---
 
