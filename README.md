@@ -39,21 +39,22 @@ Every artifact the agent produces follows a template, so output is consistent ac
 ```
 repo/
 ├── planifest-framework/   ← The framework (drop in, don't modify per-project)
-│   ├── skills/            ← Agent instructions (orchestrator + 7 phase skills)
+│   ├── skills/            ← Agent instructions — orchestrator + phase skills
 │   ├── templates/         ← File format templates for every artifact
 │   ├── schemas/           ← JSON Schema validation definitions
-│   ├── standards/         ← Code quality standards
-│   └── feature-structure.md  ← Canonical directory layout
+│   └── standards/         ← Code quality standards
 │
 ├── plan/                  ← Feature briefs, execution plans, ADRs, risk registers,
 │                            scope docs. Organised by feature. Everything that
 │                            describes WHAT to build and WHY.
+│                            See plan/feature-structure.md for the canonical layout.
 │
 ├── src/                   ← Code (organised by component). Implementation, tests,
 │                            config, manifests. Each component has a component.yml.
 │
-└── planifest-docs/        ← Project documentation (for humans, not agents).
-                             Architecture notes, research, roadmap.
+└── docs/                  ← Living documentation — component registry, architecture
+                             overview, decisions index, dependency graph. Generated
+                             by the docs-agent; read by agents and humans.
 ```
 
 ---
@@ -94,15 +95,15 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 ## The framework
 
-| Folder | Contents | Count |
-|--------|----------|-------|
-| [skills/](planifest-framework/skills/) | Orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, change-agent, docs-agent | 8 |
-| [templates/](planifest-framework/templates/) | Feature brief, execution plan, ADR, scope, risk register, domain glossary, data contract, component manifest, iteration log, change summary, cost model, operational model, recommendations, security report, SLO definitions — each with a guide where applicable | 24 |
-| [schemas/](planifest-framework/schemas/) | Shared type definitions, domain document envelope | 2 |
-| [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, testing, backend & frontend stack evaluations | 10 |
-| [setup/](planifest-framework/setup/) | Per-tool boot file templates (antigravity, claude-code, cline, codex, copilot, cursor, windsurf — `.sh` and `.ps1` for each) | 14 |
-| [hooks/](planifest-framework/hooks/) | Git hooks (pre-commit, pre-push) and CI workflow | 3 |
-| [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, feature-pipeline, change-pipeline, retrofit | 4 |
+| Folder | Contents |
+|--------|----------|
+| [skills/](planifest-framework/skills/) | Agent instructions — the orchestrator and every phase and sub-agent skill |
+| [templates/](planifest-framework/templates/) | File format templates for every artifact the pipeline produces, each with a guide where applicable |
+| [schemas/](planifest-framework/schemas/) | Shared type definitions and the domain document envelope |
+| [standards/](planifest-framework/standards/) | Code quality, API design, database, deployment, infrastructure, monorepo, observability, testing, and backend/frontend stack-evaluation standards |
+| [setup/](planifest-framework/setup/) | Per-tool boot file templates — a `.sh` and `.ps1` pair for each supported tool |
+| [hooks/](planifest-framework/hooks/) | Git hooks, the CI workflow, and the telemetry/context-mode/enforcement adapters they wire up |
+| [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, feature-pipeline, change-pipeline, retrofit |
 
 ---
 
@@ -110,7 +111,7 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 
 These apply regardless of tool, model, or configuration:
 
-1. **Requirements must be complete before codegen begins**
+1. **Requirement gaps are surfaced, then resolved or explicitly deferred, before codegen begins** — every deferral is recorded in that feature's `plan/current/scope.md` Deferred section, so the claim is checkable, not just asserted
 2. **No direct schema modification** — migration proposal required, human approves
 3. **Destructive schema operations require human approval**
 4. **Data is owned by one component** — never write to another component's data
@@ -128,6 +129,7 @@ Planifest is a deliberate trade-off: it exchanges upfront ceremony for traceabil
 - **Plans don't prevent all bad output.** A complete specification reduces assumption-driven errors; it doesn't guarantee correct code. Validation and security skills catch classes of problems, not all of them.
 - **No comparative benchmarks yet.** We have not published measurements comparing outcomes with and without the framework. Claims about quality improvement are, at this stage, based on design rationale and our own use.
 - **It's not a project management method.** Planifest structures agent sessions, not teams. It sits alongside whatever delivery process you already use.
+- **The plan/docs parity check is a presence check, not a correspondence guarantee.** CI and the shipped git hooks confirm that some file under `plan/`, `docs/`, or a component's `component.yml` also changed alongside `src/` — they do not verify that file's content actually corresponds to the code change. Reviewers still need to check correspondence themselves at the PR gate.
 
 ---
 
