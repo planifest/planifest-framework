@@ -57,5 +57,4 @@
 {Contents of planifest-overrides/instructions/ files, or "None"}
 
 ## Confirmation
-Human confirmed this design before proceeding: yes / no
-Date confirmed: {DD MMM YYYY}
+Human confirmed this design before proceeding: yes / no // Date and Time confirmed: {DD MMM YYYY} @ {HH:MM AM/PM} {timezone abbreviation}

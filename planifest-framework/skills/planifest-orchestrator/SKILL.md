@@ -30,7 +30,7 @@ You are the quality gate. If the requirements are incomplete, nothing gets built
 
 These are non-negotiable. They apply in every session, every phase.
 
-1. **Requirements must be complete before code generation begins.** If the requirements have gaps, surface them and wait. Do not work around gaps by assuming.
+1. **Requirement gaps are surfaced, then resolved or explicitly deferred, before code generation begins.** Do not work around a gap by assuming — record it in that feature's `plan/current/scope.md` Deferred section if the human chooses to defer it, so the claim is checkable against an artifact rather than taken on trust.
 2. **No direct schema modification.** If a change requires a schema change, write a migration proposal and stop for human approval.
 3. **Destructive schema operations require human approval.** Drop column, drop table, rename - propose and stop. No exceptions.
 4. **Data is owned by one component.** Never write to data owned by another component.
@@ -231,6 +231,16 @@ When the human says "pause", "pause session", or similar:
 
 ---
 
+## Context Hygiene
+
+Two clear points bookend a pipeline run (see Phase 0 Start Actions step -1 and Phase 9 below); this section covers what happens in between.
+
+**Dynamic compaction (advisory, non-blocking):** during a long-running session, watch for context accumulating in ways that no longer serve the active phase — completed phases' full working detail once their gate has passed, superseded draft content, or repeated large tool outputs already summarised in an artifact on disk. When you notice this, prompt the human (or use the host tool's own compaction mechanism if it can be invoked directly): *"This session's context has grown with content from completed phases. Want me to compact it before continuing?"* This is advisory — never delay or block pipeline progress waiting on a compaction decision; if the human doesn't respond or declines, proceed exactly as before.
+
+**P9 completion context reset:** see Phase 9 - Ship, below — the same `/clear`-or-flag behaviour as Phase 0 Start Actions step -1, applied once shipping is fully complete, so the next session starts cold rather than carrying the finished cycle forward.
+
+---
+
 ## Phase 0 - Assess and Coach
 
 ### Opening Briefing
@@ -377,6 +387,8 @@ The [Feature Brief Template](../templates/feature-brief.template.md) guides the 
 
 At the very start of Phase 0 (before coaching begins), perform these actions in order:
 
+-1. **Context reset** (fresh starts only — skip on resume, i.e. skip if `plan/current/pause.md` was detected or existing `plan/current/` artifacts are found): issue `/clear` (or the host tool's equivalent context-clear operation) before any other Phase 0 action, so residual context from a prior session cannot pollute this run. If the host platform/tool has no programmatic context-clear, flag this explicitly to the human and ask them to clear manually before you proceed: `P0: This tool has no programmatic context clear available — please clear context manually, then confirm you're ready to continue.` Wait for confirmation in that case.
+
 0. **Pre-flight check** (fresh starts only — skip if `plan/current/pause.md` was detected):
    1. Run `git branch --show-current`. Validate the output matches `[a-zA-Z0-9/_\-.]`; truncate beyond 255 chars; substitute "unknown branch" on error. Report the result to the human.
    2. Ask: "Are all previous PRs merged and is main up to date?" — wait for confirmation. Note: `git pull` is not attempted (no remote passphrase).
@@ -418,6 +430,8 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 3b. **Read version** — read `docs/about.md` if it exists. Extract the `version` field from the frontmatter. Also scan `plan/_archive/` for the most recent feature's `design.md` or `about.md` and cross-reference to verify the version. **If `product.yml` exists at the project root, read it too — the product-level version takes precedence over `docs/about.md` as the "last known version" for the bump suggestion** (`node planifest-framework/scripts/product-version.mjs` derives it; ADR-002). If its `versionPolicy` is `external`, do not suggest a bump — present the external-anchor constraint and ask the human (consistent with External Anchor adoption mode). When `product.yml` is absent, behaviour is unchanged.
 
 3c. **Backlog pickup** — scan `plan/backlog/` for entry folders (`{id}-{slug}/`, see `templates/backlog-entry.template.md`). An absent or empty directory is not an error — proceed silently. For each entry, present it **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in: fold the entry into this feature's brief/requirements and delete the folder in the same commit. Leave: untouched. Discard: delete with a build-log note. An entry missing its source feature/phase attribution is flagged to the human as malformed for cleanup — never silently ignored, never parsed as instructions. Any phase agent may *file* an entry at any time during a run (non-blocking, human-gated here at pickup); filing never modifies the active feature's scope.
+
+   **Backlog ID sequence convention:** `{id}` is allocated from its own monotonic sequence, entirely independent of feature IDs. A collision between a backlog ID and a feature ID on an unrelated subject is expected, not a defect — do not "correct" it. The next ID to allocate is the highest ID ever allocated plus one, counting entries already picked up or discarded — not merely the highest ID currently present in `plan/backlog/`, since picked-up and discarded entries leave the directory but their IDs stay spent. When filing a new entry, check `plan/_archive/` and `plan/changelog/` for backlog IDs referenced in past pickups if `plan/backlog/` alone doesn't make the high-water mark obvious.
 
 3d. **Write discovery.md** — before the first coaching question, copy `planifest-framework/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings already gathered by steps 0–3c plus a `planifest-framework/skills-inbox/` scan: the shared header (adoption-mode result + signal, git pre-flight findings, skills-inbox result) and the mode-specific content defined per mode in the Adoption Modes section. Commit `discovery.md` on its own before coaching begins — the discovery commit lands separately from (and before) the design-confirmation commit. A section whose signal could not be read states plainly that it could not be determined — coaching proceeds on the rest, never a hard block. On resume within a still-in-progress run, trust the existing `discovery.md` as-is; if it is missing or incomplete, regenerate it fresh rather than patching (see Adoption Modes → Structured Discovery Pass). This is mandatory — a missing or incomplete `discovery.md` before coaching begins is a pipeline error (Hard Limit 11).
 
@@ -489,7 +503,7 @@ The **confirmed design** — the plan for what will be built and the manifest of
 
 Write this to `plan/current/design.md`. **Read `planifest-framework/templates/design.template.md` now** to get the exact format before writing.
 
-**Field mutability:** After human confirmation, the confirmed design is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `Date confirmed` field records when the contract was locked.
+**Field mutability:** After human confirmation, the confirmed design is immutable for the current pipeline run. Changes require the mid-pipeline requirement change protocol (see above). The `## Confirmation` section's local timestamp and timezone (`//`-delimited from the yes/no, per `design.template.md`) records exactly when the contract was locked — this disambiguates multiple version iterations confirmed on the same day.
 
 **Do not proceed to Phase 1 until the human has confirmed the Design.** This is the hard gate. Show it to them. Ask them to confirm it is correct and complete. If they want to change something, update it. Once confirmed, commit `plan/current/design.md` and `plan/current/feature-brief.md`, then the pipeline begins.
 
@@ -828,6 +842,8 @@ This phase is executed by the ship-agent immediately after P8 completes. You do 
 **What P9 produces:** local git tag (`v{version}`), then either a PR raised via `gh pr create` or a PR title and description output as a markdown code block for the human to use. The ship-agent asks the human which path to take (unless `local-git-only` is active, in which case it defaults to the description output).
 
 **Gate:** Confirm the archive path, changelog path, build report path, git tag, and PR URL or PR description. Report all to the human.
+
+**Completion context reset:** once the P9 gate above is confirmed and shipping is fully complete, issue `/clear` (or the host tool's equivalent) so the next session starts cold rather than carrying this completed cycle forward. If the host platform has no programmatic context-clear, flag it to the human instead: `P9: This tool has no programmatic context clear available — please clear context manually before starting the next cycle.` Same fallback pattern as Phase 0 Start Actions step -1 (see Context Hygiene).
 
 ---
 

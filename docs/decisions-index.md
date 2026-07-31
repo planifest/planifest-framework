@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000018-telemetry-emission-consistency
+Last updated: 0000019-self-description-and-session-hygiene-fixes
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -185,6 +185,13 @@ ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema
 | ADR-001 | Unify Telemetry Gating by Removing the --context-mode-mcp Coupling | accepted | Removes the `--context-mode-mcp` AND-condition from telemetry hook installation — `--structured-telemetry-mcp` alone becomes sufficient, closing the exact gap that caused 0000017's telemetry loss |
 | ADR-002 | Telemetry Failure Detection and Interactive Recovery | accepted | Hook-driven emission stays fire-and-forget (ADR-005, 0000003, unchanged) but now writes a durable failure marker on error, checked by the orchestrator at phase-start checkpoints; agent-driven emission stops and asks immediately inline. Human is asked once per distinct root cause per run |
 | ADR-003 | discovery.md Elevated to Hard Limit Status | accepted | discovery.md's existence-and-completeness requirement elevated to Hard Limit status, matching build-log.md's Hard Limit 8 pattern — a self-audit finding from this feature's own P0 |
+
+### Feature 0000019 — self-description-and-session-hygiene-fixes
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Repository self-description check is a separate script | accepted | `self-description-check.mjs` is a new, repository-scoped script wired into CI, deliberately not folded into `consistency-check.mjs` — different subject (repo self-description vs. `plan/current/`), different lifecycle (every PR vs. per-feature), different caller |
+| ADR-002 | context_pressure telemetry events map to phase: "orchestrator" | accepted | Fixes an unconditional HTTP 400 (invalid `phase` enum value `"monitoring"`) discovered live during this feature's own P0; maps to `"orchestrator"` as the semantically closest existing value, consistent with context hygiene being framed as an orchestrator responsibility |
 
 ---
 
