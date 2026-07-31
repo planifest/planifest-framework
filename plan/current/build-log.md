@@ -101,6 +101,40 @@ Gate note: continuous_run active, P1→P2 proceeded without stopping per orchest
 | Telemetry | emitted |
 | Notes | Implemented req-001+004 (README), req-002+003 (CI/hooks, with 2 new tests, RED verified against pre-fix hooks then GREEN after), req-005 (new self-description-check.mjs + wiring + 7-assertion test, RED/GREEN verified), req-006+007+008 (orchestrator SKILL.md + 2 templates). Deviation: discovered mid-req-005 that 5 planifest-framework/ folders (scripts, tests, external-skills, migrations, skills-inbox) had no README table row at all — extended req-001's table fix to cover them so the new CI check starts clean; recorded in the commit message and here. component.yml bumped to 0.19.0. Committed after each requirement group (Hard Limit 7) — 5 commits this phase. |
 
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:35:52Z` |
+| End | `2026-07-31T21:39:54Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | `0` |
+| MCP calls | `4` |
+| Parallel task batches | `0` (single sequential run: full test suite, then self-description-check.mjs, then component.json search — no lint/typecheck/build step exists for this markdown/YAML/bash/Node stack) |
+| Telemetry | emitted |
+| Notes | **Process gap self-caught:** started P4 work before writing this phase-start block, a Hard Limit 8 violation — caught and corrected retroactively before the phase gate, not silently left. Cycle 1/5: `run-tests.sh` reported 1 feature-suite failure — `test-context-pressure.sh` asserted `phase: "monitoring"` as correct, which was exactly the bug 0000027 fixed. Root cause: stale test pinned to pre-fix behaviour, not a defect in the fix. Fix: updated the assertion to `"orchestrator"` per ADR-002. Re-ran: 97/97 assertions across all suites pass, 30/30 feature suites pass, 1/1 regression suite passes. `self-description-check.mjs` exits 0 against the real repo. No `component.json` remains in any of the 4 live CI/hook files. Semantic coverage: req-002 and req-005 have dedicated automated test files (16 and 7 assertions); req-001/003/004/006/007/008 are wording/instruction-only with no executable logic — verified via 14 targeted string checks against the exact landed text. 0000027 covered by the corrected test-context-pressure.sh assertion plus the earlier direct-backend 400→200 verification in P0. |
+
+Cycle 1:
+  Check: test
+  Error: `FAIL: REQ-008: phase is monitoring` (test-context-pressure.sh:143)
+  Root cause: test-bug — assertion pinned to the pre-0000027-fix behaviour
+  Fix: updated assertion to expect "orchestrator", added explanatory comment referencing ADR-002
+  Result: pass
+
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-07-31T21:39:54Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `0` |
+| MCP calls | `1` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Reviewing req-001..008 + 0000027 for security findings. |
+
 ---
 
 ## Summary (filled at P7)
