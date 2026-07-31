@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 0000018-telemetry-emission-consistency (31 Jul 2026)
+**Last updated:** 0000019-self-description-and-session-hygiene-fixes (31 Jul 2026)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -11,7 +11,7 @@
 |----|------|------|--------|--------|---------|------|
 | `context-mode-hooks` | context-mode Enforcement Hook Scripts | component-pack | developer-tooling | active | Blocking PreToolUse hook scripts (`.mjs`, Node-only since v0.2.0 — no `jq`, no Unix-shell requirement) that enforce context-mode routing rules by intercepting Grep, Bash (pattern-matched), and WebFetch tool calls. | [purpose](../src/context-mode-hooks/docs/purpose.md) |
 | `setup-hook-integration` | Setup Hook Integration | component-pack | developer-tooling | active | setup.sh/ps1, skill-sync, and hook adapters (copilot, cursor, windsurf, codex) — installs and configures enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project. | [purpose](../src/setup-hook-integration/docs/purpose.md) |
-| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.18.0: unified telemetry gating signal — `--structured-telemetry-mcp` alone wires hooks, no more silent `--context-mode-mcp` coupling gap; emission is mandatory-when-enabled with durable failure markers and interactive block-or-proceed recovery, once per distinct root cause per run; discovery.md elevated to Hard Limit status). | [component.yml](../planifest-framework/component.yml) |
+| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.19.0: README/CI/hook self-description accuracy — corrected drifted counts and paths, fixed a `component.json`/`component.yml` matcher mismatch that falsely rejected valid changes, reworded the CI parity check and Hard Limit 1 to their actual enforceable behaviour, added a new CI check to catch future README drift; orchestrator session hygiene — timestamped design confirmations, `/clear` at Phase 0 start and P9 completion, documented backlog ID sequence convention; fixed the `context-pressure` telemetry hook's invalid `phase` enum value). | [component.yml](../planifest-framework/component.yml) |
 
 ---
 
