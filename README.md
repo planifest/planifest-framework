@@ -104,6 +104,11 @@ The setup script copies skills into the directory your tool auto-discovers, adds
 | [setup/](planifest-framework/setup/) | Per-tool boot file templates — a `.sh` and `.ps1` pair for each supported tool |
 | [hooks/](planifest-framework/hooks/) | Git hooks, the CI workflow, and the telemetry/context-mode/enforcement adapters they wire up |
 | [workflows/](planifest-framework/workflows/) | Agent workflow definitions: fast-path, feature-pipeline, change-pipeline, retrofit |
+| [scripts/](planifest-framework/scripts/) | Deterministic tooling: consistency checks, version derivation, regression promotion, skill sync |
+| [tests/](planifest-framework/tests/) | Per-feature test scripts plus the promoted regression pack |
+| [external-skills/](planifest-framework/external-skills/) | Vendored third-party capability skills, available for a pipeline run to load alongside the Planifest skills |
+| [migrations/](planifest-framework/migrations/) | Pending and completed framework-version migrations, applied by the `planifest-migrator` skill |
+| [skills-inbox/](planifest-framework/skills-inbox/) | Drop-in intake point for a new capability skill, processed at the next Phase 0 |
 
 ---
 
