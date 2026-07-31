@@ -33,6 +33,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | `{{count}}` |
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
+| Telemetry | emitted / failed-with-recorded-choice / confirmed-disabled |
 | Notes | `{{free text or "none"}}` |
 
 ---
@@ -49,6 +50,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | `{{count}}` |
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
+| Telemetry | emitted / failed-with-recorded-choice / confirmed-disabled |
 | Notes | `{{free text or "none"}}` |
 
 -->
@@ -67,3 +69,4 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Cheaper tier agent calls | `{{count}}` |
 | Self-corrections | `{{count}}` |
 | Phases skipped | `{{list or "none"}}` |
+| Phases with a recorded telemetry gap | `{{count — phases where Telemetry was failed-with-recorded-choice, or "0"}}` |

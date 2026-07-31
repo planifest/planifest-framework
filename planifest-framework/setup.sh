@@ -667,7 +667,7 @@ merge_telemetry_hook_settings() {
 
 install_telemetry_hooks() {
   # Copy context-pressure hook script and wire PostToolUse in settings.json (REQ-008, REQ-010)
-  # Only called when both --structured-telemetry-mcp and --context-mode-mcp are active.
+  # Only called when --structured-telemetry-mcp is active (0000018 req-001).
   local hooks_src_rel="$1"   # relative to SCRIPT_DIR  e.g. hooks/telemetry
   local hooks_dir_rel="$2"   # relative to PROJECT_ROOT e.g. .claude/hooks/telemetry
   local settings_rel="$3"    # relative to PROJECT_ROOT e.g. .claude/settings.json
@@ -1126,8 +1126,10 @@ setup_tool() {
     fi
   fi
 
-  # Install telemetry hooks only when BOTH flags are active (REQ-010)
-  if [ "$STRUCTURED_TELEMETRY_MCP" = true ] && [ "$CONTEXT_MODE_MCP" = true ] && \
+  # Install telemetry hooks whenever --structured-telemetry-mcp is active (0000018 req-001)
+  # No longer requires --context-mode-mcp — that AND-condition silently left telemetry
+  # hooks unwired for any project passing --structured-telemetry-mcp alone.
+  if [ "$STRUCTURED_TELEMETRY_MCP" = true ] && \
      [ -n "${TOOL_TELEMETRY_HOOKS_SRC:-}" ] && [ -n "${TOOL_TELEMETRY_HOOKS_DIR:-}" ] && \
      [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
     install_telemetry_hooks "$TOOL_TELEMETRY_HOOKS_SRC" "$TOOL_TELEMETRY_HOOKS_DIR" "$TOOL_SETTINGS_FILE" "$BACKEND_URL"
