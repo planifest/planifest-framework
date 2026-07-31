@@ -33,17 +33,17 @@ version: "0.1.0"
 
 ## Out of Scope
 
-- General `setup.sh`/`setup.ps1` parity fixes unrelated to flag reconstruction or persistence — the pre-existing, separately-tracked `.ps1` drift referenced in backlog entry `0000013-setup-refresh-skill-preserving-settings` is not addressed here beyond keeping this feature's own marker-write addition in parity
+- General `setup.sh`/`setup.ps1` parity fixes unrelated to flag reconstruction or persistence, the pre-existing, separately-tracked `.ps1` drift referenced in backlog entry `0000013-setup-refresh-skill-preserving-settings` is not addressed here beyond keeping this feature's own marker-write addition in parity
 - New setup flags not already supported by `setup.sh`/`setup.ps1`
 - Staleness reconciliation between `.claude/.planifest-setup-flags` and hand-edited hook wiring that diverges from what the marker records (see execution-plan.md Assumption A-002 and risk register)
-- Any automatic retry of a failed setup re-invocation — retries are always human-initiated (REQ-006)
-- A separate cache file for retry/recovery state — REQ-009/REQ-010 explicitly reuse the single install-time marker file, not a second file
+- Any automatic retry of a failed setup re-invocation, retries are always human-initiated (REQ-006)
+- A separate cache file for retry/recovery state. REQ-009/REQ-010 explicitly reuse the single install-time marker file, not a second file
 
 ---
 
 ## Deferred
 
-Nothing deferred — both suggested actions from backlog entry `0000013` were pulled into this feature's scope during P0 (see `plan/current/build-log.md`, backlog pickup entry). A related but distinct concern (general AI-writing-tells style enforcement raised during this feature's own Scope Lock Challenge) was filed separately as backlog entry `0000026-ai-writing-tells-style-guard`, out of scope for this feature.
+Nothing deferred, both suggested actions from backlog entry `0000013` were pulled into this feature's scope during P0 (see `plan/current/build-log.md`, backlog pickup entry). A related but distinct concern (general AI-writing-tells style enforcement raised during this feature's own Scope Lock Challenge) was filed separately as backlog entry `0000026-ai-writing-tells-style-guard`, out of scope for this feature.
 
 ---
 

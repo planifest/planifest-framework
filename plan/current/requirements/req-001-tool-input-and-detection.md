@@ -29,7 +29,7 @@ As a human on the loop maintaining a Planifest install, I name which tool's setu
 - [ ] Given a named tool argument, the skill proceeds directly with that tool, no detection question asked
 - [ ] Given no tool argument and one install present, the skill proceeds with that tool automatically
 - [ ] Given no tool argument and two or more installs present, the skill asks the human on the loop to name one before continuing
-- [ ] Given no tool argument and zero installs present, the skill does not ask "which tool" (this is the no-install-found case — see REQ-007)
+- [ ] Given no tool argument and zero installs present, the skill does not ask "which tool" (this is the no-install-found case, see REQ-007)
 
 ## Dependencies
 - None (first step in the refresh flow)

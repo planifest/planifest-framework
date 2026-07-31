@@ -14,7 +14,7 @@ version: "0.1.0"
 
 ## Business Goal
 
-Refreshing a Planifest install's generated artifacts (`CLAUDE.md`, `.claude/hooks/`, `.claude/skills/`, etc.) after the framework source changes currently requires manually reconstructing the original `setup.sh`/`setup.ps1` invocation — the correct tool name and every flag previously used — by reading installed hook wiring and marker files. None of this is recorded directly today. This exact reverse-engineering was done by hand during the 0000018 session that filed this backlog item. A refresh skill removes that manual step for both humans and agents doing framework maintenance.
+Refreshing a Planifest install's generated artifacts (`CLAUDE.md`, `.claude/hooks/`, `.claude/skills/`, etc.) after the framework source changes currently requires manually reconstructing the original `setup.sh`/`setup.ps1` invocation, the correct tool name and every flag previously used, by reading installed hook wiring and marker files. None of this is recorded directly today. This exact reverse-engineering was done by hand during the 0000018 session that filed this backlog item. A refresh skill removes that manual step for both humans and agents doing framework maintenance.
 
 ---
 
@@ -30,7 +30,7 @@ Refreshing a Planifest install's generated artifacts (`CLAUDE.md`, `.claude/hook
 
 ## Waves
 
-Single wave — all three stories are one cohesive feature (detect → reconstruct → confirm → refresh, plus the persistence follow-on that makes future reconstructions exact).
+Single wave, all three stories are one cohesive feature (detect → reconstruct → confirm → refresh, plus the persistence follow-on that makes future reconstructions exact).
 
 | Wave | Features Included | Ships When |
 |------|-------------------|------------|
@@ -51,7 +51,7 @@ Single wave — all three stories are one cohesive feature (detect → reconstru
 
 | Data Store | Owner Component | Shared With |
 |------------|----------------|-------------|
-| `.claude/.planifest-setup-flags` — doubles as install-time flag record AND the refresh skill's retry cache (holds reconstructed/confirmed flags + last attempted command) | `setup-hook-integration` | read/write by `planifest-refresh-setup` |
+| `.claude/.planifest-setup-flags`, doubles as install-time flag record AND the refresh skill's retry cache (holds reconstructed/confirmed flags + last attempted command) | `setup-hook-integration` | read/write by `planifest-refresh-setup` |
 
 ### Integration Points
 
@@ -85,10 +85,10 @@ No new stack. Matches the existing `setup-hook-integration` component: Bash (`se
 ## Scope Boundaries
 
 ### In Scope
-- A skill that detects the installed tool (`.claude/`, `.cursor/`, `.windsurf/`, `.clinerules`, `.agents/` + `OPENAI_*`, `.opencode/`) — full parity with what `setup.sh`/`setup.ps1` already support
+- A skill that detects the installed tool (`.claude/`, `.cursor/`, `.windsurf/`, `.clinerules`, `.agents/` + `OPENAI_*`, `.opencode/`), full parity with what `setup.sh`/`setup.ps1` already support
 - Reconstructing active flags from installed hook wiring and marker files (context-mode hooks → `--context-mode-mcp`; telemetry hooks + URL → `--structured-telemetry-mcp` + `--backend-url`; `plan/.orchestrator-strict` → `--strict-orchestrator`; `attribution.txt` under skills dir → `--include-full-skill-library`)
 - Confidence reporting: when reconstruction is ambiguous or partial, list what was found plus confidence, and require human confirmation before running setup
-- Deleting only `CLAUDE.md`/`AGENTS.md` (the boot files setup won't overwrite on their own) — never `settings.local.json` or other user-owned files
+- Deleting only `CLAUDE.md`/`AGENTS.md` (the boot files setup won't overwrite on their own), never `settings.local.json` or other user-owned files
 - Re-invoking the correct setup script for the detected tool with the confirmed flags
 - `setup.sh`/`setup.ps1` writing a flags-used marker file at install time, read preferentially by the refresh skill on future runs
 
@@ -97,13 +97,13 @@ No new stack. Matches the existing `setup-hook-integration` component: Bash (`se
 - New setup flags not already supported by `setup.sh`/`setup.ps1`
 
 ### Deferred
-- None — both suggested actions from the backlog entry were pulled into this feature's scope per human confirmation during P0
+- None, both suggested actions from the backlog entry were pulled into this feature's scope per human confirmation during P0
 
 ---
 
 ## Non-Functional Requirements
 
-This is a local CLI/dev-tooling skill — no latency/availability/throughput targets apply. The binding non-functional requirement is safety:
+This is a local CLI/dev-tooling skill, no latency/availability/throughput targets apply. The binding non-functional requirement is safety:
 
 | NFR | Target | Measurement |
 |-----|--------|-------------|
@@ -119,7 +119,7 @@ This is a local CLI/dev-tooling skill — no latency/availability/throughput tar
 - This feature's own additions to `setup.sh`/`setup.ps1` (the flags-used marker write) must stay in parity between the two scripts, even though the pre-existing general `.ps1` drift is out of scope
 
 ### Assumptions
-- Installed hook wiring in `.claude/settings.json` (and each tool's equivalent) reliably signals which flags were used at install time — agents will flag if this conflicts during spec
+- Installed hook wiring in `.claude/settings.json` (and each tool's equivalent) reliably signals which flags were used at install time, agents will flag if this conflicts during spec
 - If the flags-used marker file from this feature already exists, it is preferred over inference from hook wiring
 
 ---

@@ -14,7 +14,7 @@
 
 ## Active Skills
 
-No capability skills loaded for this pipeline run (none relevant to this stack — Bash/PowerShell/Markdown skill authoring).
+No capability skills loaded for this pipeline run (none relevant to this stack. Bash/PowerShell/Markdown skill authoring).
 
 ---
 
@@ -37,7 +37,7 @@ No capability skills loaded for this pipeline run (none relevant to this stack �
 
 ## Non-Functional Requirements
 
-This is a local CLI/dev-tooling skill — no latency/availability/throughput targets apply (see confirmed design, Architecture Layer). The binding non-functional requirements are safety and correctness:
+This is a local CLI/dev-tooling skill, no latency/availability/throughput targets apply (see confirmed design, Architecture Layer). The binding non-functional requirements are safety and correctness:
 
 | ID | Category | Requirement | Target | Measurement |
 |----|----------|------------|--------|-------------|
@@ -45,13 +45,13 @@ This is a local CLI/dev-tooling skill — no latency/availability/throughput tar
 | NFR-002 | Correctness | Never run setup with a reconstructed flag set the human on the loop has not explicitly confirmed | 100% of runs pass through the confirmation gate, including all-high-confidence runs | Test asserts no deletion/re-invocation call occurs without a preceding confirmation event (REQ-003) |
 | NFR-003 | Recoverability | An interrupted run (process killed between confirmation and setup completion) must be recoverable without repeating flag detection | Recovery reads the marker file, not hook wiring, on a detected interruption | Test simulates a kill between REQ-009's write and REQ-005's completion, then asserts the next run reads the marker instead of re-detecting (REQ-010) |
 
-> No performance/latency/throughput NFRs apply — this is a local CLI tool, not a service.
+> No performance/latency/throughput NFRs apply, this is a local CLI tool, not a service.
 
 ---
 
 ## API Summary
 
-Not applicable — this feature does not expose or consume an HTTP API. No OpenAPI specification is produced (spec-agent rule: omit for non-API components).
+Not applicable, this feature does not expose or consume an HTTP API. No OpenAPI specification is produced (spec-agent rule: omit for non-API components).
 
 ---
 
@@ -85,13 +85,13 @@ flowchart LR
 | ID | Assumption | Impact if Wrong |
 |----|-----------|----------------|
 | A-001 | Installed hook wiring in `.claude/settings.json` (and each tool's equivalent config) reliably signals which flags were used at install time | Reconstruction confidence is lower than expected; more runs require human confirmation of a lower-confidence set, which is the designed fallback, not a failure |
-| A-002 | `.claude/.planifest-setup-flags`, once present and complete, is preferred over hook-wiring inference without a staleness check against current hook wiring | If a human hand-edits hook wiring without re-running setup, the marker could report a flag set that no longer matches installed state; out of scope for this feature (no staleness reconciliation) — flagged in risk register |
+| A-002 | `.claude/.planifest-setup-flags`, once present and complete, is preferred over hook-wiring inference without a staleness check against current hook wiring | If a human hand-edits hook wiring without re-running setup, the marker could report a flag set that no longer matches installed state; out of scope for this feature (no staleness reconciliation), flagged in risk register |
 
 ---
 
 ## Open Questions
 
-None — all material gaps were resolved during the P0 Scope Lock Challenge (see `plan/current/build-log.md`).
+None, all material gaps were resolved during the P0 Scope Lock Challenge (see `plan/current/build-log.md`).
 
 ---
 

@@ -14,7 +14,7 @@
 
 | Component | Owner (team/role) | On-call Rotation | Escalation Path |
 |-----------|------------------|-----------------|-----------------|
-| `planifest-refresh-setup` | Planifest framework maintainers | not applicable — local CLI skill, no production deployment or on-call | Framework maintainers via the repo's normal issue/PR process |
+| `planifest-refresh-setup` | Planifest framework maintainers | not applicable, local CLI skill, no production deployment or on-call | Framework maintainers via the repo's normal issue/PR process |
 | `setup-hook-integration` (marker-write addition) | Planifest framework maintainers | not applicable | Framework maintainers via the repo's normal issue/PR process |
 
 ---
@@ -25,14 +25,14 @@ Not applicable in the traditional sense (no running service to alert on). The cl
 
 | Trigger | Condition | Action | Automated? |
 |---------|-----------|--------|-----------|
-| Setup re-invocation fails (REQ-006) | `setup.sh`/`setup.ps1` exits non-zero during refresh | Skill reports cause, attempted command, and retry path directly to the human on the loop | yes (the reporting), no (any retry — always human-initiated) |
+| Setup re-invocation fails (REQ-006) | `setup.sh`/`setup.ps1` exits non-zero during refresh | Skill reports cause, attempted command, and retry path directly to the human on the loop | yes (the reporting), no (any retry, always human-initiated) |
 | Interrupted refresh detected (REQ-010) | Boot files missing + marker file shows an uncompleted attempt | Skill reports recovered state and offers to resume from cache | yes (detection), no (resume requires human confirmation) |
 
 ---
 
 ## Alerting Thresholds
 
-Not applicable — no metrics pipeline, no running service to alert on. This is an on-request, local CLI skill.
+Not applicable, no metrics pipeline, no running service to alert on. This is an on-request, local CLI skill.
 
 ---
 
@@ -40,18 +40,18 @@ Not applicable — no metrics pipeline, no running service to alert on. This is 
 
 | Component | Strategy | Rollback Plan | Health Check |
 |-----------|----------|--------------|-------------|
-| `planifest-refresh-setup` | Distributed as a skill file under `planifest-framework/skills/`, mirrored to `.claude/skills/` in this self-hosted repo, installed into consumer repos via `setup.sh`/`setup.ps1` skill sync | Revert the commit / skill directory; no running instance to roll back | Skill invocation itself is the check — a failed run reports its own failure per REQ-006 |
+| `planifest-refresh-setup` | Distributed as a skill file under `planifest-framework/skills/`, mirrored to `.claude/skills/` in this self-hosted repo, installed into consumer repos via `setup.sh`/`setup.ps1` skill sync | Revert the commit / skill directory; no running instance to roll back | Skill invocation itself is the check, a failed run reports its own failure per REQ-006 |
 | `setup-hook-integration` (marker-write addition) | Ships as part of `setup.sh`/`setup.ps1`, same distribution as the rest of those scripts | Revert the commit | Covered by existing `tests/test_setup.sh`/`test_setup.ps1` suites plus new parity tests for REQ-008 |
 
 ---
 
 ## Backup and Recovery
 
-No database or persistent service state exists. The one recovery concern in scope is the `.claude/.planifest-setup-flags` marker file itself, and it is not a backup target in the traditional sense — it is regenerated on every successful `setup.sh`/`setup.ps1` run (REQ-008) and is disposable: if lost, the refresh skill falls back to full hook-wiring detection (REQ-002/REQ-010), which is the designed fallback, not a data-loss event.
+No database or persistent service state exists. The one recovery concern in scope is the `.claude/.planifest-setup-flags` marker file itself, and it is not a backup target in the traditional sense, it is regenerated on every successful `setup.sh`/`setup.ps1` run (REQ-008) and is disposable: if lost, the refresh skill falls back to full hook-wiring detection (REQ-002/REQ-010), which is the designed fallback, not a data-loss event.
 
 | Data Store | Backup Frequency | Retention | Recovery Time Objective | Recovery Point Objective |
 |-----------|-----------------|-----------|------------------------|------------------------|
-| `.claude/.planifest-setup-flags` | none (regenerated on every successful install) | not applicable — overwritten on each successful `setup.sh`/`setup.ps1` run | immediate — a lost/missing marker degrades to full detection (REQ-002), no downtime | not applicable — no data-loss scenario, only a confidence-level degradation |
+| `.claude/.planifest-setup-flags` | none (regenerated on every successful install) | not applicable, overwritten on each successful `setup.sh`/`setup.ps1` run | immediate, a lost/missing marker degrades to full detection (REQ-002), no downtime | not applicable, no data-loss scenario, only a confidence-level degradation |
 
 ---
 

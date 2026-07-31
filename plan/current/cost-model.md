@@ -14,23 +14,23 @@
 
 | Category | Estimated Monthly Cost | Notes |
 |----------|----------------------|-------|
-| Compute | $0 | Runs locally, on request, inside the human on the loop's existing agent session — no dedicated compute provisioned |
+| Compute | $0 | Runs locally, on request, inside the human on the loop's existing agent session, no dedicated compute provisioned |
 | Storage | $0 | `.claude/.planifest-setup-flags` is a few hundred bytes of local repo state, no managed storage |
 | Network / Egress | $0 | No network calls beyond what `setup.sh`/`setup.ps1` already make (none, for the core install path) |
 | Third-party Services | $0 | No third-party service is introduced |
-| **Total** | **$0** | Not applicable — this feature has no infrastructure cost surface |
+| **Total** | **$0** | Not applicable, this feature has no infrastructure cost surface |
 
 ---
 
 ## Compute Costs
 
-Not applicable — no dedicated compute; runs as part of an existing local agent session.
+Not applicable, no dedicated compute; runs as part of an existing local agent session.
 
 ---
 
 ## Storage Costs
 
-Not applicable — the marker file is a local, uncommitted-scale text file (see `src/setup-hook-integration/docs/data-contract.md`).
+Not applicable, the marker file is a local, uncommitted-scale text file (see `src/setup-hook-integration/docs/data-contract.md`).
 
 ---
 
@@ -48,7 +48,7 @@ Not applicable.
 
 ## Assumptions
 
-1. This feature introduces no new infrastructure, service, or third-party dependency — cost impact is zero by construction, consistent with the confirmed design's Architecture Layer ("Cost boundary: not constrained").
+1. This feature introduces no new infrastructure, service, or third-party dependency, cost impact is zero by construction, consistent with the confirmed design's Architecture Layer ("Cost boundary: not constrained").
 
 ---
 
