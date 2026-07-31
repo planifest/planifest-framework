@@ -132,3 +132,18 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode. Overall risk: Low. Found and fixed 2 issues in-run: (1) High, deletion allowlist enforced only by SKILL.md prose with no deterministic backstop, fixed via new planifest-framework/scripts/refresh-delete-boot-files.sh/.ps1 (13 new tests). (2) Medium, .planifest-setup-flags not gitignored for copilot/opencode, fixed via global .gitignore pattern, verified live across 3 tools. Discovered and filed (out of scope, not a security finding): setup.sh/setup.ps1 copilot crashes on every invocation due to a pre-existing TOOL_HOOK_ADAPTER_DEST self-copy bug, backlog 0000027. Recommended follow-up (not blocking): live pwsh verification before external release (Q-006). No critical or unmitigated high/medium findings remain, human review not required to proceed per P5's zero-findings continuous-run exception is not applicable here since findings existed, but all were resolved in-phase. |
+
+---
+
+### P6 - Docs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T01:05:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode. Gate A passed (docs/ exists). Gate B: docs update needed, confirmed via continuous-run authorization (not re-asked, per P0 authorization). Updated living docs: component-registry.md, dependency-graph.md, architecture-overview.md, decisions-index.md (no api-index.md, not an API feature). Updated src/setup-hook-integration/docs/: purpose.md, interface-contract.md, scope.md, risk.md, test-coverage.md (new data-contract.md and quirks.md additions were done at P1/P3, referenced here for completeness). No new src/{id} component created (planifest-refresh-setup is a skill under planifest-framework/, not a src/ component, consistent with how other standalone skills are documented). Wrote plan/current/recommendations.md (4 recommendations, 1 tech debt item). Did not write a separate plan/changelog/ iteration-log file at this phase: following the precedent set by the two most recent features (0000018, 0000019), which have no "-iteration-log-" file, only ship-agent's P7 changelog at plan/changelog/{feature-id}-{date}.md; build-log.md serves as this run's audit trail. Drift check: no domain-glossary/code mismatches found; no ADR-contradicting code found; component boundaries match src/ (2 components: context-mode-hooks unchanged, setup-hook-integration updated). No doc_gap events emitted, no gaps found. |
