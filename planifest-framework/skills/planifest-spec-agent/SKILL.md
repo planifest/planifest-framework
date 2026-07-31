@@ -122,7 +122,7 @@ Independent spec artifacts MUST be written in parallel. Apply the dependency tes
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership.
 
-**Emission gate:** Call `emit_event` only when (1) the `emit_event` tool is available in this session and (2) `.claude/telemetry-enabled` exists in the project root. If either condition fails, skip silently — do not emit.
+**Emission gate (0000018, ADR-001/ADR-002):** telemetry is gated by the unified signal (`--structured-telemetry-mcp` — see `telemetry-standards.md`); when active, emission is mandatory, not best-effort. If `emit_event` fails or is unavailable, stop immediately, state the exact error, and ask the human to block until resolved or proceed without telemetry for the rest of this run — the orchestrator records the answer in `build-log.md` and honors it for the rest of the run, never re-asking for the same failure. When the unified signal is genuinely absent, that's not a failure — proceed normally, no prompt.
 
 **`spec_gap`** — when the spec cannot proceed without human input:
 ```json
