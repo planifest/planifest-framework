@@ -117,3 +117,18 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode. Semantic coverage: REQ-008 covered by 21 live-invocation assertions (test-0000020-req-008-install-time-marker-write.sh, parts a-e). REQ-001 through REQ-007, REQ-009, REQ-010 covered by 34 structural assertions over SKILL.md content (test-0000020-req-001-010-refresh-setup-skill.sh), the established pattern for skill-content requirements in this repo. Self-correct cycle 1: initial structural test had 3 failing assertions (literal-substring mismatches against markdown bold syntax and a mistaken belief that `.` matched any character in assert_contains, which is a plain substring check, not regex); fixed the needle text to match actual SKILL.md content and reran, all 34 passed. Full suite: bash planifest-framework/tests/run-tests.sh, 32 feature suites + 1 regression suite, 97+ assertions, 0 failures, no regressions from this feature's changes. bash -n syntax check clean on setup.sh; setup.ps1 checked statically only (no pwsh runtime, Q-006). Build: not applicable (no compiled artifact, shell/PowerShell/Markdown only). |
+
+---
+
+### P5 - Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T00:55:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `0` |
+| MCP calls | `2` (security_finding x2) |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode. Overall risk: Low. Found and fixed 2 issues in-run: (1) High, deletion allowlist enforced only by SKILL.md prose with no deterministic backstop, fixed via new planifest-framework/scripts/refresh-delete-boot-files.sh/.ps1 (13 new tests). (2) Medium, .planifest-setup-flags not gitignored for copilot/opencode, fixed via global .gitignore pattern, verified live across 3 tools. Discovered and filed (out of scope, not a security finding): setup.sh/setup.ps1 copilot crashes on every invocation due to a pre-existing TOOL_HOOK_ADAPTER_DEST self-copy bug, backlog 0000027. Recommended follow-up (not blocking): live pwsh verification before external release (Q-006). No critical or unmitigated high/medium findings remain, human review not required to proceed per P5's zero-findings continuous-run exception is not applicable here since findings existed, but all were resolved in-phase. |
