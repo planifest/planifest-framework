@@ -46,3 +46,15 @@ Backlog pickup: 0000013 (setup refresh skill) pulled in. 0000019, 0000020, 00000
 
 P0 exchange — repo instructions: Loaded `planifest-overrides/instructions/custom-001-local-git-only.md` (local-git-only, commit granularly) — matches CLAUDE.md.
 
+Scope Lock — Happy path: Human on the loop asks Claude to refresh setup; skill detects tool, reconstructs flags from hook wiring/markers with confidence per flag, human confirms, skill deletes only CLAUDE.md/AGENTS.md and re-runs setup with confirmed flags. [source: agent-draft-edited — human replaced "developer" with "human on the loop" and removed em dashes]
+
+Scope Lock — First-run path: No flags-used marker exists on the first run (it's new with this feature), so the skill falls back to hook-wiring inference only, same confirmation flow as any other run. A repo with no Planifest install at all is out of scope for this skill; it should say so and stop. [source: agent-draft-accepted]
+
+Scope Lock — Happy path amendment: human on the loop names which tool's setup to refresh up front (or is asked, if more than one tool is installed) — moved out of an initial "ambiguity halt" framing in the error-path draft, since specifying the tool is normal input, not a failure. [source: human clarification during Error/sad path review]
+
+Scope Lock — Error / sad path: Most likely failure is setup.sh/setup.ps1 failing partway through re-invocation (permission error, locked file) after CLAUDE.md/AGENTS.md are already deleted. Skill stops immediately, investigates the cause (lock/permission/held-by-process), reports what setup reported and which step it reached, prints the exact attempted command as a copyable code block, and caches the reconstructed flags/command so a retry skips re-detection. Never retries automatically; never touches settings.local.json or other user-owned files (confirmed unaffected). [source: agent-draft-edited — human added command-printing, caching-for-retry, and cause-investigation; human also moved the tool-ambiguity and no-install-found cases out of this path to happy-path and first-run-path respectively]
+
+Scope Lock — Cross-session continuity: Risk window is between CLAUDE.md/AGENTS.md deletion and setup finishing regeneration — a killed process in that window leaves boot files missing with no report shown. Recovery reuses the same flags-used marker file (not a separate cache) written to disk before deletion begins; a later session reads it, shows the same confidence report for reconfirmation, and re-runs the attempted command instead of repeating detection. Missing marker = falls back to full detection like a first run. [source: agent-draft-accepted, gap resolved by human: retry cache and install-time marker are the same file, confirmed 2026-08-01]
+
+Scope Lock complete. All four scenario paths captured.
+
