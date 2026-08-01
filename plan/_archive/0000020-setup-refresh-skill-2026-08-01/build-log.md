@@ -162,3 +162,19 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode does not bypass this gate (Hard Limit); presenting full P7/P8/P9 outcome to human before considering shipped. Local Git Only override active, P9 will default to PR-description output, no push, no gh pr create. |
+
+
+---
+
+### P8 - Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T01:20:00Z` |
+| Model tier | cheaper (sub-agent) |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Continuous run mode. Archive confirmed at plan/_archive/0000020-setup-refresh-skill-2026-08-01/. Invoking build-assessment-agent as sub-agent. |
