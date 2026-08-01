@@ -26,6 +26,7 @@
 | `CLAUDE.md` | File | Generated from `templates/standard-boot.md` (Claude Code only) |
 | `git config core.hooksPath` | Git config | Points to `planifest-framework/hooks/` for advisory commit-msg hook |
 | `planifest-framework/external-skills.json` | File | Manifest of installed external skills (created on first `add-skill`) |
+| `<tool-dir>/.planifest-setup-flags` | File | Flags-used marker (0000020): tool, flags applied, backend URL, timestamp, attempt status. Written on every successful install; consumed by `planifest-refresh-setup`. Schema: `docs/data-contract.md` |
 
 ## Breaking Change Policy
 
@@ -37,3 +38,4 @@ No downstream components consume the outputs programmatically. Outputs are consu
 - The AI coding agent at session start (reads `settings.json`, skills, boot file)
 - Git at commit time (reads `core.hooksPath`)
 - `skill-sync.sh` (reads `external-skills.json`)
+- `planifest-refresh-setup` skill (reads and updates `.planifest-setup-flags`, 0000020)

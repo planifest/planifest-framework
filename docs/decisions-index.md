@@ -193,6 +193,18 @@ ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema
 | ADR-001 | Repository self-description check is a separate script | accepted | `self-description-check.mjs` is a new, repository-scoped script wired into CI, deliberately not folded into `consistency-check.mjs` — different subject (repo self-description vs. `plan/current/`), different lifecycle (every PR vs. per-feature), different caller |
 | ADR-002 | context_pressure telemetry events map to phase: "orchestrator" | accepted | Fixes an unconditional HTTP 400 (invalid `phase` enum value `"monitoring"`) discovered live during this feature's own P0; maps to `"orchestrator"` as the semantically closest existing value, consistent with context hygiene being framed as an orchestrator responsibility |
 
+### Feature 0000020 - setup-refresh-skill
+
+ADR files: [plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/](../plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Hardcoded, non-extensible deletion allowlist | accepted, hardened in P5 | The refresh skill's deletion capability is restricted to exactly `CLAUDE.md`/`AGENTS.md`. Originally a SKILL.md-prose-only rule; a P5 security finding (no deterministic backstop, unlike gate-write.mjs for writes) led to extracting the allowlist into `refresh-delete-boot-files.sh`/`.ps1`, hardcoded in code |
+| ADR-002 | Single marker file, dual purpose | accepted | `.planifest-setup-flags` serves as both the install-time flag record (written by setup.sh/setup.ps1) and the refresh skill's retry/recovery cache, not two separate files, avoiding a synchronisation problem between overlapping state |
+| ADR-003 | Mandatory human confirmation gate | accepted | The refresh skill always halts for explicit confirmation before any destructive action, in every run, including all-high-confidence runs; no bypass exists |
+| ADR-004 | Explicit tool selection, not auto-resolved | accepted | The target tool is always named by the human on the loop or asked for up front; multiple installed tools is normal input, not an ambiguity to guess through. Corrected mid-P0 after an early draft conflated this with a failure condition |
+| ADR-005 | No automatic retry on setup failure | accepted | On a failed setup re-invocation the skill stops, investigates the likely cause, and reports; retry is always a fresh, human-initiated invocation, never automatic |
+
 ---
 
 *Template: decisions-index.template.md*

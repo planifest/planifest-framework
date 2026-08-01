@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 0000019-self-description-and-session-hygiene-fixes (31 Jul 2026)
+**Last updated:** 0000020-setup-refresh-skill (01 Aug 2026)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -10,8 +10,8 @@
 | ID | Name | Type | Domain | Status | Summary | Docs |
 |----|------|------|--------|--------|---------|------|
 | `context-mode-hooks` | context-mode Enforcement Hook Scripts | component-pack | developer-tooling | active | Blocking PreToolUse hook scripts (`.mjs`, Node-only since v0.2.0 — no `jq`, no Unix-shell requirement) that enforce context-mode routing rules by intercepting Grep, Bash (pattern-matched), and WebFetch tool calls. | [purpose](../src/context-mode-hooks/docs/purpose.md) |
-| `setup-hook-integration` | Setup Hook Integration | component-pack | developer-tooling | active | setup.sh/ps1, skill-sync, and hook adapters (copilot, cursor, windsurf, codex) — installs and configures enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project. | [purpose](../src/setup-hook-integration/docs/purpose.md) |
-| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.19.0: README/CI/hook self-description accuracy — corrected drifted counts and paths, fixed a `component.json`/`component.yml` matcher mismatch that falsely rejected valid changes, reworded the CI parity check and Hard Limit 1 to their actual enforceable behaviour, added a new CI check to catch future README drift; orchestrator session hygiene — timestamped design confirmations, `/clear` at Phase 0 start and P9 completion, documented backlog ID sequence convention; fixed the `context-pressure` telemetry hook's invalid `phase` enum value). | [component.yml](../planifest-framework/component.yml) |
+| `setup-hook-integration` | Setup Hook Integration | component-pack | developer-tooling | active | setup.sh/ps1, skill-sync, and hook adapters (copilot, cursor, windsurf, codex) — installs and configures enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project. Now also writes a `.planifest-setup-flags` marker recording the flags used at install time (v0.4.0, 0000020). | [purpose](../src/setup-hook-integration/docs/purpose.md) |
+| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.20.0: added `planifest-refresh-setup`, a standalone skill that detects a Planifest install's target tool, reconstructs the setup flags currently in effect from hook wiring and the flags-used marker, confirms with the human on the loop, and safely re-invokes setup, closing the manual-reconstruction gap identified in backlog 0000013; boot-file deletion is enforced by a new hardcoded script, `refresh-delete-boot-files.sh`/`.ps1`, not by prompt instructions alone, per a P5 security finding). | [component.yml](../planifest-framework/component.yml) |
 
 ---
 
