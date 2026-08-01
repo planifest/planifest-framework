@@ -56,6 +56,21 @@ Scope Lock complete. All four scenario paths captured.
 
 ---
 
+### P1 — Spec
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T06:12:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 2 (4 requirement files; execution-plan + scope + risk-register + domain-glossary) |
+| Telemetry | emitted |
+| Notes | No OpenAPI spec, data contract, operational-model, SLO-definitions, or cost-model produced — not applicable (no API, no data store, no runtime/deployment), consistent with precedent set by 0000009 and 0000010. component.yml updated (feature, version 0.21.0, requirements-derived responsibilities/scope/risk); stack section left untouched per skill rule. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
