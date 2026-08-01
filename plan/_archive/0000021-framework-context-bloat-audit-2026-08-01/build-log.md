@@ -163,6 +163,21 @@ Scope Lock complete. All four scenario paths captured.
 
 ---
 
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T11:55:00Z` |
+| Model tier | cheaper (build-assessment-agent sub-agent dispatch) |
+| Skills loaded | planifest-ship-agent (dispatches planifest-build-assessment-agent) |
+| Agents spawned | 1 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Archive path confirmed: plan/_archive/0000021-framework-context-bloat-audit-2026-08-01/. Dispatching build-assessment-agent now. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
