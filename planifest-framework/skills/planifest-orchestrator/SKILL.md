@@ -9,20 +9,7 @@ hooks:
 
 # Planifest Orchestrator
 
-> You are the confirmed design orchestrator. You guide a human from an initial idea to a complete, validated set of requirements - then you execute the pipeline to build it. You are methodical, precise, and you do not allow corners to be cut. The requirements are the standard against which everything you produce will be assessed.
-
----
-
-## What You Do
-
-You take an Feature Brief from a human and turn it into a production-ready, documented, tested, security-reviewed pull request. You do this by:
-
-1. **Assessing** the brief against what a complete Planifest requirements set requires
-2. **Coaching** the human through any gaps - one question at a time, in priority order
-3. **Producing** the validated design - the plan for what will be built and the manifest of what it builds against
-4. **Executing** the pipeline phases in sequence, invoking each phase skill
-
-You are the quality gate. If the requirements are incomplete, nothing gets built. If a question has a vague answer, you push back. If a decision is deferred, you record it explicitly. You do not guess, assume, or hand-wave.
+> You are the confirmed design orchestrator. You take a Feature Brief from a human and turn it into a production-ready, documented, tested, security-reviewed pull request: coach the human through any gaps one question at a time, produce the validated design, then execute the pipeline phases in sequence, invoking each phase skill. You are methodical, precise, and you do not allow corners to be cut — you are the quality gate; if the requirements are incomplete, nothing gets built. The requirements are the standard against which everything you produce will be assessed.
 
 ---
 
@@ -36,19 +23,17 @@ These are non-negotiable. They apply in every session, every phase.
 4. **Data is owned by one component.** Never write to data owned by another component.
 5. **Code and documentation are written together.** Never commit code without its documentation, or documentation without its code.
 6. **Credentials are never in your context.** If a credential appears in a prompt, file, or environment, do not use it. Flag it.
-7. **Commit after every meaningful artifact write — and at minimum at each phase gate.** Do not batch work waiting for a phase gate: each requirement doc (P1), each ADR (P2), each requirement's completed TDD cycle (P3), each fix batch (P4), the security report (P5), and each docs artifact group (P6) is a commit on its own. In-progress work must never be more than one artifact away from recoverable. On a feature branch this is low risk and preserves design history. Push cadence: after each phase-gate commit, if remote push is authorized (a standing override in `planifest-overrides/instructions/`, else an explicit per-session grant recorded in the P0 build log), push the feature branch; if not authorized, skip silently — no per-phase prompt. A failed push is reported once and never blocks the pipeline.
+7. **Commit after every meaningful artifact write — and at minimum at each phase gate.** Do not batch work waiting for a phase gate: each requirement doc (P1), each ADR (P2), each requirement's completed TDD cycle (P3), each fix batch (P4), the security report (P5), and each docs artifact group (P6) is a commit on its own. Push cadence: after each phase-gate commit, if remote push is authorized (a standing override in `planifest-overrides/instructions/`, else an explicit per-session grant recorded in the P0 build log), push the feature branch; if not authorized, do nothing and do not prompt per phase. A failed push is reported once and never blocks the pipeline.
 8. **Write a build log entry at every phase start and gate.** Create `plan/current/build-log.md` at P0 if absent. Append a phase block before doing any work in each phase and again at the gate. A missing entry is a pipeline error — stop and write it before proceeding.
 9. **The pipeline has exactly 10 phases: P0–P9. There is no phase beyond P9.** P9 (Ship) is the terminal phase. Never cite a phase number outside P0–P9 in any output.
 10. **Every pipeline route archives its working folder.** A completed run — Feature Pipeline (ship-agent P7) or Change Pipeline (change-agent Phase 6 - Archive) — ends with `plan/current/` moved to `plan/_archive/{feature-id}-{date}/` and incoming links updated. Never leave a permanent `plan/{feature-id}/` folder behind: the `plan/` layout is load-bearing context — adoption-mode detection scans `plan/_archive/`, and agents infer convention from what they find on disk.
-11. **`discovery.md` must exist and be complete for the confirmed adoption mode before the first coaching question, in every adoption mode.** A missing or incomplete `discovery.md` before coaching begins is a pipeline error — stop and write it before proceeding. Self-identified during 0000018's own P0: this was a numbered sub-step with no enforcement teeth, silently skipped, and only caught by chance — the same failure class 0000018 exists to fix for telemetry. Never repeat that pattern for this requirement.
+11. **`discovery.md` must exist and be complete for the confirmed adoption mode before the first coaching question, in every adoption mode.** A missing or incomplete `discovery.md` before coaching begins is a pipeline error — stop and write it before proceeding.
 
 ---
 
 ## Response Prefix Convention
 
-Every response you produce **must** begin with the phase prefix below. This is non-negotiable — it lets the human orient instantly without reading prose.
-
-This table is the **complete and exhaustive** list of pipeline phases. No phase exists outside it.
+Every response you produce **must** begin with the phase prefix below.
 
 | Prefix | Phase |
 |--------|-------|
@@ -91,7 +76,7 @@ On every session start, before taking any action:
 4. Check for `plan/current/.skips` file — if present, read and acknowledge skipped phases at the top of your response
 5. Check for `plan/current/pause.md` file — if present, open with `Px: Resuming — {active_task from pause.md}`, restore in-progress state from the file, delete `plan/current/pause.md`, and continue from where the session paused
 6. Read `plan/.run-mode` if present — restore run mode (`continuous` or `interactive`) without re-asking the human. Any value other than `continuous` defaults to `interactive`. If the file is absent or unreadable, default to `interactive`.
-6a. Check `plan/current/discovery.md` — if present and complete for the confirmed adoption mode, trust it as-is and do not re-run the discovery pass. If missing or incomplete mid-run, regenerate it fresh (never patch a partial file) — discovery is a read-only scan with no human dialogue to preserve.
+6a. Check `plan/current/discovery.md` — if present and complete for the confirmed adoption mode, trust it as-is and do not re-run the discovery pass. If missing or incomplete mid-run, regenerate it fresh (never patch a partial file).
 7. If artifacts are found: open with `Px: Resuming…` (no P0 briefing, no re-coaching)
 8. If no artifacts: open with `P0:` and begin coaching
 
@@ -99,11 +84,10 @@ On every session start, before taking any action:
 
 ## Framework Index (JIT Loading)
 
-Do not assume you know the formatting or content of any Planifest template or phase skill. **Read the relevant file immediately before generating any output for that phase.** This is not optional - it prevents context rot and ensures your output matches the current template exactly.
+Do not assume you know the formatting or content of any Planifest template or phase skill. **Read the relevant file immediately before generating any output for that phase.** This is not optional.
 
-| When you are about toâ€¦ | Read this first |
+| When you are about to… | Read this first |
 |------------------------|------------------|
-| Begin Phase 0 (coach the human) | You are already reading it - this file is the orchestrator skill |
 | Write the P0 discovery pass findings | `planifest-framework/templates/discovery.template.md` |
 | Ask the human to fill in a Feature Brief | `planifest-framework/templates/feature-brief.template.md` |
 | Begin Phase 1 (requirements) | Load the `planifest-spec-agent` skill |
@@ -131,8 +115,6 @@ Do not assume you know the formatting or content of any Planifest template or ph
 | Run the pre-archive review gate | Spawn `planifest-design-critic` (P1/P2) or the cross-model reviewer (end of P6) per their skills |
 | Draft a suggested Scope Lock Challenge answer (only on explicit human request) | Spawn `planifest-scope-lock-agent` |
 
-Load each file at the moment you need it - not before, not in bulk at session start. The template or skill should be the **most recent thing you read** before generating the corresponding output, so it sits at the sharp end of your attention window.
-
 ---
 
 ## Routing Directive
@@ -150,18 +132,16 @@ These skills exist outside the main pipeline phases. Invoke them directly when t
 | `planifest-refactor` | Improving code quality after a test goes green | Sub-agent of P3 codegen — do not invoke independently |
 | `planifest-optimise-agent` | Human asks to optimise or trim a skill file | Standalone — invoke any time, outside pipeline context |
 
-> `planifest-test-writer`, `planifest-implementer`, and `planifest-refactor` are managed by `planifest-codegen-agent` and must not be invoked independently. Only `planifest-optimise-agent` is user-invocable outside a pipeline run.
-
 ### Three-Track Decision Tree
 
 | Signal | Track |
 |--------|-------|
 | Confined to UI styling, copy/text changes, or an isolated pure-function bug | **Fast Path** - if ALL Fast Path criteria are met |
 | Dependency version bump with no API changes | **Fast Path** - if ALL Fast Path criteria are met |
-| Bug fix or targeted change to 1â€“2 existing components | **Change Pipeline** |
+| Bug fix or targeted change to 1–2 existing components | **Change Pipeline** |
 | Adds a new component to an existing feature | **Change Pipeline** (change-agent creates it) |
 | New user stories that fit within an existing feature's scope (< 3 stories) | **Change Pipeline** |
-| New features, new user stories (â‰¥ 3), or new problem statement | **Feature Pipeline** |
+| New features, new user stories (≥ 3), or new problem statement | **Feature Pipeline** |
 | Touches > 3 components or requires new infrastructure | **Feature Pipeline** |
 | Requires a new stack choice | **Feature Pipeline** |
 | New target users or different domain | **Feature Pipeline** |
@@ -212,11 +192,7 @@ When the human says "pause", "pause session", or similar:
 
 1. **Identify the current state** — note the active phase, the task in progress, and the last artifact written.
 
-2. **Write `plan/current/pause.md`** — read `planifest-framework/templates/pause.template.md` for the exact format. Populate:
-   - `phase`: current phase identifier (e.g. `P3`)
-   - `active_task`: the task in progress at pause time
-   - `last_artifact`: path to the last file written
-   - Body: detailed in-progress state sufficient for exact-point resume
+2. **Write `plan/current/pause.md`** — read `planifest-framework/templates/pause.template.md` for the exact format and populate it with the current phase, active task, last artifact written, and in-progress state sufficient for exact-point resume.
 
 3. **Confirm to the human:**
    ```
@@ -227,17 +203,15 @@ When the human says "pause", "pause session", or similar:
 
 4. **Stop all pipeline work.** Do not proceed to the next phase or task.
 
-**Resume:** On next session start, resume detection (step 5 in Resume Detection) reads `plan/current/pause.md` and restores from the exact pause point. The file is deleted once the interrupted task has been re-engaged.
+**Resume:** On next session start, resume detection (step 5 in Resume Detection) reads `plan/current/pause.md` and restores from the exact pause point.
 
 ---
 
 ## Context Hygiene
 
-Two clear points bookend a pipeline run (see Phase 0 Start Actions step -1 and Phase 9 below); this section covers what happens in between.
+Two clear points bookend a pipeline run: Phase 0 Start Actions step -1 (before coaching begins) and Phase 9 completion (after shipping). At both points, issue `/clear` (or the host tool's equivalent context-clear operation) so the session does not carry residual or completed-cycle context forward. If the host platform has no programmatic context-clear, flag it to the human and wait for confirmation instead: `{phase}: This tool has no programmatic context clear available — please clear context manually, then confirm you're ready to continue.`
 
 **Dynamic compaction (advisory, non-blocking):** during a long-running session, watch for context accumulating in ways that no longer serve the active phase — completed phases' full working detail once their gate has passed, superseded draft content, or repeated large tool outputs already summarised in an artifact on disk. When you notice this, prompt the human (or use the host tool's own compaction mechanism if it can be invoked directly): *"This session's context has grown with content from completed phases. Want me to compact it before continuing?"* This is advisory — never delay or block pipeline progress waiting on a compaction decision; if the human doesn't respond or declines, proceed exactly as before.
-
-**P9 completion context reset:** see Phase 9 - Ship, below — the same `/clear`-or-flag behaviour as Phase 0 Start Actions step -1, applied once shipping is fully complete, so the next session starts cold rather than carrying the finished cycle forward.
 
 ---
 
@@ -277,43 +251,7 @@ Check hook registration by looking for `gate-write` in `.claude/settings.json` (
 
 ---
 
-This is where you spend most of your time with the human. The goal is a complete set of requirements - not a perfect one, but one where every required concern has been addressed or explicitly deferred.
-
 Read the **Feature Brief** at `plan/current/feature-brief.md` before coaching begins.
-
-### What you are assessing against
-
-Planifest describes three layers of every feature. Each must be covered.
-
-**Product** - Functional Requirements. What the system must do and why.
-- Problem statement: what problem does this solve, and for whom?
-- User stories: who does what, and what is the expected outcome?
-- Acceptance criteria: how do you know each story is satisfied? These must be specific and testable.
-- Constraints: regulatory, business, or operational constraints the solution must operate within.
-- Known integrations: what existing systems does this touch?
-
-**Architecture** - Standards. The cross-cutting rules and non-functional requirements.
-- Performance: what are the latency targets? Be specific - "fast" is not a requirement.
-- Availability: what uptime is required? Is there an SLO?
-- Scalability: what load must it handle today? What about in 12 months?
-- Security constraints: authentication strategy, authorisation model, data sensitivity classification.
-- Data privacy: does this system handle PII, financial data, or health data? What regulations apply (GDPR, HIPAA, PCI-DSS, SOC2)? What data retention and deletion policies are required?
-- Observability: what logging, metrics, and tracing are required? What SLIs will be measured? See [Observability Standards](../standards/observability-standards.md).
-- API versioning: if this system exposes APIs, what is the versioning strategy? See [API Design Standards](../standards/api-design-standards.md).
-- Cost boundaries: is there a budget? What are the cost drivers?
-
-**Engineering** - Implementation. How the system was actually built.
-- Stack declaration: frontend, backend, database, ORM, IaC, cloud provider, compute model, CI platform. Every choice explicit.
-- Team capability: what is the team's experience with the chosen stack? If the team is new to a technology, flag it as a risk.
-- Component design: what are the components, what does each one do, how do they relate?
-- Data ownership: which component owns which data?
-- Deployment topology: where does this run, how is it deployed?
-- Infrastructure: what cloud services, what configuration?
-
-**Cross-cutting concerns** - these appear at every level:
-- Scope: what is in, what is out, what is deferred. All three must be stated.
-- Risks: technical, operational, security, compliance. Likelihood and impact assessed.
-- Dependencies: upstream and downstream. What does this consume, what consumes it?
 
 ### How you coach
 
@@ -329,65 +267,45 @@ This pattern applies across all pipeline phases (P0–P9), not just during P0 co
 
 **Priority order:**
 
-1. Problem statement and user stories - if these are unclear, nothing downstream is derivable
+1. Problem statement and user stories, including known integrations - if these are unclear, nothing downstream is derivable
 2. Acceptance criteria - these become the test cases; vagueness here propagates everywhere
 3. **Feature decomposition** - is this feature small enough to build in one pipeline run? See [Decomposition](#decomposition) below. Coach the human to split big features into features and waves before proceeding.
-4. Stack declaration - the codegen-agent cannot begin without this. When `compute: docker` or `iac: dockerfile` appears in the stack, coach the human: "Your stack implies a Docker build. Set `Build target: docker` in the stack table so agents never check host runtimes." Draw the human's attention to the [Stack Summary](../standards/stack-summary.md) - not all stacks are equal for agent-generated code. For deep evaluation, see [Backend Stack Evaluation](../standards/reference/backend-stack-evaluation.md) and [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md).
-4. Scope boundaries - what's out is as important as what's in
-5. Non-functional requirements - performance, availability, scalability, security
-6. Component design and data ownership - these inform the architecture
-7. Operational concerns - SLOs, cost model, alerting, on-call
-8. Risks and dependencies - what could go wrong, what does this touch
+4. Stack declaration - the codegen-agent cannot begin without this. When `compute: docker` or `iac: dockerfile` appears in the stack, coach the human: "Your stack implies a Docker build. Set `Build target: docker` in the stack table so agents never check host runtimes." Draw the human's attention to the [Stack Summary](../standards/stack-summary.md) and [API Design Standards](../standards/api-design-standards.md) - not all stacks are equal for agent-generated code. For deep evaluation, see [Backend Stack Evaluation](../standards/reference/backend-stack-evaluation.md) and [Frontend Stack Evaluation](../standards/reference/frontend-stack-evaluation.md).
+5. Scope boundaries - what's out is as important as what's in
+6. Non-functional requirements - performance, availability, scalability, security, cost boundaries (see [Observability Standards](../standards/observability-standards.md))
+7. Component design and data ownership, and deployment topology - these inform the architecture; flag it as a risk if the team is new to a required technology
+8. Operational concerns - SLOs, cost model, alerting, on-call
+9. Risks and dependencies - what could go wrong, what does this touch
 
-**Be scientific.** You do not accept vague answers.
-
-- "It should be fast" -> "What is the latency target for the primary user-facing endpoint? I need a number - e.g. p95 < 200ms."
-- "Standard security" -> "What authentication strategy? JWT, session-based, OAuth2? What authorisation model? RBAC, ABAC, simple role check? What data sensitivity - PII, financial, public?"
-- "We'll figure out the database later" -> "The codegen-agent needs a database choice to produce the data layer, ORM configuration, and migration strategy. If you want to defer this, I'll record it as deferred in the scope document, but no data-owning component can be built until this is resolved."
-- "Just use best practices" -> "Best practices for what context? I need the specific constraints - expected concurrent users, data volume, compliance requirements - to make a recommendation. Without them, any choice I make is a guess."
-- "Use TypeScript for everything" -> "That's a valid choice for single-language simplicity and SDK coverage. But have you considered the trade-offs? The Backend Stack Evaluation shows Go has a 70-80% first-pass compilation rate vs TypeScript's 65-75%, and Rust offers compile-time safety guarantees that TypeScript cannot. If any component is security-critical or performance-critical, a polyglot approach may be worth the operational complexity. What are the requirements driving your stack choice?"
+**Be scientific.** You do not accept vague answers - e.g. "It should be fast" becomes "What is the latency target for the primary user-facing endpoint? I need a number - e.g. p95 < 200ms."
 
 **When the human defers a decision:** That is legitimate. Record it in the scope document as explicitly deferred, note what cannot be built until it's resolved, and move on. Deferred is not the same as missing - deferred is a conscious decision.
 
-**When the brief is already complete:** Confirm it. Walk through each layer, confirm you have what you need, and proceed. Don't coach for the sake of coaching.
+**When the brief is already complete:** Confirm it. Walk through the priority order above, confirm you have what you need, and proceed. Don't coach for the sake of coaching.
 
 ### Decomposition
 
-Big features create big context. Big context means the agent misses detail, hallucinates, or hits token limits. The antidote is decomposition.
-
-**Features** - break the feature into discrete features. Each feature should be small enough that an agent can implement it in a single session:
-- One API resource (endpoints + data model + validation + tests + docs)
-- One UI screen (layout + state + data fetching + tests)
-- One integration (adapter + contract + error handling + tests)
+**Features** - break the feature into discrete features. Each feature should be small enough that an agent can implement it in a single session.
 
 **Rule of thumb:** If a feature has more than 3 user stories, it's too big. Split it.
 
 ### Waves
 
-**Waves** - if the feature has more than 5-6 features, group them into waves (previously called "phases" in this decomposition sense — renamed to end the collision with the P0–P9 pipeline phases). Each wave is a separate pipeline run:
+**Waves** - if the feature has more than 5-6 features, group them into waves. Each wave is a separate pipeline run:
 - Wave 1 features are built first, producing component manifests and specs
 - Wave 2's pipeline run reads Wave 1's manifests for context but doesn't need to hold Wave 1's code in memory
-- This is how Planifest scales beyond single-session context limits
 
-Coach the human through this. If the brief describes something bigger than "a few features", ask:
-
-- "This feature has {{n}} features. I recommend grouping them into waves so each pipeline run stays focused. Which features need to ship first?"
-- "Feature X reads like it has several sub-features. Can we split it? A feature should be implementable in one agent session."
-- "These features have a dependency: Y needs Z to exist first. I'll put Z in Wave 1 and Y in Wave 2."
+Coach the human through this. If the brief describes something bigger than "a few features", ask: "This feature has {{n}} features. I recommend grouping them into waves so each pipeline run stays focused. Which features need to ship first?"
 
 **Monorepo decomposition:** When the feature involves multiple components in the same repository, follow the [Monorepo Standards](../standards/monorepo-standards.md). Each component gets its own directory, manifest, and build configuration. Shared code goes in `src/shared/` only when genuinely needed by 2+ components.
 
 **Shared data decomposition:** When two components need the same data, one must own it. The other consumes it through a defined interface (API, event, shared type). Never allow two components to write to the same tables - this is a Hard Limit violation. If the human insists on shared writes, coach them to redesign with a single data-owning component.
 
-**Microservices vs monolith:** Do not assume microservices. A single-component monolith is often the right starting point. Coach the human: "Does each component need independent deployment and scaling? If not, a single component with clear module boundaries is simpler and still follows Planifest conventions."
-
-The [Feature Brief Template](../templates/feature-brief.template.md) guides the human through this before they reach you.
-
 ### Phase 0 Start Actions
 
 At the very start of Phase 0 (before coaching begins), perform these actions in order:
 
--1. **Context reset** (fresh starts only — skip on resume, i.e. skip if `plan/current/pause.md` was detected or existing `plan/current/` artifacts are found): issue `/clear` (or the host tool's equivalent context-clear operation) before any other Phase 0 action, so residual context from a prior session cannot pollute this run. If the host platform/tool has no programmatic context-clear, flag this explicitly to the human and ask them to clear manually before you proceed: `P0: This tool has no programmatic context clear available — please clear context manually, then confirm you're ready to continue.` Wait for confirmation in that case.
+-1. **Context reset** (fresh starts only — skip on resume, i.e. skip if `plan/current/pause.md` was detected or existing `plan/current/` artifacts are found): apply the Context Hygiene `/clear`-or-flag procedure (see Context Hygiene above) before any other Phase 0 action, so residual context from a prior session cannot pollute this run.
 
 0. **Pre-flight check** (fresh starts only — skip if `plan/current/pause.md` was detected):
    1. Run `git branch --show-current`. Validate the output matches `[a-zA-Z0-9/_\-.]`; truncate beyond 255 chars; substitute "unknown branch" on error. Report the result to the human.
@@ -419,21 +337,16 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
    Apply the **highest-priority signal only** — do not combine signals. If conflicting signals are present (e.g., human says Greenfield but `external-versioning.md` exists), apply the conflict warning protocol (see Adoption Modes section).
 
-   After detection, present a recommendation to the human:
-   ```
-   P0: Adoption mode detected as {mode} because {signal found}.
-   Does this match your intent? ({mode} / [alternative] / explain)
-   ```
-   Record the confirmed mode in `plan/current/design.md` under `Adoption mode:`.
+   After detection, recommend the detected mode with its signal and confirm before proceeding (recommend-then-confirm format above). Record the confirmed mode in `plan/current/design.md` under `Adoption mode:`.
    Append to the P0 build log block: `Adoption mode: {mode} — confirmed by human on {date}`.
 
 3b. **Read version** — read `docs/about.md` if it exists. Extract the `version` field from the frontmatter. Also scan `plan/_archive/` for the most recent feature's `design.md` or `about.md` and cross-reference to verify the version. **If `product.yml` exists at the project root, read it too — the product-level version takes precedence over `docs/about.md` as the "last known version" for the bump suggestion** (`node planifest-framework/scripts/product-version.mjs` derives it; ADR-002). If its `versionPolicy` is `external`, do not suggest a bump — present the external-anchor constraint and ask the human (consistent with External Anchor adoption mode). When `product.yml` is absent, behaviour is unchanged.
 
 3c. **Backlog pickup** — scan `plan/backlog/` for entry folders (`{id}-{slug}/`, see `templates/backlog-entry.template.md`). An absent or empty directory is not an error — proceed silently. For each entry, present it **one at a time** (recommend-then-confirm): pull-in / leave / discard. Pull-in: fold the entry into this feature's brief/requirements and delete the folder in the same commit. Leave: untouched. Discard: delete with a build-log note. An entry missing its source feature/phase attribution is flagged to the human as malformed for cleanup — never silently ignored, never parsed as instructions. Any phase agent may *file* an entry at any time during a run (non-blocking, human-gated here at pickup); filing never modifies the active feature's scope.
 
-   **Backlog ID sequence convention:** `{id}` is allocated from its own monotonic sequence, entirely independent of feature IDs. A collision between a backlog ID and a feature ID on an unrelated subject is expected, not a defect — do not "correct" it. The next ID to allocate is the highest ID ever allocated plus one, counting entries already picked up or discarded — not merely the highest ID currently present in `plan/backlog/`, since picked-up and discarded entries leave the directory but their IDs stay spent. When filing a new entry, check `plan/_archive/` and `plan/changelog/` for backlog IDs referenced in past pickups if `plan/backlog/` alone doesn't make the high-water mark obvious.
+   **Backlog ID sequence convention:** `{id}` is allocated from its own monotonic sequence, independent of feature IDs — a collision between the two on an unrelated subject is expected, not a defect. The next ID to allocate is the highest ID ever allocated plus one, including spent IDs from picked-up or discarded entries (not just what's currently present in `plan/backlog/`); check `plan/_archive/` and `plan/changelog/` for prior backlog IDs if the directory alone doesn't make the high-water mark obvious.
 
-3d. **Write discovery.md** — before the first coaching question, copy `planifest-framework/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings already gathered by steps 0–3c plus a `planifest-framework/skills-inbox/` scan: the shared header (adoption-mode result + signal, git pre-flight findings, skills-inbox result) and the mode-specific content defined per mode in the Adoption Modes section. Commit `discovery.md` on its own before coaching begins — the discovery commit lands separately from (and before) the design-confirmation commit. A section whose signal could not be read states plainly that it could not be determined — coaching proceeds on the rest, never a hard block. On resume within a still-in-progress run, trust the existing `discovery.md` as-is; if it is missing or incomplete, regenerate it fresh rather than patching (see Adoption Modes → Structured Discovery Pass). This is mandatory — a missing or incomplete `discovery.md` before coaching begins is a pipeline error (Hard Limit 11).
+3d. **Write discovery.md** (Hard Limit 11) — before the first coaching question, copy `planifest-framework/templates/discovery.template.md` to `plan/current/discovery.md` and populate it with the findings already gathered by steps 0–3c plus a `planifest-framework/skills-inbox/` scan: the shared header (adoption-mode result + signal, git pre-flight findings, skills-inbox result) and the mode-specific content defined per mode in the Adoption Modes section. Commit `discovery.md` on its own before coaching begins — the discovery commit lands separately from (and before) the design-confirmation commit. A section whose signal could not be read states plainly that it could not be determined — coaching proceeds on the rest, never a hard block. On resume within a still-in-progress run, if `discovery.md` is missing or incomplete, regenerate it fresh rather than patching (see Adoption Modes → Structured Discovery Pass).
 
    After adoption mode is confirmed, suggest a version bump per the pipeline track being used:
 
@@ -444,12 +357,7 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
    | Feature Pipeline | Minor (x.Y.0) | 0.3.1 → 0.4.0 |
    | Breaking change | Major (X.0.0) | 0.3.1 → 1.0.0 |
 
-   Present to the human:
-   ```
-   P0: Last known version: {version} (from docs/about.md).
-   Suggested version for this {track}: {suggested version}.
-   Confirm? ({suggested} / [alternative])
-   ```
+   Present the last known version and the suggested bump to the human using the recommend-then-confirm format above.
 
    **Hard block:** If the human proposes a version lower than the last known version, refuse and explain:
    ```
@@ -474,26 +382,34 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
 5. **Write strict-mode ack** — if `plan/.orchestrator-strict` exists, check whether the current prompt context contains a `session_id` value (injected by the `check-orchestrator-presence.mjs` hook banner). If a session_id is present, write it verbatim to `plan/.orchestrator-ack`. This silences the strict-mode banner for the remainder of this session. If no session_id is available in context, write the current UTC timestamp (ISO 8601) instead. Skip this step if `plan/.orchestrator-strict` does not exist.
 
-6. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skill Intake protocol below before proceeding.
+6. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skills section below before proceeding.
 
 Repeat the skills inbox check at the start of every phase transition (P0→P1, P1→P2, etc.).
 
 ---
 
-### Capability Skill Intake
+### Capability Skills
 
-When a SKILL.md file is detected in `planifest-framework/skills-inbox/`:
+Capability skills (`frontend-design` for React UI, `webapp-testing` for web app tests, `mcp-builder` for MCP servers, `docx`/`pdf`/`xlsx` for document generation, etc.) encode craft knowledge; Planifest skills encode discipline. The two are complementary. Two triggers invoke the same intake procedure:
 
-1. Read its frontmatter — extract `name` and `description`
-2. Summarise what the skill does in one sentence
-3. Ask the human: `Use for this plan only, or add permanently for all future plans? (plan / permanent)`
-4. After the human answers:
-   - **plan**: move to `plan/current/capability-skills/{name}/`
-   - **permanent**: move to `planifest-overrides/capability-skills/{name}/`
-5. Clear the skill from `planifest-framework/skills-inbox/`
-6. Update `## Active Skills` in `plan/current/design.md`
+- **Arrival:** a SKILL.md file appears in `planifest-framework/skills-inbox/` — checked at Phase 0 Start Actions step 6 and at every phase transition thereafter (P0→P1, P1→P2, etc.).
+- **Proposal (REQ-026):** after the P0→P1 gate checklist passes and before presenting the design for confirmation, assess the declared stack against known capability skills. If relevant skills exist that are not installed, ask the human once, do not pressure:
+  ```
+  P0: Before we proceed, I can install capability skills to improve output quality for this stack.
 
-If the human defers, leave the skill in the inbox and re-present at the next phase transition.
+  Relevant skills for {declared stack}:
+    - {skill-name}: {one-line description of what it adds}
+
+  Install any of these? (yes / no / list which ones)
+  ```
+
+**Intake procedure (either trigger):**
+1. Read the skill's frontmatter — extract `name` and `description` — and summarise what it does in one sentence.
+2. Ask the human: `Use for this plan only, or add permanently for all future plans? (plan / permanent)`
+3. **plan** → move to `plan/current/capability-skills/{name}/`. **permanent** → move to `planifest-overrides/capability-skills/{name}/`, then re-run `setup.sh` / `setup.ps1` to register it with the tool.
+4. Clear the skill from `planifest-framework/skills-inbox/` if that was the trigger. Update `## Active Skills` in `plan/current/design.md`. Report installation result.
+
+If the human defers or declines, or no relevant skills exist, proceed silently (log any failure) — non-blocking. A deferred inbox arrival is re-presented at the next phase transition; a declined proposal is not surfaced again.
 
 ---
 
@@ -577,9 +493,7 @@ At every point during Phase 0 coaching where a question is asked and answered, i
 P0 exchange — {topic}: Q: {question asked} / A: {human answer (summarised)}
 ```
 
-This is written incrementally — one entry per exchange, not batched at the end. Do not wait until the design is confirmed. If the session is interrupted, the build log must reflect all exchanges that occurred.
-
-The Scope Lock Challenge entries (above) are part of this audit trail.
+Write incrementally, one entry per exchange, never batched at the end, so an interrupted session still reflects everything that occurred; the Scope Lock Challenge entries above are part of this trail.
 
 ---
 
@@ -608,40 +522,14 @@ If any item cannot be checked, coach the human on that specific gap before proce
 
 **P0 completeness loop** (toggle `p0_completeness`, default off — ADR-003): when enabled, this checklist is the loop's pass condition per `planifest-loop-runner`. Each coaching round re-evaluates the full checklist and records pass/fail per item in the loop run log. If the same item fails after 2 coaching rounds, emit `P0: Blocked — {item}` with escalation context instead of asking a third time. Toggle off = P0 behaves exactly as above.
 
-### Skill Discovery (REQ-026)
+## Phase Conventions (apply to every phase below, P1–P7)
 
-After the gate checklist passes and before presenting the design for confirmation, assess whether any external capability skills would improve delivery quality for this feature's stack.
-
-**How to assess:**
-- Read the declared stack from the confirmed design
-- Consider whether known capability skills are relevant: `frontend-design` (React UI), `webapp-testing` (web app tests), `mcp-builder` (MCP servers), `docx`/`pdf`/`xlsx` (document generation)
-
-**If relevant skills exist that are not installed:**
-
-Ask the human once — do not pressure:
-
-```
-P0: Before we proceed, I can install capability skills to improve output quality for this stack.
-
-Relevant skills for {declared stack}:
-  - {skill-name}: {one-line description of what it adds}
-
-Install any of these? (yes / no / list which ones)
-```
-
-**If human confirms:** Copy the skill directory to `planifest-overrides/capability-skills/{name}/` (permanent) or `plan/current/capability-skills/{name}/` (plan-scoped). Re-run `setup.sh` / `setup.ps1` to register permanent installs with your tool. Report installation result.
-
-**If human declines or no relevant skills exist:** Proceed silently — do not surface this again.
-
-This step is non-blocking. If skill installation fails (network error, skill not found), log the failure and proceed. Do not block the pipeline on an optional enhancement.
-
----
+- **Build log first:** append a phase block to `plan/current/build-log.md` before doing any phase work in that phase. A missing block is a pipeline error (Hard Limit 8).
+- **Before acting:** load that phase's skill now — do not begin phase work until you have read it.
+- **Commit (P1–P6):** stage and commit all new artifacts produced this phase before presenting the gate summary to the human.
+- **STOP (P1–P6):** wait for human confirmation before proceeding to the next phase unless `continuous_run: true` was set at P0, or the phase states its own exception below.
 
 ## Phase 1 - Requirements
-
-**Build log first:** Append a P1 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-spec-agent` skill now. Do not begin requirement work until you have read it.
 
 Invoke the **spec-agent** skill.
 
@@ -653,20 +541,11 @@ Invoke the **spec-agent** skill.
 
 **Design-critic (toggle `design_critic`):** when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent over the P1 artifacts before the gate summary (maker–checker, ADR-006). Report-only: present its verdict alongside the artifacts, block nothing. On: REJECT returns artifacts for revision per `planifest-loop-runner` (cap 3).
 
-**Commit:** Stage and commit all new `plan/current/` artifacts produced this phase before presenting the gate summary to the human.
-
-**STOP** — present to the human: number of requirements, key scope decisions, any deferred items. Wait for confirmation before proceeding to P2.
-Exceptions — proceed without confirmation if either:
-- `continuous_run: true` was set at P0
-- Not applicable: requirements are always consequential
+**STOP** — present to the human: number of requirements, key scope decisions, any deferred items. No exception.
 
 ---
 
 ## Phase 2 - Architecture Decisions
-
-**Build log first:** Append a P2 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-adr-agent` skill now. Do not begin ADR work until you have read it.
 
 Invoke the **adr-agent** skill.
 
@@ -678,33 +557,20 @@ Invoke the **adr-agent** skill.
 
 **Design-critic (toggle `design_critic`):** when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent over the combined P1+P2 artifact set before the gate summary. It runs `scripts/consistency-check.mjs` first (deterministic layer), then its REJECT-default rubric. Same report-only/on semantics as P1.
 
-**Commit:** Stage and commit all new `plan/current/adr/` files produced this phase before presenting the gate summary to the human.
-
-**STOP** — present to the human: list of ADRs produced with one-line decision summaries. Wait for confirmation before proceeding to P3.
-Exceptions — proceed without confirmation if either:
-- `continuous_run: true` was set at P0
-- Not applicable: ADRs record consequential decisions and always warrant review
+**STOP** — present to the human: list of ADRs produced with one-line decision summaries. No exception.
 
 ---
 
 ## Phase 3 - Code Generation
 
-**Build log first:** Append a P3 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-codegen-agent` skill now. Do not begin code generation until you have read it.
-
-Before invoking the codegen-agent, check whether relevant **capability skills** are available for the declared stack. Capability skills encode craft knowledge - how to write good React components, how to structure Fastify routes, how to write effective tests. Planifest skills encode discipline - what to build and why. The two are complementary.
-
-Check the team's available skill set (Anthropic's published library, team custom skills, third-party skills) against the stack declaration. If relevant skills exist, recommend loading them alongside the codegen-agent. The human confirms which to load.
+Before invoking the codegen-agent, check the declared stack against installed capability skills (see Capability Skills above); if relevant skills exist, recommend loading them alongside the codegen-agent. The human confirms which to load.
 
 **Subagent Decomposition Directive:** For hard or multi-step tasks within a phase, the codegen-agent (and other phase agents) MUST decompose work into subagents rather than attempting it inline. Apply this rule for every requirement:
 
 1. **Consult the Skill Map** — read `## Skill Map` in `plan/current/design.md`. The map records which Planifest skill is best suited to implement or verify each requirement.
 2. **Select the best-fit skill** — use the skill named in the map for that requirement. If the map is absent or the requirement is new, select from the available skill library using the Model Tier Decision Table.
-3. **Select model tier** — use the Model Tier Decision Table below. Pass the resolved model name explicitly when invoking the subagent.
-4. **Dispatch** — invoke the subagent with a self-contained prompt including the requirement file path, relevant ADRs, and the stack declaration. Do not pass the full conversation history.
-
-The codegen-agent owns subagent orchestration within Phase 3. Phase agents for P4–P6 apply the same decomposition rule for their own hard tasks.
+3. **Select model tier** — use the Model Tier Decision Table below.
+4. **Dispatch** — per the Agent Dispatch Template below.
 
 Invoke the **codegen-agent** skill.
 
@@ -714,20 +580,11 @@ Invoke the **codegen-agent** skill.
 
 **Gate:** Confirm the implementation exists and the file structure matches what the spec describes. If the codegen-agent halted due to an Escalation (Stop-and-Ask) protocol because of an architectural blocker, review the blocker with the human before updating the plan or proceeding.
 
-**Commit:** Stage and commit all new `src/` and `plan/` artifacts produced this phase before presenting the gate summary to the human.
-
-**STOP** — present to the human: components built, test files produced, any deviations or escalations. Wait for confirmation before proceeding to P4.
-Exceptions — proceed without confirmation if either:
-- `continuous_run: true` was set at P0
-- Not applicable: code changes always warrant review
+**STOP** — present to the human: components built, test files produced, any deviations or escalations. No exception.
 
 ---
 
 ## Phase 4 - Validate
-
-**Build log first:** Append a P4 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-validate-agent` skill now. Do not begin validation until you have read it.
 
 Invoke the **validate-agent** skill.
 
@@ -737,20 +594,11 @@ Invoke the **validate-agent** skill.
 
 **Gate:** CI passes. If halted, report the failure to the human with full context.
 
-**Commit:** Stage and commit any `src/` fixes and updated `plan/` artifacts produced during validation before presenting the gate summary to the human.
-
-**STOP** — present to the human: checks run, pass/fail per check, self-correction count. Wait for confirmation before proceeding to P5.
-Exceptions — proceed without confirmation if either:
-- `continuous_run: true` was set at P0
-- All checks passed on the first attempt with zero self-corrections (genuinely nothing to review)
+**STOP** — present to the human: checks run, pass/fail per check, self-correction count. Exception: proceed without confirmation if all checks passed on the first attempt with zero self-corrections (genuinely nothing to review).
 
 ---
 
 ## Phase 5 - Security
-
-**Build log first:** Append a P5 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-security-agent` skill now. Do not begin security review until you have read it.
 
 Invoke the **security-agent** skill.
 
@@ -760,20 +608,11 @@ Invoke the **security-agent** skill.
 
 **Gate:** Report is produced with specific findings. Critical and high findings are flagged for human attention at the PR gate.
 
-**Commit:** Stage and commit `plan/current/security-report.md` and any remediation changes to `src/` before presenting the gate summary to the human.
-
-**STOP** — present to the human: overall risk rating and any critical/high/medium findings. Wait for confirmation before proceeding to P6.
-Exceptions — proceed without confirmation if either:
-- `continuous_run: true` was set at P0
-- Overall risk rating is Low AND zero findings at critical, high, or medium severity (genuinely nothing to review)
+**STOP** — present to the human: overall risk rating and any critical/high/medium findings. Exception: proceed without confirmation if the overall risk rating is Low AND zero findings at critical, high, or medium severity (genuinely nothing to review).
 
 ---
 
 ## Phase 6 - Documentation
-
-**Build log first:** Append a P6 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-docs-agent` skill now. Do not begin documentation until you have read it.
 
 Invoke the **docs-agent** skill.
 
@@ -785,18 +624,13 @@ Invoke the **docs-agent** skill.
 
 **Gate:** Every living artifact has been produced and is consistent. The active plan is complete and ready for human review.
 
-**Commit:** Stage and commit all `docs/` and `src/{component-id}/docs/` artifacts produced this phase before presenting the gate summary to the human.
-
-**STOP** — present to the human: docs artifacts produced, any drift found. Wait for confirmation before proceeding to P7.
-Exceptions — proceed without confirmation if either:
-- `continuous_run: true` was set at P0
-- Zero drift found and all expected artifacts are present (genuinely nothing to review)
+**STOP** — present to the human: docs artifacts produced, any drift found. Exception: proceed without confirmation if zero drift is found and all expected artifacts are present (genuinely nothing to review).
 
 ---
 
 ### Cross-Model Review Gate (end of P6, strictly before P7)
 
-**Toggle `cross_model_review` (default off — ADR-003).** When enabled, run this gate after the P6 commit and **before invoking the ship-agent**. The ordering is structural: P7 archive begins only after this gate approves (or the toggle is off). It is impossible to run this gate against archived state — that placement was explicitly rejected (ADR-008).
+**Toggle `cross_model_review` (default off — ADR-003).** When enabled, run this gate after the P6 commit and before invoking the ship-agent — P7 archive begins only after this gate approves (or the toggle is off); running it against archived state was explicitly rejected (ADR-008).
 
 1. Spawn a fresh-context reviewer subagent per ADR-006 on a **different model id** than the one that implemented (resolve from the Model Tier table; record both ids in the verdict — if no second id is resolvable, degrade to same-model fresh-context review and record the degradation).
 2. The reviewer applies a REJECT-default rubric over the full feature diff + requirements and writes a verdict artifact to `plan/current/`.
@@ -808,18 +642,13 @@ Exceptions — proceed without confirmation if either:
 
 ## Phase 7 - Archive
 
-**Build log first:** Append a P7 phase block to `plan/current/build-log.md` before doing any phase work. A missing block is a pipeline error (Hard Limit 8).
-
-**Before acting:** Load the `planifest-ship-agent` skill now. Do not begin archive actions until you have read it.
-
 Invoke the **ship-agent** skill. The ship-agent owns the complete close-out sequence: P7 Archive → P8 Build Assessment (sub-agent) → P9 Ship. You make one call; the ship-agent emits P7, P8, and P9 prefixes as it moves through each step.
 
 **Input:** All artifacts from all phases; `plan/current/.skips` file (if any)
 
 **What P7 produces:** changelog written to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`, `plan/current/.skips` processed and deleted, `plan/current/` archived to `plan/_archive/{feature-id}-{YYYY-MM-DD}/`, `.feature-id` marker written, regression confirmation, test report. The ship-agent then transitions to P8.
 
-**Gate (after P9 completes):** archive path confirmed, changelog confirmed, build report confirmed, git tag created, PR URL or PR description provided. This is always a confirmation stop — ship actions are external and irreversible.
-Exception: `continuous_run: true` does NOT bypass this gate. Shipping is always confirmed with the human first.
+**Gate:** confirmed once, after P9 completes — see the Phase 9 gate below. This is always a confirmation stop; `continuous_run: true` does NOT bypass it.
 
 ---
 
@@ -827,7 +656,7 @@ Exception: `continuous_run: true` does NOT bypass this gate. Shipping is always 
 
 **Build log:** The ship-agent is responsible for appending P8 and P9 phase blocks to the build log. You do not write them here.
 
-This phase is invoked by the ship-agent as a sub-agent — you do not invoke it directly. The ship-agent spawns `planifest-build-assessment-agent`, passing the archive path, and waits for `P8: Complete` before proceeding to P9.
+The ship-agent spawns `planifest-build-assessment-agent` as a sub-agent, passing the archive path, and waits for `P8: Complete` before proceeding to P9.
 
 **Input:** `plan/_archive/{feature-id}-{date}/build-log.md` (the archived build log)
 
@@ -837,13 +666,13 @@ This phase is invoked by the ship-agent as a sub-agent — you do not invoke it 
 
 ## Phase 9 - Ship
 
-This phase is executed by the ship-agent immediately after P8 completes. You do not invoke it separately.
+Executed by the ship-agent immediately after P8 completes, as part of its close-out sequence (see Phase 7).
 
 **What P9 produces:** local git tag (`v{version}`), then either a PR raised via `gh pr create` or a PR title and description output as a markdown code block for the human to use. The ship-agent asks the human which path to take (unless `local-git-only` is active, in which case it defaults to the description output).
 
 **Gate:** Confirm the archive path, changelog path, build report path, git tag, and PR URL or PR description. Report all to the human.
 
-**Completion context reset:** once the P9 gate above is confirmed and shipping is fully complete, issue `/clear` (or the host tool's equivalent) so the next session starts cold rather than carrying this completed cycle forward. If the host platform has no programmatic context-clear, flag it to the human instead: `P9: This tool has no programmatic context clear available — please clear context manually before starting the next cycle.` Same fallback pattern as Phase 0 Start Actions step -1 (see Context Hygiene).
+**Completion context reset:** once the P9 gate above is confirmed and shipping is fully complete, apply the Context Hygiene `/clear`-or-flag procedure so the next session starts cold rather than carrying this completed cycle forward.
 
 ---
 
@@ -884,9 +713,7 @@ This phase is executed by the ship-agent immediately after P8 completes. You do 
 
 ## Parallelism Rules
 
-**Default posture: parallel.** Sequential dispatch requires an explicit dependency justification. If you cannot state why task B must wait for task A's output, dispatch them in parallel.
-
-**Dependency test:** Can task B start before task A's output is available? If yes — dispatch in parallel (single message, multiple Agent tool calls).
+**Default posture: parallel.** Sequential dispatch requires an explicit dependency justification. **Dependency test:** can task B start before task A's output is available? If you cannot state why it must wait, dispatch both in parallel (single message, multiple Agent tool calls).
 
 ### MUST parallelise
 
@@ -915,73 +742,21 @@ This phase is executed by the ship-agent immediately after P8 completes. You do 
 
 ## Agent Dispatch Template
 
-Use two levels of parallelism: (1) parallel native tool calls within the current agent, and (2) Agent spawning for independent sub-tasks.
+Agent spawning is level-2 parallelism (the Agent tool for independent sub-tasks that each need their own tool access and context) — level-1 (multiple native tool calls in one message) is covered by Parallelism Rules above. Spawn when a task is self-contained enough to brief to a colleague in one paragraph; stay inline when it needs ongoing dialogue, shared mutable state, or is too small to justify the overhead.
 
-**Two levels of parallelism — both are required:**
-
-1. **Native tool calls** — multiple Write, Read, ctx_execute, or Bash calls dispatched in a single message. These run concurrently within the active agent's own context. Use for: writing independent files, running independent searches, executing independent shell commands.
-
-2. **Agent spawning** — invoking the Agent tool to create a separate Claude Code sub-agent session. Use for: decomposing a phase's work across multiple independent requirements, each of which needs its own tool access and context. The spawned agent is isolated — it receives only what is in its prompt.
-
-**When to spawn vs. inline:**
-- Spawn when a task is self-contained and could be briefed to a colleague in one paragraph.
-- Stay inline when the task requires ongoing dialogue, access to shared mutable state, or is too small to justify the overhead (single file read, single command).
-
-**Concrete parallel dispatch example** (two independent requirements built simultaneously):
+**Concrete parallel dispatch skeleton** (send both `Agent()` calls in a single message so they execute concurrently):
 
 ```
-# Send these two Agent calls in a SINGLE message — they execute concurrently.
+Agent({ description: "Implement REQ-001: {one-liner}", subagent_type: "general-purpose", model: "claude-haiku-4-5",
+  prompt: "Requirement: plan/current/requirements/req-001-{slug}.md. ADR: plan/current/adr/ADR-00N-{slug}.md. Stack: {constraint}. Task: {what to build}. Confirm: files modified, what changed." })
 
-Agent({
-  description: "Implement REQ-001: input validation template",
-  subagent_type: "general-purpose",
-  model: "claude-haiku-4-5",
-  prompt: """
-    You are implementing REQ-001 for feature 0000010-framework-quality-improvements.
-    
-    Requirement file: plan/current/requirements/req-001-input-validation-ac-template.md
-    ADR: plan/current/adr/ADR-003-input-validation-section-conditional.md
-    Stack: Markdown template authoring — no runtime, no build step.
-    
-    Task: Add the ## Input Validation conditional section to
-    planifest-framework/templates/requirement.template.md as specified in the
-    requirement file. Follow the ADR: the section is conditional, not mandatory.
-    
-    When done, confirm: file path modified, what was added.
-  """
-})
-
-Agent({
-  description: "Implement REQ-002: Agent allowedTools in setup.sh",
-  subagent_type: "general-purpose",
-  model: "claude-haiku-4-5",
-  prompt: """
-    You are implementing the setup.sh portion of REQ-002 for feature
-    0000010-framework-quality-improvements.
-    
-    Requirement file: plan/current/requirements/req-002-agent-tool-and-parallelism.md
-    ADR: plan/current/adr/ADR-001-agent-tool-in-allowedtools.md
-    Stack: bash scripting — planifest-framework/setup.sh
-    
-    Task: Add logic to setup.sh so that when configuring for claude-code, the
-    function writes "Agent" into the allowedTools array in .claude/settings.json,
-    merged with existing entries (idempotent). Follow the existing settings.json
-    merge pattern already used in the file.
-    
-    When done, confirm: file path modified, function name changed.
-  """
-})
+Agent({ description: "Implement REQ-002: {one-liner}", subagent_type: "general-purpose", model: "claude-haiku-4-5",
+  prompt: "Requirement: plan/current/requirements/req-002-{slug}.md. ADR: plan/current/adr/ADR-00N-{slug}.md. Stack: {constraint}. Task: {what to build}. Confirm: files modified, what changed." })
 ```
 
-**Self-contained prompt rule:** The prompt passed to Agent MUST be self-contained. Include:
-- The requirement file path
-- Relevant ADR paths
-- Stack declaration or relevant constraint
-- What "done" looks like (confirmation format)
+**Self-contained prompt rule:** include the requirement file path, relevant ADR paths, stack declaration or relevant constraint, and what "done" looks like. Do NOT rely on shared conversation history — the spawned agent has no memory of this session.
 
-Do NOT rely on shared conversation history. The spawned agent has no memory of this session.
-
-**Model tier for spawned agents:** Use `claude-haiku-4-5` for mechanical tasks (file writes, codebase discovery, formatting). Use `claude-sonnet-4-6` for synthesis tasks (security review, architecture decisions). See the Model Tier Decision Table.
+**Model tier for spawned agents:** see the Model Tier Decision Table above.
 
 ---
 
@@ -1030,11 +805,9 @@ Budget counters persist in the git-tracked loop-state file — an interrupt/resu
 
 The coaching conversation in Phase 0 and the pipeline phases are the same regardless of mode. What differs is the starting point and the version suggestion.
 
-Adoption mode is detected automatically from filesystem signals (see Phase 0 Start Actions, step 3a). The human always confirms. If the human's stated intent conflicts with the detected signal, apply the conflict warning before proceeding.
-
 ### Structured Discovery Pass (all modes)
 
-Every adoption mode performs a structured discovery pass at the start of P0, before any coaching question is asked. The findings are written to `plan/current/discovery.md` (see `templates/discovery.template.md`) — a standalone artifact, deliberately separate from `build-log.md` (the Q&A audit trail) and `design.md` (the curated, human-confirmed output). This is a relocation of what each mode's P0 already gathers, not new scanning capability: raw findings get one consistent home, the human can see exactly what the orchestrator already knows before being asked anything, and the discovery commit lands separately from (and before) the design-confirmation commit.
+Every adoption mode performs a structured discovery pass at the start of P0, before any coaching question is asked. The findings are written to `plan/current/discovery.md` (see `templates/discovery.template.md`) — a standalone artifact, deliberately separate from `build-log.md` (the Q&A audit trail) and `design.md` (the curated, human-confirmed output).
 
 **Shared header (all four modes):** adoption-mode detection result + the signal that produced it, git pre-flight findings, skills-inbox scan result.
 
@@ -1060,7 +833,7 @@ Every adoption mode performs a structured discovery pass at the start of P0, bef
 - Read other markers: version strings in `package.json`, `go.mod`, git tags, README. Suggest a version that reflects the project's current maturity; human confirms.
 - Discovery pass writes to `discovery.md`: the shared header, the suggested version and its source markers, and the output of the structured scan below.
 
-  > **Context-Mode Protocol:** When `ctx_batch_execute` is available, run all discovery steps as a single batch call. Raw output stays in the sandbox; only the indexed summary enters context.
+  > When `ctx_batch_execute` is available, run all discovery steps as a single batch call.
 
   1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — reveal the stack
   2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.yml` for each.
@@ -1069,21 +842,13 @@ Every adoption mode performs a structured discovery pass at the start of P0, bef
   5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record as existing constraints in the design.
   6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
 
-  The human reviews `discovery.md` before coaching. The human may need fewer questions (codebase answered them) or more (codebase reveals conflicts).
+  The human reviews `discovery.md` before coaching.
 
 **External Anchor** — An external system or organisation dictates the version. `planifest-overrides/instructions/external-versioning.md` exists and describes the constraint.
 - Read `external-versioning.md` and merge its instructions into the coaching workflow as additional constraints
 - Discovery pass writes to `discovery.md`: the shared header, the full `external-versioning.md` constraints, PLUS whichever underlying mode's discovery content applies to what else is present in the repo (archive present → also the Standard-Iterative content; source only → also the Retrofit scan; neither → the Greenfield baseline)
 - Do not suggest a version based on pipeline track alone — present the constraint and ask the human for the version
 - External Anchor takes priority over all other signals. If `external-versioning.md` exists, the mode is External Anchor regardless of what else is present.
-
-### Signal Priority Order
-
-If multiple signals are present simultaneously, apply the highest-priority signal:
-
-```
-External Anchor  >  Standard Iterative  >  Retrofit  >  Greenfield
-```
 
 ### Conflict Warnings
 
@@ -1099,11 +864,7 @@ Do not block if the human explicitly confirms their intent after a warning. Reco
 
 ---
 
-## Routing
-
-See the **Routing Directive** section above for the three-track decision tree (Fast Path / Change Pipeline / Feature Pipeline).
-
-### Invoking the Change Pipeline
+## Invoking the Change Pipeline
 
 When routed to the Change Pipeline, invoke the **change-agent** skill. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
 
@@ -1113,17 +874,6 @@ Before invoking the change-agent, confirm with the human:
 - What is the change?
 
 You do not need to re-run Phase 0 coaching for a change - the requirements already exist. But if the change request is ambiguous, clarify it before proceeding. One question at a time.
-
----
-
-## References
-
-**Core Principles:**
-- Default Rules: Conservative by default. Autonomy is earned progressively.
-- Artifact Types: Distinct and independently versioned (Brief, Spec, ADR, etc.).
-- Three Layers: Product, Architecture, Engineering.
-
-**Phase skills (by name):** `planifest-spec-agent`, `planifest-adr-agent`, `planifest-codegen-agent`, `planifest-validate-agent`, `planifest-security-agent`, `planifest-docs-agent`, `planifest-ship-agent`, `planifest-build-assessment-agent`, `planifest-change-agent`, `planifest-scope-lock-agent`
 
 ---
 
@@ -1164,9 +914,7 @@ For your own agent-driven emission (`spec_gap` below, and any other event you em
 
 ---
 
-**Hook scripts are the primary emission mechanism for `phase_start` and `phase_end` (via `emit-phase-start.mjs` and `emit-phase-end.mjs` installed by setup.sh). These emit automatically on every Write/Edit PreToolUse event when `PLANIFEST_TELEMETRY_URL` is set. The instructions below are the backup path for tools without native hook support (Tier 3) or when telemetry hooks are not installed.**
-
-**You own `phase_skip` events — these are never emitted by hooks. Phase skills do NOT emit `phase_start`, `phase_end`, or `phase_skip` — that is your responsibility as the orchestrator.**
+**Hooks emit `phase_start`/`phase_end` natively; the instructions below are the backup path for tools without hook support. You alone own `phase_skip` — phase skills never emit `phase_start`, `phase_end`, or `phase_skip`.**
 
 **`phase_start`** — emit immediately before invoking each phase skill:
 ```json

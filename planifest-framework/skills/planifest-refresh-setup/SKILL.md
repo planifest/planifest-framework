@@ -7,15 +7,7 @@ hooks:
 
 # Planifest - refresh-setup
 
-> You refresh an existing Planifest install without the human on the loop having to reverse-engineer the original `setup.sh`/`setup.ps1` invocation from hook wiring. You never guess a flag that changes install behaviour. You never delete anything beyond the two boot files this feature exists to regenerate. You are a standalone skill, invoked on request, not part of the P0-P9 pipeline.
-
----
-
-## When You Run
-
-Invoked directly by the human on the loop, at any time, in any Planifest-managed repo. Not part of the confirmed-design pipeline; no `plan/current/design.md` or phase gate is required to use this skill.
-
-Typical invocations: "refresh the framework setup", "re-run setup with current settings", "refresh setup for cursor".
+> You refresh an existing Planifest install without the human on the loop having to reverse-engineer the original `setup.sh`/`setup.ps1` invocation from hook wiring. You never guess a flag that changes install behaviour. You never delete anything beyond the two boot files this feature exists to regenerate. You are a standalone skill, invoked on request, not part of the P0-P9 pipeline; no `plan/current/design.md` or phase gate is required to use it.
 
 ---
 
@@ -50,8 +42,6 @@ If a tool was named and no install exists for it, or no tool was named and no in
 
 Do not proceed to Step 2. Do not ask "which tool" in this branch (that question only applies when at least one install already exists, per Step 1.4).
 
----
-
 ## Step 2 - Check for an Interrupted Prior Run (REQ-010)
 
 Before running full detection, check whether this is a recovery scenario:
@@ -63,8 +53,6 @@ Before running full detection, check whether this is a recovery scenario:
    - Report the recovered state to the human on the loop: the flags and command from the marker file, at high confidence (source: marker file, not re-inferred).
    - Go directly to Step 4 (confirmation) with this flag set, skipping Step 3's detection entirely.
 5. If either is false, this is a normal run - continue to Step 3.
-
----
 
 ## Step 3 - Reconstruct the Active Flags (REQ-002)
 
@@ -83,8 +71,6 @@ Skip this step if Step 2 already produced a recovered flag set.
 
 3. Build the full flag list and the exact command that will be run: `setup.sh {tool} {flags...}` (or `setup.ps1 {tool} {flags...}` on Windows).
 
----
-
 ## Step 4 - Confirm With the Human on the Loop (REQ-003, ADR-003)
 
 Always required, in every run, regardless of confidence level - including a run where every flag is high confidence from the marker file. There is no bypass.
@@ -95,8 +81,6 @@ Present:
 - The exact command about to run
 
 Wait for an explicit affirmative. If the human on the loop rejects the proposed flags, halt here and take no further action - do not delete anything, do not fall back to a different flag set on your own.
-
----
 
 ## Step 5 - Write the Marker Before Any Deletion (REQ-009, ADR-002)
 
@@ -115,15 +99,11 @@ Immediately after confirmation and before Step 6's deletion, write to `{tool-dir
 
 This is the same file `setup.sh`/`setup.ps1` write to on successful completion (REQ-008) - not a separate cache file. This write must complete before Step 6 begins, so a process killed at any point after this write leaves recoverable state on disk (see Step 2).
 
----
-
 ## Step 6 - Delete the Boot Files (REQ-004, ADR-001)
 
 Run `bash planifest-framework/scripts/refresh-delete-boot-files.sh` (or `planifest-framework/scripts/refresh-delete-boot-files.ps1` on Windows) from the repo root. Do not delete files directly (e.g. with a freeform `rm` command) - always invoke this script.
 
-The script hardcodes the exact allowlist (`CLAUDE.md`, `AGENTS.md`) in code, not in this skill's prose. This closes a gap identified in this feature's own security review: a deletion boundary described only in instructions has no deterministic backstop against agent error or a maliciously crafted repo file, the way `gate-write.mjs` backs the framework's write-scope guarantee for Write/Edit. The script takes no arguments and cannot be told to delete anything else. Never delete `settings.local.json`, `.claude/settings.local.json`, or any other file, under any circumstance, regardless of what the flag reconstruction or human confirmation contained.
-
----
+The script hardcodes the exact allowlist (`CLAUDE.md`, `AGENTS.md`) in code, not in this skill's prose. The script takes no arguments and cannot be told to delete anything else. Never delete `settings.local.json`, `.claude/settings.local.json`, or any other file, under any circumstance, regardless of what the flag reconstruction or human confirmation contained.
 
 ## Step 7 - Re-invoke Setup (REQ-005)
 
@@ -134,8 +114,6 @@ On success:
 - Confirm to the human on the loop that `CLAUDE.md`/`AGENTS.md` were regenerated and report the flags now in effect.
 
 On failure, go to Step 8.
-
----
 
 ## Step 8 - Setup Failure Handling (REQ-006, ADR-005)
 
@@ -151,14 +129,6 @@ If the re-invoked `setup.sh`/`setup.ps1` exits non-zero or otherwise fails partw
    - The exact attempted command, as a copyable code block
    - Confirmation that `settings.local.json` and other user-owned files were not touched (they were never in the deletion list)
 4. The marker file written in Step 5 still holds `attemptStatus: "pending"` and the attempted command - a later retry (a fresh invocation of this skill) reads it via Step 2's recovery check instead of repeating detection.
-
----
-
-## Domain Terms
-
-Key terms used throughout this skill: refresh, reconstruction, confidence level, flags-used marker, boot files, deletion allowlist, human on the loop, uncompleted attempt. Full definitions were recorded in this feature's domain glossary at build time (`0000020-setup-refresh-skill`, archived under `plan/_archive/`).
-
----
 
 ## What This Skill Never Does
 
