@@ -1,8 +1,30 @@
 # Changelog — 0000021-framework-context-bloat-audit — 01 Aug 2026
 
-**Change:** Fresh-context claude-opus-5 audit and guardrailed trim of redundant/implicit content across `planifest-framework/skills/`, `planifest-framework/standards/`, `planifest-framework/templates/`, and root `CLAUDE.md` (Feature Pipeline)
-**Backlog entries closed:** 0000019 (populate the regression pack — pulled into this feature as a prerequisite)
-**Backlog entries left open:** 0000020 (decompose the orchestrator skill), 0000021 (define a minimal artifact set), 0000024 (record a skill-scope principle ADR) — explicitly deferred per human direction at P0; this feature's real in-file trim ceiling for `planifest-orchestrator/SKILL.md` (21.1% reduction achievable in-file after two full audit rounds) is concrete evidence for backlog 0000020's next attempt
+**Feature:** Framework Context Bloat Audit — fresh-context claude-opus-5 audit and guardrailed trim of redundant/implicit content across `planifest-framework/skills/`, `standards/`, `templates/`, and root `CLAUDE.md`
+**Pipeline run:** P0-P9 complete, no phases skipped
+**PR:** {pending — updated after PR is raised in P9 Step 9}
+
+## What Was Built
+
+The framework's skill/instruction content had accumulated redundant explanation, restated conventions, and spelled-out behavior that current-generation models already infer without being told. A regression pack was populated (1 test → 22) and run as a baseline before any content was touched; three parallel fresh-context `claude-opus-5` subagents audited every skill, standard, and template file; recommended trims were applied under a dual-guardrail process (no enforcement-content loss, no ambiguity regression) verified by the regression pack; a second audit round closed a shortfall against the confirmed ≥20% floor. Final: skills -22.4%, standards -43.2%, templates+CLAUDE.md -28.1%, all tests passing, matching baseline exactly.
+
+## Artifacts Produced
+
+feature-brief.md, design.md, discovery.md, execution-plan.md, scope.md, risk-register.md, domain-glossary.md, 4 requirement docs, 2 ADRs, audit-findings-report.md + 3 detail files + 2 round-2 detail files, regression-baseline.md, security-report.md, recommendations.md, this changelog, test report (below).
+
+## Decisions
+
+- ADR-001: `claude-opus-5` model-tier override for the audit subagent (feature-scoped, human-requested)
+- ADR-002: guardrailed, baseline-gated trim process — regression pack first, dual guardrails per trim, 5-attempt failure-informed retry before reverting
+
+## Backlog
+
+**Closed:** 0000019 (populate the regression pack — pulled in as a prerequisite)
+**Left open:** 0000020 (decompose the orchestrator skill), 0000021-backlog (define a minimal artifact set), 0000024 (record a skill-scope principle ADR) — explicitly deferred per human direction at P0, re-affirmed mid-feature; this feature's real in-file trim ceiling for `planifest-orchestrator/SKILL.md` (21.1% after two full audit rounds) is concrete evidence for backlog 0000020's next attempt
+
+## Skipped Phases
+
+None.
 
 ---
 
