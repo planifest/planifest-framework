@@ -86,6 +86,21 @@ Scope Lock complete. All four scenario paths captured.
 
 ---
 
+### P3 — Codegen
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T06:45:00Z` |
+| Model tier | primary (orchestrator, direct execution — TDD sub-agent loop not applicable, see Notes) |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | 0 so far (req-001) |
+| MCP calls | several (ctx_batch_execute diagnosis of promote-to-regression.sh path bug) |
+| Parallel task batches | 0 so far (req-001 was sequential: promote, diagnose, fix, verify) |
+| Telemetry | emitted |
+| Notes | Documented deviation from the standard TDD inner-loop protocol (test-writer/implementer/refactor triad): this feature edits instruction content and promotes existing tests rather than writing new application code with unit tests, so the RED/GREEN/refactor cycle does not apply. Using the direct execution + guardrailed-review process from ADR-002 instead, which is this feature's own equivalent discipline. req-001: promoted 21 tests (approved list, see P0 AskUserQuestion). Baseline run #1 found 20/21 newly-promoted tests failing — discovered a pre-existing defect in planifest-framework/scripts/promote-to-regression.sh (plain `cp`, no adjustment for tests/regression/ sitting one directory level deeper than tests/, so every $SCRIPT_DIR-relative path broke). Escalated to human (scope question: script not in original file-scope list) — human chose "fix the script." First fix attempt had a sed rule-ordering bug (self-correction: reordered rules, re-ran). Second fix attempt surfaced 2 remaining failures with bespoke self-referential path logic (test-regression-pack.sh, test-gate-write-windows.sh/.mjs) needing individual patches beyond the generic rule. Final baseline run: 33 feature suites + 22 regression tests, 0 failures, exit 0. Recorded to plan/current/regression-baseline.md. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
