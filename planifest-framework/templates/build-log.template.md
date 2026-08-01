@@ -5,7 +5,6 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 # Build Log - {{feature-id}}
 
 > Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
-> Filed to the archive at P7. Read by the build-assessment-agent at P8.
 
 ## Header
 
@@ -20,8 +19,6 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 ---
 
 ## Phase Log
-
-<!-- Orchestrator: append one block per phase using the template below. -->
 
 ### P0 — Assess & Coach
 

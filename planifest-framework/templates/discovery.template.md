@@ -6,8 +6,7 @@ summary: "Raw P0 discovery-pass findings — what the orchestrator knew before c
 
 > Created at the start of P0, before the first coaching question, in every adoption mode.
 > Raw findings only — decisions belong in `design.md`, the Q&A audit trail in `build-log.md`.
-> Fresh each pipeline run: filed to the archive at P7, recreated at the next P0.
-> A section whose signal could not be read states that plainly — coaching proceeds on the rest.
+> Unreadable signal: say so; coaching proceeds.
 
 ## Header (all modes)
 
