@@ -178,3 +178,19 @@ Scope Lock complete. All four scenario paths captured.
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Continuous run mode. Archive confirmed at plan/_archive/0000020-setup-refresh-skill-2026-08-01/. Invoking build-assessment-agent as sub-agent. |
+
+
+---
+
+### P9 - Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T01:25:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | No product.yml exists; 2 src/ component-packs exist (context-mode-hooks, setup-hook-integration) but this repo's established precedent (20 prior tags, all v{planifest-framework version}, no product.yml ever created) treats planifest-framework/component.yml as the sole release-versioned entity, matching the ship-agent skill's own repo-specific example. Followed precedent rather than creating a product.yml, since that would be a versioning-model change requiring its own design decision, not a routine ship action. Version: 0.20.0 (from planifest-framework/component.yml, already confirmed at P0). Local Git Only override active: no push, no gh pr create, PR description output only. |
