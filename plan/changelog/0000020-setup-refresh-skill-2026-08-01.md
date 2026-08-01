@@ -2,7 +2,7 @@
 
 **Feature:** Setup Refresh Skill
 **Pipeline run:** P0-P9 complete, no phases skipped
-**PR:** pending, updated after PR description is issued in Step 9
+**PR:** https://github.com/planifest/planifest-framework/pull/45
 
 ## What Was Built
 
