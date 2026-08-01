@@ -1,12 +1,12 @@
 ---
-version: "0.19.0"
-feature: "0000019-self-description-and-session-hygiene-fixes"
-updated: "31 Jul 2026"
+version: "0.20.0"
+feature: "0000020-setup-refresh-skill"
+updated: "01 Aug 2026"
 ---
 # About
 
 | Field | Value |
 |-------|-------|
-| Version | `0.19.0` |
-| Last feature | `0000019-self-description-and-session-hygiene-fixes` |
-| Updated | `31 Jul 2026` |
+| Version | `0.20.0` |
+| Last feature | `0000020-setup-refresh-skill` |
+| Updated | `01 Aug 2026` |

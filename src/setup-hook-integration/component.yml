@@ -2,7 +2,7 @@
 id: "setup-hook-integration"
 name: "Setup Hook Integration"
 feature: "0000003-hook-based-enforcement"
-version: "0.3.0"
+version: "0.4.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -56,11 +56,11 @@ contract:
   breakingChangePolicy: "requires-human-approval"
 
 data:
-  ownsData: false
-  dataContract: "none"
-  tables: []
-  schemaVersion: "0.0.0"
-  migrationPath: "none"
+  ownsData: true
+  dataContract: "src/setup-hook-integration/docs/data-contract.md"
+  tables: [".claude/.planifest-setup-flags"]
+  schemaVersion: "1.0.0"
+  migrationPath: "src/setup-hook-integration/docs/data-contract.md#migration-history"
 
 scope:
   inScope:
@@ -68,9 +68,11 @@ scope:
     - "setup.ps1 changes for --context-mode-mcp flag processing"
     - "setup/claude-code.sh and setup/claude-code.ps1 hook path declarations"
     - "Claude Code only"
+    - "setup.sh/setup.ps1 write .claude/.planifest-setup-flags at install time, in parity (0000020-setup-refresh-skill, REQ-008)"
   outOfScope:
     - "Hook wiring for Cursor, Windsurf, Cline, Antigravity"
     - "Hook uninstall / removal logic"
+    - "General setup.sh/setup.ps1 parity fixes unrelated to the flags-used marker (0000020-setup-refresh-skill)"
   deferred:
     - "Hook wiring for other tools pending hook architecture confirmation"
 
@@ -80,6 +82,7 @@ risk:
     - "settings.json merge may overwrite existing hooks if not implemented carefully (R-005)"
     - "Bash shebang on Windows — chmod/path handling differs (R-004)"
     - "settings.json hook schema assumption may be wrong (R-002)"
+    - "setup.sh/setup.ps1 marker-write addition could drift out of parity between the two scripts (0000020-setup-refresh-skill, R-003)"
 
 quality:
   testCoverage:
@@ -90,6 +93,8 @@ quality:
     - "setup.ps1 ConvertTo-Json depth: PowerShell default depth is 2; using -Depth 10 workaround. If settings.json nesting exceeds depth 10, content will be truncated to string."
   quirks:
     - "setup.ps1 hook entries use forward-slash paths in command values — this matches Claude Code hook config expectations even on Windows"
+    - "Write-SetupFlagsMarker (0000020) verified statically only in this environment, no pwsh available (Q-006)"
+    - "OpenCode's setup.ps1 tool config lacks a SkillsDir property, marker write silently skips for OpenCode on Windows, pre-existing gap (Q-007)"
 
 pipeline:
   templateVersion: "1.0.0"
@@ -98,7 +103,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-04-12"
-  updatedAt: "2026-04-25"
+  updatedAt: "2026-08-01"
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"

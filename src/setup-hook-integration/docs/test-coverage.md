@@ -15,6 +15,8 @@
 - PostToolUse `settings.json` wiring with correct URL (REQ-008) — covered, blocked by TD-004
 - Idempotency: re-run produces exactly one PostToolUse entry (REQ-001) — covered, blocked by TD-004
 - Basic tool target setup (claude-code, cursor, etc.) — covered by `test_setup.sh`
+- `.planifest-setup-flags` marker write, content, per-tool directory, no-write-on-failure (REQ-008, 0000020), 21 live-invocation assertions, `test-0000020-req-008-install-time-marker-write.sh`
+- Boot-file deletion allowlist (REQ-004, 0000020), 13 live-invocation assertions, `test-0000020-req-004-boot-file-deletion-script.sh`
 
 ## What is not tested
 
@@ -22,6 +24,7 @@
 - `commit-msg` hook warning output — no automated tests
 - `gate-write.mjs` and `check-design.mjs` enforcement — no automated tests
 - Setup.ps1 correctness — partially covered by `test_setup.ps1`
+- `Write-SetupFlagsMarker` (setup.ps1, 0000020), checked statically only, no `pwsh` runtime in this dev environment (Q-006)
 
 ## Recommendation
 

@@ -10,3 +10,5 @@ Derived from `plan/current/risk-register.md` — component-scoped items only.
 | TD-002 | JS injection via `$name` in `node -e` | Medium | Use env-var pattern — see tech-debt.md | Open (TD-002) |
 | TD-003 | `--from` URL accepts non-HTTPS schemes | Low-Medium | Validate `https://` prefix — see tech-debt.md | Open (TD-003) |
 | TD-006 | `setup.ps1` missing skill subcommand routing | Low | Add equivalent to setup.ps1 | Open (TD-006) |
+| R-010 | `setup.sh`/`setup.ps1` marker-write addition (0000020) could drift out of parity between the two scripts | Medium likelihood / Low impact | Parity acceptance criteria (REQ-008) and a live test suite for the bash side; PowerShell side checked statically only, see quirks.md Q-006 | Open |
+| R-011 | `.planifest-setup-flags` written outside a gitignored directory for `copilot`/`opencode`, risking accidental commit (0000020 P5 security finding) | Was Medium, now mitigated | Global `.planifest-setup-flags` gitignore pattern added and verified live for all affected tools | Mitigated |
