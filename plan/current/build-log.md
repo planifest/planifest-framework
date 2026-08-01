@@ -71,6 +71,21 @@ Scope Lock complete. All four scenario paths captured.
 
 ---
 
+### P2 — ADRs
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-01T06:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 1 (ADR-001 and ADR-002 written together, no cross-reference dependency) |
+| Telemetry | emitted |
+| Notes | 2 ADRs: model-tier override (claude-opus-5 for req-002 audit) and the guardrailed baseline-gated trim process (req-001, req-003, req-004). No other decisions met the ADR criteria — stack is fixed by the design, .claude/ exclusion and 20%-floor target are already documented as scope/NFR, not novel architectural decisions. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
