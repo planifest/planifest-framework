@@ -98,7 +98,7 @@ Single wave. Three features, one pipeline run.
 
 - 0000021 ADR-002: baseline-gated trim process is mandatory
 - Ratchet: content-pinning regression tests are updated to assert new canonical locations, never deleted or weakened
-- Local git only (`custom-001-local-git-only.md`): no push; human raises the PR
+- Local git only (`custom-001-local-git-only.md`) with a per-session exception: the human on the loop expressly authorised the agent to push and raise the PR for this run (grant recorded in the P0 build log)
 - No em dashes in artifacts; "human on the loop" phrasing
 
 ### Assumptions
@@ -108,9 +108,9 @@ Single wave. Three features, one pipeline run.
 
 ## Scenario Paths
 
-**Happy path:** Baseline regression run recorded; Class 1-3 edits applied section by section with granular commits; affected regression tests updated relocation-aware; full pack re-run green; word count at or under 7,600; docs updated; PR description produced for the human on the loop.
+**Happy path:** Baseline regression run recorded; Class 1-3 edits applied section by section with granular commits; affected regression tests updated relocation-aware; full pack re-run green; word count at or under 7,600; docs updated; the agent pushes the feature branch and raises the PR at P9 (per-session grant recorded in the build log).
 
-> Baseline, edit, re-verify, ship.
+> Baseline, edit, re-verify, ship with agent-raised PR.
 
 **First-run path:** Before any edit to SKILL.md: run the full regression pack and record pass/fail per test plus the current word counts (orchestrator and skills corpus total) in `plan/current/regression-baseline.md`. No edit lands before the baseline is committed.
 
