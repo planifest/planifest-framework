@@ -27,11 +27,11 @@ As a human on the loop, I want session markers committed at creation and reliabl
 - `planifest-framework/skills/planifest-ship-agent/SKILL.md` P9 MUST gain a pre-flight check, positioned before "Step 10 — Push/PR decision", that runs `git ls-files plan/.orchestrator-active plan/.orchestrator-ack plan/.run-mode` (or equivalent) and surfaces a clear warning to the human if any of the three paths are still tracked in git at that point. This is a durable backstop: if P7 Step 6/7 correctly removed and committed the markers, this check finds nothing; a hit means the atomic fix did not take, and the human must be told before a PR goes out with a stale marker on the branch.
 
 ## Acceptance Criteria
-- [ ] Phase 0 Start Actions Step 1 explicitly instructs committing `plan/.orchestrator-active` at write time
-- [ ] Phase 0 Start Actions Step 5 explicitly instructs committing `plan/.orchestrator-ack` at write time (when it is written)
-- [ ] Ship-agent P7 Step 7's `git add` command includes all three marker paths (`plan/.orchestrator-active`, `plan/.orchestrator-ack`, `plan/.run-mode`) alongside the existing archive/changelog/about.md paths
-- [ ] Ship-agent P9 has a pre-flight check (before the push/PR decision step) that verifies none of the three markers are still tracked in git, surfacing a clear warning if any are found
-- [ ] This pipeline run (0000023) itself demonstrates the fix: its own P0-created markers (`.orchestrator-active`, `.run-mode`, and `.orchestrator-ack`, since strict mode is active in this repo) are committed at creation — already true as of this session's P0 commits, cited here as a dogfooding proof point
+- [x] Phase 0 Start Actions Step 1 explicitly instructs committing `plan/.orchestrator-active` at write time — covered by `planifest-framework/tests/test-0000023-req-002-marker-commit-lifecycle.sh`
+- [x] Phase 0 Start Actions Step 5 explicitly instructs committing `plan/.orchestrator-ack` at write time (when it is written) — same test
+- [x] Ship-agent P7 Step 7's `git add` command includes all three marker paths (`plan/.orchestrator-active`, `plan/.orchestrator-ack`, `plan/.run-mode`) alongside the existing archive/changelog/about.md paths — same test
+- [x] Ship-agent P9 has a pre-flight check (before the push/PR decision step) that verifies none of the three markers are still tracked in git, surfacing a clear warning if any are found — same test, "P9 pre-flight backstop check" section
+- [x] This pipeline run (0000023) itself demonstrates the fix: its own P0-created markers (`.orchestrator-active`, `.run-mode`, and `.orchestrator-ack`, since strict mode is active in this repo) are committed at creation — already true as of this session's P0 commits, cited here as a dogfooding proof point
 
 ## Dependencies
 - `planifest-framework/skills/planifest-orchestrator/SKILL.md` (Phase 0 Start Actions, Steps 1 and 5)

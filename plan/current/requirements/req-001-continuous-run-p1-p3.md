@@ -28,10 +28,10 @@ As a human on the loop running continuous mode, I want P1 (Spec), P2 (ADRs), and
 
 ## Acceptance Criteria
 
-- [ ] P1, P2, P3 STOP-rule cells in the Phase Invocation Table read exactly as specified above (verifiable by grep)
-- [ ] P4, P5, P6, P9 STOP-rule cells are byte-identical to their current state (verifiable by diff)
-- [ ] An ADR exists (post-P2) documenting the regression's root cause and the fix
-- [ ] A fresh continuous_run pipeline run demonstrates P1, P2, P3 proceeding without a confirmation stop (this very pipeline run, 0000023, is the live verification)
+- [x] P1, P2, P3 STOP-rule cells in the Phase Invocation Table read exactly as specified above — covered by `planifest-framework/tests/test-0000023-req-001-continuous-run-p1-p3.sh`
+- [x] P4, P5, P6, P9 STOP-rule cells are byte-identical to their current state — covered by the same test's "P4-P6/P9 unchanged" section
+- [x] An ADR exists (post-P2) documenting the regression's root cause and the fix — `plan/current/adr/ADR-001-restore-continuous-run-p1-p3.md`
+- [x] A fresh continuous_run pipeline run demonstrates P1, P2, P3 proceeding without a confirmation stop — this pipeline run (0000023) is the live verification: P1, P2, P3 all proceeded without a human confirmation stop under continuous_run
 
 ## Dependencies
 

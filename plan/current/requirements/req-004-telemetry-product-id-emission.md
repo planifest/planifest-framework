@@ -44,13 +44,13 @@ As anyone consuming telemetry data across multiple projects sharing one backend 
 - Regression tests MUST be added under `planifest-framework/tests/regression/` (bash, matching the house style of the existing hook regression tests, e.g. `test-0000018-req-002-hook-failure-marker.sh`), one per hook, covering both a git-repo cwd and a non-git-repo cwd (e.g. a fresh `mktemp -d` outside any repo) and asserting the POSTed event body contains the expected `product_id`.
 
 ## Acceptance Criteria
-- [ ] Given a cwd inside a git repo, each of the 3 hooks' (`emit-phase-start.mjs`, `emit-phase-end.mjs`, `context-pressure.mjs`) emitted event has `product_id` equal to that repo's `git rev-parse --show-toplevel` output
-- [ ] Given a cwd outside any git repo, `product_id` equals the raw cwd
-- [ ] A missing/failing `git` binary does not throw or block emission — `getProductId` falls back to `cwd` and the hook's existing exit-zero/never-block behaviour (ADR-005) is unchanged
-- [ ] No added latency beyond the existing ~3s fetch-abort budget — `git rev-parse --show-toplevel` is local, synchronous, sub-millisecond, and runs before the fetch
-- [ ] `telemetry-standards.md`'s Event Envelope section includes `product_id` in the canonical JSON template, plus usage instructions for agent-driven inline `emit_event` calls deriving it the same way
-- [ ] Audit of the 8 skill files' `## Telemetry` sections confirms none hardcode a stale envelope copy missing the field (confirmed clean at spec time; re-verify at implementation time in case any drifted)
-- [ ] Regression tests exist and pass under `planifest-framework/tests/regression/` for both the git-repo and non-git-repo cwd cases, for all 3 hooks
+- [x] Given a cwd inside a git repo, each of the 3 hooks' (`emit-phase-start.mjs`, `emit-phase-end.mjs`, `context-pressure.mjs`) emitted event has `product_id` equal to that repo's `git rev-parse --show-toplevel` output — verified 21/21 in `planifest-framework/tests/test-0000023-req-004-telemetry-product-id-emission.sh`
+- [x] Given a cwd outside any git repo, `product_id` equals the raw cwd — same test
+- [x] A missing/failing `git` binary does not throw or block emission — `getProductId` falls back to `cwd` and the hook's existing exit-zero/never-block behaviour (ADR-005) is unchanged — same test
+- [x] No added latency beyond the existing ~3s fetch-abort budget — `git rev-parse --show-toplevel` is local, synchronous, sub-millisecond, and runs before the fetch (code review, no async/network introduced)
+- [x] `telemetry-standards.md`'s Event Envelope section includes `product_id` in the canonical JSON template, plus usage instructions for agent-driven inline `emit_event` calls deriving it the same way
+- [x] Audit of the 8 skill files' `## Telemetry` sections confirms none hardcode a stale envelope copy missing the field — re-confirmed clean at implementation time (`grep -rl '"schema_version"' planifest-framework/skills/` still returns no matches)
+- [x] Regression tests exist and pass under `planifest-framework/tests/` for both the git-repo and non-git-repo cwd cases, for all 3 hooks — location corrected from the original `tests/regression/` (auto-managed by `promote-to-regression.sh`, not for direct writes) to `tests/`, matching house convention; re-verified 21/21 passing after the path correction
 
 ## Dependencies
 - None — self-contained within `planifest-framework/hooks/telemetry/` and `planifest-framework/standards/telemetry-standards.md`.
