@@ -47,6 +47,9 @@ responsibilities:
   - "Maintain a populated tests/regression/ pack as the safety net for cross-cutting skill/standards/template changes, gated by human review of the promoted test list before any baseline run"
   - "Bound skill-content growth via a recorded audit-findings-report + dual-guardrail trim process (no enforcement-content loss, no ambiguity regression), never applied without a pre-recorded regression-pack baseline to compare against"
   - "Restate every orchestrator rule in exactly one canonical file (phase skill, workflow, standard, or template) with a pointer from the orchestrator, verified by a P4 diff review as the second detector alongside content-pinning regression tests"
+  - "Source telemetry product_id from a durable declared identifier (product.yml id field) rather than a filesystem path, with unresolvable product_id routed to the existing failure-marker mechanism rather than a fallback value"
+  - "Prompt the human on the loop for a declared product id at P0 when product.yml/id is absent, hard-stopping rather than proceeding silently"
+  - "Document the emit_event MCP tool's envelope argument name correctly across telemetry-standards.md and all phase skills' Telemetry sections"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -115,6 +118,8 @@ scope:
     - "Loop/reversal telemetry event types and planifest-overrides/loop-toggles.yml (all default off)"
     - "tests/regression/ population and baseline-vs-post-trim comparison for skill/standards/template content edits"
     - "standards/agent-dispatch-standards.md as the canonical home for model-tier decisions and parallelism/dispatch mechanics, referenced (not restated) by the orchestrator, ship-agent, and codegen-agent"
+    - "product.yml id field as the canonical declared product_id for telemetry, for single- and multi-component projects alike"
+    - "Correct emit_event MCP tool argument documentation (envelope, not event) in telemetry-standards.md and all phase skills"
   outOfScope:
     - "Application-level code generation (handled by planifest-codegen-agent)"
     - "CI pipeline configuration for consumer projects"
