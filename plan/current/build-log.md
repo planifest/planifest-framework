@@ -124,6 +124,10 @@ P2 gate: ADR-001 (agent-dispatch-standards.md as canonical home for model-tier +
 | Telemetry | confirmed-disabled |
 | Notes | Skill Map: req-001/req-005 -> validate-agent (deferred to their own dispatch, run sequentially first/last); req-002/req-003/req-004 -> codegen-agent, this phase. req-001 (baseline) must run and commit before any SKILL.md edit per its hard dependency - executing it now as this phase's first action even though its best-fit skill is validate-agent, since it gates all codegen work. |
 
+Documented deviation (codegen-agent Deviation & Escalation Protocol): this feature has no application code, no data contract, and no per-requirement unit/integration/e2e test suite to write - it edits existing Markdown skill/standards content within planifest-framework, verified by the pre-existing regression pack (tests/regression/) rather than new tests. The TDD Inner Loop Protocol (test-writer -> implementer -> refactor sub-agents per requirement) does not apply; req-001 and req-005 already encode the applicable verification mechanism (regression-pack baseline and comparison) in place of RED/GREEN cycles. Recorded here per protocol rather than silently skipped.
+
+Parallelism reasoning (Parallel Dispatch Checklist step 2, dependency mapping): req-002, req-003, and req-004 all edit the same single file, planifest-orchestrator/SKILL.md. Per the Cannot-parallelise test (shared mutable state / one unit's edit depends on the file's current state after the prior unit's edit), these three are dispatched sequentially, not in parallel, despite being independent in content scope - concurrent edits to one file from separate agents would each risk operating against a stale read of the file. This supersedes the earlier P1 build-log note that anticipated parallel dispatch for these workstreams; that note described content independence, not edit-safety, and codegen-agent's own dependency test overrides it now that actual file-level execution is starting.
+
 ---
 
 ## Summary (filled at P7)
