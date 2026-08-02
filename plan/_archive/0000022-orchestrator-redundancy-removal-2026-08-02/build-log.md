@@ -248,16 +248,31 @@ Changelog: deferred to P7 - ship-agent's Step 1 owns plan/changelog/{feature-id}
 
 ---
 
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T17:35:00Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | `1` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `0` |
+| Telemetry | confirmed-disabled |
+| Notes | Archive path: plan/_archive/0000022-orchestrator-redundancy-removal-2026-08-02/. Sub-agent dispatched at cheaper tier (haiku) per Model Tier Decision Table - read-only summarisation from a structured log. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
-| Phases with a recorded telemetry gap | `{{count — phases where Telemetry was failed-with-recorded-choice, or "0"}}` |
+| Total phases completed | `9 (P0-P8; P9 in progress)` |
+| Total agents spawned | `9 (5 requirement docs P1, 2 ADRs P2, 1 P4 diff review, 1 P8 build-assessment)` |
+| Total MCP calls | `~15 (ctx_execute shell calls throughout, primarily P3-P4)` |
+| Phases using parallelism | `2 (P1: 5 requirement docs; P2: 2 ADRs)` |
+| Primary tier agent calls | `8` |
+| Cheaper tier agent calls | `1 (P8 build-assessment)` |
+| Self-corrections | `0 (validate-agent's 5-cycle loop never triggered; the single P4 content-loss fix was Detector 2 working as designed, not a self-correction cycle)` |
+| Phases skipped | `none` |
+| Phases with a recorded telemetry gap | `0 (confirmed-disabled every phase - unified telemetry signal genuinely absent this run)` |
