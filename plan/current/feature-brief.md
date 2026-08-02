@@ -120,9 +120,9 @@ Single wave. Three features, one pipeline run.
 
 > Two detectors: red tests for pinned content, P4 diff review for everything else; both resolve by relocation-aware update or restoration, never by weakening.
 
-**Cross-session continuity:** All state lives in committed artifacts (`plan/current/`, granular commits per section edit). An interrupted session resumes from the last commit; `regression-baseline.md` is committed early so the comparison target survives any interruption. No partial-write risk beyond a single uncommitted file edit, which git status surfaces on resume.
+**Cross-session continuity:** All durable run state lives in committed artifacts (`plan/current/`, granular commits per section edit); the branch is pushed at phase gates, so the remote also holds gate state. The session markers (`plan/.orchestrator-active`, `plan/.orchestrator-ack`, `plan/.run-mode`) are committed alongside the P0 artifacts, so run mode survives a lost working tree. An interrupted session resumes from the last commit; `regression-baseline.md` is committed early so the comparison target survives any interruption. No partial-write risk beyond a single uncommitted file edit, which git status surfaces on resume.
 
-> Resume from last granular commit; baseline is durable.
+> Resume from last granular commit; baseline and markers are durable.
 
 ## Acceptance Criteria
 
