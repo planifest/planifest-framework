@@ -44,6 +44,37 @@ Discovery (P0) estimated 4 of 22 regression tests pin `planifest-orchestrator/SK
 
 **No test pins Fast Path criteria/execution text, the reversal execute/assess mechanics detail, or the Change Pipeline confirm-questions text** - confirming these three Class 1 items (3, 5's execute/assess detail, 7) remain genuinely covered only by the P4 diff review (ADR-002's Detector 2), not by any test.
 
+## Post-Trim Comparison (req-005)
+
+**Run date:** 2026-08-02
+**Runner:** `bash planifest-framework/tests/run-tests.sh`
+
+### Result
+
+- Feature suites: 33 passed, 0 failed (baseline: 33 passed, 0 failed)
+- Regression suite: 22 passed, 0 failed (baseline: 22 passed, 0 failed)
+- Total: 55 passed, 0 failed — **zero regressions**. Every test that passed at baseline still passes now, including the 10 orchestrator-content-pinning tests (1 relocated assertion in test-0000006-build-assessment.sh, now checking `standards/agent-dispatch-standards.md` instead of the orchestrator; the other 9 unaffected, re-verified individually).
+- Two additional test corrections landed during the run, both confirmed as fixes to pre-existing bugs rather than weakenings: test-0000017-req-006's stale `### Signal Priority Order` sed-range reference (heading no longer existed, causing a silent leak-to-EOF), and test-0000010's "two levels of parallelism" check repointed to the relocated content.
+
+### Word Counts
+
+| File | Baseline | Post-trim | Delta |
+|------|----------|-----------|-------|
+| `planifest-framework/skills/planifest-orchestrator/SKILL.md` | 10,379 | 8,592 | -1,787 (-17.2%) |
+| All `planifest-framework/skills/*/SKILL.md` combined | 26,269 | 24,437 | -1,832 (-7.0%) |
+
+**Target:** revised to <= 8,600 words (from the original 7,600) — human-confirmed 2026-08-02 after P3 review found the remaining gap to be dense P0 operative content, not duplication or exposition. **Result: 8,592 <= 8,600 — target met.**
+
+### Zero Enforcement-Content Loss (0000021 ADR-002 pass condition)
+
+Confirmed via the dual-detector process (0000022 ADR-002):
+- **Detector 1 (regression pack):** zero failures against baseline, as above.
+- **Detector 2 (P4 diff review):** to be performed at P4 per ADR-002, covering the Fast Path, reversal execute/assess, and Change Pipeline confirm-question content that no test pins.
+
+No content was deleted without a canonical-target verification; two gaps were found and closed before removal (telemetry-standards.md and workflows/retrofit.md were both missing content their orchestrator sections claimed was "already stated elsewhere" — added first, then removed from the orchestrator). One item (reversal execute/assess mechanics) was withdrawn entirely after inspection found no actual duplication.
+
+---
+
 ## Corrections Applied Before Any Edit
 
 1. **req-002 item 5** (reversal execute/assess mechanics) narrowed: keep the Assess step's reversal-assessor-spawn mention in addition to the petition receipt step and four human-gate conditions, so `test-0000016-pipeline-governance.sh`'s "planifest-reversal-assessor" assertion is not broken.
