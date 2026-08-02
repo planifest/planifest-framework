@@ -755,34 +755,20 @@ Every adoption mode performs a structured discovery pass at the start of P0, bef
 
 ### Mode Taxonomy
 
-**Greenfield** — No prior codebase, no archive, no overrides. Starting from zero.
+Each mode's discovery-pass field shape is defined in `discovery.template.md` (one subsection per mode) — this taxonomy states only the detection signal and the version/coaching logic specific to the orchestrator.
+
+**Greenfield** — No prior codebase, no archive, no overrides. Starting from zero. Writes to `discovery.md`: the `0.1.0` version baseline — "nothing found yet" is itself the defined content, not an error.
 - Version starts at `0.1.0`
-- Discovery pass writes to `discovery.md`: the shared header, repo instructions from `planifest-overrides/instructions/` (or "None"), and the `0.1.0` version baseline. "Nothing found yet" is itself the defined Greenfield content — an empty-looking discovery is correct, not an error.
 - Coach from the Feature Brief directly
 
-**Standard Iterative** — This system has been through at least one Planifest pipeline run. `plan/_archive/` or `docs/about.md` exists.
+**Standard Iterative** — This system has been through at least one Planifest pipeline run. `plan/_archive/` or `docs/about.md` exists. Writes to `discovery.md` per its own template subsection.
 - Read `docs/about.md` for current version; suggest minor bump for Feature Pipeline, patch for Change Pipeline
-- Discovery pass writes to `discovery.md`: the shared header, the current version from `docs/about.md`, a summary of prior features from `plan/_archive/` (feature IDs, dates, one-liners), prior ADRs that constrain this feature unless superseded, and the existing component/data-ownership map from `docs/`
 - Prior decisions are constraints unless an ADR supersedes them
 
-**Retrofit** — Source code exists but has never been through a Planifest pipeline run. No archive, no `docs/about.md`.
-- Read other markers: version strings in `package.json`, `go.mod`, git tags, README. Suggest a version that reflects the project's current maturity; human confirms.
-- Discovery pass writes to `discovery.md`: the shared header, the suggested version and its source markers, and the output of the structured scan below.
+**Retrofit** — Source code exists but has never been through a Planifest pipeline run. No archive, no `docs/about.md`. Read other markers (version strings in `package.json`, `go.mod`, git tags, README) and suggest a version reflecting the project's current maturity; human confirms. The structured codebase scan that populates `discovery.md` is defined in `workflows/retrofit.md` — run it now.
 
-  > When `ctx_batch_execute` is available, run all discovery steps as a single batch call.
-
-  1. **Scan for entry points:** `package.json`, `go.mod`, `requirements.txt`, `Cargo.toml`, `Makefile`, `Dockerfile`, `docker-compose.yml` — reveal the stack
-  2. **Identify components:** Each directory with its own build/test configuration is a candidate component. Create a `component.yml` for each.
-  3. **Map data ownership:** Find database connections, ORM configurations, migration files. Determine which component owns which tables/collections.
-  4. **Discover API contracts:** Find route definitions, controller files, gRPC proto files. Draft an OpenAPI spec from what exists (if applicable).
-  5. **Detect patterns:** Identify auth middleware, logging, error handling, testing patterns already in use. Record as existing constraints in the design.
-  6. **Surface tech debt:** Note inconsistencies, missing tests, deprecated dependencies, security concerns. Record in the risk register.
-
-  The human reviews `discovery.md` before coaching.
-
-**External Anchor** — An external system or organisation dictates the version. `planifest-overrides/instructions/external-versioning.md` exists and describes the constraint.
+**External Anchor** — An external system or organisation dictates the version. `planifest-overrides/instructions/external-versioning.md` exists and describes the constraint. Writes to `discovery.md`: the full constraint, plus whichever underlying mode's content applies to what else is present (per its own template subsection).
 - Read `external-versioning.md` and merge its instructions into the coaching workflow as additional constraints
-- Discovery pass writes to `discovery.md`: the shared header, the full `external-versioning.md` constraints, PLUS whichever underlying mode's discovery content applies to what else is present in the repo (archive present → also the Standard-Iterative content; source only → also the Retrofit scan; neither → the Greenfield baseline)
 - Do not suggest a version based on pipeline track alone — present the constraint and ask the human for the version
 - External Anchor takes priority over all other signals. If `external-versioning.md` exists, the mode is External Anchor regardless of what else is present.
 
