@@ -57,6 +57,8 @@ Remote git grant (per-session, Hard Limit 7): human expressly authorised pushing
 
 Scope Lock — happy path: baseline regression run and word counts committed first; section-by-section trim with granular commits and relocation-aware test updates; success is orchestrator at or under 7,600 words, every removed rule canonical in exactly one file, pack green with zero enforcement-content loss, docs at 0.22.0, and the agent pushes the branch and raises the PR at P9. [source: agent-draft-edited]
 
+Scope Lock — first-run path: the baseline record at plan/current/regression-baseline.md (per-test results plus word counts) is the sole initialisation; no trim exists until the baseline commit exists, so the comparison reference always precedes the first trim commit; the shipped orchestrator itself has no first-run state (static content, identical on every load). [source: agent-draft-accepted]
+
 ---
 
 ## Summary (filled at P7)
