@@ -53,6 +53,21 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 
 ---
 
+### P1 — Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T00:24:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | emitted |
+| Notes | Continuous run confirmed; human reinforced subagent-decomposition preference. 2 independent user stories (US-001, US-002) — candidate for parallel dispatch per Agent Dispatch Standards. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
