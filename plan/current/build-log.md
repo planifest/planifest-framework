@@ -219,6 +219,18 @@ All 5 requirements PASS. No uncovered acceptance criteria. Checkboxes updated to
 | Telemetry | confirmed-disabled |
 | Notes | Living docs updates: component-registry.md (planifest-framework version bump + summary), docs/about.md (version, feature, date - written at P7 by ship-agent per convention, not here), recommendations if any drift found. No per-component docs/data-contract needed (ownsData: false). |
 
+Gate A: docs/ exists with all mandatory living docs (no api-index.md, correctly absent - no component exposes an API). Gate B: human confirmed the recommended scope (component-registry.md only; architecture-overview/dependency-graph/decisions-index untouched - no architectural or dependency change).
+
+Gap caught and fixed: planifest-framework/component.yml's version/feature fields were never bumped at P3 (codegen-agent's "Framework component.yml close-out" rule) - fixed now: 0.21.0 -> 0.22.0, feature field updated, metadata.updatedAt bumped. Flagged as REC-003 for a mechanical check to catch this class of miss in future features. Full pack re-confirmed green (55/55) after the registry/component.yml edits.
+
+Feature-level completeness confirmed: execution-plan, scope, risk-register, domain-glossary, operational-model, slo-definitions, cost-model, adr/ (2 ADRs), security-report all exist at plan/current/ and are mutually consistent. No OpenAPI (correctly N/A). recommendations.md produced (4 recommendations, 2 deferred items, 1 tech-debt note).
+
+Drift detection: no drift found across all 6 checks (API endpoints N/A, domain terms consistent with glossary throughout, component boundaries unchanged, data ownership unchanged, ADR-001/ADR-002 compliance confirmed by implementation, dependency direction N/A - no imports).
+
+Changelog: deferred to P7 - ship-agent's Step 1 owns plan/changelog/{feature-id}-{date}.md with its own template; writing a second draft here would create a reconciliation step P7 doesn't need.
+
+**P6 (Documentation) complete.** Zero drift. All living docs and feature-level artifacts consistent. Proceeding to P7 (ship-agent, which also runs P8 and P9 in sequence).
+
 ---
 
 ## Summary (filled at P7)
