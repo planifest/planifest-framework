@@ -107,6 +107,23 @@ P1 gate: 5 requirements produced (req-001 through req-005), scope/risk-register/
 | Telemetry | confirmed-disabled |
 | Notes | Two significant decisions to record: name/location of the new standards file (req-003), and the P4-diff-review-as-second-detector policy confirmed at Scope Lock. |
 
+P2 gate: ADR-001 (agent-dispatch-standards.md as canonical home for model-tier + parallelism content, status accepted) and ADR-002 (dual-detector content-loss verification: regression pack + named P4 diff review, status accepted) produced, dispatched in parallel per custom-002. Every significant decision from req-002/req-003/req-004/req-005 is covered: stack choice itself needs no new ADR (no stack change, static Markdown/Bash trim). Continuous run: proceeding directly to P3 without a confirmation stop.
+
+---
+
+### P3 — Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T13:25:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | Skill Map: req-001/req-005 -> validate-agent (deferred to their own dispatch, run sequentially first/last); req-002/req-003/req-004 -> codegen-agent, this phase. req-001 (baseline) must run and commit before any SKILL.md edit per its hard dependency - executing it now as this phase's first action even though its best-fit skill is validate-agent, since it gates all codegen work. |
+
 ---
 
 ## Summary (filled at P7)
