@@ -168,3 +168,20 @@ Gate: ADR-001 produced, covers the one significant decision in this feature's re
 Additional finding: the corrected canonical `planifest-ship-agent/SKILL.md`'s Step 7 `git add` command (as literally written) stages `plan/_archive/ plan/changelog/ docs/about.md` plus the three markers, but does not explicitly name `plan/current/` — yet the prior 0000022 archive commit (`4dba090`) shows `plan/current/*` deletions staged and rename-detected against `plan/_archive/`. Resolved by explicitly `git add plan/current/` as well this run, matching actual historical practice over the incomplete literal instruction; verified via `git log --stat` on the 0000022 commit before proceeding. Filed as backlog 0000033 for a future pickup (a second edit to `planifest-ship-agent/SKILL.md` mid-P7 of the very feature that already edited it once this run was deliberately avoided in favor of a scoped future fix). Archive commit `0f2b7bc` completed atomically: 3 markers deleted, `plan/current/` renamed into `plan/_archive/`, `docs/about.md` updated, all in one commit. Live-verified req-002: `git ls-files plan/.orchestrator-active plan/.orchestrator-ack plan/.run-mode` returns empty immediately after — the P9 pre-flight check (Step 9b) will find nothing to warn about, as designed. Gate: archive complete, proceeding to P8. |
 
 ---
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T21:45:00Z` |
+| Model tier | cheaper (sub-agent dispatch) |
+| Skills loaded | planifest-build-assessment-agent (sub-agent) |
+| Agents spawned | 1 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Dispatching build-assessment-agent sub-agent against this archived build-log.md. |
+
+Gate: `P8: Complete` — build-report.md produced. Corrected 3 factual slips before accepting: the agent misattributed the cline.sh backlog filing to "0000027" (an unrelated, already-picked-up entry) instead of the correct `0000034`, and mischaracterized backlog `0000033` as "ship-agent SKILL.md sync" when it's actually the P7 git-add-missing-plan/current/ finding. Also added the `.claude/skills/` staleness clarification and backlog `0000035` (filed after the agent's dispatch, at the human's direction) to the summary. Recommendation: Ship. Proceeding to P9. |
+
+---
