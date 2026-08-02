@@ -529,102 +529,58 @@ If any item cannot be checked, coach the human on that specific gap before proce
 - **Commit (P1–P6):** stage and commit all new artifacts produced this phase before presenting the gate summary to the human.
 - **STOP (P1–P6):** wait for human confirmation before proceeding to the next phase unless `continuous_run: true` was set at P0, or the phase states its own exception below.
 
+## Phase Invocation Table (P1-P6)
+
+Each phase skill documents its own Input and What It Produces (see its `## Input` / `## What You Produce` sections) — read the skill before acting, per Phase Conventions above. This table is the orchestrator's own routing and gating layer only.
+
+| Phase | Skill to invoke | Gate condition | STOP rule / exception |
+|---|---|---|---|
+| P1 Requirements | spec-agent | Every artifact produced; OpenAPI (if applicable) covers every endpoint implied by the functional requirements | STOP, present requirement count/scope decisions/deferred items. No exception. |
+| P2 Architecture Decisions | adr-agent | An ADR exists for every significant decision (stack, database, auth, deployment topology, component boundaries) | STOP, present ADR list with one-line summaries. No exception. |
+| P3 Code Generation | codegen-agent | Implementation exists and matches the spec's file structure; an Escalation halt is reviewed with the human before proceeding | STOP, present components built/tests produced/deviations. No exception. |
+| P4 Validate | validate-agent | CI passes | STOP, present checks run and self-correction count. Exception: proceed without confirmation if all checks passed first-attempt with zero self-corrections. |
+| P5 Security | security-agent | Report produced with specific findings | STOP, present risk rating and critical/high/medium findings. Exception: proceed without confirmation if risk is Low with zero critical/high/medium findings. |
+| P6 Documentation | docs-agent | Every living artifact produced and consistent (`docs/` is living state; `plan/` is change-in-progress — never mix the two) | STOP, present docs artifacts produced and any drift found. Exception: proceed without confirmation if zero drift and all expected artifacts present. |
+
+**Before P3 specifically:** check the declared stack against installed capability skills (see Capability Skills above) and recommend loading any relevant ones; the human confirms which to load. Then apply the Subagent Decomposition Directive for every requirement — the codegen-agent (and other phase agents) MUST decompose hard or multi-step work into subagents rather than attempting it inline: consult `## Skill Map` in `plan/current/design.md` for the best-fit skill per requirement (falling back to the available skill library via the Model Tier Decision Table if the map is absent or the requirement is new), select model tier per that table, then dispatch per the Agent Dispatch Template.
+
+**Design-critic (toggle `design_critic`):** at the P1 and P2 gates, when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent before the gate summary (maker–checker, ADR-006) — over the P1 artifacts alone at P1, over the combined P1+P2 set at P2 (running `scripts/consistency-check.mjs` first, then its REJECT-default rubric). Report-only: present its verdict alongside the artifacts, block nothing. On: REJECT returns artifacts for revision per `planifest-loop-runner` (cap 3).
+
+---
+
 ## Phase 1 - Requirements
 
-Invoke the **spec-agent** skill.
-
-**Input:** The confirmed design + the original Feature Brief
-
-**What it produces:** Execution Plan, OpenAPI Specification (if applicable), Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model - all written to `plan/`
-
-**Gate:** Review the spec-agent's output. Confirm every artifact has been produced. Confirm the OpenAPI spec (if applicable) covers every endpoint implied by the functional requirements. If anything is missing, invoke the spec-agent again with specific instructions.
-
-**Design-critic (toggle `design_critic`):** when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent over the P1 artifacts before the gate summary (maker–checker, ADR-006). Report-only: present its verdict alongside the artifacts, block nothing. On: REJECT returns artifacts for revision per `planifest-loop-runner` (cap 3).
-
-**STOP** — present to the human: number of requirements, key scope decisions, any deferred items. No exception.
+Invoke the **spec-agent** skill. See the Phase Invocation Table above for the gate condition and STOP rule.
 
 ---
 
 ## Phase 2 - Architecture Decisions
 
-Invoke the **adr-agent** skill.
-
-**Input:** Execution Plan, OpenAPI Specification (if applicable, from Phase 1)
-
-**What it produces:** ADRs for every significant decision, written to `plan/current/adr/`
-
-**Gate:** Confirm an ADR exists for every significant decision - stack choice, database selection, auth strategy, deployment topology, component boundaries. If a decision was made but not recorded, invoke the adr-agent for the missing ADR.
-
-**Design-critic (toggle `design_critic`):** when `report-only` or `on`, spawn a fresh-context `planifest-design-critic` subagent over the combined P1+P2 artifact set before the gate summary. It runs `scripts/consistency-check.mjs` first (deterministic layer), then its REJECT-default rubric. Same report-only/on semantics as P1.
-
-**STOP** — present to the human: list of ADRs produced with one-line decision summaries. No exception.
+Invoke the **adr-agent** skill. See the Phase Invocation Table above for the gate condition and STOP rule.
 
 ---
 
 ## Phase 3 - Code Generation
 
-Before invoking the codegen-agent, check the declared stack against installed capability skills (see Capability Skills above); if relevant skills exist, recommend loading them alongside the codegen-agent. The human confirms which to load.
-
-**Subagent Decomposition Directive:** For hard or multi-step tasks within a phase, the codegen-agent (and other phase agents) MUST decompose work into subagents rather than attempting it inline. Apply this rule for every requirement:
-
-1. **Consult the Skill Map** — read `## Skill Map` in `plan/current/design.md`. The map records which Planifest skill is best suited to implement or verify each requirement.
-2. **Select the best-fit skill** — use the skill named in the map for that requirement. If the map is absent or the requirement is new, select from the available skill library using the Model Tier Decision Table.
-3. **Select model tier** — use the Model Tier Decision Table below.
-4. **Dispatch** — per the Agent Dispatch Template below.
-
-Invoke the **codegen-agent** skill.
-
-**Input:** Full requirements artifact set from Phases 1 and 2, stack declaration from the confirmed design
-
-**What it produces:** Full implementation at `src/{component-id}/` for each component - application code, shared types, tests, IaC, Dockerfiles
-
-**Gate:** Confirm the implementation exists and the file structure matches what the spec describes. If the codegen-agent halted due to an Escalation (Stop-and-Ask) protocol because of an architectural blocker, review the blocker with the human before updating the plan or proceeding.
-
-**STOP** — present to the human: components built, test files produced, any deviations or escalations. No exception.
+Invoke the **codegen-agent** skill. See the Phase Invocation Table above for the gate condition, STOP rule, and the Subagent Decomposition Directive.
 
 ---
 
 ## Phase 4 - Validate
 
-Invoke the **validate-agent** skill.
-
-**Input:** The implementation from Phase 3
-
-**What it does:** Runs CI checks (lint, typecheck, test, build). Self-corrects up to 5 times. Halts if the issue persists.
-
-**Gate:** CI passes. If halted, report the failure to the human with full context.
-
-**STOP** — present to the human: checks run, pass/fail per check, self-correction count. Exception: proceed without confirmation if all checks passed on the first attempt with zero self-corrections (genuinely nothing to review).
+Invoke the **validate-agent** skill. See the Phase Invocation Table above for the gate condition and STOP rule.
 
 ---
 
 ## Phase 5 - Security
 
-Invoke the **security-agent** skill.
-
-**Input:** The validated implementation from Phase 4
-
-**What it produces:** Security report at `plan/current/security-report.md`
-
-**Gate:** Report is produced with specific findings. Critical and high findings are flagged for human attention at the PR gate.
-
-**STOP** — present to the human: overall risk rating and any critical/high/medium findings. Exception: proceed without confirmation if the overall risk rating is Low AND zero findings at critical, high, or medium severity (genuinely nothing to review).
+Invoke the **security-agent** skill. See the Phase Invocation Table above for the gate condition and STOP rule.
 
 ---
 
 ## Phase 6 - Documentation
 
-Invoke the **docs-agent** skill.
-
-**Input:** All artifacts from all phases
-
-**What it produces:** Living repository documentation at `docs/` (component registry, dependency graph, architecture overview, decisions index, API index) and per-component docs at `src/{component-id}/docs/`, and recommendations.
-
-> `docs/` is the living state layer — it reflects what the repo currently is. `plan/` reflects what is changing or has changed. These are distinct: never put living state into `plan/`, never put change artifacts into `docs/`.
-
-**Gate:** Every living artifact has been produced and is consistent. The active plan is complete and ready for human review.
-
-**STOP** — present to the human: docs artifacts produced, any drift found. Exception: proceed without confirmation if zero drift is found and all expected artifacts are present (genuinely nothing to review).
+Invoke the **docs-agent** skill. See the Phase Invocation Table above for the gate condition and STOP rule.
 
 ---
 
