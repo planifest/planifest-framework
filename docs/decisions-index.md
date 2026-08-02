@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000023-framework-pipeline-fixes
+Last updated: 0000024-declared-product-id-for-telemetry
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -212,6 +212,12 @@ ADR files: [plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/](../plan/_
 | ADR-003 | Mandatory human confirmation gate | accepted | The refresh skill always halts for explicit confirmation before any destructive action, in every run, including all-high-confidence runs; no bypass exists |
 | ADR-004 | Explicit tool selection, not auto-resolved | accepted | The target tool is always named by the human on the loop or asked for up front; multiple installed tools is normal input, not an ambiguity to guess through. Corrected mid-P0 after an early draft conflated this with a failure condition |
 | ADR-005 | No automatic retry on setup failure | accepted | On a failed setup re-invocation the skill stops, investigates the likely cause, and reports; retry is always a fresh, human-initiated invocation, never automatic |
+
+### Feature 0000024 — declared-product-id-for-telemetry
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | product.yml Extended to Single-Component Projects as Declared Product ID Home | accepted | `product.yml`'s `id` field becomes the canonical declared `product_id` for telemetry across all projects, including single-component ones — extends (does not supersede) 0000016 ADR-002, whose versioning-only decision remains fully in force |
 
 ---
 

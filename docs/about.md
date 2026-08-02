@@ -1,12 +1,12 @@
 ---
-version: "0.23.0"
-feature: "0000023-framework-pipeline-fixes"
-updated: "02 Aug 2026"
+version: "0.24.0"
+feature: "0000024-declared-product-id-for-telemetry"
+updated: "03 Aug 2026"
 ---
 # About
 
 | Field | Value |
 |-------|-------|
-| Version | `0.23.0` |
-| Last feature | `0000023-framework-pipeline-fixes` |
-| Updated | `02 Aug 2026` |
+| Version | `0.24.0` |
+| Last feature | `0000024-declared-product-id-for-telemetry` |
+| Updated | `03 Aug 2026` |
