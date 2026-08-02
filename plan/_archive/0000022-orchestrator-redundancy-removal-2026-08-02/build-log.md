@@ -263,6 +263,21 @@ Changelog: deferred to P7 - ship-agent's Step 1 owns plan/changelog/{feature-id}
 
 ---
 
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T17:40:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `0` |
+| Telemetry | confirmed-disabled |
+| Notes | Version derived via product-version.mjs exit 4 (no product.yml, single-component fallback per this repo's established convention) -> planifest-framework/component.yml's version 0.22.0. Tag v0.22.0 created. Push/PR: per-session remote-git grant from P0 build log applies - agent pushes and raises the PR (human's explicit instruction, not the mechanical local-git-only default). |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
