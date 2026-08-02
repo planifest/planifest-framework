@@ -26,7 +26,7 @@ These are non-negotiable. They apply in every session, every phase.
 7. **Commit after every meaningful artifact write — and at minimum at each phase gate.** Do not batch work waiting for a phase gate: each requirement doc (P1), each ADR (P2), each requirement's completed TDD cycle (P3), each fix batch (P4), the security report (P5), and each docs artifact group (P6) is a commit on its own. Push cadence: after each phase-gate commit, if remote push is authorized (a standing override in `planifest-overrides/instructions/`, else an explicit per-session grant recorded in the P0 build log), push the feature branch; if not authorized, do nothing and do not prompt per phase. A failed push is reported once and never blocks the pipeline.
 8. **Write a build log entry at every phase start and gate.** Create `plan/current/build-log.md` at P0 if absent. Append a phase block before doing any work in each phase and again at the gate. A missing entry is a pipeline error — stop and write it before proceeding.
 9. **The pipeline has exactly 10 phases: P0–P9. There is no phase beyond P9.** P9 (Ship) is the terminal phase. Never cite a phase number outside P0–P9 in any output.
-10. **Every pipeline route archives its working folder.** A completed run — Feature Pipeline (ship-agent P7) or Change Pipeline (change-agent Phase 6 - Archive) — ends with `plan/current/` moved to `plan/_archive/{feature-id}-{date}/` and incoming links updated. Never leave a permanent `plan/{feature-id}/` folder behind: the `plan/` layout is load-bearing context — adoption-mode detection scans `plan/_archive/`, and agents infer convention from what they find on disk.
+10. **Every pipeline route archives its working folder.** A completed run — Feature Pipeline (ship-agent P7) or Change Pipeline (change-agent Phase 6 - Archive) — ends with `plan/current/` moved to `plan/_archive/{feature-id}-{date}/` and incoming links updated. Never leave a permanent `plan/{feature-id}/` folder behind.
 11. **`discovery.md` must exist and be complete for the confirmed adoption mode before the first coaching question, in every adoption mode.** A missing or incomplete `discovery.md` before coaching begins is a pipeline error — stop and write it before proceeding.
 
 ---
@@ -249,7 +249,7 @@ This pattern applies across all pipeline phases (P0–P9), not just during P0 co
 
 **Be scientific.** You do not accept vague answers - e.g. "It should be fast" becomes "What is the latency target for the primary user-facing endpoint? I need a number - e.g. p95 < 200ms."
 
-**When the human defers a decision:** That is legitimate. Record it in the scope document as explicitly deferred, note what cannot be built until it's resolved, and move on. Deferred is not the same as missing - deferred is a conscious decision.
+**When the human defers a decision:** Record it in the scope document as explicitly deferred, note what cannot be built until it's resolved, and move on.
 
 **When the brief is already complete:** Confirm it. Walk through the priority order above, confirm you have what you need, and proceed. Don't coach for the sake of coaching.
 
@@ -385,7 +385,7 @@ If the human defers or declines, or no relevant skills exist, proceed silently (
 
 ### What you produce at the end of Phase 0
 
-The **confirmed design** — the plan for what will be built and the manifest of what it builds against. This is the contract between you and the human before you begin building.
+The **confirmed design** — the plan for what will be built and the manifest of what it builds against.
 
 Write this to `plan/current/design.md`. **Read `planifest-framework/templates/design.template.md` now** to get the exact format before writing.
 
