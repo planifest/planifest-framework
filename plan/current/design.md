@@ -37,7 +37,7 @@
 - Deferred: nothing deferred
 
 ## Assumptions
-- Word estimates per section (~2,900-3,300 removable) are approximate; the 7,600-word ceiling binds, not per-section estimates - impact if wrong: some Class 3 trims go deeper, or the ceiling is renegotiated with the human on the loop before P4
+- Word estimates per section (~2,900-3,300 removable) were approximate. Realised: 1,787 words removed (10,379 -> 8,592) with zero content loss; the remaining gap to the original 7,600 ceiling was reviewed and found to be dense P0 operative content, not duplication. Human confirmed a revised ceiling of 8,600 on 2026-08-02 rather than cutting further.
 - A new standards file is an acceptable home for model-tier and parallelism content - impact if wrong: P2 ADR selects an existing standards file instead; no scope change
 
 ## Risks
