@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000022-orchestrator-redundancy-removal"
-version: "0.22.0"
+feature: "0000023-framework-pipeline-fixes"
+version: "0.23.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -158,8 +158,12 @@ metadata:
   # responsibilities/scope/risk entries for the orchestrator redundancy
   # removal (canonical-owner de-duplication, agent-dispatch-standards.md)
   # ahead of P3 codegen.
+  # Updated by 0000023 (codegen-agent) P3: restored continuous_run exception
+  # for P1-P3, fixed session-marker commit lifecycle, fixed copilot.sh/.ps1
+  # self-copy crash + setup.ps1 dispatcher guard, added product_id telemetry
+  # emission.
   createdBy: "agent"
   lastModifiedBy: "agent"
-  skill: "planifest-spec-agent"
+  skill: "planifest-codegen-agent"
   tool: "claude-code"
   model: "claude-sonnet-5"
