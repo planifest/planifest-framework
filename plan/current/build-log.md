@@ -151,3 +151,18 @@ Gate: ADR-001 produced, covers the one significant decision in this feature's re
 | Notes | Gate A passed (docs/ exists). Gate B: assessed and proceeded consistent with continuous_run (same precedent as 0000019's build log). Updated: component-registry.md (version bump + summary), decisions-index.md (ADR-001 entry + Last-updated bump), architecture-overview.md (git dependency row extended to cover telemetry hooks' new usage). dependency-graph.md checked — no structural drift (no new components, no new dependency edges). No api-index.md (no API surface). No per-component src/{id}/docs/ artifacts — planifest-framework is a top-level component-pack, not a src/ component, legitimate absence (same precedent as planifest-refresh-setup in architecture-overview.md). No separate iteration-log/changelog written at P6 — following the 0000018/0000019/0000020+ precedent that only ship-agent's P7 changelog is produced; build-log.md is this run's audit trail. Drift found and flagged (not silently fixed): decisions-index.md's "Last updated" was stale at 0000019 despite 0000020's ADR section already present, and 0000021/0000022 have no ADR entries in the index at all despite having ADRs in their archives — recorded in recommendations.md as pre-existing, out-of-scope drift for a future pass. Recommendations.md also flags the .claude/skills/ staleness and the cline.sh bug priority. All feature-level artifacts confirmed present and consistent. Cross-Model Review Gate: toggle default off, not enabled this run — skipped, proceeding straight to ship-agent (same precedent as 0000022). |
 
 ---
+
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T21:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 (P7 itself) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Confirmed at skill-load: `.claude/skills/planifest-ship-agent/SKILL.md` (loaded copy) is the same stale synced artifact already flagged for the orchestrator — its Step 7 git add and Step 9b pre-flight check are both the pre-req-002 (old/broken) text. Proceeding using the corrected canonical `planifest-framework/skills/planifest-ship-agent/SKILL.md` behavior (verified directly against that file during P3), not the stale loaded prompt — this is the live dogfood of req-002 the human anticipated. Cross-reference check: added an "ADR files:" link to decisions-index.md's new Feature 0000023 section pointing at the archive path in advance (no other docs/ files reference plan/current/ paths). |
+
+---
