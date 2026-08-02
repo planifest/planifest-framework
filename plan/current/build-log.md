@@ -133,6 +133,6 @@ Gate: ADR-001 produced, covers the one significant decision in this feature's re
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Telemetry | confirmed-disabled |
-| Notes | Notable surface: req-004 adds a new `execFileSync("git", ...)` subprocess call in 3 telemetry hooks; req-003 changes a setup script's file-copy destination and a PowerShell dispatcher guard; req-001/002 are pure prose/gate changes to the orchestrator's own approval mechanism (self-modification surface, already flagged transparently at P3). |
+| Notes | Notable surface: req-004 adds a new `execFileSync("git", ...)` subprocess call in 3 telemetry hooks; req-003 changes a setup script's file-copy destination and a PowerShell dispatcher guard; req-001/002 are pure prose/gate changes to the orchestrator's own approval mechanism (self-modification surface, already flagged transparently at P3). Overall risk: Low. Zero critical/high/medium findings — all 5 threat-model rows rated Low with specific mitigation evidence (fixed-arg execFileSync with no shell, try/catch fail-open matching ADR-005, destination-path narrowing not a new write capability, dispatcher-guard nesting verified not to affect other tool configs). Zero-findings exception applies — proceeding to P6 without stopping. |
 
 ---
