@@ -91,3 +91,18 @@ Version confirmed: 0.23.0
 Gate: ADR-001 produced, covers the one significant decision in this feature's requirement set (req-001). Continuous_run exception applies — proceeding to P3 without stopping.
 
 ---
+
+### P3 — Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T19:55:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | TBD |
+| MCP calls | 0 |
+| Parallel task batches | TBD |
+| Telemetry | confirmed-disabled |
+| Notes | 4 independent requirements (req-001..req-004), no cross-references between them — dispatched per Skill Map / Subagent Decomposition Directive. |
+
+---
