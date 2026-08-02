@@ -1,6 +1,6 @@
 # Component Registry
 
-**Last updated:** 0000021-framework-context-bloat-audit (01 Aug 2026)
+**Last updated:** 0000022-orchestrator-redundancy-removal (02 Aug 2026)
 **Maintained by:** planifest-docs-agent
 
 ---
@@ -11,7 +11,7 @@
 |----|------|------|--------|--------|---------|------|
 | `context-mode-hooks` | context-mode Enforcement Hook Scripts | component-pack | developer-tooling | active | Blocking PreToolUse hook scripts (`.mjs`, Node-only since v0.2.0 — no `jq`, no Unix-shell requirement) that enforce context-mode routing rules by intercepting Grep, Bash (pattern-matched), and WebFetch tool calls. | [purpose](../src/context-mode-hooks/docs/purpose.md) |
 | `setup-hook-integration` | Setup Hook Integration | component-pack | developer-tooling | active | setup.sh/ps1, skill-sync, and hook adapters (copilot, cursor, windsurf, codex) — installs and configures enforcement hooks, telemetry hooks, context-mode hooks, commit standards, and external skill management into any Planifest-managed project. Now also writes a `.planifest-setup-flags` marker recording the flags used at install time (v0.4.0, 0000020). | [purpose](../src/setup-hook-integration/docs/purpose.md) |
-| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.21.0: fresh-context claude-opus-5 audit and guardrailed trim of redundant/implicit instruction content across all 21 skills (-22.4%), standards (-43.2%), and templates (-28.1%), verified by the newly-populated `tests/regression/` pack (1 test -> 22) with zero enforcement-content loss; fixed a pre-existing path bug in `promote-to-regression.sh` discovered en route). | [component.yml](../planifest-framework/component.yml) |
+| `planifest-framework` | Planifest Framework | component-pack | developer-tooling | active | Core standards, skills, hooks, and setup scripts enforcing the confirmed-design pipeline (v0.22.0: orchestrator de-duplication pass — `planifest-orchestrator/SKILL.md` reduced 10,379 -> 8,592 words (-17.2%) by removing content already fully and correctly stated in a phase skill, workflow, standard, or template, and relocating model-tier/parallelism reference data into a new `standards/agent-dispatch-standards.md`; verified via the regression pack plus an independent fresh-context P4 diff review, which caught and fixed one genuine content-loss finding before ship). | [component.yml](../planifest-framework/component.yml) |
 
 ---
 
