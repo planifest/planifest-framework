@@ -79,7 +79,22 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
 | Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
-| Notes | One ADR expected: extends 0000016 ADR-002 to cover product.yml's new role for single-component projects. This ADR authoring is also the vehicle for req-002's live re-verification step (emit a real adr_decision event with the corrected envelope argument, confirm via query_telemetry). |
+| Notes | ADR-001 written (extends 0000016 ADR-002, relationship "extends" not "supersedes" — ADR-002's versioning decision remains fully in force). req-002 live re-verification CLOSED: emitted a real `adr_decision` event (id `c8d820f5-26f8-4a36-b4e6-3be1020664fc`) via `mcp__structured-telemetry-mcp__emit_event` using the corrected `envelope`-wrapped argument shape — succeeded first try. Confirmed landed via `query_telemetry` scoped to session_id `0000024-declared-product-id-for-telemetry`: response explicitly returned "found other event types for this scope: adr_decision (1)". This closes the follow-up verification step 0000017's RCA left open and unexecuted. Gate: ADR exists for the one significant decision (product.yml scope extension) — passes. continuous_run active, proceeding to P3 without a stop. |
+
+---
+
+### P3 — Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T00:50:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
+| Notes | Implements req-001 (3 hooks + orchestrator P0 step 3b) and req-002 (telemetry-standards.md + 8-skill audit) via TDD inner loop. |
 
 ---
 
