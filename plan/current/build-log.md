@@ -160,6 +160,21 @@ Parallelism reasoning (Parallel Dispatch Checklist step 2, dependency mapping): 
 
 ---
 
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T15:10:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | No application CI applicable (no code, lint, typecheck, build for a Markdown/Bash content trim) - validate-agent's role here is Detector 2 from ADR-002: the P4 diff review confirming every removed instruction is verifiably stated in exactly one canonical file, covering specifically the 3 content areas no regression test pins (Fast Path detail, reversal execute/assess mechanics [withdrawn, N/A], Change Pipeline confirm questions). |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
