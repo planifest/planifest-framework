@@ -121,3 +121,18 @@ Gate: ADR-001 produced, covers the one significant decision in this feature's re
 | Notes | Semantic correctness check found a real gap: req-001/002 (pure prose SKILL.md edits) had zero automated test coverage — only manual grep during P3. This codebase has clear precedent for grep-based content tests against SKILL.md (e.g. `test-skill-telemetry.sh`), so wrote `test-0000023-req-001-continuous-run-p1-p3.sh` (7/7 pass) and `test-0000023-req-002-marker-commit-lifecycle.sh` (7/7 pass) rather than accept the gap; all 4 requirements' Acceptance Criteria checkboxes updated to [x] with test references (req-003's one genuinely-unmet AC, `setup.sh all` exit 0, marked explicitly as NOT MET with its documented out-of-scope reason — not silently checked off). Coverage table: REQ-001 (4 AC, all covered, new test) / REQ-002 (5 AC, all covered, new test) / REQ-003 (8 AC, 7 covered + 1 documented-not-met) / REQ-004 (7 AC, all covered, existing test relocated+fixed at P3). Full suite: 36/37 feature suites + 22/22 regression suites pass; the 1 failure is the pre-flagged, out-of-scope `cline.sh` bug (unrelated to any of this feature's 4 requirements) — no self-correction cycles spent on it per briefing. Zero other lint/typecheck/build tooling exists in this repo (no package.json at root) — the test suite is this repo's complete CI. Gate: all checks pass except the one documented, pre-existing, out-of-scope failure. |
 
 ---
+
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T21:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Notable surface: req-004 adds a new `execFileSync("git", ...)` subprocess call in 3 telemetry hooks; req-003 changes a setup script's file-copy destination and a PowerShell dispatcher guard; req-001/002 are pure prose/gate changes to the orchestrator's own approval mechanism (self-modification surface, already flagged transparently at P3). |
+
+---
