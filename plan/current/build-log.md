@@ -173,6 +173,22 @@ Parallelism reasoning (Parallel Dispatch Checklist step 2, dependency mapping): 
 | Telemetry | confirmed-disabled |
 | Notes | No application CI applicable (no code, lint, typecheck, build for a Markdown/Bash content trim) - validate-agent's role here is Detector 2 from ADR-002: the P4 diff review confirming every removed instruction is verifiably stated in exactly one canonical file, covering specifically the 3 content areas no regression test pins (Fast Path detail, reversal execute/assess mechanics [withdrawn, N/A], Change Pipeline confirm questions). |
 
+**Detector 2 (P4 diff review):** dispatched as a fresh-context subagent (maker-checker, independent of the editing agent) against the full orchestrator diff. Result: 12 of 13 content areas CONFIRMED, 1 CONTENT LOSS finding - External Anchor's underlying-mode selection mapping had been dropped, not relocated (neither the orchestrator's replacement prose nor discovery.template.md's External Anchor subsection stated the actual archive/source/neither -> mode rule). Fixed per ADR-002's resolution rule: restored explicitly in discovery.template.md. A related stale pointer in spec-agent/SKILL.md (citing the orchestrator for a scan that had moved to workflows/retrofit.md) was fixed alongside it. Full pack re-confirmed green (55/55) after both fixes.
+
+**Semantic correctness (AC coverage):**
+
+| Req | AC count | Covered / Verified by | Pass/Fail |
+|---|---|---|---|
+| req-001 | 3/3 | plan/current/regression-baseline.md (baseline section) | PASS |
+| req-002 | 4/4 | Orchestrator diff + regression pack; items 4 and 5 fulfilled via documented direction-reversal/withdrawal rather than literal removal, recorded in req-002 itself | PASS (with documented deviation) |
+| req-003 | 3/3 | agent-dispatch-standards.md + P4 diff review finding #8; ship-agent AC corrected (no duplicate existed to repoint) | PASS (with documented correction) |
+| req-004 | 4/4 | test-0000006 update + full pack rerun; 1 of 9 "unaffected" tests needed an unrelated pre-existing-bug fix, recorded in req-004 | PASS (with documented correction) |
+| req-005 | 4/4 | plan/current/regression-baseline.md (Post-Trim Comparison section) | PASS |
+
+All 5 requirements PASS. No uncovered acceptance criteria. Checkboxes updated to [x] in each requirement file with corrections noted inline where execution diverged from the original literal wording.
+
+**P4 (Validate) complete.** No lint/typecheck/build applicable. Semantic correctness: 5/5 requirements pass. Detector 2 diff review: 1 finding, fixed, re-verified. Full pack: 55/55 green. Zero self-correction cycles needed beyond the single Detector 2 fix (which is itself the P4 process working as designed, not a validation failure requiring the 5-cycle loop).
+
 ---
 
 ## Summary (filled at P7)

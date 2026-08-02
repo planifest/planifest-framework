@@ -24,9 +24,9 @@ As the orchestrator agent, I want the Model Tier Decision Table and the Parallel
 - Update `planifest-framework/skills/planifest-codegen-agent/SKILL.md`, which currently cites "the orchestrator's canonical Parallelism Directive", to repoint that citation to `standards/agent-dispatch-standards.md` instead of the orchestrator
 
 ## Acceptance Criteria
-- [ ] `planifest-framework/standards/agent-dispatch-standards.md` exists and contains the full Model Tier Decision Table and the full Parallelism Rules + Agent Dispatch Template content, byte-for-byte preserved from their prior location (relocation, not rewording)
-- [ ] `planifest-orchestrator/SKILL.md`, `planifest-ship-agent/SKILL.md`, and `planifest-codegen-agent/SKILL.md` each point to `standards/agent-dispatch-standards.md` for this content instead of restating it or citing the orchestrator
-- [ ] No behavioural change: the same table and rules are consulted at the same decision points, only from one file
+- [x] `planifest-framework/standards/agent-dispatch-standards.md` exists and contains the full Model Tier Decision Table and the full Parallelism Rules + Agent Dispatch Template content, byte-for-byte preserved from their prior location (relocation, not rewording) - confirmed by independent P4 diff review
+- [x] `planifest-orchestrator/SKILL.md` and `planifest-codegen-agent/SKILL.md` point to `standards/agent-dispatch-standards.md` for this content. **Correction:** `planifest-ship-agent/SKILL.md` was checked and found to have no duplicate Model Tier content to begin with (grep for "tier" found nothing) - ADR-001's assumed duplicate did not exist in the current file, so there was nothing to repoint there.
+- [x] No behavioural change: the same table and rules are consulted at the same decision points, only from one file
 
 ## Dependencies
 - req-001 (regression baseline) must be complete first

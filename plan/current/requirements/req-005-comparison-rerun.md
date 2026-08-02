@@ -25,10 +25,10 @@ As the framework maintainer, I want the full regression pack re-run and compared
 - If any regression test that passed in the baseline fails in the comparison, stop: this is a Hard Limit violation (enforcement-content loss), do not proceed to P2, and escalate to the human on the loop with the specific test and the specific content it lost
 
 ## Acceptance Criteria
-- [ ] Full regression pack re-run recorded with pass/fail per test, compared against the req-001 baseline
-- [ ] Zero regressions: every previously-passing test still passes (against its updated assertion location where applicable)
-- [ ] Final orchestrator word count recorded and confirmed at or under 8,600 words
-- [ ] Comparison result is a committed artifact, not just a report
+- [x] Full regression pack re-run recorded with pass/fail per test, compared against the req-001 baseline
+- [x] Zero regressions: every previously-passing test still passes (against its updated assertion location where applicable)
+- [x] Final orchestrator word count recorded and confirmed at or under 8,600 words
+- [x] Comparison result is a committed artifact, not just a report
 
 ## Dependencies
 - req-001 (baseline), req-002, req-003, and req-004 must all be complete first - this is the final verification requirement in the sequence
