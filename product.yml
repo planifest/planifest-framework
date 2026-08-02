@@ -1,0 +1,21 @@
+# product.yml — product-level version manifest (ADR-002, feature 0000016)
+#
+# Created at 0000023-framework-pipeline-fixes P9 — this project crossed from
+# 1 to effectively-always-had 3 components (planifest-framework,
+# setup-hook-integration, context-mode-hooks) without a product.yml existing
+# yet; created now per the ship-agent's P9 Step 9 case 3.
+
+id: "planifest"
+name: "Planifest"
+version: "0.23.0"
+feature: "0000023-framework-pipeline-fixes"
+
+versionPolicy: "max-component-version"
+
+components:
+  - id: "planifest-framework"
+    version: "0.23.0"
+  - id: "setup-hook-integration"
+    version: "0.4.0"
+  - id: "context-mode-hooks"
+    version: "0.2.0"
