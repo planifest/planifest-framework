@@ -116,9 +116,9 @@ Single wave. Three features, one pipeline run.
 
 > Baseline artifact exists and is committed before the first trim commit.
 
-**Error / sad path:** A regression test fails after an edit because it pinned a removed phrase. Resolution: if the phrase was relocated, update the test to assert the new canonical location; if the phrase was the sole statement of a rule, restore it (the cut was wrong). A test is never deleted or weakened to make the pack pass. If the same test fails after 2 correction attempts, stop and escalate to the human on the loop.
+**Error / sad path:** A regression test fails after an edit because it pinned a removed phrase. Resolution: if the phrase was relocated, update the test to assert the new canonical location; if the phrase was the sole statement of a rule, restore it (the cut was wrong). A test is never deleted or weakened to make the pack pass. If the same test fails after 2 correction attempts, stop and escalate to the human on the loop. Because only 4 of the 22 tests pin orchestrator content, the P4 diff review is the named second detector: a lost rule found by diff review resolves identically to a test failure (restore the content, never rationalise the cut).
 
-> Test failures resolve by relocation-aware update or by restoring content, never by weakening the pack.
+> Two detectors: red tests for pinned content, P4 diff review for everything else; both resolve by relocation-aware update or restoration, never by weakening.
 
 **Cross-session continuity:** All state lives in committed artifacts (`plan/current/`, granular commits per section edit). An interrupted session resumes from the last commit; `regression-baseline.md` is committed early so the comparison target survives any interruption. No partial-write risk beyond a single uncommitted file edit, which git status surfaces on resume.
 
