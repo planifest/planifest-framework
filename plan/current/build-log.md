@@ -88,4 +88,6 @@ Version confirmed: 0.23.0
 | Telemetry | confirmed-disabled |
 | Notes | Only req-001 (continuous_run restoration) involves a significant architectural/governance decision warranting an ADR — req-002/003/004 are mechanical bug fixes with no decision to record. |
 
+Gate: ADR-001 produced, covers the one significant decision in this feature's requirement set (req-001). Continuous_run exception applies — proceeding to P3 without stopping.
+
 ---
