@@ -143,6 +143,21 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 
 ---
 
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T03:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
+| Notes | Cross-model review gate: toggle absent (no `planifest-overrides/loop-toggles.yml`) — off, skipped per default. Ship-agent owns P7→P8→P9 as one continuous sequence; final gate always confirms regardless of continuous_run. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
