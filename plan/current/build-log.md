@@ -233,6 +233,21 @@ Changelog: deferred to P7 - ship-agent's Step 1 owns plan/changelog/{feature-id}
 
 ---
 
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T16:25:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | ship-agent owns P7 (Archive) -> P8 (Build Assessment, sub-agent) -> P9 (Ship) as one continuous sequence. Cross-Model Review Gate: toggle default off, not enabled this run - skipped, proceeding straight to ship-agent. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
