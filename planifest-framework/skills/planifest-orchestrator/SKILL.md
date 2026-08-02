@@ -90,23 +90,13 @@ Do not assume you know the formatting or content of any Planifest template or ph
 |------------------------|------------------|
 | Write the P0 discovery pass findings | `planifest-framework/templates/discovery.template.md` |
 | Ask the human to fill in a Feature Brief | `planifest-framework/templates/feature-brief.template.md` |
-| Begin Phase 1 (requirements) | Load the `planifest-spec-agent` skill |
 | Produce an Execution Plan | `planifest-framework/templates/execution-plan.template.md` |
 | Define a granular requirement | `planifest-framework/templates/requirement.template.md` |
 | Produce a Domain Glossary | `planifest-framework/templates/domain-glossary.template.md` |
 | Produce a Risk Register | `planifest-framework/templates/risk-register.template.md` |
 | Produce a Scope document | `planifest-framework/templates/scope.template.md` |
-| Begin Phase 2 (ADRs) | Load the `planifest-adr-agent` skill |
 | Produce an ADR | `planifest-framework/templates/adr.template.md` |
-| Begin Phase 3 (code generation) | Load the `planifest-codegen-agent` skill |
 | Create or update a component manifest | `planifest-framework/templates/component.template.yml` |
-| Begin Phase 4 (validation) | Load the `planifest-validate-agent` skill |
-| Begin Phase 5 (security) | Load the `planifest-security-agent` skill |
-| Begin Phase 6 (documentation) | Load the `planifest-docs-agent` skill |
-| Begin Phase 7 (archive) | Load the `planifest-ship-agent` skill |
-| Begin Phase 8 (build assessment) | Invoked by ship-agent as sub-agent — load `planifest-build-assessment-agent` skill |
-| Begin Phase 9 (ship) | Continues within ship-agent — no additional skill load required |
-| Handle a change request | Load the `planifest-change-agent` skill |
 | Write an Iteration Log | `planifest-framework/templates/iteration-log.template.md` |
 | Write confirmed design to `plan/current/design.md` | `planifest-framework/templates/design.template.md` |
 | Enter any loop (P0 completeness, critic, reversal, verify, cross-model) | Load the `planifest-loop-runner` skill |
