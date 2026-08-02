@@ -28,4 +28,4 @@ No regression candidates. None of the 4 new test files carry a `# REGRESSION-CAN
 
 ## 4. Summary
 
-**Overall test health:** ✅ Healthy — one documented, pre-flagged, out-of-scope failure (unrelated `cline.sh` bug, tracked as a separate background task); zero regressions introduced by this feature.
+**Overall test health:** ✅ Healthy — one documented, pre-flagged, out-of-scope failure (unrelated `cline.sh` bug, filed as backlog `0000034`); zero regressions introduced by this feature.
