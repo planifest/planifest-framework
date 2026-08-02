@@ -185,3 +185,18 @@ Additional finding: the corrected canonical `planifest-ship-agent/SKILL.md`'s St
 Gate: `P8: Complete` — build-report.md produced. Corrected 3 factual slips before accepting: the agent misattributed the cline.sh backlog filing to "0000027" (an unrelated, already-picked-up entry) instead of the correct `0000034`, and mischaracterized backlog `0000033` as "ship-agent SKILL.md sync" when it's actually the P7 git-add-missing-plan/current/ finding. Also added the `.claude/skills/` staleness clarification and backlog `0000035` (filed after the agent's dispatch, at the human's direction) to the summary. Recommendation: Ship. Proceeding to P9. |
 
 ---
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T22:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent (continued) |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | No `product.yml` at project root. Checking component count to determine version-derivation case (ADR-002, product-level versioning). |
+
+---
