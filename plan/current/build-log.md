@@ -45,7 +45,17 @@ Pending migrations: none (`planifest-framework/migrations/` contains no `.md` ou
 
 Skills inbox: empty.
 
-Adoption mode: standard-iterative (detected; signal: `plan/_archive/` populated and `docs/about.md` present) — pending human confirmation.
+Adoption mode: standard-iterative — confirmed by human on 2026-08-02.
+
+Version confirmed: 0.22.0 (minor bump from 0.21.0, Feature Pipeline track) — confirmed by human on 2026-08-02.
+
+Run mode: continuous — authorised by human on 2026-08-02; `plan/.run-mode` written. P1-P6 gates proceed without confirmation; P9 gate still stops.
+
+Backlog filed mid-run: 0000029-scope-lock-drafts-always-presented (P0, non-blocking, scope unchanged). Human direction applied for the remainder of this run: Scope Lock questions arrive with the draft attached.
+
+Remote git grant (per-session, Hard Limit 7): human expressly authorised pushing the feature branch and raising the PR this session ("I want you to push and raise the PR this time"). Overrides `custom-001-local-git-only.md` for this run only. Push after phase-gate commits; PR raised at P9 via gh.
+
+Scope Lock — happy path: baseline regression run and word counts committed first; section-by-section trim with granular commits and relocation-aware test updates; success is orchestrator at or under 7,600 words, every removed rule canonical in exactly one file, pack green with zero enforcement-content loss, docs at 0.22.0, and the agent pushes the branch and raises the PR at P9. [source: agent-draft-edited]
 
 ---
 
