@@ -94,7 +94,22 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
 | Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
-| Notes | Implements req-001 (3 hooks + orchestrator P0 step 3b) and req-002 (telemetry-standards.md + 8-skill audit) via TDD inner loop. |
+| Notes | telemetry-standards.md fixed directly by orchestrator first (shared file, avoided subagent write conflict). Dispatched 2 parallel subagents: (1) req-001 — deleted getProductId()/git-path fallback from all 3 hooks, replaced with readProductId() reading product.yml's id field (no fallback, routes to existing recordTelemetryFailure()); extended orchestrator P0 step 3b with hard-stop prompt; wrote test-0000024-req-001-declared-product-id.sh (42/42 passing); deleted now-obsolete test-0000023-req-004; fixed 2 unrelated pre-existing tests broken by the change (test-0000018-req-002-hook-failure-marker.sh + regression copy, test-context-pressure.sh) by adding product.yml to their scratch dirs. (2) req-002 — audited all 8 phase skills' Telemetry sections: zero fixes needed, confirmed centralisation (0000023 ADR-002) held. Both subagents wrote files only, no git commands — orchestrator verified independently (re-ran grep checks, re-read the hook diff, re-ran the new test file standalone: 42/42, and the full suite: 36 feature suites passed/1 failed + 22 regression passed/0 failed) before committing. The 1 failure is `test-0000023-req-003-copilot-setup-self-copy.sh` case (e) — pre-existing, documented, unrelated (backlog 0000034, cline.sh bug) — confirmed not a regression from this feature's changes. component.yml bumped to 0.24.0, feature field updated (close-out). Parallel task batches: 2 (P1: req-001+req-002 docs; P3: req-001 hooks+req-002 audit). Gate: implementation matches spec, tests exist and pass modulo the pre-existing unrelated failure — passes, deferred to P4 for formal CI confirmation. continuous_run active, proceeding to P4. |
+
+---
+
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T02:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
+| Notes | Orchestrator's own P3 verification already ran the full suite (36/1 feature, 22/0 regression) and confirmed the 1 failure is pre-existing and unrelated (backlog 0000034). P4 formally confirms CI status and decides whether that pre-existing failure blocks the gate. |
 
 ---
 
