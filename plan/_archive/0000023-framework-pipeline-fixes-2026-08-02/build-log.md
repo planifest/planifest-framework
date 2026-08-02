@@ -197,6 +197,20 @@ Gate: `P8: Complete` — build-report.md produced. Corrected 3 factual slips bef
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Telemetry | confirmed-disabled |
-| Notes | No `product.yml` at project root. Checking component count to determine version-derivation case (ADR-002, product-level versioning). |
+| Notes | No `product.yml` existed; project has 3 components (planifest-framework 0.23.0, setup-hook-integration 0.4.0, context-mode-hooks 0.2.0) → case 3, created `product.yml` with `versionPolicy: max-component-version`. `product-version.mjs` derived `0.23.0`, exit 0. Validated against last tag `v0.22.0` — not a regression. Tagged `v0.23.0` locally. Push/PR decision: human explicitly requested push + PR this run (overriding the local-git-only default per its own stated exception clause and this session's explicit chat authorization) — pushed branch + tags, raised PR #48 via `gh pr create`. Changelog PR field updated. |
 
 ---
+
+## Summary (filled at P7 — completed here at P9 close-out)
+
+| Metric | Value |
+|--------|-------|
+| Total phases completed | 10 (P0-P9) |
+| Total agents spawned | 9 (4 at P1, 4 at P3, 1 at P8) |
+| Total MCP calls | 0 |
+| Phases using parallelism | 2 (P1, P3) |
+| Primary tier agent calls | 8 |
+| Cheaper tier agent calls | 1 |
+| Self-corrections | 0 |
+| Phases skipped | none |
+| Phases with a recorded telemetry gap | 0 (confirmed-disabled all run, no signal active) |

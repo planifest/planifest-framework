@@ -2,7 +2,7 @@
 
 **Feature:** Framework Pipeline Fixes
 **Pipeline run:** P0-P9 all completed, none skipped
-**PR:** pending — updated after PR description is output in Step 10
+**PR:** https://github.com/planifest/planifest-framework/pull/48
 
 ## What Was Built
 
