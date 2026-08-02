@@ -77,6 +77,21 @@ P0 exchange — standing instruction: Q: n/a (human directive, not a coaching ga
 
 ---
 
+### P1 — Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T12:58:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | Applying custom-002 (prefer subagent decomposition): the 5 anticipated requirements from the Skill Map are largely independent workstreams (baseline, class 1 removals, class 2 relocations, class 3 trims, comparison rerun) - dispatching in parallel where content boundaries don't overlap. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
