@@ -39,14 +39,14 @@ As a human running `setup.sh copilot`, I want the command to exit 0, so that Cop
 - The `.ps1` fix (including the dispatcher guard change) is verified statically only in this environment — no `pwsh` runtime available, consistent with the pre-existing note in `src/setup-hook-integration/component.yml`'s quirks list (Q-006: "Write-SetupFlagsMarker (0000020) verified statically only in this environment, no pwsh available"). This is a deferred live verification, not a missing requirement — it stays open until a Windows/`pwsh`-capable environment is available to run `setup.ps1 copilot` for real.
 
 ## Acceptance Criteria
-- [ ] `setup.sh copilot` exits 0 on a fresh disposable workspace (verified by the new regression test)
-- [ ] `setup.sh all` (which includes the copilot target) also exits 0
-- [ ] The adapter file lands at `.github/hooks/adapters/copilot.mjs` in the target workspace, not back in `planifest-framework/`
-- [ ] `.github/hooks/planifest.json`'s two `command` fields reference the new destination path (`.github/hooks/adapters/copilot.mjs`), consistent with each other and with where the file was actually copied
-- [ ] `copilot.ps1` declares `HookAdapterSrc`, `HookAdapterDest`, and `HooksInstallDir` — the exact keys `Install-Tier1Hooks`/`Install-Tier1HookRegistration` consume in `setup.ps1`, confirmed by reading `setup.ps1` and `cursor.ps1` rather than guessed
-- [ ] `setup.ps1`'s dispatcher no longer calls `Install-Tier1HookRegistration` for a tool config that has `HookAdapterSrc` but no `SettingsFile` (i.e. Copilot) — the guard mirrors `setup.sh`'s independent two-condition structure
-- [ ] `Install-CopilotAdapter` in `setup.ps1` registers `node .github/hooks/adapters/copilot.mjs`, not the stale `planifest-framework/...` path
-- [ ] New regression test `test-0000023-req-003-copilot-setup-self-copy.sh` is added and passes for the bash path; the `.ps1` path (including the dispatcher guard change) is documented as statically-verified-only pending a `pwsh`-capable environment
+- [x] `setup.sh copilot` exits 0 on a fresh disposable workspace (verified by the new regression test)
+- [ ] `setup.sh all` (which includes the copilot target) also exits 0 — **NOT MET**, but not for a req-003 reason: `setup.sh all` still exits 1 because of a separate, pre-existing, out-of-scope bug in `setup/cline.sh` (path collision between `TOOL_SKILLS_DIR` and `TOOL_BOOT_FILE`), unmasked now that copilot's own crash no longer aborts the `all` run first. Isolated assertions in the same test prove req-003's own fix holds inside the `all` run regardless. See `plan/current/scope.md` → "Discovered During P3".
+- [x] The adapter file lands at `.github/hooks/adapters/copilot.mjs` in the target workspace, not back in `planifest-framework/`
+- [x] `.github/hooks/planifest.json`'s two `command` fields reference the new destination path (`.github/hooks/adapters/copilot.mjs`), consistent with each other and with where the file was actually copied
+- [x] `copilot.ps1` declares `HookAdapterSrc`, `HookAdapterDest`, and `HooksInstallDir` — the exact keys `Install-Tier1Hooks`/`Install-Tier1HookRegistration` consume in `setup.ps1`, confirmed by reading `setup.ps1` and `cursor.ps1` rather than guessed
+- [x] `setup.ps1`'s dispatcher no longer calls `Install-Tier1HookRegistration` for a tool config that has `HookAdapterSrc` but no `SettingsFile` (i.e. Copilot) — the guard mirrors `setup.sh`'s independent two-condition structure
+- [x] `Install-CopilotAdapter` in `setup.ps1` registers `node .github/hooks/adapters/copilot.mjs`, not the stale `planifest-framework/...` path
+- [x] New regression test `test-0000023-req-003-copilot-setup-self-copy.sh` is added and passes for the bash path (13/14 assertions; the 1 documented exception above); the `.ps1` path (including the dispatcher guard change) is verified statically only, pending a `pwsh`-capable environment
 
 ## Dependencies
 - None — self-contained within `planifest-framework/setup/` and `planifest-framework/setup.ps1`.
