@@ -34,3 +34,7 @@ version: "0.1.0"
 ## Deferred
 
 - Live `pwsh` verification of the `copilot.ps1` fix (including the dispatcher-guard change) — no PowerShell runtime available in this environment. Verified statically only (grep-based checks in the new regression test). Blocked until a Windows/`pwsh`-capable environment is available to run `setup.ps1 copilot` end to end.
+
+## Discovered During P3 (out of scope, filed separately)
+
+- `setup/cline.sh` sets `TOOL_SKILLS_DIR=".clinerules/skills"` and `TOOL_BOOT_FILE=".clinerules"` to colliding paths — once the skills dir is `mkdir -p`'d, writing the boot file crashes with "Is a directory". This was previously masked because `setup.sh all` processes `copilot` before `cline`, and copilot's own self-copy crash (req-003) aborted the run first. Fixing req-003 unmasked this pre-existing, unrelated bug rather than causing it — `setup.sh all` still cannot reach exit 0 as a result. Not fixed here (out of scope: touching `cline.sh`/`cline.ps1` was explicitly excluded from req-003). Flagged as a separate background task by the implementing subagent during P3.
