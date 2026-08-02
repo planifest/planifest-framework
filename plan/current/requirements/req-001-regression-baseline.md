@@ -24,9 +24,9 @@ As the framework maintainer, I run and record the full regression pack before to
 - Write both the test results and the word counts to a new file, plan/current/regression-baseline.md, and commit it on its own before any trim edit to SKILL.md
 
 ## Acceptance Criteria
-- [ ] plan/current/regression-baseline.md exists and is committed before the first trim-related commit to SKILL.md
-- [ ] It records pass/fail for all 22 regression tests
-- [ ] It records the orchestrator SKILL.md word count and the total skills corpus word count as of the baseline run
+- [x] plan/current/regression-baseline.md exists and is committed before the first trim-related commit to SKILL.md
+- [x] It records pass/fail for all 22 regression tests
+- [x] It records the orchestrator SKILL.md word count and the total skills corpus word count as of the baseline run
 
 ## Dependencies
 - None. This is the first requirement in the sequence; req-002 through req-005 depend on this one being complete first.

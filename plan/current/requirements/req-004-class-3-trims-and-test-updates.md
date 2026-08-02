@@ -26,10 +26,10 @@ As the framework maintainer, I want the orchestrator's expository asides trimmed
 - If a test's assertion can no longer be satisfied because the underlying rule was judged non-essential, stop and escalate to the human on the loop rather than deleting or weakening the check; this feature removes duplication only and never removes a rule
 
 ## Acceptance Criteria
-- [ ] test-0000006-build-assessment.sh's Model Tier / Parallelism Rules assertions are updated to check standards/agent-dispatch-standards.md, in the same commit as req-003's relocation
-- [ ] The other 9 orchestrator-pinning tests are individually re-run after req-002 and req-003 land and confirmed still passing, with no assertion changes needed
-- [ ] No regression test is deleted or weakened
-- [ ] Hard Limit 10's rationale essay and the named P0 coaching asides are trimmed with zero loss of any operative instruction; Hard Limit 7 is confirmed untouched
+- [x] test-0000006-build-assessment.sh's Model Tier / Parallelism Rules assertions are updated to check standards/agent-dispatch-standards.md, in the same commit as req-003's relocation
+- [x] The other 9 orchestrator-pinning tests re-confirmed passing. **Correction:** 8 of 9 needed no change; test-0000017-req-006-structured-discovery-pass.sh needed a fix, but for a pre-existing bug unrelated to this feature's content changes (a stale sed-range pattern referencing a heading that no longer existed, causing silent over-matching) - not a weakening, a correction, applied to both tests/ and tests/regression/ copies.
+- [x] No regression test is deleted or weakened
+- [x] Hard Limit 10's rationale essay and the named P0 coaching asides are trimmed with zero loss of any operative instruction; Hard Limit 7 is confirmed untouched
 
 ## Dependencies
 - req-002 and req-003 must be substantially complete first, since the test updates in this requirement need the final canonical locations those two requirements choose

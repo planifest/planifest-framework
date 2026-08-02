@@ -30,10 +30,10 @@ As the human on the loop, I want content in planifest-orchestrator/SKILL.md that
 - Land each of the eight removals above as its own commit.
 
 ## Acceptance Criteria
-- [ ] All 8 items above are removed from planifest-orchestrator/SKILL.md and replaced with a one-line pointer where a pointer is called for
-- [ ] For each removal, the canonical target file was read and confirmed correct before the corresponding SKILL.md edit was made
-- [ ] No behavioural change: every rule removed is still stated, in full, in exactly one file
-- [ ] Each of the 8 items lands as its own commit, not batched together
+- [x] All 8 items above are removed from planifest-orchestrator/SKILL.md and replaced with a one-line pointer where a pointer is called for
+- [x] For each removal, the canonical target file was read and confirmed correct before the corresponding SKILL.md edit was made
+- [x] No behavioural change: every rule removed is still stated, in full, in exactly one file
+- [x] Each of the 8 items lands as its own commit, not batched together
 
 ## Dependencies
 - req-001 (regression baseline) must be complete and committed first
