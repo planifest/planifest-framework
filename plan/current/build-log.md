@@ -69,6 +69,10 @@ P0 exchange — marker commit mandate: Q: Should the session markers always be c
 
 Scope Lock complete. All four scenario paths captured.
 
+Design confirmed by human on 02 Aug 2026 @ 12:47 PM UTC. plan/current/design.md written and committed.
+
+P0 exchange — standing instruction: Q: n/a (human directive, not a coaching gap) / A: Human directed adding a repo-wide instruction to look for subagent-decomposition opportunities on longer tasks, to be added as a planifest-override, committed, and followed by a setup refresh for Claude Code. Wrote planifest-overrides/instructions/custom-002-prefer-subagent-decomposition.md. This is a standing instruction independent of 0000022's confirmed scope, added after design confirmation (Field Mutability) - it governs how work is executed from here forward but does not alter 0000022's user stories, acceptance criteria, or scope. plan/current/design.md's Repo Instructions section is not retroactively amended (frozen contract for this run); the override takes effect for this and future sessions per its own content.
+
 ---
 
 ## Summary (filled at P7)
