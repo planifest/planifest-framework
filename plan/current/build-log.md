@@ -74,3 +74,18 @@ Version confirmed: 0.23.0
 | Notes | continuous_run active — per Scope Lock first-run path, this run dogfoods the intended (fixed) P1-P3 gate behavior even though the literal SKILL.md fix lands later in this same run (P3); proceeding P1→P2 without stopping, consistent with human's explicit choice at P0 and prior precedent (0000019, 0000022 build logs). 4 requirement docs (req-001..req-004) dispatched to 4 parallel subagents (1 parallel batch), each self-contained with pre-researched exact file/line targets. req-003's subagent surfaced a new, previously-unflagged bug while investigating: setup.ps1's Tier-1 dispatcher guard would incorrectly call Install-Tier1HookRegistration for Copilot (no SettingsFile) if only the two adapter keys were added — folded into req-003 as an additional functional requirement. Shared artifacts (execution-plan, scope, risk-register, domain-glossary, operational-model, slo-definitions, cost-model) written directly (each individually too small to justify subagent dispatch overhead, per the repo's decomposition override's own exception clause). Operational-model/SLO/cost-model sections marked "not applicable" throughout rather than fabricated — no runtime service in this feature. Gate: all artifacts produced, no OpenAPI needed (no API surface), no new component manifest needed (existing top-level planifest-framework component, not under src/). Continuous_run exception applies — proceeding to P2 without stopping. |
 
 ---
+
+### P2 — Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T19:40:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Only req-001 (continuous_run restoration) involves a significant architectural/governance decision warranting an ADR — req-002/003/004 are mechanical bug fixes with no decision to record. |
+
+---
