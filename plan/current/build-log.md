@@ -90,6 +90,8 @@ P0 exchange — standing instruction: Q: n/a (human directive, not a coaching ga
 | Telemetry | confirmed-disabled |
 | Notes | Applying custom-002 (prefer subagent decomposition): the 5 anticipated requirements from the Skill Map are largely independent workstreams (baseline, class 1 removals, class 2 relocations, class 3 trims, comparison rerun) - dispatching in parallel where content boundaries don't overlap. |
 
+P1 gate: 5 requirements produced (req-001 through req-005), scope/risk-register/domain-glossary produced, operational-model/slo-definitions/cost-model produced as explicit not-applicable (no runtime component), execution-plan produced referencing all 5 requirement files, component.yml updated with 0000022-derived responsibilities/scope/risk entries. No OpenAPI spec (not an API feature, correctly omitted). No data contract (ownsData: false). Skill Map in design.md re-checked against final requirements - still accurate (validate-agent for req-001/005, codegen-agent for req-002/003/004), no update needed. design_critic toggle: default off, not enabled this run - skipped. Continuous run mode: P1 gate presented informationally, proceeding directly to P2 without a confirmation stop.
+
 ---
 
 ## Summary (filled at P7)
