@@ -59,3 +59,18 @@ Adoption mode: standard-iterative — confirmed by human on 2026-08-02
 Version confirmed: 0.23.0
 
 ---
+
+### P1 — Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T19:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | continuous_run active — per Scope Lock first-run path, this run dogfoods the intended (fixed) P1-P3 gate behavior even though the literal SKILL.md fix lands later in this same run (P3); proceeding P1→P2 without stopping, consistent with human's explicit choice at P0 and prior precedent (0000019, 0000022 build logs). |
+
+---
