@@ -106,3 +106,18 @@ Gate: ADR-001 produced, covers the one significant decision in this feature's re
 | Notes | 4 independent requirements (req-001..req-004), no cross-references between them — dispatched per Skill Map / Subagent Decomposition Directive, 1 parallel batch, 4 agents. req-001/002 were pure prose/table edits to SKILL.md files (no TDD sub-loop; documented deviation matching 0000021 precedent). req-003/004 followed RED-before-GREEN discipline within their own single dispatch rather than spawning nested test-writer/implementer/refactor sub-agents (documented, proportionate deviation for fixes this contained) — both confirmed RED then GREEN, 1 implementation attempt each, no escalations. req-001's edit tripped the sandbox's automated self-modification security warning (removing a "No exception" STOP-gate clause) — reviewed and confirmed as the exact, deliberately authorized change from this run's P0/ADR-001, not an unauthorized action; disclosed to the human at the time. Orchestrator-level fix applied post-dispatch: req-004's subagent wrote its test to `tests/regression/` (auto-managed by `promote-to-regression.sh`, "do not edit manually" per its own manifest) instead of `tests/` (correct convention for a not-yet-promoted feature test, confirmed by req-003's subagent's independent investigation); moved the file and corrected its now-wrong relative `SCRIPT_DIR/../helpers` and `../..`-FRAMEWORK paths, re-ran and confirmed still 21/21 passing. `planifest-framework/component.yml` version bumped 0.22.0→0.23.0, feature field updated. Full test suite run post-fix: 34/35 feature suites + 22/22 regression suites pass; the 1 failure is `setup.sh all` exit code, caused by a separate pre-existing `cline.sh` path-collision bug that req-003's fix unmasked (previously hidden by copilot's crash aborting the run first) — not a regression from this feature's work, confirmed by isolated assertions that req-003's own fix holds; flagged as a separate background task by the implementing subagent and logged in scope.md. Continuous_run exception now correctly applies at this phase (live dogfood of req-001's own fix) — proceeding to P4 without stopping. |
 
 ---
+
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T20:30:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Full suite already run once during P3 verification (34/35 + 22/22); re-running formally under validate-agent for the official P4 record. Known, pre-flagged failure: `setup.sh all` exit code, caused by unrelated pre-existing `cline.sh` bug — validate-agent briefed not to spend self-correction attempts on it. |
+
+---
