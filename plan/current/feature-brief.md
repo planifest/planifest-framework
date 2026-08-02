@@ -43,7 +43,7 @@ No new component. `product.yml` (repo root, not under `src/`) gains a required r
 
 | From | To | Method | Contract |
 |------|-----|--------|----------|
-| `emit-phase-start.mjs` / `emit-phase-end.mjs` / `context-pressure.mjs` | `structured-telemetry-mcp` `/emit` HTTP endpoint | HTTP POST | Envelope JSON, `product_id` field now sourced from `product.yml` first |
+| `emit-phase-start.mjs` / `emit-phase-end.mjs` / `context-pressure.mjs` | `structured-telemetry-mcp` `/emit` HTTP endpoint | HTTP POST | Envelope JSON, `product_id` sourced from `product.yml` only — no fallback value; unresolvable `product_id` is an emission failure |
 | planifest-orchestrator / phase skills | `structured-telemetry-mcp` `emit_event` MCP tool | MCP tool call | Argument name `envelope` (not `event`) — confirmed live via direct test this session |
 
 ## Stack
@@ -68,8 +68,8 @@ Inherited — no new stack choice. Markdown skills, Node `.mjs` hooks, no new la
 ## Scope Boundaries
 
 ### In Scope
-- `getProductId(cwd)` in all 3 telemetry hooks: read `product.yml`'s `id` field first; fall back to current `git rev-parse --show-toplevel` behaviour only if `product.yml` or its `id` field is absent (never hard-block — ADR-005)
-- `planifest-orchestrator/SKILL.md` P0 step 3b: if `product.yml` is absent, or present without an `id` field, prompt the human once for a declared product id and write/create `product.yml` with it (creating a minimal `product.yml` for single-component projects if none exists)
+- Delete `getProductId(cwd)` and its git-path fallback entirely from all 3 telemetry hooks — no function, no fallback logic. Replace with: read `product.yml`'s `id` field; if present, use it. If `product.yml` is absent, unparseable, or missing `id`, treat this as an emission failure — caught by the hook's existing try/catch, routed through the existing `recordTelemetryFailure()` marker mechanism (no new marker format), never a hard block (ADR-005 unchanged). No path-based value is ever emitted as `product_id`.
+- `planifest-orchestrator/SKILL.md` P0 step 3b: if `product.yml` is absent, or present without an `id` field, hard-stop and ask the human for a declared product id before proceeding; write/create `product.yml` with it (creating a minimal `product.yml` for single-component projects if none exists). This is the primary path — by running first in every pipeline, it should resolve `product_id` before any hook fires in the same run.
 - `telemetry-standards.md`: update the Event Envelope section's `product_id` description to reflect the new sourcing order (declared first, path fallback second); update the `emit_event` usage guidance to explicitly show the tool call's top-level argument name is `envelope`, not `event`
 - Audit all 8 phase skills' `## Telemetry` sections for any place that names or implies the wrong MCP argument name; fix any found
 - Live re-verification: confirm at least one agent-driven event type actually lands end-to-end through the real `emit_event` tool during this feature's own pipeline run (closing 0000017's RCA definition-of-done item 9)
@@ -88,7 +88,8 @@ Inherited — no new stack choice. Markdown skills, Node `.mjs` hooks, no new la
 | NFR | Target | Measurement |
 |-----|--------|-------------|
 | Correctness | 100% of agent-driven `emit_event` calls during this feature's own pipeline run use the correct `envelope` argument and succeed | Build log Telemetry field = `emitted` for every phase, zero `failed-with-recorded-choice` |
-| Backward compatibility | Hooks never hard-block regardless of `product.yml` state | Existing ADR-005 behaviour unchanged, verified by regression test |
+| Data integrity | No telemetry event ever carries a filesystem-path `product_id` after this feature ships | Regression test asserts an unresolvable `product_id` produces a failure marker, never a path-shaped value |
+| Backward compatibility | Hooks never hard-block regardless of `product.yml` state, even though they no longer fall back to a path value | Existing ADR-005 behaviour (exit-zero, never blocks the session) unchanged, verified by regression test |
 
 ## Constraints and Assumptions
 
@@ -106,15 +107,16 @@ Inherited — no new stack choice. Markdown skills, Node `.mjs` hooks, no new la
 
 **First-run path:** A brand-new single-component project has no `product.yml`. At P0 step 3b, the orchestrator detects this, asks the human for a product id, and creates a minimal `product.yml` containing just `id`. All telemetry for the rest of that run (and future runs) uses the declared id.
 
-**Error / sad path:** `product.yml` exists but is malformed (unparseable YAML) or missing the `id` field specifically. Hooks fall back to the existing git-path behaviour without blocking. The orchestrator's P0 prompt still fires (treats missing `id` the same as missing file) so the gap self-heals on the next run.
+**Error / sad path:** `product.yml` exists but is malformed (unparseable YAML) or missing the `id` field specifically. There is no fallback value — the 3 hooks treat this exactly like any other emission failure: caught by the existing try/catch, written to `plan/.telemetry-failures/` via the existing `recordTelemetryFailure()` call (no new marker format, no path-based `product_id` ever emitted), never blocking the session (ADR-005 unchanged). The orchestrator's P0 step 3b, being interactive rather than a fire-and-forget hook, hard-stops and asks the human to fix the file before proceeding — it does not silently treat malformed the same as absent, and running first in every pipeline it should pre-empt the hook failure path in the common case.
 
 **Cross-session continuity:** If P0 is interrupted after the human answers the product-id prompt but before `product.yml` is written, the next session's resume detection re-reads `product.yml`, finds it still absent/incomplete, and re-prompts — no partial-write state to recover, since the write is a single small file operation.
 
 ## Acceptance Criteria
 
 - [ ] Given `product.yml` with a declared `id`, all 3 telemetry hooks emit `product_id` equal to that `id`
-- [ ] Given no `product.yml` (or one missing `id`), hooks fall back to `git rev-parse --show-toplevel` (or raw cwd) exactly as today — zero regression, zero blocking
-- [ ] Given no `product.yml`, the orchestrator's P0 step 3b prompts the human once and creates/updates `product.yml` with the declared id
-- [ ] `telemetry-standards.md` correctly documents `emit_event`'s top-level argument as `envelope`
+- [ ] `getProductId(cwd)` and all git-path-derivation logic is deleted from all 3 hooks — confirmed by absence, not just by non-use
+- [ ] Given no `product.yml` (or one missing/malformed `id`), hooks never emit a path-shaped `product_id` — the call is caught as an emission failure and routed through the existing `recordTelemetryFailure()` marker, without blocking the session
+- [ ] Given no `product.yml` or malformed `product.yml`, the orchestrator's P0 step 3b hard-stops and asks the human before proceeding, rather than silently continuing
+- [ ] `telemetry-standards.md` correctly documents `emit_event`'s top-level argument as `envelope`, and no longer documents a path-based `product_id` fallback
 - [ ] At least one agent-driven event (e.g. `adr_decision`) is emitted live during this feature's own P2 and confirmed to land via `query_telemetry`
-- [ ] Regression tests exist for the hook fallback behaviour (git-repo cwd, non-git cwd, malformed `product.yml`, missing `id` field) — 4 cases minimum
+- [ ] Regression tests exist for: declared id present (success), `product.yml` absent (failure marker, no block), malformed YAML (failure marker, no block), `id` field missing (failure marker, no block) — 4 cases minimum, none asserting a path-shaped fallback value
