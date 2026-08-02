@@ -191,6 +191,21 @@ All 5 requirements PASS. No uncovered acceptance criteria. Checkboxes updated to
 
 ---
 
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T15:45:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | No runtime component, no secrets, no auth, no network, no IaC, no dependencies for this feature (Markdown/Bash content trim within an existing framework component). Security review scoped accordingly - see security-report.md for the explicit not-applicable rationale per category. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
