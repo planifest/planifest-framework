@@ -63,6 +63,12 @@ Scope Lock — error / sad path: a red regression test after a trim resolves one
 
 P0 exchange — error-path detector gap: Q: Only 4 of 22 regression tests grep orchestrator content; what happens when the P4 diff review, not a test, finds a lost rule? / A: Human accepted the recommended closure: a diff-review finding resolves identically to a test failure (restore the content, never rationalise), and the P4 diff review is the named second detector for content no test pins.
 
+Scope Lock — cross-session continuity: all durable run state lives in committed artifacts (baseline record before first trim, granular commits per section, branch pushed at phase gates so the remote holds gate state); session markers (.orchestrator-active, .orchestrator-ack, .run-mode) are committed alongside the P0 artifacts so run mode survives a lost working tree; at most one uncommitted in-progress edit is at risk, surfaced by git status on resume and completed or deliberately discarded. [source: agent-draft-edited]
+
+P0 exchange — marker commit mandate: Q: Should the session markers always be committed, in every run? / A: Human confirmed yes; the orchestrator mandates the P0 commit only for .run-mode, not for .orchestrator-active or .orchestrator-ack — backlog 0000030 filed for the creation-side mandate (deletion side is 0000028).
+
+Scope Lock complete. All four scenario paths captured.
+
 ---
 
 ## Summary (filled at P7)
