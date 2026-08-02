@@ -146,29 +146,9 @@ These skills exist outside the main pipeline phases. Invoke them directly when t
 | Requires a new stack choice | **Feature Pipeline** |
 | New target users or different domain | **Feature Pipeline** |
 
-### Fast Path Criteria
+### Fast Path Criteria and Execution
 
-You may ONLY use the Fast Path if the request meets **ALL** of the following:
-
-1. It does **not** introduce new external dependencies
-2. It does **not** alter, add, or remove database schemas or data models
-3. It does **not** change security parameters, authentication, or routing logic
-4. It is confined to: UI styling, copy changes, or isolated pure-function logic bugs
-
-If **any** criterion fails, route to the Change Pipeline instead. Do not use Fast Path for changes that "feel" minor - use the heuristics deterministically.
-
-### Fast Path Execution
-
-If the Fast Path is engaged:
-
-1. **Do not** ask for a Feature Brief, Execution Plan, or ADR
-2. **Implement** the fix directly
-3. **Validate** - run CI checks (lint, typecheck, test, build) via the validate-agent or equivalent
-4. **Update** `component.yml` with a patch version bump and updated `metadata.updatedAt`
-5. **Log** the change: append an entry to `plan/changelog/{feature-id}-{YYYY-MM-DD}.md`
-6. **Commit** using the fast-path convention: `fix(fast-path): {description}`
-
-The pre-push hook and CI workflow recognise the `fix(fast-path):` prefix and relax the documentation check to require only `component.yml` or a changelog update - not full `plan/` or `docs/` changes.
+Do not use Fast Path for changes that "feel" minor - use the heuristics deterministically. Full criteria and execution steps: `planifest-framework/workflows/fast-path.md`.
 
 ---
 
