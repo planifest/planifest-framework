@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000023-framework-pipeline-fixes"
-version: "0.23.0"
+feature: "0000024-declared-product-id-for-telemetry"
+version: "0.24.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -147,6 +147,7 @@ quality:
     - "ratchet-check treats a reworded criterion as remove+add and blocks it (conservative); the .ratchet-approve marker is the intended path for legitimate rewording"
     - "ratchet-check cannot verify who wrote .ratchet-approve (ADR-004 same-changeset detection not implemented in 0.16.0); marker forgery is audit-detected via ratchet-log.md and P8, not prevented"
     - "product-version.mjs parses only the constrained product.template.yml shape, not arbitrary YAML"
+    - "readProductId() (telemetry hooks) extracts product.yml's top-level id field via a constrained regex, not a full YAML parser — consistent with the existing minimal-dependency style of these hook files; will not handle a non-trivial YAML structure around the id key"
 
 pipeline:
   templateVersion: "1.0.0"
@@ -155,7 +156,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-08-02"
+  updatedAt: "2026-08-03"
   # Updated by 0000021 (spec-agent) P1: seeded requirements-derived
   # responsibilities/scope/risk entries for the regression-pack and
   # audit-findings-report/guardrailed-trim process ahead of P3 codegen.
@@ -167,6 +168,11 @@ metadata:
   # for P1-P3, fixed session-marker commit lifecycle, fixed copilot.sh/.ps1
   # self-copy crash + setup.ps1 dispatcher guard, added product_id telemetry
   # emission.
+  # Updated by 0000024 (codegen-agent) P3: replaced git-path product_id
+  # derivation with a declared product.yml id field (no fallback, routes
+  # to existing failure-marker mechanism), added orchestrator P0 hard-stop
+  # prompt, fixed stale emit_event envelope-argument documentation, closed
+  # 0000017's unexecuted RCA live-verification follow-up.
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"
