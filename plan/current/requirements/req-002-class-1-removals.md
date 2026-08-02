@@ -1,0 +1,39 @@
+---
+title: "Requirement: req-002 - class-1-removals"
+summary: "Detailed requirements for this specific functional feature."
+status: "draft"
+version: "0.1.0"
+---
+# Requirement: req-002 - class-1-removals
+
+**Skill:** [spec-agent](../skills/planifest-spec-agent/SKILL.md)
+**Feature:** 0000022-orchestrator-redundancy-removal
+**Source:** US-001
+**Priority:** must-have
+
+## User Story
+
+> One requirement doc = one user story.
+
+As the human on the loop, I want content in planifest-orchestrator/SKILL.md that is already fully and correctly stated elsewhere removed from the orchestrator and replaced with a pointer, so that the two copies cannot drift apart.
+
+## Functional Requirements
+- Before each removal below, read the named canonical file and confirm it already states the content correctly. Do not remove the orchestrator content first and check the canonical source afterward.
+- Remove the telemetry event table (the 14-event reference table) and the JSON snippet examples from SKILL.md; replace with a pointer to planifest-framework/standards/telemetry-standards.md. Retain in SKILL.md: the failure-marker check duty, the per-phase Telemetry build-log line requirement, and phase_skip ownership.
+- Remove the per-phase Input/Produces/Gate prose blocks for Phase 1 through Phase 7 from SKILL.md; replace with a pointer to each phase's own skill (planifest-spec-agent, planifest-adr-agent, planifest-codegen-agent, planifest-validate-agent, planifest-security-agent, planifest-docs-agent, planifest-ship-agent). Retain in SKILL.md: a single compact table listing phase number, skill to load, the STOP rule and its exception, and the design-critic/cross-model-review toggle note.
+- Remove the Fast Path criteria list and Fast Path execution steps from SKILL.md; replace with a pointer to planifest-framework/workflows/fast-path.md. Retain in SKILL.md: the routing table row pointing to it.
+- Remove the Scope Lock suggested-answer protocol detail (the accept/edit/reject/no-implicit-confirmation rules) from SKILL.md; replace with a pointer to planifest-framework/skills/planifest-scope-lock-agent/SKILL.md. Retain in SKILL.md: the four scenario-path questions themselves and the capture format for build-log entries. This item covers only the redundant restatement of ADR-003 mechanics; it does not touch the "always offered, only drafted on request" semantics, which is superseded by backlog 0000029 and is out of scope here.
+- Remove the reversal execute/assess mechanics detail from SKILL.md; replace with a pointer to planifest-framework/skills/planifest-reversal-assessor/SKILL.md and planifest-framework/skills/planifest-loop-runner/SKILL.md. Retain in SKILL.md: the petition receipt step and the four human-gate conditions.
+- Remove the retrofit 6-step scan list and the full per-mode discovery.md content descriptions from SKILL.md; replace with a pointer to planifest-framework/workflows/retrofit.md and planifest-framework/templates/discovery.template.md. Retain in SKILL.md: the mode taxonomy table and the conflict-warning protocol.
+- Remove the Change Pipeline's three confirm questions (which feature/component/change) from SKILL.md; replace with a pointer to planifest-framework/workflows/change-pipeline.md. Retain in SKILL.md: "route to change-agent, confirm scope per the workflow."
+- Collapse the triple-stated "load the phase skill before acting" instruction to a single statement in Phase Conventions: remove the Framework Index rows that repeat "Begin Phase N -> load skill X" for phases 1-9, and remove the restatement inside each per-phase section.
+- Land each of the eight removals above as its own commit.
+
+## Acceptance Criteria
+- [ ] All 8 items above are removed from planifest-orchestrator/SKILL.md and replaced with a one-line pointer where a pointer is called for
+- [ ] For each removal, the canonical target file was read and confirmed correct before the corresponding SKILL.md edit was made
+- [ ] No behavioural change: every rule removed is still stated, in full, in exactly one file
+- [ ] Each of the 8 items lands as its own commit, not batched together
+
+## Dependencies
+- req-001 (regression baseline) must be complete and committed first
