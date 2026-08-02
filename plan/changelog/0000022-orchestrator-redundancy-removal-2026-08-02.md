@@ -2,7 +2,7 @@
 
 **Feature:** Orchestrator Redundancy Removal
 **Pipeline run:** P0-P9 complete, no phases skipped
-**PR:** pending — updated after PR is raised in Step 10
+**PR:** https://github.com/planifest/planifest-framework/pull/47
 
 ## What Was Built
 
