@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000019-self-description-and-session-hygiene-fixes
+Last updated: 0000023-framework-pipeline-fixes
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -117,6 +117,14 @@ Last updated: 0000019-self-description-and-session-hygiene-fixes
 | ADR-004 | P9 human push/PR decision protocol | active | P9 always presents a push/PR choice to the human; agent never pushes without awareness; local-git-only defaults to PR description output |
 | ADR-005 | Run-mode sentinel file | active | `plan/.run-mode` written at P0 persists the run mode across session boundaries; any value other than `continuous` defaults to `interactive` |
 | ADR-006 | Retroactive tags via Planifest migration | active | Historical release tags applied through a migration file, not a script; human-confirmed per tag; tags are local-only until human pushes |
+
+### Feature 0000023 — framework-pipeline-fixes
+
+ADR files: [plan/_archive/0000023-framework-pipeline-fixes-2026-08-02/adr/](../plan/_archive/0000023-framework-pipeline-fixes-2026-08-02/adr/)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Restore continuous_run exception for P1-P3 gates | accepted | Restores the `continuous_run: true` exception to P1/P2/P3 STOP rules, matching P4-P6; root-caused the regression to commit `42ae808` (feature 0000021, a word-count trim pass), correcting backlog 0000031's "pre-existing, not introduced by 0000022" claim |
 
 ---
 

@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000020-setup-refresh-skill
+Last updated: 0000023-framework-pipeline-fixes
 
 ---
 
@@ -129,7 +129,7 @@ No components own persistent data. Planifest operates on local filesystem artifa
 | Node.js (built-ins only: fs, path, child_process, os, url) | Runtime | All hook adapters and enforcement scripts |
 | Bash | Runtime | setup.sh, test scripts, hook install scripts |
 | PowerShell 7+ | Runtime | setup.ps1, test_setup.ps1, PowerShell hook scripts |
-| git (core.hooksPath) | CLI | setup.sh/ps1 (commit-msg hook installation) |
+| git (core.hooksPath) | CLI | setup.sh/ps1 (commit-msg hook installation); `hooks/telemetry/*.mjs` (0000023: `git rev-parse --show-toplevel` derives `product_id` for the telemetry envelope, falling back to raw `cwd` on failure — never blocks emission) |
 
 ---
 

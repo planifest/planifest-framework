@@ -290,7 +290,7 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
    ```
    Delete `plan/.run-mode` and continue.
 
-1. **Write the sentinel** — write `plan/.orchestrator-active` containing the feature-id (or `pending` if the feature-id is not yet known). This unlocks `plan/current/` writes for the duration of the pipeline run. Update the file with the confirmed feature-id once it is known.
+1. **Write the sentinel** — write `plan/.orchestrator-active` containing the feature-id (or `pending` if the feature-id is not yet known). This unlocks `plan/current/` writes for the duration of the pipeline run. Update the file with the confirmed feature-id once it is known. Include this file in the P0 commit.
 
 2. **Create build log** — copy `planifest-framework/templates/build-log.template.md` to `plan/current/build-log.md`. Fill in the header fields: feature-id, start timestamp (ISO 8601 UTC), tool name, primary model name, cheaper model name. If `plan/current/build-log.md` already exists (resume), do not overwrite — append to it. At the start of every phase (P0–P9), append a new phase block to the build log before doing any phase work. Record: model tier used, skills loaded, agent count, MCP call count, parallel task batch count. This is mandatory — a missing phase block is a pipeline error (Hard Limit 8). At P7 after archiving, fill in the Summary table with totals.
 
@@ -350,7 +350,7 @@ At the very start of Phase 0 (before coaching begins), perform these actions in 
 
    Present the Skill Map to the human as part of the design confirmation. Re-evaluate and update the `## Skill Map` section at each phase gate before proceeding to the next phase — requirements or skills may have changed.
 
-5. **Write strict-mode ack** — if `plan/.orchestrator-strict` exists, check whether the current prompt context contains a `session_id` value (injected by the `check-orchestrator-presence.mjs` hook banner). If a session_id is present, write it verbatim to `plan/.orchestrator-ack`. This silences the strict-mode banner for the remainder of this session. If no session_id is available in context, write the current UTC timestamp (ISO 8601) instead. Skip this step if `plan/.orchestrator-strict` does not exist.
+5. **Write strict-mode ack** — if `plan/.orchestrator-strict` exists, check whether the current prompt context contains a `session_id` value (injected by the `check-orchestrator-presence.mjs` hook banner). If a session_id is present, write it verbatim to `plan/.orchestrator-ack`. This silences the strict-mode banner for the remainder of this session. If no session_id is available in context, write the current UTC timestamp (ISO 8601) instead. Skip this step if `plan/.orchestrator-strict` does not exist. When this step is not skipped, include `plan/.orchestrator-ack` in the P0 commit.
 
 6. **Check skills inbox** — check `planifest-framework/skills-inbox/` for any SKILL.md files. If found, process them per the Capability Skills section below before proceeding.
 
@@ -505,9 +505,9 @@ Each phase skill documents its own Input and What It Produces (see its `## Input
 
 | Phase | Skill to invoke | Gate condition | STOP rule / exception |
 |---|---|---|---|
-| P1 Requirements | spec-agent | Every artifact produced; OpenAPI (if applicable) covers every endpoint implied by the functional requirements | STOP, present requirement count/scope decisions/deferred items. No exception. |
-| P2 Architecture Decisions | adr-agent | An ADR exists for every significant decision (stack, database, auth, deployment topology, component boundaries) | STOP, present ADR list with one-line summaries. No exception. |
-| P3 Code Generation | codegen-agent | Implementation exists and matches the spec's file structure; an Escalation halt is reviewed with the human before proceeding | STOP, present components built/tests produced/deviations. No exception. |
+| P1 Requirements | spec-agent | Every artifact produced; OpenAPI (if applicable) covers every endpoint implied by the functional requirements | STOP, present requirement count/scope decisions/deferred items. Exception: `continuous_run: true` was set at P0. |
+| P2 Architecture Decisions | adr-agent | An ADR exists for every significant decision (stack, database, auth, deployment topology, component boundaries) | STOP, present ADR list with one-line summaries. Exception: `continuous_run: true` was set at P0. |
+| P3 Code Generation | codegen-agent | Implementation exists and matches the spec's file structure; an Escalation halt is reviewed with the human before proceeding | STOP, present components built/tests produced/deviations. Exception: `continuous_run: true` was set at P0. |
 | P4 Validate | validate-agent | CI passes | STOP, present checks run and self-correction count. Exception: proceed without confirmation if all checks passed first-attempt with zero self-corrections. |
 | P5 Security | security-agent | Report produced with specific findings | STOP, present risk rating and critical/high/medium findings. Exception: proceed without confirmation if risk is Low with zero critical/high/medium findings. |
 | P6 Documentation | docs-agent | Every living artifact produced and consistent (`docs/` is living state; `plan/` is change-in-progress — never mix the two) | STOP, present docs artifacts produced and any drift found. Exception: proceed without confirmation if zero drift and all expected artifacts present. |

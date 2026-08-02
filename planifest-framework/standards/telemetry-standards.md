@@ -109,6 +109,7 @@ Every `emit_event` call must use this envelope. The `data` field carries event-s
 {
   "schema_version": "1.0",
   "event": "<event_name>",
+  "product_id": "<git repo root, or cwd if not a git repo>",
   "agent": "<skill-name e.g. planifest-validate-agent>",
   "phase": "<phase e.g. validate>",
   "tool": "<tool e.g. claude-code>",
@@ -121,6 +122,8 @@ Every `emit_event` call must use this envelope. The `data` field carries event-s
 ```
 
 The snippets in each skill's `## Telemetry` section show the `data` field content only — the full envelope above always wraps it.
+
+`product_id` attributes an event to the repo it was emitted from, so events from multiple projects sharing one telemetry backend don't show "unknown". Hook-driven emission (`emit-phase-start.mjs`, `emit-phase-end.mjs`, `context-pressure.mjs`) derives it via `git rev-parse --show-toplevel` run against the hook's own `cwd`, falling back to that raw `cwd` on any failure (not a git repo, or `git` unavailable). Agent-driven inline `emit_event` calls derive `product_id` the same way — `git rev-parse --show-toplevel` from the agent's own cwd, falling back to cwd on failure.
 
 ---
 
