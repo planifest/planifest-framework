@@ -59,6 +59,10 @@ Scope Lock — happy path: baseline regression run and word counts committed fir
 
 Scope Lock — first-run path: the baseline record at plan/current/regression-baseline.md (per-test results plus word counts) is the sole initialisation; no trim exists until the baseline commit exists, so the comparison reference always precedes the first trim commit; the shipped orchestrator itself has no first-run state (static content, identical on every load). [source: agent-draft-accepted]
 
+Scope Lock — error / sad path: a red regression test after a trim resolves one of two ways: relocated phrase means the test updates to assert the new canonical location; sole-statement rule means the content is restored (the cut was wrong). Tests are never deleted or weakened. Same test failing after 2 correction attempts stops work and escalates to the human on the loop. [source: agent-draft-edited]
+
+P0 exchange — error-path detector gap: Q: Only 4 of 22 regression tests grep orchestrator content; what happens when the P4 diff review, not a test, finds a lost rule? / A: Human accepted the recommended closure: a diff-review finding resolves identically to a test failure (restore the content, never rationalise), and the P4 diff review is the named second detector for content no test pins.
+
 ---
 
 ## Summary (filled at P7)
