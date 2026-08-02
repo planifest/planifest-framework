@@ -94,6 +94,21 @@ P1 gate: 5 requirements produced (req-001 through req-005), scope/risk-register/
 
 ---
 
+### P2 — Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T13:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | Two significant decisions to record: name/location of the new standards file (req-003), and the P4-diff-review-as-second-detector policy confirmed at Scope Lock. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
