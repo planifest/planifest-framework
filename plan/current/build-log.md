@@ -136,3 +136,18 @@ Gate: ADR-001 produced, covers the one significant decision in this feature's re
 | Notes | Notable surface: req-004 adds a new `execFileSync("git", ...)` subprocess call in 3 telemetry hooks; req-003 changes a setup script's file-copy destination and a PowerShell dispatcher guard; req-001/002 are pure prose/gate changes to the orchestrator's own approval mechanism (self-modification surface, already flagged transparently at P3). Overall risk: Low. Zero critical/high/medium findings — all 5 threat-model rows rated Low with specific mitigation evidence (fixed-arg execFileSync with no shell, try/catch fail-open matching ADR-005, destination-path narrowing not a new write capability, dispatcher-guard nesting verified not to affect other tool configs). Zero-findings exception applies — proceeding to P6 without stopping. |
 
 ---
+
+### P6 — Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T21:15:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Living docs to check: docs/component-registry.md (planifest-framework row), docs/about.md (written by ship-agent at P7, not here), no api-index.md (no API), docs/decisions-index.md (ADR-001), docs/dependency-graph.md and architecture-overview.md (check for drift, likely none — no new components/dependencies). Also: `.claude/skills/` is a stale synced copy of the edited SKILL.md files — recommend a skill-sync/setup re-run, per design.md's own Dependencies section (out of scope to trigger here). |
+
+---
