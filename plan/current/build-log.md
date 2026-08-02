@@ -206,6 +206,21 @@ All 5 requirements PASS. No uncovered acceptance criteria. Checkboxes updated to
 
 ---
 
+### P6 — Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-02T16:05:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | confirmed-disabled |
+| Notes | Living docs updates: component-registry.md (planifest-framework version bump + summary), docs/about.md (version, feature, date - written at P7 by ship-agent per convention, not here), recommendations if any drift found. No per-component docs/data-contract needed (ownsData: false). |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
