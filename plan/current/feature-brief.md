@@ -88,7 +88,7 @@ Single wave. Three features, one pipeline run.
 
 | NFR | Target | Measurement |
 |-----|--------|-------------|
-| Orchestrator size | <= 7,600 words | `wc -w` on SKILL.md after final commit |
+| Orchestrator size | <= 8,600 words (revised from 7,600 - see A-001; human confirmed 2026-08-02 after P3) | `wc -w` on SKILL.md after final commit |
 | Behavioural change | zero | Full regression pack green before and after; diff review confirms every removed instruction has exactly one canonical statement |
 | Enforcement-content loss | zero | 0000021 ADR-002 baseline comparison |
 
