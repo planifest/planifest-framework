@@ -60,11 +60,26 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 | Start | `2026-08-03T00:24:00Z` |
 | Model tier | primary |
 | Skills loaded | planifest-spec-agent |
+| Agents spawned | 2 |
+| MCP calls | 0 |
+| Parallel task batches | 1 (req-001 + req-002 dispatched together) |
+| Telemetry | emitted |
+| Notes | Continuous run confirmed; human reinforced subagent-decomposition preference. Dispatched req-001 and req-002 as 2 parallel subagents (independent, different requirement docs) per Agent Dispatch Standards — both verified against source files (line-number claims checked) before commit. Directly authored scope.md, risk-register.md, domain-glossary.md, execution-plan.md, operational-model.md, slo-definitions.md, cost-model.md, and updated planifest-framework/component.yml (responsibilities + scope only — version bump deferred to P3 per house convention). OpenAPI omitted (component-pack, no API surface). Data contract omitted (no schema-owning changes; documented in execution-plan Data Model Summary instead). Gate: all artifacts produced, no OpenAPI needed — passes. continuous_run active, proceeding to P2 without a stop. |
+
+---
+
+### P2 — Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T00:40:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
 | Agents spawned | `{{count}}` |
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
-| Telemetry | emitted |
-| Notes | Continuous run confirmed; human reinforced subagent-decomposition preference. 2 independent user stories (US-001, US-002) — candidate for parallel dispatch per Agent Dispatch Standards. |
+| Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
+| Notes | One ADR expected: extends 0000016 ADR-002 to cover product.yml's new role for single-component projects. This ADR authoring is also the vehicle for req-002's live re-verification step (emit a real adr_decision event with the corrected envelope argument, confirm via query_telemetry). |
 
 ---
 
