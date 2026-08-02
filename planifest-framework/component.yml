@@ -1,7 +1,7 @@
 id: "planifest-framework"
 name: "Planifest Framework"
-feature: "0000021-framework-context-bloat-audit"
-version: "0.21.0"
+feature: "0000022-orchestrator-redundancy-removal"
+version: "0.22.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -150,7 +150,7 @@ pipeline:
 
 metadata:
   createdAt: "2026-05-02"
-  updatedAt: "2026-08-01"
+  updatedAt: "2026-08-02"
   # Updated by 0000021 (spec-agent) P1: seeded requirements-derived
   # responsibilities/scope/risk entries for the regression-pack and
   # audit-findings-report/guardrailed-trim process ahead of P3 codegen.
