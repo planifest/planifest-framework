@@ -788,14 +788,7 @@ Do not block if the human explicitly confirms their intent after a warning. Reco
 
 ## Invoking the Change Pipeline
 
-When routed to the Change Pipeline, invoke the **change-agent** skill. The change-agent handles: loading domain context, implementing the minimum necessary change, validating, checking for contract or schema changes, and updating documentation.
-
-Before invoking the change-agent, confirm with the human:
-- Which feature?
-- Which component(s) are affected?
-- What is the change?
-
-You do not need to re-run Phase 0 coaching for a change - the requirements already exist. But if the change request is ambiguous, clarify it before proceeding. One question at a time.
+When routed to the Change Pipeline, confirm scope and invoke the **change-agent** skill per `planifest-framework/workflows/change-pipeline.md`. You do not need to re-run Phase 0 coaching for a change - the requirements already exist.
 
 ---
 
