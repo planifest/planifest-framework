@@ -65,6 +65,21 @@ Push authorization: explicit per-session grant from human on 2026-08-03 — "pus
 
 ---
 
+### P1 — Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T01:15:00Z` |
+| Model tier | primary (spec-agent dispatch, per Model Tier Decision Table: Requirements writing = Primary) |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 10 (batch 1: 7 requirement docs + scope + risk-register + domain-glossary) + 4 (batch 2: execution-plan + operational-model + slo-definitions + cost-model) |
+| MCP calls | 0 (delegated to subagents) |
+| Parallel task batches | 2 |
+| Telemetry | emitted |
+| Notes | continuous_run active — no STOP gate per Phase Invocation Table exception. Dispatched per Parallelism Directive: batch 1 = independent requirement files + scope/risk-register/domain-glossary (all independent per spec-agent's own table); batch 2 = execution-plan.md (depends on requirements being drafted) + operational-model/slo-definitions/cost-model (independent of each other and of execution-plan). |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
