@@ -7,14 +7,14 @@
 
 id: "planifest"
 name: "Planifest"
-version: "0.23.0"
-feature: "0000023-framework-pipeline-fixes"
+version: "0.24.0"
+feature: "0000024-declared-product-id-for-telemetry"
 
 versionPolicy: "max-component-version"
 
 components:
   - id: "planifest-framework"
-    version: "0.23.0"
+    version: "0.24.0"
   - id: "setup-hook-integration"
     version: "0.4.0"
   - id: "context-mode-hooks"
