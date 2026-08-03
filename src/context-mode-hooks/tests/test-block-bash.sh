@@ -100,6 +100,23 @@ assert_deny "cat README.md | grep TODO" "req-002: cat | grep (cat not allowliste
 assert_deny "rg --type ts error" "req-002: rg with flags"
 assert_deny "wget -O file.txt https://example.com" "req-002: wget with flags"
 
+# --- 0000026 (backlog 0000042): loopback URL argument → allow ---
+assert_allow "planifest-framework/setup.sh claude-code --backend-url http://localhost:3741" "0000026: local setup arg, http://localhost"
+assert_allow "planifest-framework/setup.sh claude-code --backend-url http://127.0.0.1:3741" "0000026: local setup arg, http://127.0.0.1"
+assert_allow "echo http://[::1]:8080/status" "0000026: local setup arg, http://[::1]"
+
+# --- 0000026: curl/wget to a loopback target is still blocked (a local fetch
+# can still flood context same as a remote one) ---
+assert_deny "curl http://localhost:3741/health" "0000026: curl to localhost still blocked"
+assert_deny "wget http://127.0.0.1/file" "0000026: wget to 127.0.0.1 still blocked"
+
+# --- 0000026: subdomain/userinfo spoofing bypass attempts → still blocked ---
+assert_deny "echo http://localhost.evil.com/" "0000026: subdomain spoof (localhost.evil.com) blocked"
+assert_deny "echo http://localhost@evil.com/" "0000026: userinfo spoof (localhost@evil.com) blocked"
+
+# --- 0000026: genuine remote URL argument → still blocked ---
+assert_deny "echo http://example.com/config" "0000026: remote URL argument still blocked"
+
 # --- hookEventName correct ---
 deny_output=$(make_input "grep foo bar" | node "$HOOK")
 event=$(get_hook_event_name "$deny_output")
