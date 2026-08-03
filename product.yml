@@ -5,8 +5,8 @@
 # setup-hook-integration, context-mode-hooks) without a product.yml existing
 # yet; created now per the ship-agent's P9 Step 9 case 3.
 
-id: "planifest"
-name: "Planifest"
+id: "planifest-framework"
+name: "Planifest Framework"
 version: "0.24.0"
 feature: "0000024-declared-product-id-for-telemetry"
 
