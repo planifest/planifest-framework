@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000024-declared-product-id-for-telemetry
+Last updated: 0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -183,7 +183,7 @@ ADR files: [plan/_archive/0000017-ratchet-forgery-detection-and-telemetry-schema
 |-----|-------|--------|---------|
 | ADR-001 | Ratchet-Approve — Agent Write on Explicit Instruction | accepted | Amends 0000016 ADR-004: agent may write `.ratchet-approve` only when the human states path, reason, and go-ahead in the same turn; format `path \| reason \| timestamp`; immediate dedicated commit; backstop kept with an explicit approver-facing message; consumption copied to `plan/ratchet-audit-log.md` |
 | ADR-002 | Cross-Platform Hook Runtime Unification (.sh → .mjs) | accepted | The 3 context-mode hooks become `.mjs` (Node-only) — removes `jq` and the Git Bash/WSL requirement entirely; missing Node surfaces a message at setup and runtime while failing open |
-| ADR-003 | Scope Lock Suggested Answers via On-Demand Subagent | accepted | The orchestrator always offers "want me to suggest an answer?" at each Scope Lock question but only dispatches `planifest-scope-lock-agent` on explicit request; drafts are usage-only, consistency-checked, flagged, and never self-confirming |
+| ADR-003 | Scope Lock Suggested Answers via On-Demand Subagent | superseded by 0000025 ADR-003 | The orchestrator always offers "want me to suggest an answer?" at each Scope Lock question but only dispatches `planifest-scope-lock-agent` on explicit request; drafts are usage-only, consistency-checked, flagged, and never self-confirming. **Superseded:** 0000025-ADR-003 reverses the never-pre-draft, offer-then-opt-in default for the Scope Lock Challenge specifically, replacing it with default parallel drafting and batch presentation; per-item explicit accept/edit/reject and immediate build-log capture are unchanged |
 | ADR-004 | Structured P0 Discovery Pass and discovery.md Lifecycle | accepted | Every adoption mode runs a structured discovery pass before coaching, writing to `plan/current/discovery.md` — fresh each run, archived at P7; partial failures noted inline, never a hard block |
 
 ### Feature 0000018 — telemetry-emission-consistency
@@ -218,6 +218,14 @@ ADR files: [plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/](../plan/_
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|
 | ADR-001 | product.yml Extended to Single-Component Projects as Declared Product ID Home | accepted | `product.yml`'s `id` field becomes the canonical declared `product_id` for telemetry across all projects, including single-component ones — extends (does not supersede) 0000016 ADR-002, whose versioning-only decision remains fully in force |
+
+### Feature 0000025 — pipeline-gate-and-config-fixes-and-ship-agent-fixes
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Ship-agent PR Footer Default-Off with Opt-In Toggle | accepted | The hardcoded AI-attribution footer is removed from the P9 PR description template by default (both `gh pr create` and human-push paths); restorable only via a `planifest-overrides/instructions/` opt-in file, consistent with the existing `local-git-only` override pattern |
+| ADR-002 | Setup-Config Overrides Precedence | accepted | The new tracked `planifest-overrides/setup-config/{tool}.md` file is source of truth for setup flags/backend-url; the existing gitignored `.planifest-setup-flags` marker becomes a local cache reconciled to match it on setup/refresh; `.orchestrator-strict` explicitly out of scope (separate concern) |
+| ADR-003 | Scope Lock Default Drafted, Batch-Presented | accepted | Scope Lock Challenge now dispatches `planifest-scope-lock-agent` for all four scenario-path questions in parallel by default and presents them together for one batch accept/edit/reject pass — supersedes 0000017-ADR-003's opt-in-per-question default; explicitly scoped against 0000014-ADR-008's one-question-at-a-time convention, which is unchanged everywhere else |
 
 ---
 
