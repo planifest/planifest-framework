@@ -82,6 +82,21 @@ Push authorization: explicit per-session grant from human on 2026-08-03 — "pus
 
 ---
 
+### P2 — Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T01:22:00Z` |
+| Model tier | primary (ADR writing = Primary per Model Tier Decision Table) |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 3 (parallel, independent decisions, no cross-reference) |
+| MCP calls | 0 (delegated to subagents) |
+| Parallel task batches | 1 |
+| Telemetry | emitted |
+| Notes | 3 of 7 stories meet the "requires an ADR" bar: US-001 (footer toggle mechanism — req-001 explicitly deferred this), US-004 (setup-config precedence/reconciliation — req-004 explicitly deferred this), US-007 (Scope Lock default change — supersedes 0000017-ADR-003, scoped against 0000014-ADR-008). Stories 002/003/005/006 are bug fixes / extensions of already-established patterns, no new architecture decision. No stack ADR — design.md's stack is fully inherited, no new choice to record. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
