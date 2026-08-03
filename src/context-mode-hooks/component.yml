@@ -1,8 +1,8 @@
 # Planifest Component Manifest
 id: "context-mode-hooks"
 name: "context-mode Enforcement Hook Scripts"
-feature: "0000017-ratchet-forgery-detection-and-telemetry-schema-spec"
-version: "0.2.0"
+feature: "0000026-context-hook-and-telemetry-backstop-fixes"
+version: "0.2.1"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -12,6 +12,7 @@ systemContext: "Installed into .claude/hooks/context-mode/ during setup. Invoked
 responsibilities:
   - "Intercept Grep tool calls and return a block decision with redirect to ctx_execute shell"
   - "Intercept Bash tool calls matching blocked patterns (grep, rg, curl, wget, HTTP) and return a block decision with the correct ctx_* alternative"
+  - "Exempt bare http(s):// arguments whose parsed host is an exact loopback match (localhost, 127.0.0.1, [::1]) from the HTTP block pattern, using the platform URL parser rather than substring matching so subdomain/userinfo spoofing (localhost.evil.com, localhost@evil.com) cannot bypass the check; curl/wget invocations remain blocked regardless of target (0000026, backlog 0000042)"
   - "Allow Bash tool calls matching the allowlist (git, mkdir, rm, mv, cd, ls, npm install, pip install) unconditionally"
   - "Intercept WebFetch tool calls and return a block decision with redirect to ctx_fetch_and_index + ctx_search"
   - "Complete all hook execution within 50ms latency budget"
@@ -93,9 +94,9 @@ pipeline:
 
 metadata:
   createdAt: "2026-04-12"
-  updatedAt: "2026-07-26"
+  updatedAt: "2026-08-03"
   createdBy: "agent"
   lastModifiedBy: "agent"
-  skill: "planifest-codegen-agent"
+  skill: "planifest-change-agent"
   tool: "claude-code"
-  model: "claude-fable-5"
+  model: "claude-sonnet-5"
