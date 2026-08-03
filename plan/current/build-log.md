@@ -52,6 +52,13 @@ Decomposition: 6 stories, past the "≤3" rule of thumb — flagged once to the 
 
 Feature-id / name: human specified "ship-agent-fixes" naming for the ship-agent-specific stories was fine as-is; "framework-housekeeping" was rejected as too vague. Orchestrator proposed `pipeline-gate-and-config-fixes` for the remaining stories (Scope Lock defaults + docs-agent Gate B = "gate" fixes; setup-config relocation + backlog unification = "config" fixes; subagent parallelism folded under the same "fixes" umbrella). Human confirmed.
 
+Scope Lock Challenge — human requested this run's own Scope Lock apply the target (not-yet-shipped) behavior from story 7: all four scenario-path drafts dispatched in parallel via planifest-scope-lock-agent, presented as one batch. 4 subagents dispatched in parallel (see MCP/agent calls this phase).
+
+Scope Lock — happy path: Continuous-mode run proceeds uninterrupted to a footer-free PR, a reliably-staged archive commit, faster parallel-dispatched phases, versioned setup config, and no redundant confirmation prompts. [source: agent-draft-accepted]
+Scope Lock — first-run path: Six of seven fixes are first-run-neutral (same behavior every run, no prior state needed); the exception is setup config, where `planifest-overrides/setup-config/{tool}.md` is created fresh on first post-ship setup run, no migration needed. [source: agent-draft-accepted]
+Scope Lock — error / sad path: Human rejected the first draft as build-framed ("if one of the seven fixes can't complete cleanly" describes this pipeline run producing the fixes, not the shipped features' own usage-time failure modes — violates the scope-lock-agent's usage-only framing rule). Revised per-fix, usage-framed: each fix fails toward visibility/safety, not silence — footer misfire is caught in human PR review; unstaged archive is visible in pre-push review; failed parallel write unit is retried/falls back without losing phase progress; setup-config write failure falls back to existing marker with a warning; unroutable deferred item stays visible in recommendations.md; docs-agent continuous_run misjudgment produces an extra prompt, never a skipped review; a failed Scope Lock draft still lets the other three land together. [source: agent-draft-edited]
+Scope Lock — cross-session continuity: No state at risk for most fixes (each changes an existing output fresh each time); setup config is the exception — if setup stops after writing the new tracked file but before reconciling the old marker, the tracked file is source of truth and the next run reconciles. [source: agent-draft-accepted]
+
 ---
 
 <!-- Copy and fill in this block at each phase boundary:
