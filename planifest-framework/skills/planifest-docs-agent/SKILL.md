@@ -105,6 +105,12 @@ Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md`. Read `planifest-framework/t
 - **Cross-references.** The component registry must link to each component's purpose document. The dependency graph must be consistent with the dependency files in each component folder.
 - **Consistency check.** The domain glossary terms should match what appears in the code. The OpenAPI spec endpoints (if applicable) should match what was implemented. Flag any drift you find - do not silently fix it.
 - **Recommendations.** Produce `plan/current/recommendations.md` - suggested improvements for future iterations. Be constructive and specific. Reference concrete files or decisions.
+- **Backlog filing for Deferred Items and Tech Debt.** In addition to writing `recommendations.md`'s Deferred Items and Tech Debt tables, file each row from those two tables as its own `plan/backlog/{id}-{slug}/entry.md`, following `planifest-framework/templates/backlog-entry.template.md`:
+  - **Applies going forward only.** This routing runs for the feature currently being produced by this pipeline run. Do not backfill entries for Deferred Items/Tech Debt rows already sitting in an already-archived feature's `recommendations.md`.
+  - Set the template's `Source feature` and `Source phase` fields to this feature's ID and the docs phase (P6).
+  - Set `Deferral source` to `deliberate scope decision` for a row filed from the Deferred Items table, or `tech debt` for a row filed from the Tech Debt table.
+  - Point `## Why Deferred` at the originating rationale already captured elsewhere in this feature (its own `scope.md`, ADRs, or the `recommendations.md` row itself) rather than duplicating that rationale in the entry.
+  - Allocate `{id}` per the existing backlog convention: highest `{id}` ever allocated (including picked-up and discarded entries), plus one — check `plan/backlog/`, `plan/_archive/`, and `plan/changelog/` for the high-water mark.
 - Load a capability skill if one exists for a document generation format the feature needs (e.g. `docx`, `pdf`).
 
 ### Drift Detection
