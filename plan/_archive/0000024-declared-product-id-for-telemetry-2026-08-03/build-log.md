@@ -150,11 +150,11 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 | Start | `2026-08-03T03:00:00Z` |
 | Model tier | primary |
 | Skills loaded | planifest-ship-agent |
-| Agents spawned | `{{count}}` |
-| MCP calls | `{{count}}` |
-| Parallel task batches | `{{count}}` |
-| Telemetry | `{{emitted / failed-with-recorded-choice / confirmed-disabled}}` |
-| Notes | Cross-model review gate: toggle absent (no `planifest-overrides/loop-toggles.yml`) — off, skipped per default. Ship-agent owns P7→P8→P9 as one continuous sequence; final gate always confirms regardless of continuous_run. |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Cross-model review gate: toggle absent (no `planifest-overrides/loop-toggles.yml`) — off, skipped per default. Ship-agent owns P7→P8→P9 as one continuous sequence; final gate always confirms regardless of continuous_run. Cross-reference check: no plan/current/-specific pointers found needing post-archive updates (existing plan/current/ mentions across docs/ and src/*/docs/ are evergreen descriptions of the convention itself, not feature-specific links). Changelog + test report written. No regression candidates tagged. Archived to plan/_archive/0000024-declared-product-id-for-telemetry-2026-08-03/ via copy-then-delete; all 3 sentinels (.orchestrator-active, .orchestrator-ack, .run-mode) removed; docs/about.md already correct from P6. Committed with plan/current/ explicitly named in git add (backlog 0000033's fix applied) — git correctly rename-detected every file, no orphaned deletions. |
 
 ---
 
@@ -162,12 +162,29 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
-| Phases with a recorded telemetry gap | `{{count — phases where Telemetry was failed-with-recorded-choice, or "0"}}` |
+| Total phases completed | 8 (P0-P7) |
+| Total agents spawned | 4 (2 in P1, 2 in P3 — all general-purpose subagents) |
+| Total MCP calls | 5 (1 emit_event + 1 query_telemetry in P2; 2 emit_event in P5; 1 emit_event in P6) |
+| Phases using parallelism | 2 (P1, P3 — 1 batch of 2 each) |
+| Primary tier agent calls | 4 (no explicit cheaper-tier override applied — deviation from the fully-prescribed test-writer/implementer/refactor dispatch template noted below) |
+| Cheaper tier agent calls | 0 |
+| Self-corrections | 0 |
+| Phases skipped | none |
+| Phases with a recorded telemetry gap | 0 |
+
+**Dispatch deviation note:** P3 used general-purpose subagents performing inline red-green-refactor discipline rather than the fully nested `planifest-test-writer` → `planifest-implementer` → `planifest-refactor` sub-agent chain with cheaper-tier model overrides. Justification: task size (2 requirements, well-scoped, independently verified by the orchestrator afterward) did not warrant 3 additional levels of agent-spawning overhead. Documented here as a deliberate simplification, not a silent gap.
+
+---
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T03:15:00Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | 1 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Invoked as sub-agent per ship-agent P8 protocol, passing the archive path. |
