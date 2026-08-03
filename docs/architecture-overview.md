@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000023-framework-pipeline-fixes
+Last updated: 0000024-declared-product-id-for-telemetry
 
 ---
 
@@ -112,6 +112,10 @@ When the signal is active, emission is mandatory, not best-effort:
 - **`planifest-orchestrator`** checks for markers at the start of every phase (P0–P9) and surfaces a block-or-proceed question to the human once per distinct root cause per run, recording the answer as a `Telemetry` field in the active `build-log.md` phase block.
 - **Agent-driven failures** (any phase skill's direct `emit_event` call) stop and ask the same question inline, in the same turn — no marker involved.
 
+**`product_id` sourcing (0000024):** every event's `product_id` is sourced from `product.yml`'s `id` field — a durable, human-declared identity, confirmed by the orchestrator at P0 (hard-stop prompt if absent). There is no filesystem-path fallback: an absent, unparseable, or `id`-less `product.yml` is treated as an emission failure and routed through the same failure-marker mechanism described above, never a silent path-shaped value. `product.yml` now applies to single-component projects too for this purpose (extends 0000016 ADR-002 — see `docs/decisions-index.md`), distinct from its pre-existing multi-component versioning role.
+
+**`emit_event` argument name (0000024):** the MCP tool's top-level call argument is `envelope`, not `event` — this was silently broken for every agent-driven call (12 of 14 event types) since `structured-telemetry-mcp` renamed the argument; only hook-driven `phase_start`/`phase_end`/`context_pressure` (which POST directly via HTTP, bypassing this MCP tool) were unaffected. Fixed and live-reverified this feature (0000017's RCA follow-up, previously unexecuted).
+
 Full protocol and event envelope: `planifest-framework/standards/telemetry-standards.md`.
 
 ---
@@ -129,7 +133,7 @@ No components own persistent data. Planifest operates on local filesystem artifa
 | Node.js (built-ins only: fs, path, child_process, os, url) | Runtime | All hook adapters and enforcement scripts |
 | Bash | Runtime | setup.sh, test scripts, hook install scripts |
 | PowerShell 7+ | Runtime | setup.ps1, test_setup.ps1, PowerShell hook scripts |
-| git (core.hooksPath) | CLI | setup.sh/ps1 (commit-msg hook installation); `hooks/telemetry/*.mjs` (0000023: `git rev-parse --show-toplevel` derives `product_id` for the telemetry envelope, falling back to raw `cwd` on failure — never blocks emission) |
+| git (core.hooksPath) | CLI | setup.sh/ps1 (commit-msg hook installation) — `hooks/telemetry/*.mjs` no longer depend on `git` (0000024 removed the `git rev-parse --show-toplevel` `product_id` derivation entirely; see Telemetry section above) |
 
 ---
 
@@ -149,6 +153,7 @@ Reference `docs/decisions-index.md` for the full ADR list.
 - **ADR-003 (0000020):** Mandatory human confirmation gate before any refresh action, regardless of flag-reconstruction confidence
 - **ADR-004 (0000020):** Tool selection is explicit input to the refresh skill, never silently auto-resolved when multiple installs are present
 - **ADR-005 (0000020):** No automatic retry on a failed setup re-invocation; retry is always human-initiated
+- **ADR-001 (0000024):** `product.yml` extended to single-component projects as the declared `product_id` home for telemetry — extends, not supersedes, 0000016 ADR-002's versioning-only scope
 
 ---
 
