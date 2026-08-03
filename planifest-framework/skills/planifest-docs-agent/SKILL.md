@@ -52,7 +52,19 @@ Check whether `docs/` exists at the repository root.
 
 Read the feature brief and design to understand the scope of this pipeline run. Assess whether the living docs (`docs/architecture-overview.md`, `docs/component-registry.md`, `docs/dependency-graph.md`, `docs/decisions-index.md`, `docs/api-index.md`) require updating based on what was built.
 
-Present your assessment and a recommendation to the human:
+Check `continuous_run` / `plan/.run-mode` before deciding how to present the assessment:
+
+**When `continuous_run` is active:** log the assessment and recommendation as a statement, not a question, and proceed automatically — do not stop for confirmation:
+
+```
+P6: Gate B — docs update assessment (continuous run, auto-accepted).
+[Summary of what changed in this run — one sentence.]
+Auto-accepted: [updating / no update needed for] the following docs: [list or "none"].
+```
+
+Record the auto-accepted decision in the P6 build log block, same as a human-confirmed decision.
+
+**When `continuous_run` is not active:** present the assessment and wait for the human to confirm before proceeding, unchanged from today:
 
 ```
 P6: Gate B — docs update assessment.
