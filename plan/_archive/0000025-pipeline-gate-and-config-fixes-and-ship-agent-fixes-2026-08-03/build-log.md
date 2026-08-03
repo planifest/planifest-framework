@@ -226,8 +226,9 @@ Per CLAUDE.md Hard Limit 7 ("Update documentation after any deviation") — this
 | Agents spawned | 1 |
 | MCP calls | 0 |
 | Parallel task batches | 0 |
-| Telemetry | pending |
-| Notes | Dispatching planifest-build-assessment-agent as a sub-agent per ship-agent's P8 template, passing the archive path. |
+| Telemetry | confirmed-disabled (sub-agent's own phase, no agent-driven event type defined for build-assessment per telemetry-standards.md) |
+| Notes | build-report.md produced: 23 primary/4 cheaper model routing (well-justified), 5/8 phases parallelised, 0 self-correction cycles, 1 self-caught deviation (`.claude/` path, no data loss), 38/38 acceptance criteria covered, 126/126 assertions passing, risk Low (4 low-severity findings, 0 critical/high/medium). Overall verdict: efficient, high-quality pipeline, ready for P9. |
+| End | `2026-08-03T03:08:00Z` |
 
 ---
 
