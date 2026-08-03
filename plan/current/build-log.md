@@ -1,8 +1,8 @@
 ---
-title: "Build Log - 0000026-pending"
+title: "Build Log - 0000026-context-hook-and-telemetry-backstop-fixes"
 summary: "Working telemetry file maintained by the orchestrator throughout the pipeline run."
 ---
-# Build Log - 0000026-pending
+# Build Log - 0000026-context-hook-and-telemetry-backstop-fixes
 
 > Created at P0. Appended by the orchestrator at each phase boundary. Survives session changes.
 
@@ -10,7 +10,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Field | Value |
 |-------|-------|
-| Feature ID | `0000026-pending` |
+| Feature ID | `0000026-context-hook-and-telemetry-backstop-fixes` |
 | Pipeline start | `2026-08-03T09:07:16Z` |
 | Tool | `claude-code` |
 | Primary model | `claude-sonnet-5` |
@@ -47,6 +47,14 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | 0000029 | Same as 0000040 | Pre-ADR-003 duplicate of the same request as 0000040, filed one feature earlier (0000022) — superseded by the same shipped behavior |
 
 **Backlog pickup — pull-in:** 0000042 (context-mode hook false-flags local `http://` args) and 0000044 (orchestrator telemetry-marker/emit_event compliance gap) folded into this feature's scope. Both entries state their exact fix mechanism is "to be decided at pickup" — resolving via brief coaching before P3.
+
+**Routing:** Change Pipeline (Three-Track Decision Tree: "Bug fix or targeted change to 1-2 existing components" — 2 components: `context-mode-hooks`, `planifest-framework`; neither is a new user story). Version bump: patch, 0.25.0 → 0.25.1 (Change Pipeline default), to be confirmed at ship.
+
+**Scope decisions (human-confirmed):**
+- 0000042: fix is anchored host-match only — parse the matched URL's host and exempt only exact `localhost` / `127.0.0.1` / `::1` (no `127.0.0.0/8` range, no `*.localhost` suffix — narrow fix, not broadened). Human flagged and closed two bypass classes during coaching: subdomain spoofing (`localhost.evil.com`) and userinfo spoofing (`localhost@evil.com`) — both require host-boundary anchoring or full URL parsing, not raw substring matching.
+- 0000044: fix is a hook-based marker check — a phase-transition/UserPromptSubmit hook that auto-checks `plan/.telemetry-failures/` and injects a visible reminder, removing reliance on the orchestrator's own memory. (Phase-gate lint check option not selected this round — may resurface as a follow-up if the hook-based fix alone proves insufficient.)
+
+Feature ID finalized: `0000026-context-hook-and-telemetry-backstop-fixes`. Branch renamed from `feat/0000026-pending`.
 
 ---
 
