@@ -58,6 +58,21 @@ Feature ID finalized: `0000026-context-hook-and-telemetry-backstop-fixes`. Branc
 
 ---
 
+### PC — Change Pipeline (change-agent)
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T09:07:16Z` |
+| Model tier | primary (0000042 fix, done inline) / primary subagent (0000044 fix, dispatched in parallel per standing subagent-decomposition directive — two independent components, no shared state) |
+| Skills loaded | planifest-change-agent (conceptually — implemented directly per confirmed scope rather than a separate Skill-tool invocation, given both fixes were already fully scoped by P0 coaching) |
+| Agents spawned | 1 (general-purpose, fix for 0000044 — telemetry failure-marker backstop hook) |
+| MCP calls | 0 |
+| Parallel task batches | 1 (the two independent fixes ran concurrently: 0000042 inline, 0000044 via subagent) |
+| Telemetry | emitted |
+| Notes | 0000042 (context-mode hook): fixed `planifest-framework/hooks/context-mode/block-bash.mjs` — bare `http(s)://` argument match now exempts exact loopback hosts (`localhost`, `127.0.0.1`, `[::1]`) via `new URL().hostname`, closing the subdomain (`localhost.evil.com`) and userinfo (`localhost@evil.com`) bypass classes identified during coaching; curl/wget remain blocked regardless of target. Added 9 new test cases to `src/context-mode-hooks/tests/test-block-bash.sh` (existing 42 + new 9 = 51 passed, 0 failed). Updated `src/context-mode-hooks/component.yml` (version 0.2.0 → 0.2.1). Noted but did not touch: `.claude/hooks/context-mode/block-bash.sh` is a dead orphaned file (not wired into `.claude/settings.json` — only the `.mjs` is referenced), out of scope for this fix. 0000044 (telemetry backstop hook) dispatched to a background subagent — pending at time of this entry. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
