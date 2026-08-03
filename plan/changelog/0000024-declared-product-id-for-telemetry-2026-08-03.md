@@ -2,7 +2,7 @@
 
 **Feature:** Declared product_id and telemetry envelope fix
 **Pipeline run:** P0–P9 complete, no phases skipped
-**PR:** pending — updated after PR is raised in Step 10
+**PR:** local-git-only active — human raises PR from branch `feat/0000024-declared-product-id-for-telemetry`, tag `v0.24.0`
 
 ## What Was Built
 

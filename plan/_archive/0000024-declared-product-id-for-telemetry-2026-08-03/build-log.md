@@ -187,4 +187,19 @@ Scope Lock complete. All four scenario paths captured; feature-brief.md updated 
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Telemetry | emitted |
-| Notes | Invoked as sub-agent per ship-agent P8 protocol, passing the archive path. |
+| Notes | Invoked as sub-agent per ship-agent P8 protocol, passing the archive path. build-report.md filed: ready to ship, zero blocking findings, all ACs met. Flagged 1 recommendation (structural consistency in build-log.md table fields for future runs) — non-blocking. |
+
+---
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T03:20:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Version derived via `product-version.mjs`: 0.24.0 (max-component-version policy). `product.yml` updated first (components[planifest-framework].version, feature field) — script correctly returned the stale 0.23.0 before this update, confirming the derivation is live, not cached. Tag `v0.24.0` created locally. Marker tracking pre-flight (Step 9b): `git ls-files` for all 3 sentinels returned empty — correctly untracked. `local-git-only` override active — skipped push/PR prompt per ship-agent's own instruction, output PR description directly for the human. |
