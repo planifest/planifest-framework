@@ -109,6 +109,8 @@ Per CLAUDE.md Hard Limit 7 ("Update documentation after any deviation") — this
 | Parallel task batches | 1 |
 | Telemetry | failed-with-recorded-choice — root cause `context-pressure::TypeError::fetch-failed` acknowledged mid-phase; 3 adr_decision events backfilled and connectivity independently confirmed (see Telemetry Deviation Correction above) |
 | Notes | 3 of 7 stories meet the "requires an ADR" bar: US-001 (footer toggle mechanism — req-001 explicitly deferred this), US-004 (setup-config precedence/reconciliation — req-004 explicitly deferred this), US-007 (Scope Lock default change — supersedes 0000017-ADR-003, scoped against 0000014-ADR-008). Stories 002/003/005/006 are bug fixes / extensions of already-established patterns, no new architecture decision. No stack ADR — design.md's stack is fully inherited, no new choice to record. |
+| Gate | 3 ADRs produced and committed: ADR-001 (PR footer default-off, opt-in via planifest-overrides/instructions/), ADR-002 (setup-config tracked file is source of truth, gitignored marker reconciled), ADR-003 (Scope Lock default-drafted/batch-presented, supersedes 0000017-ADR-003, scoped against 0000014-ADR-008; docs/decisions-index.md updated to mark the superseded row). Out-of-band: human corrected product.yml id/name (planifest → planifest-framework), committed `551130f`. |
+| End | `2026-08-03T01:45:00Z` |
 
 ---
 
