@@ -137,6 +137,7 @@ Do not flag legitimate absences as drift. Do flag missing artifacts that should 
 | Per-component docs for independent components (purpose, interface, risk, scope) | Dependency graph before all component dependency files exist |
 | Drift checks across independent areas (API endpoints, domain terms, data ownership) | Component registry before all component purpose.md files exist |
 | Recommendations + iteration log (independent documents) | Consistency check before individual artifacts are written |
+| 2+ independent living-doc updates (no shared content dependency) — e.g. `component-registry.md`, `decisions-index.md`, `architecture-overview.md` edited in a single parallel batch instead of serially | A living doc that reads another living doc's newly-written content in the same run |
 
 ## Telemetry
 
