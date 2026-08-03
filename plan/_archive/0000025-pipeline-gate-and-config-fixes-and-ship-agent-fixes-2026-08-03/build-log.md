@@ -228,6 +228,22 @@ Per CLAUDE.md Hard Limit 7 ("Update documentation after any deviation") — this
 | Parallel task batches | 0 |
 | Telemetry | confirmed-disabled (sub-agent's own phase, no agent-driven event type defined for build-assessment per telemetry-standards.md) |
 | Notes | build-report.md produced: 23 primary/4 cheaper model routing (well-justified), 5/8 phases parallelised, 0 self-correction cycles, 1 self-caught deviation (`.claude/` path, no data loss), 38/38 acceptance criteria covered, 126/126 assertions passing, risk Low (4 low-severity findings, 0 critical/high/medium). Overall verdict: efficient, high-quality pipeline, ready for P9. |
+
+---
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T03:09:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Step 9: version derived via `product-version.mjs` — initially printed stale `0.24.0` since `product.yml`'s `components[]`/root `version`/`feature` fields hadn't been bumped alongside `component.yml` at P3; updated `product.yml` to 0.25.0/0000025, re-derived cleanly, tag `v0.25.0` created. Step 9b: marker pre-flight check clean (`git ls-files` on all 3 markers returned empty). Step 10: `local-git-only` override present in `planifest-overrides/instructions/` but human's explicit P0 grant ("push continually and open the PR at the end of this run") took precedence — proceeded directly to Option [1] without re-prompting. No `restore-pr-attribution` override present, footer correctly omitted from the PR body. Pushed branch + tags, opened PR #51 via `gh pr create`. Changelog PR field updated with the URL. |
+| End | `2026-08-03T03:12:00Z` |
 | End | `2026-08-03T03:08:00Z` |
 
 ---
