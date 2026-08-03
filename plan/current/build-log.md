@@ -30,7 +30,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Agents spawned | 0 |
 | MCP calls | several (context-mode shell scans) |
 | Parallel task batches | 0 |
-| Telemetry | emitted |
+| Telemetry | failed-with-recorded-choice (corrected retroactively — see Telemetry Deviation Correction below) |
 | Notes | Session began with GUTD sync (main pulled to b9a0257, merging feature 0000024), then git housekeeping: old branch feat/0000024-declared-product-id-for-telemetry contained 2 uncaptured files (backlog entry 0000039, changelog PR-URL correction) not on main after squash-merge. Cherry-picked both (d54de59, d1f728a) onto new branch, deleted old branch. Backlog pickup then expanded scope per human request. |
 
 Pre-flight: branch `feat/0000039-suppress-ai-attribution-footer-in-prs` created from up-to-date `main` (confirmed via prior GUTD sync this session); renamed to `feat/0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes` once feature-id confirmed.
@@ -65,6 +65,21 @@ Push authorization: explicit per-session grant from human on 2026-08-03 — "pus
 
 ---
 
+### Telemetry Deviation Correction (recorded during P2, applies retroactively to P0 and P1)
+
+Per CLAUDE.md Hard Limit 7 ("Update documentation after any deviation") — this run deviated from `0000018-ADR-002`'s telemetry protocol in two ways, self-caught only after the human asked "are you seeing failures?" during P2:
+
+1. **Failure marker unacknowledged across a phase boundary.** `plan/.telemetry-failures/context-pressure--TypeError--fetch-failed.json` first appeared at `2026-08-03T01:08:52.449Z` (210 occurrences through `01:19:51.695Z`) — inside P0's Scope Lock Challenge dispatch and continuing through all of P1. The orchestrator's per-phase marker check (Hard Limit, 0000018-ADR-002) was only performed once, at P0 start, when the directory was empty — it was not re-run at the P0→P1 or P1→P2 boundaries as required, so the marker sat unacknowledged through P1 and into P2.
+2. **Agent-driven `emit_event` calls never made in real time.** The P0/P1/P2 `Telemetry: emitted` entries as originally logged were an unverified assumption, not a real record — no `emit_event` call was made for any agent-driven event (e.g. `adr_decision` per each of the 3 ADRs) until the human raised the gap during P2. All 3 `adr_decision` events were backfilled at that point (`30f08098-...`, `9fc49e08-...`, `2bdb9369-...`), and connectivity was independently confirmed via a clean `phase_skip` test event (`97ceb9a4-...`) plus a direct `curl` to the backend (`HTTP 404`, backend reachable).
+
+**Root cause investigation:** the `context-pressure` hook is the only telemetry hook actually wired in `.claude/settings.json` — `emit-phase-start.mjs`/`emit-phase-end.mjs` are not registered at all, despite `telemetry-standards.md` describing them as hook-driven. This is a pre-existing setup gap, not new breakage.
+
+**Block-or-proceed question, root cause `context-pressure::TypeError::fetch-failed`:** human directed filing backlog items rather than blocking — read as **proceed**, root cause acknowledged. Marker deleted after this record was written. Two backlog entries filed (`0000043` — hooks not wired in setup; `0000044` — orchestrator's own marker-check-cadence and agent-emission gap, needs a deterministic backstop per `0000016-ADR-007`'s precedent). Human confirmed: "We are picking them up next" — i.e., after this run.
+
+**Corrected Telemetry fields:** P0 and P1 above changed from `emitted` to `failed-with-recorded-choice` to reflect what actually happened. P2's field (below) reflects the same, with the correction/backfill recorded as occurring within P2.
+
+---
+
 ### P1 — Requirements
 
 | Field | Value |
@@ -75,7 +90,7 @@ Push authorization: explicit per-session grant from human on 2026-08-03 — "pus
 | Agents spawned | 10 (batch 1: 7 requirement docs + scope + risk-register + domain-glossary) + 4 (batch 2: execution-plan + operational-model + slo-definitions + cost-model) |
 | MCP calls | 0 (delegated to subagents) |
 | Parallel task batches | 2 |
-| Telemetry | emitted |
+| Telemetry | failed-with-recorded-choice (corrected retroactively — see Telemetry Deviation Correction) |
 | Notes | continuous_run active — no STOP gate per Phase Invocation Table exception. Dispatched per Parallelism Directive: batch 1 = independent requirement files + scope/risk-register/domain-glossary (all independent per spec-agent's own table); batch 2 = execution-plan.md (depends on requirements being drafted) + operational-model/slo-definitions/cost-model (independent of each other and of execution-plan). |
 | Gate | All 14 artifacts produced and committed: 7 requirement docs (req-001–req-007), scope.md, risk-register.md (9 entries, medium overall), domain-glossary.md (21 terms), execution-plan.md, operational-model.md, slo-definitions.md, cost-model.md. No OpenAPI spec — correctly omitted, feature has no API surface. Component manifest (`planifest-framework/component.yml`) not redrafted — existing component, purpose/scope already covers these fixes; version bump happens at P3 per established convention. |
 | End | `2026-08-03T01:19:00Z` |
@@ -92,7 +107,7 @@ Push authorization: explicit per-session grant from human on 2026-08-03 — "pus
 | Agents spawned | 3 (parallel, independent decisions, no cross-reference) |
 | MCP calls | 0 (delegated to subagents) |
 | Parallel task batches | 1 |
-| Telemetry | emitted |
+| Telemetry | failed-with-recorded-choice — root cause `context-pressure::TypeError::fetch-failed` acknowledged mid-phase; 3 adr_decision events backfilled and connectivity independently confirmed (see Telemetry Deviation Correction above) |
 | Notes | 3 of 7 stories meet the "requires an ADR" bar: US-001 (footer toggle mechanism — req-001 explicitly deferred this), US-004 (setup-config precedence/reconciliation — req-004 explicitly deferred this), US-007 (Scope Lock default change — supersedes 0000017-ADR-003, scoped against 0000014-ADR-008). Stories 002/003/005/006 are bug fixes / extensions of already-established patterns, no new architecture decision. No stack ADR — design.md's stack is fully inherited, no new choice to record. |
 
 ---
