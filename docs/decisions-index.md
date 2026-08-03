@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000024-declared-product-id-for-telemetry
+Last updated: 0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -218,6 +218,14 @@ ADR files: [plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/](../plan/_
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|
 | ADR-001 | product.yml Extended to Single-Component Projects as Declared Product ID Home | accepted | `product.yml`'s `id` field becomes the canonical declared `product_id` for telemetry across all projects, including single-component ones — extends (does not supersede) 0000016 ADR-002, whose versioning-only decision remains fully in force |
+
+### Feature 0000025 — pipeline-gate-and-config-fixes-and-ship-agent-fixes
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Ship-agent PR Footer Default-Off with Opt-In Toggle | accepted | The hardcoded AI-attribution footer is removed from the P9 PR description template by default (both `gh pr create` and human-push paths); restorable only via a `planifest-overrides/instructions/` opt-in file, consistent with the existing `local-git-only` override pattern |
+| ADR-002 | Setup-Config Overrides Precedence | accepted | The new tracked `planifest-overrides/setup-config/{tool}.md` file is source of truth for setup flags/backend-url; the existing gitignored `.planifest-setup-flags` marker becomes a local cache reconciled to match it on setup/refresh; `.orchestrator-strict` explicitly out of scope (separate concern) |
+| ADR-003 | Scope Lock Default Drafted, Batch-Presented | accepted | Scope Lock Challenge now dispatches `planifest-scope-lock-agent` for all four scenario-path questions in parallel by default and presents them together for one batch accept/edit/reject pass — supersedes 0000017-ADR-003's opt-in-per-question default; explicitly scoped against 0000014-ADR-008's one-question-at-a-time convention, which is unchanged everywhere else |
 
 ---
 
