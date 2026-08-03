@@ -216,6 +216,21 @@ Per CLAUDE.md Hard Limit 7 ("Update documentation after any deviation") — this
 
 ---
 
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T03:06:00Z` |
+| Model tier | cheaper (build assessment = Cheaper per Model Tier Decision Table) |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | 1 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | pending |
+| Notes | Dispatching planifest-build-assessment-agent as a sub-agent per ship-agent's P8 template, passing the archive path. |
+
+---
+
 ## Summary (filled at P7)
 
 | Metric | Value |
