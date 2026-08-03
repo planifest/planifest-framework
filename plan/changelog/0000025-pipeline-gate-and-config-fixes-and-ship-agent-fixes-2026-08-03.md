@@ -2,7 +2,7 @@
 
 **Feature:** Pipeline gate and config fixes, and ship-agent fixes
 **Pipeline run:** P0–P9 complete, no phases skipped
-**PR:** pending — updated after PR is raised in Step 10
+**PR:** https://github.com/planifest/planifest-framework/pull/51
 
 ## What Was Built
 
