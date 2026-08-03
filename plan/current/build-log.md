@@ -114,6 +114,21 @@ Per CLAUDE.md Hard Limit 7 ("Update documentation after any deviation") — this
 
 ---
 
+### P3 — Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-03T01:48:00Z` |
+| Model tier | primary (orchestration) + cheaper for sub-tasks where applicable |
+| Skills loaded | planifest-codegen-agent |
+| Agents spawned | 5 (parallel batch, grouped by target file to avoid same-file write conflicts, not 1:1 with requirements) |
+| MCP calls | 0 (delegated to subagents) |
+| Parallel task batches | 1 |
+| Telemetry | pending — verified at phase end |
+| Notes | Dispatch grouped by file ownership, not requirement, since req-003/005/006 all touch `planifest-docs-agent/SKILL.md`: Agent 1 = req-001+req-002 (`planifest-ship-agent/SKILL.md`, both sections); Agent 2 = req-004 (`planifest-overrides/setup-config/`, setup scripts); Agent 3 = req-007 (`planifest-orchestrator/SKILL.md` Scope Lock Challenge, `planifest-scope-lock-agent/SKILL.md`); Agent 4 = req-003's validate-agent/agent-dispatch-standards.md portion; Agent 5 = req-003's docs-agent portion + req-005 + req-006 combined (all three touch `planifest-docs-agent/SKILL.md`). Following this repo's own established P3 precedent (0000024): direct implementation + regression bash test per requirement at `planifest-framework/tests/test-0000025-req-{NNN}-{slug}.sh`, not the literal test-writer/implementer/refactor subagent chain (designed for `src/{component}/` application code, not skill-file/markdown edits). |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
