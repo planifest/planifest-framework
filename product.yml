@@ -5,16 +5,16 @@
 # setup-hook-integration, context-mode-hooks) without a product.yml existing
 # yet; created now per the ship-agent's P9 Step 9 case 3.
 
-id: "planifest"
-name: "Planifest"
-version: "0.24.0"
-feature: "0000024-declared-product-id-for-telemetry"
+id: "planifest-framework"
+name: "Planifest Framework"
+version: "0.25.0"
+feature: "0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes"
 
 versionPolicy: "max-component-version"
 
 components:
   - id: "planifest-framework"
-    version: "0.24.0"
+    version: "0.25.0"
   - id: "setup-hook-integration"
     version: "0.4.0"
   - id: "context-mode-hooks"
