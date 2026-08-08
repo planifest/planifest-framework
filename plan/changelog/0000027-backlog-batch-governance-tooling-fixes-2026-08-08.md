@@ -2,7 +2,7 @@
 
 **Feature:** Backlog batch: governance and tooling fixes
 **Pipeline run:** P0–P9 complete, no phases skipped
-**PR:** pending — `local-git-only` override active; PR title/description output to the human on the loop at P9 for them to raise via `gh pr create` after `git push`
+**PR:** https://github.com/planifest/planifest-framework/pull/54
 
 ## What Was Built
 
