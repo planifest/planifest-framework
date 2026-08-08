@@ -288,12 +288,25 @@ Gate accepted (zero drift, no stop): P6 → P7 — 08 Aug 2026
 
 | Metric | Value |
 |--------|-------|
-| Total phases completed | `{{count}}` |
-| Total agents spawned | `{{count}}` |
-| Total MCP calls | `{{count}}` |
-| Phases using parallelism | `{{count}}` |
-| Primary tier agent calls | `{{count}}` |
-| Cheaper tier agent calls | `{{count}}` |
-| Self-corrections | `{{count}}` |
-| Phases skipped | `{{list or "none"}}` |
-| Phases with a recorded telemetry gap | `{{count — phases where Telemetry was failed-with-recorded-choice, or "0"}}` |
+| Total phases completed | `10` (P0–P9) |
+| Total agents spawned | `12` (4 Scope Lock drafts at P0, 4 requirement-group agents at P1, 4 codegen-group agents at P3) — P8 spawns 1 more (build-assessment-agent) |
+| Total MCP calls | `0` (structured-telemetry-mcp `emit_event` — unified telemetry signal confirmed-disabled throughout this local dev session) |
+| Phases using parallelism | `3` (P0 Scope Lock Challenge, P1 requirements, P3 codegen — each a 4-way parallel dispatch) |
+| Primary tier agent calls | `12` |
+| Cheaper tier agent calls | `0` |
+| Self-corrections | `0` (P4 validation passed first-attempt; P5's 2 security fixes were direct fixes during review, not a P4 self-correct retry cycle) |
+| Phases skipped | `none` |
+| Phases with a recorded telemetry gap | `0` |
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | cheaper (haiku, per ship-agent's own dispatch template) |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | 1 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Archive path confirmed to exist before dispatch: `plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/`. |
