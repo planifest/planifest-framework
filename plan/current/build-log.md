@@ -45,6 +45,21 @@ Marker cleared with the agreement of the human on the loop. The underlying defec
 and is in scope for this feature. Root cause `context-pressure::TypeError::fetch-failed` is acknowledged for
 the remainder of this run and will not be re-asked.
 
+### P1 — Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T12:30:00Z` |
+| Model tier | primary, with cheaper-tier subagents for per-requirement drafting |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | `{{count}}` |
+| MCP calls | `{{count}}` |
+| Parallel task batches | `{{count}}` |
+| Telemetry | `{{pending}}` |
+| Notes | Six requirements plus three closures. Decomposed across parallel subagents per the standing subagent-decomposition override. |
+
+Gate accepted: P0 — 2026-08-08T12:28:00Z
+
 ---
 
 ## P0 Audit Trail

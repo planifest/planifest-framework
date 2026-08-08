@@ -92,11 +92,17 @@ Single wave. Six stories across four features, all within one component boundary
 
 ### In Scope
 
-- Bounded retry on network-level emission failures only, across all five telemetry hooks
-  (`context-pressure`, `emit-phase-start`, `emit-phase-end`, `emit-event-receipt`, `resolve-phase`).
-  Backlog `0000063` names three; the discovery pass found five.
-- Extraction of the duplicated emit-and-record logic, `readProductId()` (`0000054`), and the phase-enum maps
-  (`0000057`) into shared modules.
+- Bounded retry on network-level emission failures, in the three hooks that call `fetch` directly:
+  `context-pressure`, `emit-phase-start`, `emit-phase-end`. `resolve-phase.mjs` makes no fetch call and
+  delegates by spawning the emit hooks, so it inherits the fix. `emit-event-receipt.mjs` writes a local file
+  and has nothing to retry. Backlog `0000063`'s count of three was correct; the P0 claim of five was an
+  orchestrator error corrected at P1.
+- Extraction of the duplicated logic into shared modules: `readProductId()` (`0000054`), the phase-enum maps
+  (`0000057`), `recordTelemetryFailure()`, the emit-and-record block, `getFlagPath()`, and `readStdin()`.
+  Consolidating `readStdin()` also fixes a latent NFR-001 violation, since only two of twelve hooks wire
+  `stdin.on("error")` and the rest hang on a stdin stream error instead of exiting 0. `getSessionId()` is
+  excluded from consolidation: its four copies have three genuinely different behaviour profiles.
+- Correction to `setup.sh:447`, where the tier-1 telemetry install glob would silently drop a shared module.
 - Registration of the phase telemetry hooks so `phase_start` and `phase_end` are emitted.
 - Live verification of `resolve-phase.mjs` against a real hook firing (`0000058`).
 - Verification that the telemetry schema carries `loop_iteration` and `phase_reversal_*` fields (`0000053`).
