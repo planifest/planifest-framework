@@ -73,6 +73,68 @@ P0 exchange — scope additions: Q: Which four additions? Recommended `0000058`,
 `0000026`, with `0000026` scoped hard at P1 to a single deterministic em dash check and the broader
 writing-tells list deferred. / A: Confirmed.
 
+P0 exchange — Playwright MCP: Q: Is Playwright MCP available, and can it be incorporated as a setup flag? /
+A: Checked and not available. Absent from this session's tool set, and a connector-registry search for
+`playwright`, `browser automation`, `e2e testing` and `web testing` returned zero results. Filed as backlog
+`0000064` rather than scoped into this feature.
+
+P0 exchange — run mode: Q: Review after each phase, or continuous run? / A: Continuous, with subagents used
+throughout. Recorded in `plan/.run-mode`. The P0 design gate and the Scope Lock per-item accepts are retained,
+since continuous mode waives the P1 to P6 phase gates only.
+
+P0 exchange — scope collapse: Q: Two Scope Lock agents flagged that `0000042` and the phase-hook wiring may
+already be done. Verified both against the repo. `block-bash.mjs` already carries the loopback exemption
+(`LOOPBACK_HOSTS`, line 72), shipped in `7f28593` under feature `0000026`, so `0000042` is fixed but its entry
+still reads `status: open`. `setup.sh:626` `merge_telemetry_hook_settings()` already wires `resolve-phase.mjs`
+to `PreToolUse` and `Stop`, shipped in `0000027`, and `.gitignore:2` ignores `.claude/` wholesale, so the
+settings file inspected at P0 is untracked local machine state rather than repo state. Confirm the revised
+scope? / A: Confirmed. `0000042` drops to a closure and the wiring requirement becomes an install refresh.
+
+P0 exchange — em dash scope: Q: Write-time only, write-time plus one-off cleanup, or repo-wide CI scan? The
+repo already contains em dashes in roughly 870 files. / A: Write-time plus one-off cleanup. The orchestrator
+bounded the cleanup to live artifacts (`plan/current/`, `docs/`, `planifest-framework/`) and excluded
+`plan/_archive/` and `plan/changelog/` as historical record, stated to the human on the loop as a judgement
+call open to reversal.
+
+P0 exchange — telemetry receipts: Q: `plan/.telemetry-receipts/` is not gitignored, unlike its sibling
+`plan/.telemetry-failures/`, so receipts would appear as untracked files. Gitignore or commit? / A: Gitignore.
+
+P0 exchange — marker write silence: Q: A failing marker write currently produces no marker, no interrupt and
+no trace. Address it here or defer? / A: Add a stderr fallback line. Still exits 0, still never blocks.
+
+---
+
+## Scope Lock Challenge (P0, ADR-003 default parallel dispatch)
+
+Four `planifest-scope-lock-agent` instances dispatched in parallel, one per scenario path, before any question
+was presented. All four returned drafts. Presented as a batch; the human on the loop gave a separate explicit
+accept for each of the four.
+
+Scope Lock — happy path: The feature is invisible when it works. Phase transitions emit `phase_start` and
+`phase_end` for the first time in this repo, a backend caught mid-restart receives the event on retry with no
+marker and no interrupt, and artifacts never land containing an em dash. [source: agent-draft-accepted]
+
+Scope Lock — first-run path: `plan/.telemetry-failures/` and `plan/.telemetry-receipts/` are created on demand
+rather than pre-seeded, phase events have no prior history to reconcile against, and the em dash hook inspects
+only content being written now while the one-off cleanup handles existing live artifacts as a separate bounded
+pass. [source: agent-draft-accepted]
+
+Scope Lock — error path: Mid-restart is retried and invisible. Never-listening, 4xx/5xx and retry exhaustion
+are recorded as exactly one marker and surfaced once. A failing marker write now emits a stderr line rather
+than vanishing silently. [source: agent-draft-accepted]
+
+Scope Lock — cross-session continuity: Markers and `build-log.md` are durable, uncommitted `plan/current/`
+work is at risk but recoverable by hand, and the sharp risk is this feature editing the hooks running its own
+build, where a half-applied extraction degrades to a silent no-op because hooks must exit 0. Broken hooks are
+fixed forward and verified live, never assumed working. [source: agent-draft-accepted]
+
+Scope Lock complete. All four scenario paths captured.
+
+Agent-surfaced flags carried into the design rather than resolved by the drafting agents: `0000042` already
+shipped; the phase-hook wiring already exists in `setup.sh`; roughly 870 existing files contain em dashes;
+`plan/.telemetry-receipts/` is not gitignored; the marker write failure path is silent; the em dash bypass
+mechanism needs specifying for a Write/Edit hook since `--no-verify` has no equivalent there.
+
 ---
 
 ## Backlog Pickup (P0 step 3c)
@@ -84,7 +146,7 @@ writing-tells list deferred. / A: Confirmed.
 | `0000057-consolidate-phase-enum-maps` | pull-in |
 | `0000058-verify-resolve-phase-live-hook-firing` | pull-in |
 | `0000053-telemetry-schema-missing-loop-reversal-fields` | pull-in |
-| `0000042-context-mode-hook-false-flags-local-http-url-in-args` | pull-in |
+| `0000042-context-mode-hook-false-flags-local-http-url-in-args` | pull-in as closure only — verified already fixed in `0000026` (`7f28593`), entry status never updated |
 | `0000026-ai-writing-tells-style-guard` | pull-in (scoped hard at P1) |
 | `0000051-orchestrator-router-decomposition-followup` | pull-in as closure only |
 | `0000052-scope-lock-and-marker-commit-followups` | pull-in as closure only |
