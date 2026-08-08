@@ -87,6 +87,37 @@ Backlog pickup (step 3c) — pull-in executed for all 8 targeted entries (000004
 
 `discovery.md` written and committed before the first coaching question (`docs(0000027): add P0 discovery findings`), satisfying Hard Limit 11.
 
+Mid-P0 direction from the human (unprompted): run as many of the 8 fixes as possible on parallel subagents at P3, excluding any pair that clashes on the same file(s) — target isolated fixes not in scope for other changes. Banked for the P2/P3 dispatch plan; does not bypass the Hard Limit 1 gate (no code before confirmed design).
+
+### Scope Lock Challenge
+
+Dispatched 4x `planifest-scope-lock-agent` in parallel (ADR-003 default), one per scenario-path question, against `feature-brief.md` (no prior confirmed decisions to check except cross-session continuity, which was checked against this run's own demonstrated resume mechanism).
+
+Scope Lock — Happy path: no single end-to-end flow (8 independent items); draft describes the collective outcome — clean setup completion, hooks firing, backlog discoveries filed correctly, P0 distinguishing framework updates, historical backlog backfilled, minimal artifact set holding, skill-scope ADR available as reference. [source: agent-draft-accepted]
+
+Scope Lock — First-run path: fresh-workspace setup succeeds first time; telemetry-compliance check reads correctly against empty history; subagent discoveries file correctly from the start; P0 distinguishes framework updates from first encounter. `0000045` (one-time historical backfill) and `0000024` (static ADR) flagged N/A — no "first run" concept applies. [source: agent-draft-accepted]
+
+Scope Lock — Error/sad path: per-item failure modes — setup aborts loudly not silently; telemetry gaps surface via `.telemetry-failures/` rather than going unnoticed; backlog discoveries stay visible even if the filing instruction is bypassed; backfill mistakes are recoverable (source `recommendations.md` never deleted); misclassified framework updates trigger a P0 pause rather than a guess; artifact-set drift is a doc-fix, not a runtime error. `0000024` flagged N/A (no runtime failure mode for a static ADR). [source: agent-draft-accepted]
+
+Scope Lock — Cross-session continuity: nothing already confirmed or completed needs redoing on resume; the durable state write already demonstrated this run covers it. ⚠ Flag raised: recovery record tracked progress at the batch level only, not explicit per-item status for which of the 8 fixes are done vs. pending mid-batch. [source: agent-draft-accepted]
+
+P0 exchange — Continuity flag resolution: Q: add an explicit per-item status table to build-log.md, or rely on the acceptance-criteria checklist + build-log history to reconstruct status on resume? / A: add the per-item status table (see `## Item Status` below, added and maintained from P3 onward as each of the 8 fixes lands).
+
+Scope Lock complete. All four scenario paths captured.
+
+## Item Status (added at P0 per Scope Lock continuity-flag resolution; maintained through P3)
+
+| Item | One-liner | Status |
+|------|-----------|--------|
+| 0000043 | Wire phase_start/phase_end hooks into setup.sh/ps1 | not-started |
+| 0000034 | Fix cline.sh/cline.ps1 boot-file/skills-dir collision | not-started |
+| 0000035 | Subagents file discoveries to plan/backlog/, not spawn_task | not-started |
+| 0000044 | Deterministic telemetry-compliance backstop | not-started |
+| 0000045 | Backfill historical recommendations.md into plan/backlog/ | not-started |
+| 0000046 | Explicit P0 framework-dependency-update flow | not-started |
+| 0000024 | Record skill-scope-principle ADR | not-started |
+| 0000021 | Define minimal Phase 1 artifact set | not-started |
+
 ---
 
 <!-- Copy and fill in this block at each phase boundary:
