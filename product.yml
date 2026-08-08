@@ -13,7 +13,7 @@
 
 id: "planifest-framework"
 name: "Planifest Framework"
-version: "0.26.0"
+version: "0.26.1"
 feature: "0000026-context-hook-and-telemetry-backstop-fixes"
 
 versionPolicy: "max-component-version"
