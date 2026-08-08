@@ -43,13 +43,17 @@
  *     }
  *
  * Never throws. A failure here is swallowed so it can never affect the
- * calling hook's exit-zero/never-block behaviour.
+ * calling hook's exit-zero/never-block behaviour. It is not swallowed
+ * silently though (req-003): if the marker write itself fails, one line
+ * goes to stderr naming the hook and marker path, so a genuinely-down
+ * backend combined with an unwritable plan/ still leaves a trace somewhere.
  */
 
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 export function recordTelemetryFailure(hookName, err, context = {}) {
+  let markerPath;
   try {
     const cwd = context.cwd ?? process.cwd();
     const errorType = context.errorType ?? err?.name ?? err?.constructor?.name ?? "Error";
@@ -66,7 +70,7 @@ export function recordTelemetryFailure(hookName, err, context = {}) {
       .split("::")
       .map((seg) => seg.replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "unknown")
       .join("--");
-    const markerPath = join(dir, `${fileSlug}.json`);
+    markerPath = join(dir, `${fileSlug}.json`);
 
     mkdirSync(dir, { recursive: true });
 
@@ -98,7 +102,25 @@ export function recordTelemetryFailure(hookName, err, context = {}) {
     const tmpMarkerPath = `${markerPath}.tmp`;
     writeFileSync(tmpMarkerPath, JSON.stringify(marker, null, 2));
     renameSync(tmpMarkerPath, markerPath);
-  } catch {
-    // Marker write is best-effort. Never let this throw (NFR-001, ADR-005).
+  } catch (writeErr) {
+    // Marker write is best-effort. This never rethrows (NFR-001, ADR-005),
+    // but a bare swallow here means a genuinely-down backend combined with
+    // an unwritable plan/ produces zero signal anywhere. Emit exactly one
+    // stderr line naming the hook and marker path so there is a trace.
+    // The write error's type/message may echo user-configured strings
+    // verbatim, same accepted precedent as the gitignored marker files
+    // (plan/.telemetry-failures/, .gitignore line 27); no credential value
+    // is constructed here. Wrapped in its own try/catch so a broken stderr
+    // stream (e.g. EPIPE) still cannot make this function throw.
+    try {
+      const failureType = writeErr?.constructor?.name ?? writeErr?.name ?? "Error";
+      const failureMessage = String(writeErr?.message ?? writeErr ?? "unknown error").replace(/\s+/g, " ");
+      const path = markerPath ?? "(marker path unresolved)";
+      process.stderr.write(
+        `record-telemetry-failure: marker write failed for hook "${hookName}" at ${path}: ${failureType}: ${failureMessage}\n`,
+      );
+    } catch {
+      // stderr itself is unavailable. Nothing more can be done.
+    }
   }
 }
