@@ -1,9 +1,9 @@
-# Roadmap Item: Structured Telemetry MCP — Changes and Fixes (0008c)
+# Roadmap Item (0008c): Structured Telemetry MCP Changes and Fixes
 
-> **Status: still open, tracked in `plan/backlog/0000005-telemetry-schema-blocks-emit-event/` (filed 2026-07-11).** Live-verified during feature 0000016: `emit_event` rejects every call with `"(root): must be object"` — schema gaps documented below are the leading suspect. This file remains the technical reference (schema definitions, event types, exact `$defs`); the backlog entry is where pickup/status now lives, since the fix is cross-repo (`structured-telemetry-mcp`, not this repo) and this file predates the `plan/backlog/` mechanism.
+> **Status: still open, tracked in `plan/backlog/0000005-telemetry-schema-blocks-emit-event/` (filed 2026-07-11).** Live-verified during feature 0000016: `emit_event` rejects every call with `"(root): must be object"`; schema gaps documented below are the leading suspect. This file remains the technical reference (schema definitions, event types, exact `$defs`); the backlog entry is where pickup/status now lives, since the fix is cross-repo (`structured-telemetry-mcp`, not this repo) and this file predates the `plan/backlog/` mechanism.
 
 ## Source
-Live exploration of the deployed 0008a MCP server — April 2026
+Live exploration of the deployed 0008a MCP server, April 2026
 Derived from: plan/current/mcp-exploration.md and direct source review of `C:/d/planifest/structured-telemetry-mcp/`
 
 ## Observation
@@ -12,7 +12,7 @@ Derived from: plan/current/mcp-exploration.md and direct source review of `C:/d/
 
 ---
 
-## 1. Schema Additions — New Event Types
+## 1. Schema Additions: New Event Types
 
 The following event types are needed by framework skills but are absent from `schemas/telemetry-event.schema.json`. All require:
 - Adding the event name to the `event` enum
@@ -50,7 +50,7 @@ Emitted by `planifest-orchestrator` when a pipeline phase is determined to be un
 
 ### 1.2 `security_finding`
 
-Emitted by `planifest-security-agent` when a vulnerability or risk is identified. Currently these are forced into `deviation` which is semantically wrong — a security finding is not a design deviation.
+Emitted by `planifest-security-agent` when a vulnerability or risk is identified. Currently these are forced into `deviation` which is semantically wrong: a security finding is not a design deviation.
 
 ```json
 {
@@ -59,7 +59,7 @@ Emitted by `planifest-security-agent` when a vulnerability or risk is identified
     "component_id": "<component>",
     "title": "<short description>",
     "severity": "low" | "medium" | "high" | "critical",
-    "cwe": "<CWE-NNN — optional>"
+    "cwe": "<CWE-NNN, optional>"
   }
 }
 ```
@@ -79,13 +79,13 @@ Emitted by `planifest-security-agent` when a vulnerability or risk is identified
 }
 ```
 
-Note: `severity` gains a `"critical"` value not present on `deviation`. This is intentional — security findings warrant a stronger signal.
+Note: `severity` gains a `"critical"` value not present on `deviation`. This is intentional: security findings warrant a stronger signal.
 
 ---
 
 ### 1.3 `retry_limit_exceeded`
 
-Emitted by `planifest-validate-agent` (and potentially others) when the agent hits the 5-attempt escalation ceiling. Distinct from `self_correction` which fires on each retry — this fires once at the point of giving up and is the primary signal for systemic failures vs. transient ones.
+Emitted by `planifest-validate-agent` (and potentially others) when the agent hits the 5-attempt escalation ceiling. Distinct from `self_correction` which fires on each retry: this fires once at the point of giving up and is the primary signal for systemic failures vs. transient ones.
 
 ```json
 {
@@ -116,7 +116,7 @@ Emitted by `planifest-validate-agent` (and potentially others) when the agent hi
 
 ### 1.4 `adr_decision`
 
-Emitted by `planifest-adr-agent` after an ADR is written. Captures the decision in the telemetry store so architectural choices can be queried without reading ADR files. Currently `planifest-adr-agent` only has `phase_start`/`phase_end` — this fills the gap.
+Emitted by `planifest-adr-agent` after an ADR is written. Captures the decision in the telemetry store so architectural choices can be queried without reading ADR files. Currently `planifest-adr-agent` only has `phase_start`/`phase_end`; this fills the gap.
 
 ```json
 {
@@ -147,7 +147,7 @@ Emitted by `planifest-adr-agent` after an ADR is written. Captures the decision 
 
 ### 1.5 `doc_gap`
 
-Emitted by `planifest-docs-agent` when documentation is missing or incomplete for a component. Distinct from `deviation` which implies divergence from a confirmed design — a doc gap is an absence, not a divergence.
+Emitted by `planifest-docs-agent` when documentation is missing or incomplete for a component. Distinct from `deviation` which implies divergence from a confirmed design: a doc gap is an absence, not a divergence.
 
 ```json
 {
@@ -176,13 +176,13 @@ Emitted by `planifest-docs-agent` when documentation is missing or incomplete fo
 
 ## 2. Bugs in `query_telemetry`
 
-### BUG-001 — `group_by: "mcp_mode"` returns HTTP 400
+### BUG-001: `group_by: "mcp_mode"` returns HTTP 400
 
-**Location:** `src/query/bottlenecks.ts` — `BottleneckGroupBy` type and `resolveGroupColumn()`
+**Location:** `src/query/bottlenecks.ts`, `BottleneckGroupBy` type and `resolveGroupColumn()`
 
-**Root cause:** `BottleneckGroupBy` is typed as `'phase' | 'agent' | 'tool' | 'run_id' | 'content_type'`. The `dispatchQuery` function in `server-factory.ts` routes any `group_by` string to `qs.bottlenecks()`, which passes it to `resolveGroupColumn()`. That function is an exhaustive switch — an unrecognised value falls through TypeScript's exhaustive check and returns `undefined`, producing invalid SQL that the backend rejects with 400.
+**Root cause:** `BottleneckGroupBy` is typed as `'phase' | 'agent' | 'tool' | 'run_id' | 'content_type'`. The `dispatchQuery` function in `server-factory.ts` routes any `group_by` string to `qs.bottlenecks()`, which passes it to `resolveGroupColumn()`. That function is an exhaustive switch: an unrecognised value falls through TypeScript's exhaustive check and returns `undefined`, producing invalid SQL that the backend rejects with 400.
 
-**Impact:** `mcp_mode` is a first-class column in the `events` table and a critical analysis dimension. Being unable to group bottleneck data by `mcp_mode` is a significant gap — it prevents the primary use case of comparing phase durations across MCP configurations.
+**Impact:** `mcp_mode` is a first-class column in the `events` table and a critical analysis dimension. Being unable to group bottleneck data by `mcp_mode` is a significant gap: it prevents the primary use case of comparing phase durations across MCP configurations.
 
 **Fix:**
 1. Add `'mcp_mode'` to `BottleneckGroupBy`
@@ -206,15 +206,15 @@ function resolveGroupColumn(groupBy: BottleneckGroupBy): string {
 
 ---
 
-### BUG-002 — `failure_sequence` silently returns empty results when `session_id` is omitted
+### BUG-002: `failure_sequence` silently returns empty results when `session_id` is omitted
 
-**Location:** `src/query/failures.ts` — `queryFailures()` dispatch
+**Location:** `src/query/failures.ts`, `queryFailures()` dispatch
 
 **Root cause:**
 ```typescript
 case 'failure_sequence': return queryFailureSequence(db, query.session_id ?? '');
 ```
-When `session_id` is not provided, it falls back to `''`. The SQL `WHERE session_id = ''` returns zero rows — no error, no indication that the query was malformed. The caller receives an empty table with no feedback.
+When `session_id` is not provided, it falls back to `''`. The SQL `WHERE session_id = ''` returns zero rows: no error, no indication that the query was malformed. The caller receives an empty table with no feedback.
 
 **Impact:** Silent data loss. An agent calling `{ mode: "failure_sequence" }` without a `session_id` will believe there are no events for the session, when in fact the query was never properly scoped.
 
@@ -228,11 +228,11 @@ case 'failure_sequence':
 
 ---
 
-### BUG-003 — `failure_sequence` `drill_down` require `session_id` but have no validation twin
+### BUG-003: `failure_sequence` `drill_down` require `session_id` but have no validation twin
 
-**Location:** `src/query/token-efficiency.ts` — `queryDrillDown()`
+**Location:** `src/query/token-efficiency.ts`, `queryDrillDown()`
 
-**Root cause:** `queryDrillDown` follows the same pattern as `queryFailureSequence` — it calls with `query.session_id ?? ''`. The README documents `session_id` as required for `drill_down`, but the code silently uses `''` if omitted, returning empty results.
+**Root cause:** `queryDrillDown` follows the same pattern as `queryFailureSequence`: it calls with `query.session_id ?? ''`. The README documents `session_id` as required for `drill_down`, but the code silently uses `''` if omitted, returning empty results.
 
 **Fix:** Same pattern as BUG-002:
 ```typescript
@@ -247,7 +247,7 @@ case 'drill_down':
 
 ### 3.1 No raw event log query
 
-There is no way to retrieve all event types for a session or initiative. `failure_sequence` is the closest — it returns a filtered timeline (`phase_start`, `validation_failure`, `self_correction`, `phase_end` only) for a single session. There is no mode that returns the complete event stream.
+There is no way to retrieve all event types for a session or initiative. `failure_sequence` is the closest: it returns a filtered timeline (`phase_start`, `validation_failure`, `self_correction`, `phase_end` only) for a single session. There is no mode that returns the complete event stream.
 
 **Proposed addition:** `mode: "event_log"` as a new token-efficiency mode or fourth query family:
 
@@ -262,7 +262,7 @@ Returns all events ordered by timestamp with full `data` payload. Useful for pos
 
 ### 3.2 `initiative_id` filter missing from all query types
 
-`initiative_id` is a first-class column in the `events` table and is the natural scope for multi-initiative workspaces, but it is not exposed as a filter in any query family. The README documents only `session_id` and `limit` as bottleneck filters — code and docs are consistent with each other, so this is a missing feature, not a bug.
+`initiative_id` is a first-class column in the `events` table and is the natural scope for multi-initiative workspaces, but it is not exposed as a filter in any query family. The README documents only `session_id` and `limit` as bottleneck filters; code and docs are consistent with each other, so this is a missing feature, not a bug.
 
 **Proposed addition:** Add `initiative_id` as an optional filter to all three query families:
 
@@ -296,7 +296,7 @@ Apply the same pattern to `failures.ts` and `token-efficiency.ts`.
 
 ## 4. Gaps in 0008b (MCP repo documentation is complete)
 
-Cross-comparison confirmed that `mcp_impact`, `model_config`, and the full query reference are all documented in the MCP repo README and `data-contract.md`. The gaps are in the 0008b framework integration doc only — the MCP repo needs no changes for these items.
+Cross-comparison confirmed that `mcp_impact`, `model_config`, and the full query reference are all documented in the MCP repo README and `data-contract.md`. The gaps are in the 0008b framework integration doc only; the MCP repo needs no changes for these items.
 
 ### 4.1 `mcp_impact` event missing from 0008b
 
@@ -325,7 +325,7 @@ Cross-comparison confirmed that `mcp_impact`, `model_config`, and the full query
 
 ### 4.3 `query_telemetry` API missing from 0008b
 
-The MCP README has a complete Query Reference covering all 14 modes across three query families. The 0008b framework doc covers only `emit_event` — agents have no framework-level reference for querying telemetry.
+The MCP README has a complete Query Reference covering all 14 modes across three query families. The 0008b framework doc covers only `emit_event`; agents have no framework-level reference for querying telemetry.
 
 **Action for 0008b:** Add a Query Reference section to `docs/0008b` pointing to the MCP README, and note which query modes are most relevant for framework agents (e.g. `failure_sequence` for post-run diagnostics, `mcp_impact` for MCP effectiveness).
 
@@ -361,13 +361,13 @@ The MCP README has a complete Query Reference covering all 14 modes across three
 
 ## 6. Schema Migration Policy
 
-All schema additions (SCH-001 through SCH-005) are **additive** — new values in the `event` enum and new `$defs` entries. Existing stored events are unaffected. No migration required. The data contract migration policy in `src/structured-telemetry-mcp/docs/data-contract.md` permits additive changes without a migration file.
+All schema additions (SCH-001 through SCH-005) are **additive**: new values in the `event` enum and new `$defs` entries. Existing stored events are unaffected. No migration required. The data contract migration policy in `src/structured-telemetry-mcp/docs/data-contract.md` permits additive changes without a migration file.
 
-New event types require a `db/schema.ts` audit: the current `events` table stores `data` as a JSON column — no structural DB change needed. New event types are stored as-is.
+New event types require a `db/schema.ts` audit: the current `events` table stores `data` as a JSON column; no structural DB change needed. New event types are stored as-is.
 
 ---
 
 ## Dependencies
 
-- **0008b** — framework skill telemetry sections reference the new event types. 0008c schema changes must be deployed before 0008b implementation begins for the new event types.
-- **0008a** — changes are to the already-deployed server. A patch release (`0.1.1` → `0.2.0`) is required; clients must restart to pick up the new schema.
+- **0008b**: framework skill telemetry sections reference the new event types. 0008c schema changes must be deployed before 0008b implementation begins for the new event types.
+- **0008a**: changes are to the already-deployed server. A patch release (`0.1.1` → `0.2.0`) is required; clients must restart to pick up the new schema.
