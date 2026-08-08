@@ -7,14 +7,15 @@
 #
 # components[] revised 2026-08-08: holds {id, path} pointers to each
 # component's own component.yml, not a cached version — versions are read
-# live at derivation time (node scripts/product-version.mjs), so this list
+# live at derivation time (node planifest-framework/scripts/product-version.mjs),
+# so this list
 # only needs editing when a component is added or removed, never on a
 # version bump. See docs/decisions-index.md's Feature 0000016 ADR-002 entry.
 
 id: "planifest-framework"
 name: "Planifest Framework"
-version: "0.27.0"
-feature: "0000027-backlog-batch-governance-tooling-fixes"
+version: "0.28.0"
+feature: "0000028-telemetry-hardening-and-enforcement-fixes"
 
 versionPolicy: "max-component-version"
 
