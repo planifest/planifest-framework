@@ -393,3 +393,29 @@ Verification detail for REQ-004 and REQ-005 is in `plan/current/verification-rep
 | Parallel task batches | `0` |
 | Telemetry | emitted |
 | Notes | Cross-reference check passed: no markdown links point into `plan/current/`, and `decisions-index.md` already references the post-archive ADR path. No `.skips` file. No `REGRESSION-CANDIDATE` tags, so nothing was presented for promotion. |
+
+### P8: Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T19:15:00Z` |
+| Model tier | cheaper |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | `1` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Report written to `build-report.md` in this archive. Flagged that the P4 and P5 blocks had to be reconstructed before archiving, which is itself a process signal. |
+
+### P9: Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T19:20:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Version 0.28.0 derived by `product-version.mjs` (exit 0). Push and PR taken via option 1 under the express per-session grant from the human on the loop, recorded at P0 as the stated exception to the local-git-only override. |
