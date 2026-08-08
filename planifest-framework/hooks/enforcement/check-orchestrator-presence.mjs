@@ -21,15 +21,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-function readStdin() {
-  return new Promise((res) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (c) => { data += c; });
-    process.stdin.on("end", () => res(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
-}
+import { readStdin } from "./read-stdin.mjs";
 
 try {
   const raw = await readStdin();
