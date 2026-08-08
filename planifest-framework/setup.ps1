@@ -342,19 +342,51 @@ function Install-ContextModeHooks {
 }
 
 function Merge-TelemetryHookSettings {
-    # Merge PostToolUse context-pressure hook entry into .claude/settings.json
-    # Idempotent: removes existing context-pressure entry before re-adding.
+    # Merge context-pressure (PostToolUse), emit-phase-start (PreToolUse), and
+    # emit-phase-end (Stop) hook entries into .claude/settings.json, plus the
+    # emit_event receipt hook (PostToolUse, req-004/ADR-001). Idempotent: each
+    # script's prior entry is removed before being re-added.
+    #
+    # Wiring design decision (req-001, feature 0000027) -- mirrors setup.sh's
+    # Merge-TelemetryHookSettings/merge_telemetry_hook_settings: a single hook
+    # `command` string is fixed at setup time and cannot vary the <phase>
+    # argument emit-phase-start.mjs/emit-phase-end.mjs each require as the
+    # pipeline moves through phases. Both entries below route through
+    # hooks/telemetry/resolve-phase.mjs, which infers the active phase from an
+    # observable tool-lifecycle signal (which phase-agent Skill was invoked)
+    # and re-execs the real script with that phase supplied. See
+    # resolve-phase.mjs's own header for the full mechanism.
     param(
         [string]$SettingsPath,
         [string]$HooksDir,
         [string]$BackendUrl
     )
 
-    $hookCmd = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/context-pressure.mjs"
-    $newEntry = @(
+    $pressureCmd = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/context-pressure.mjs"
+    $startCmd    = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/resolve-phase.mjs start $HooksDir/emit-phase-start.mjs"
+    $endCmd      = "PLANIFEST_TELEMETRY_URL=$BackendUrl node $HooksDir/resolve-phase.mjs end $HooksDir/emit-phase-end.mjs"
+    $receiptCmd  = "node $HooksDir/emit-event-receipt.mjs"
+
+    $postToolUseEntries = @(
         @{
             matcher = ".*"
-            hooks = @(@{ type = "command"; command = $hookCmd; async = $true; timeout = 5000 })
+            hooks = @(@{ type = "command"; command = $pressureCmd; async = $true; timeout = 5000 })
+        },
+        @{
+            matcher = "mcp__structured-telemetry-mcp__emit_event"
+            hooks = @(@{ type = "command"; command = $receiptCmd; async = $true; timeout = 5000 })
+        }
+    )
+    $preToolUseEntry = @(
+        @{
+            matcher = "Skill"
+            hooks = @(@{ type = "command"; command = $startCmd })
+        }
+    )
+    $stopEntry = @(
+        @{
+            matcher = ".*"
+            hooks = @(@{ type = "command"; command = $endCmd })
         }
     )
 
@@ -367,26 +399,73 @@ function Merge-TelemetryHookSettings {
         if (-not $existing.hooks.PostToolUse) {
             $existing.hooks | Add-Member -NotePropertyName 'PostToolUse' -NotePropertyValue @() -Force
         }
+        if (-not $existing.hooks.PreToolUse) {
+            $existing.hooks | Add-Member -NotePropertyName 'PreToolUse' -NotePropertyValue @() -Force
+        }
+        if (-not $existing.hooks.Stop) {
+            $existing.hooks | Add-Member -NotePropertyName 'Stop' -NotePropertyValue @() -Force
+        }
 
-        # Remove existing context-pressure entries then append new one
-        $filtered = @($existing.hooks.PostToolUse | Where-Object {
+        # Remove existing entries for each script then append the fresh ones.
+        $filteredPost = @($existing.hooks.PostToolUse | Where-Object {
             $hooks = $_.hooks
-            -not ($hooks | Where-Object { $_.command -match 'context-pressure' })
+            -not ($hooks | Where-Object { $_.command -match 'context-pressure' -or $_.command -match 'emit-event-receipt' })
         })
-        $existing.hooks.PostToolUse = $filtered + $newEntry
+        $existing.hooks.PostToolUse = $filteredPost + $postToolUseEntries
+
+        $filteredPre = @($existing.hooks.PreToolUse | Where-Object {
+            $hooks = $_.hooks
+            -not ($hooks | Where-Object { $_.command -match 'resolve-phase' -and $_.command -match 'emit-phase-start' })
+        })
+        $existing.hooks.PreToolUse = $filteredPre + $preToolUseEntry
+
+        $filteredStop = @($existing.hooks.Stop | Where-Object {
+            $hooks = $_.hooks
+            -not ($hooks | Where-Object { $_.command -match 'resolve-phase' -and $_.command -match 'emit-phase-end' })
+        })
+        $existing.hooks.Stop = $filteredStop + $stopEntry
 
         $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
-        Write-Host "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
+        Write-Host "  ~ .claude/settings.json (telemetry hooks merged: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt)"
     }
     else {
         $dir = Split-Path -Parent $SettingsPath
         if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
 
         $settings = [PSCustomObject]@{
-            hooks = [PSCustomObject]@{ PostToolUse = $newEntry }
+            hooks = [PSCustomObject]@{
+                PostToolUse = $postToolUseEntries
+                PreToolUse  = $preToolUseEntry
+                Stop        = $stopEntry
+            }
         }
         $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
-        Write-Host "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+        Write-Host "  + .claude/settings.json (created with telemetry hooks: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt)"
+    }
+}
+
+function Test-TelemetryHooksInstalled {
+    # Positive-presence check (req-001, acceptance criterion): fails loudly if
+    # any telemetry hook was copied to disk but never actually registered in
+    # the target tool's settings -- the exact partial-wiring regression this
+    # requirement exists to prevent from recurring silently. Static parity
+    # with setup.sh's verify_telemetry_hooks_installed() / scripts/
+    # verify-telemetry-hooks.mjs (no live PowerShell run required to verify
+    # this parity -- see test-0000027-req-001-telemetry-hooks-wired.sh).
+    param(
+        [string]$SettingsPath,
+        [string]$ScriptDirPath
+    )
+
+    $verifyScript = Join-Path $ScriptDirPath 'scripts/verify-telemetry-hooks.mjs'
+    if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+        Write-Host "  ! Warning: node not found -- skipping telemetry hook presence verification"
+        return
+    }
+
+    & node $verifyScript $SettingsPath '--with-receipt'
+    if ($LASTEXITCODE -ne 0) {
+        throw "Telemetry hook presence check failed -- see output above."
     }
 }
 
@@ -425,10 +504,12 @@ function Install-TelemetryHooks {
 
 function Merge-EnforcementHookSettings {
     # Merge gate-write (PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence,
-    # check-design, and check-telemetry-failures (UserPromptSubmit) into settings.json.
-    # check-telemetry-failures (0000026, backlog 0000044) is UserPromptSubmit-shaped like
-    # the other enforcement hooks here, not PostToolUse like context-pressure.mjs, and is
-    # always installed regardless of MCP flags. Idempotent.
+    # check-design, check-telemetry-failures, and check-telemetry-receipts (UserPromptSubmit)
+    # into settings.json.
+    # check-telemetry-failures (0000026, backlog 0000044) and check-telemetry-receipts
+    # (req-004, feature 0000027, ADR-001) are UserPromptSubmit-shaped like the other
+    # enforcement hooks here, not PostToolUse like context-pressure.mjs, and are always
+    # installed regardless of MCP flags. Idempotent.
     param(
         [string]$SettingsPath,
         [string]$HooksDir
@@ -453,6 +534,10 @@ function Merge-EnforcementHookSettings {
     $telemetryFailuresEntry = @{
         matcher = '.*'
         hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-telemetry-failures.mjs" })
+    }
+    $telemetryReceiptsEntry = @{
+        matcher = '.*'
+        hooks   = @(@{ type = 'command'; command = "node $HooksDir/check-telemetry-receipts.mjs" })
     }
 
     if (Test-Path $SettingsPath) {
@@ -480,10 +565,11 @@ function Merge-EnforcementHookSettings {
                 $_.command -match 'auto-trigger-orchestrator' -or
                 $_.command -match 'check-orchestrator-presence' -or
                 $_.command -match 'check-design' -or
-                $_.command -match 'check-telemetry-failures'
+                $_.command -match 'check-telemetry-failures' -or
+                $_.command -match 'check-telemetry-receipts'
             })
         })
-        $existing.hooks.UserPromptSubmit = $filtered + $autoTriggerEntry + $presenceEntry + $userPromptEntry + $telemetryFailuresEntry
+        $existing.hooks.UserPromptSubmit = $filtered + $autoTriggerEntry + $presenceEntry + $userPromptEntry + $telemetryFailuresEntry + $telemetryReceiptsEntry
 
         $existing | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
         Write-Host "  ~ .claude/settings.json (enforcement hook entries merged)"
@@ -495,7 +581,7 @@ function Merge-EnforcementHookSettings {
         $settings = [PSCustomObject]@{
             hooks = [PSCustomObject]@{
                 PreToolUse       = @($preToolEntry)
-                UserPromptSubmit = @($autoTriggerEntry, $presenceEntry, $userPromptEntry, $telemetryFailuresEntry)
+                UserPromptSubmit = @($autoTriggerEntry, $presenceEntry, $userPromptEntry, $telemetryFailuresEntry, $telemetryReceiptsEntry)
             }
         }
         $settings | ConvertTo-Json -Depth 10 | Set-Content -Path $SettingsPath -Encoding UTF8
@@ -1196,6 +1282,9 @@ function Invoke-PlanifestSetup {
             -HooksDirRel  $toolConfig.TelemetryHooksDir `
             -SettingsRel  $toolConfig.SettingsFile `
             -BackendUrl   $BackendUrl
+        Test-TelemetryHooksInstalled `
+            -SettingsPath (Join-Path $ProjectRoot $toolConfig.SettingsFile) `
+            -ScriptDirPath $ScriptDir
     }
 
     # Install Copilot adapter when tool is copilot (REQ-015)

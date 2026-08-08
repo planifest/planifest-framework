@@ -528,11 +528,15 @@ install_enforcement_hooks() {
   # Copy enforcement hooks and wire PreToolUse/UserPromptSubmit (REQ-002, REQ-006, REQ-008).
   # Includes auto-trigger-orchestrator.mjs (REQ-002), gate-write.mjs, check-design.mjs,
   # check-telemetry-failures.mjs (0000026, backlog 0000044 — deterministic backstop for
-  # the orchestrator's ADR-002 phase-start telemetry-failure-marker check).
-  # Always installed, regardless of MCP flags — it is UserPromptSubmit-shaped like the
-  # other enforcement hooks, not PostToolUse like context-pressure.mjs, and reads
-  # plan/.telemetry-failures/ rather than requiring the telemetry hooks themselves to be
-  # active, so it does not belong behind --structured-telemetry-mcp or --context-mode-mcp.
+  # the orchestrator's ADR-002 phase-start telemetry-failure-marker check), and
+  # check-telemetry-receipts.mjs (req-004, feature 0000027, ADR-001 — cross-references
+  # build-log.md's per-phase Telemetry claims against plan/.telemetry-receipts/).
+  # Always installed, regardless of MCP flags — both telemetry checks are
+  # UserPromptSubmit-shaped like the other enforcement hooks, not PostToolUse like
+  # context-pressure.mjs, and read plan/ state rather than requiring the telemetry
+  # hooks themselves to be active, so neither belongs behind --structured-telemetry-mcp
+  # or --context-mode-mcp — when telemetry is off, build-log.md's Telemetry field reads
+  # "confirmed-disabled" and check-telemetry-receipts.mjs correctly has nothing to flag.
   local hooks_src_rel="$1"   # e.g. hooks/enforcement
   local hooks_dir_rel="$2"   # e.g. .claude/hooks/enforcement
   local settings_rel="$3"    # e.g. .claude/settings.json
@@ -565,9 +569,10 @@ install_enforcement_hooks() {
   local presence_cmd="$hooks_dir_rel/check-orchestrator-presence.mjs"
   local design_cmd="$hooks_dir_rel/check-design.mjs"
   local telemetry_failures_cmd="$hooks_dir_rel/check-telemetry-failures.mjs"
+  local telemetry_receipts_cmd="$hooks_dir_rel/check-telemetry-receipts.mjs"
 
   if command -v node >/dev/null 2>&1; then
-    PLANIFEST_GATE="$gate_cmd" PLANIFEST_RATCHET="$ratchet_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_TELEMETRY_FAILURES="$telemetry_failures_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+    PLANIFEST_GATE="$gate_cmd" PLANIFEST_RATCHET="$ratchet_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_TELEMETRY_FAILURES="$telemetry_failures_cmd" PLANIFEST_TELEMETRY_RECEIPTS="$telemetry_receipts_cmd" PLANIFEST_SETTINGS="$settings" node -e '
       const fs = require("fs"), path = require("path");
       const gate     = process.env.PLANIFEST_GATE;
       const ratchet  = process.env.PLANIFEST_RATCHET;
@@ -575,6 +580,7 @@ install_enforcement_hooks() {
       const presence = process.env.PLANIFEST_PRESENCE;
       const design   = process.env.PLANIFEST_DESIGN;
       const telemetryFailures = process.env.PLANIFEST_TELEMETRY_FAILURES;
+      const telemetryReceipts = process.env.PLANIFEST_TELEMETRY_RECEIPTS;
       const sf       = process.env.PLANIFEST_SETTINGS;
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
@@ -591,18 +597,21 @@ install_enforcement_hooks() {
         {matcher:"Edit",  hooks:[{type:"command",command:ratchet}]}
       );
       // UserPromptSubmit: auto-trigger first, then presence check, then check-design,
-      // then check-telemetry-failures (REQ-002, REQ-008, 0000026, idempotent)
+      // then check-telemetry-failures, then check-telemetry-receipts
+      // (REQ-002, REQ-008, 0000026, req-004/0000027, idempotent)
       s.hooks.UserPromptSubmit = (s.hooks.UserPromptSubmit || [])
         .filter(h => !(h.hooks||[]).some(e =>
           (e.command||"").includes("auto-trigger-orchestrator") ||
           (e.command||"").includes("check-orchestrator-presence") ||
           (e.command||"").includes("check-design") ||
-          (e.command||"").includes("check-telemetry-failures")));
+          (e.command||"").includes("check-telemetry-failures") ||
+          (e.command||"").includes("check-telemetry-receipts")));
       s.hooks.UserPromptSubmit.push(
         {matcher:".*", hooks:[{type:"command",command:trigger}]},
         {matcher:".*", hooks:[{type:"command",command:presence}]},
         {matcher:".*", hooks:[{type:"command",command:design}]},
-        {matcher:".*", hooks:[{type:"command",command:telemetryFailures}]}
+        {matcher:".*", hooks:[{type:"command",command:telemetryFailures}]},
+        {matcher:".*", hooks:[{type:"command",command:telemetryReceipts}]}
       );
       fs.mkdirSync(path.dirname(sf),{recursive:true});
       fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
@@ -610,69 +619,138 @@ install_enforcement_hooks() {
     echo "  ~ $settings_rel (enforcement hooks wired)"
   else
     echo "  ! Warning: node not found — skipping settings.json enforcement hook wiring"
-    echo "  ! Manually add gate-write (Write/Edit PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence, check-design and check-telemetry-failures (UserPromptSubmit) to $settings_rel"
+    echo "  ! Manually add gate-write (Write/Edit PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence, check-design, check-telemetry-failures and check-telemetry-receipts (UserPromptSubmit) to $settings_rel"
   fi
 }
 
 merge_telemetry_hook_settings() {
-  # Merge PostToolUse context-pressure hook entry into .claude/settings.json
-  # Idempotent: removes existing context-pressure entry before re-adding.
+  # Merge context-pressure (PostToolUse), emit-phase-start (PreToolUse), and
+  # emit-phase-end (Stop) hook entries into .claude/settings.json, plus the
+  # emit_event receipt hook (PostToolUse, req-004/ADR-001).
+  # Idempotent: each script's prior entry is removed before being re-added.
+  #
+  # Wiring design decision (req-001, feature 0000027): emit-phase-start.mjs
+  # (documented in its own header as a PreToolUse hook) and emit-phase-end.mjs
+  # (documented as a Stop hook) each require a positional <phase> CLI
+  # argument. A single hook entry is one fixed `command` string -- it cannot
+  # vary that argument as the pipeline moves through phases over the life of
+  # a session. Rather than modifying either telemetry script, both entries
+  # below route through hooks/telemetry/resolve-phase.mjs, which infers the
+  # active phase from an observable tool-lifecycle signal (which phase-agent
+  # Skill the orchestrator invoked) and re-execs the real script with that
+  # phase supplied. See resolve-phase.mjs's own header for the full mechanism
+  # and its documented limitation for multi-turn phases.
   local settings_file="$1"
   local hooks_dir="$2"   # relative path used in the command value
   local backend_url="$3"
 
-  local hook_cmd="PLANIFEST_TELEMETRY_URL=$backend_url node $hooks_dir/context-pressure.mjs"
+  local pressure_cmd="PLANIFEST_TELEMETRY_URL=$backend_url node $hooks_dir/context-pressure.mjs"
+  local start_cmd="PLANIFEST_TELEMETRY_URL=$backend_url node $hooks_dir/resolve-phase.mjs start $hooks_dir/emit-phase-start.mjs"
+  local end_cmd="PLANIFEST_TELEMETRY_URL=$backend_url node $hooks_dir/resolve-phase.mjs end $hooks_dir/emit-phase-end.mjs"
+  local receipt_cmd="node $hooks_dir/emit-event-receipt.mjs"
 
   if command -v jq >/dev/null 2>&1; then
-    local new_hook
-    new_hook=$(jq -n \
-      --arg cmd "$hook_cmd" \
-      '[{"matcher":".*","hooks":[{"type":"command","command":$cmd,"async":true,"timeout":5000}]}]')
+    local merged
     if [ -f "$settings_file" ]; then
-      local merged
       merged=$(jq \
-        --argjson new_hook "$new_hook" \
+        --arg pressure "$pressure_cmd" \
+        --arg start "$start_cmd" \
+        --arg end "$end_cmd" \
+        --arg receipt "$receipt_cmd" \
         '
           .hooks //= {} |
           .hooks.PostToolUse //= [] |
+          .hooks.PreToolUse //= [] |
+          .hooks.Stop //= [] |
           .hooks.PostToolUse |= (
             map(select(
-              (.hooks // []) | map(.command // "") | any(test("context-pressure")) | not
+              (.hooks // []) | map(.command // "") |
+              (any(test("context-pressure")) or any(test("emit-event-receipt"))) | not
             ))
-            + $new_hook
+            + [
+              {"matcher":".*","hooks":[{"type":"command","command":$pressure,"async":true,"timeout":5000}]},
+              {"matcher":"mcp__structured-telemetry-mcp__emit_event","hooks":[{"type":"command","command":$receipt,"async":true,"timeout":5000}]}
+            ]
+          ) |
+          .hooks.PreToolUse |= (
+            map(select(
+              (.hooks // []) | map(.command // "") | any(test("resolve-phase.*emit-phase-start")) | not
+            ))
+            + [{"matcher":"Skill","hooks":[{"type":"command","command":$start}]}]
+          ) |
+          .hooks.Stop |= (
+            map(select(
+              (.hooks // []) | map(.command // "") | any(test("resolve-phase.*emit-phase-end")) | not
+            ))
+            + [{"matcher":".*","hooks":[{"type":"command","command":$end}]}]
           )
         ' "$settings_file")
-      printf '%s\n' "$merged" > "$settings_file"
-      echo "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
     else
-      mkdir -p "$(dirname "$settings_file")"
-      jq -n --argjson new_hook "$new_hook" \
-        '{"hooks":{"PostToolUse":$new_hook}}' > "$settings_file"
-      echo "  + .claude/settings.json (created with telemetry PostToolUse hook)"
+      merged=$(jq -n \
+        --arg pressure "$pressure_cmd" \
+        --arg start "$start_cmd" \
+        --arg end "$end_cmd" \
+        --arg receipt "$receipt_cmd" \
+        '{
+          "hooks": {
+            "PostToolUse": [
+              {"matcher":".*","hooks":[{"type":"command","command":$pressure,"async":true,"timeout":5000}]},
+              {"matcher":"mcp__structured-telemetry-mcp__emit_event","hooks":[{"type":"command","command":$receipt,"async":true,"timeout":5000}]}
+            ],
+            "PreToolUse": [{"matcher":"Skill","hooks":[{"type":"command","command":$start}]}],
+            "Stop": [{"matcher":".*","hooks":[{"type":"command","command":$end}]}]
+          }
+        }')
     fi
+    mkdir -p "$(dirname "$settings_file")"
+    printf '%s\n' "$merged" > "$settings_file"
+    echo "  ~ .claude/settings.json (telemetry hooks merged: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt)"
   elif command -v node >/dev/null 2>&1; then
-    PLANIFEST_HOOK_CMD="$hook_cmd" PLANIFEST_SETTINGS="$settings_file" node -e '
+    PLANIFEST_PRESSURE_CMD="$pressure_cmd" PLANIFEST_START_CMD="$start_cmd" PLANIFEST_END_CMD="$end_cmd" PLANIFEST_RECEIPT_CMD="$receipt_cmd" PLANIFEST_SETTINGS="$settings_file" node -e '
       const fs = require("fs"), path = require("path");
-      const cmd = process.env.PLANIFEST_HOOK_CMD;
+      const pressureCmd = process.env.PLANIFEST_PRESSURE_CMD;
+      const startCmd    = process.env.PLANIFEST_START_CMD;
+      const endCmd      = process.env.PLANIFEST_END_CMD;
+      const receiptCmd  = process.env.PLANIFEST_RECEIPT_CMD;
       const sf  = process.env.PLANIFEST_SETTINGS;
-      const newHook = [{matcher:".*",hooks:[{type:"command",command:cmd,async:true,timeout:5000}]}];
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
       s.hooks = s.hooks || {};
       s.hooks.PostToolUse = (s.hooks.PostToolUse || [])
-        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("context-pressure")))
-        .concat(newHook);
+        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("context-pressure") || (e.command||"").includes("emit-event-receipt")))
+        .concat([
+          {matcher:".*",hooks:[{type:"command",command:pressureCmd,async:true,timeout:5000}]},
+          {matcher:"mcp__structured-telemetry-mcp__emit_event",hooks:[{type:"command",command:receiptCmd,async:true,timeout:5000}]}
+        ]);
+      s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
+        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("resolve-phase.mjs") && (e.command||"").includes("emit-phase-start")))
+        .concat([{matcher:"Skill",hooks:[{type:"command",command:startCmd}]}]);
+      s.hooks.Stop = (s.hooks.Stop || [])
+        .filter(h => !(h.hooks||[]).some(e => (e.command||"").includes("resolve-phase.mjs") && (e.command||"").includes("emit-phase-end")))
+        .concat([{matcher:".*",hooks:[{type:"command",command:endCmd}]}]);
       fs.mkdirSync(path.dirname(sf),{recursive:true});
       fs.writeFileSync(sf, JSON.stringify(s,null,2)+"\n");
     '
-    if [ -f "$settings_file" ]; then
-      echo "  ~ .claude/settings.json (telemetry PostToolUse hook merged)"
-    else
-      echo "  + .claude/settings.json (created with telemetry PostToolUse hook)"
-    fi
+    echo "  ~ .claude/settings.json (telemetry hooks merged: context-pressure, emit-phase-start, emit-phase-end, emit-event-receipt)"
   else
-    echo "  ! Warning: neither jq nor node found — skipping telemetry settings.json wiring"
+    echo "  ! Warning: neither jq nor node found -- skipping telemetry settings.json wiring"
   fi
+}
+
+verify_telemetry_hooks_installed() {
+  # Positive-presence check (req-001, acceptance criterion): fails loudly if
+  # any telemetry hook was copied to disk but never actually registered in
+  # the target tool's settings -- the exact partial-wiring regression this
+  # requirement exists to prevent from recurring silently.
+  local settings_file="$1"
+  local script_dir="$2"
+
+  if ! command -v node >/dev/null 2>&1; then
+    echo "  ! Warning: node not found -- skipping telemetry hook presence verification"
+    return 0
+  fi
+
+  node "$script_dir/scripts/verify-telemetry-hooks.mjs" "$settings_file" --with-receipt
 }
 
 install_telemetry_hooks() {
@@ -1143,6 +1221,7 @@ setup_tool() {
      [ -n "${TOOL_TELEMETRY_HOOKS_SRC:-}" ] && [ -n "${TOOL_TELEMETRY_HOOKS_DIR:-}" ] && \
      [ -n "${TOOL_SETTINGS_FILE:-}" ]; then
     install_telemetry_hooks "$TOOL_TELEMETRY_HOOKS_SRC" "$TOOL_TELEMETRY_HOOKS_DIR" "$TOOL_SETTINGS_FILE" "$BACKEND_URL"
+    verify_telemetry_hooks_installed "$PROJECT_ROOT/$TOOL_SETTINGS_FILE" "$SCRIPT_DIR"
   fi
 
   # Tier 3 tools: no hook system — print deterministic enforcement warning (REQ-012)
