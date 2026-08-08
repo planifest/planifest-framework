@@ -174,7 +174,7 @@ sentinel appear on its own line or outside a code span.
 
 Reproduced accidentally: the first draft of this security report described the bypass token
 in prose, which silently exempted the entire report from the guard. The same applies to
-`plan/current/adr/0000028-ADR-003-*`, to the new `Em Dash Prohibition` section in
+`plan/current/adr/ADR-003-*`, to the new `Em Dash Prohibition` section in
 `formatting-standards.md`, to the guard's own block message (which prints the sentinel, so
 any content quoting that message is exempt), and to the test fixtures. The documents that
 define the rule are the ones the rule cannot reach.
