@@ -20,7 +20,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ## Phase Log
 
-### P0 — Assess & Coach
+### P0: Assess & Coach
 
 | Field | Value |
 |-------|-------|
@@ -33,7 +33,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Telemetry | failed-with-recorded-choice |
 | Notes | See P0 exchange trail below. |
 
-Adoption mode: standard-iterative — detected from `plan/_archive/` (28 prior features) plus `docs/about.md`; confirmation pending with the human on the loop.
+Adoption mode: standard-iterative, detected from `plan/_archive/` (28 prior features) plus `docs/about.md`; confirmation pending with the human on the loop.
 
 Telemetry: a durable failure marker `context-pressure--TypeError--fetch-failed.json` (root cause key
 `context-pressure::TypeError::fetch-failed`, 4 occurrences, 2026-08-08T09:10:28Z to 09:11:55Z) was present
@@ -45,7 +45,7 @@ Marker cleared with the agreement of the human on the loop. The underlying defec
 and is in scope for this feature. Root cause `context-pressure::TypeError::fetch-failed` is acknowledged for
 the remainder of this run and will not be re-asked.
 
-### P1 — Requirements
+### P1: Requirements
 
 | Field | Value |
 |-------|-------|
@@ -76,59 +76,72 @@ Defects found while specifying, folded into REQ-002 rather than filed separately
 - `setup.sh:447` globs `emit-phase-*.mjs` for tier-1 telemetry installs and would silently drop a shared
   module for Cursor, Windsurf and Cline.
 
-### P2 — Architecture Decisions
+### P2: Architecture Decisions
 
 | Field | Value |
 |-------|-------|
 | Start | `2026-08-08T12:45:00Z` |
 | Model tier | primary, with cheaper-tier subagents per ADR |
 | Skills loaded | planifest-adr-agent |
+| Agents spawned | `4` |
+| MCP calls | `0` |
+| Parallel task batches | `1` |
+| Telemetry | confirmed-disabled |
+| Notes | Four ADRs drafted in one parallel batch. ADR-002 corrected a premise: neither `check-telemetry-receipts.mjs` nor `resolve-phase.mjs` currently imports a phase-enum module, so the placement decision is forward-looking rather than a fix to an existing crash. |
+
+### P3: Code Generation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T12:55:00Z` |
+| Model tier | primary for the sequential extraction, cheaper-tier subagents for independent work |
+| Skills loaded | planifest-codegen-agent, planifest-test-writer, planifest-implementer, planifest-refactor |
 | Agents spawned | `{{count}}` |
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
 | Telemetry | `{{pending}}` |
-| Notes | Four architectural decisions identified at P1. |
+| Notes | Parallelism constrained by ADR-004: REQ-002's extraction rewires one caller at a time with live verification between steps, because a hook broken mid-edit exits 0 and degrades to a silent no-op. REQ-006 is independent and runs in parallel. |
 
-Gate accepted: P0 — 2026-08-08T12:28:00Z
+Gate accepted: P0 at 2026-08-08T12:28:00Z
 
 ---
 
 ## P0 Audit Trail
 
-P0 exchange — git sync (GUTD): Q: Are all previous PRs merged and is main up to date? / A: Human invoked the
+P0 exchange, git sync (GUTD): Q: Are all previous PRs merged and is main up to date? / A: Human invoked the
 GUTD shorthand. `git fetch origin` succeeded; `git rev-list --left-right --count origin/main...main` returned
 `0	0`, so local main was identical to origin/main at `abe130f` (PR #54). No pull needed, no divergence, no
 local-only commits. Untracked backlog entries reported.
 
-P0 exchange — telemetry block-or-proceed: Q: Telemetry emission failed (TypeError / fetch failed, hook
+P0 exchange, telemetry block-or-proceed: Q: Telemetry emission failed (TypeError / fetch failed, hook
 context-pressure, 4 occurrences). Block until resolved, or proceed without telemetry? / A: Block until
 resolved. Resolved by investigation as recorded in the P0 phase block above.
 
-P0 exchange — feature subject: Q: What are we building? `plan/current/` is empty and there is no feature
+P0 exchange, feature subject: Q: What are we building? `plan/current/` is empty and there is no feature
 brief. / A: A batch of fixes drawn from `plan/backlog/`, starting with the telemetry defect just diagnosed.
 
-P0 exchange — backlog exploration: Q: 21 entries are open. Which form this release? / A: Human asked for the
+P0 exchange, backlog exploration: Q: 21 entries are open. Which form this release? / A: Human asked for the
 backlog to be walked through and ranked. Group B (`0000060`, `0000061`, `0000062`) was reviewed and rejected
 as not valuable enough for this run; `0000063` accepted.
 
-P0 exchange — scope confirmation: Q: Take the recommended set (`0000063` + phase-hook wiring + `0000054` +
+P0 exchange, scope confirmation: Q: Take the recommended set (`0000063` + phase-hook wiring + `0000054` +
 `0000057` + `0000051`/`0000052` closures), or promote `0000020` and make this the decomposition release? /
 A: Recommendation agreed, `0000020` explicitly excluded, and four further entries requested.
 
-P0 exchange — scope additions: Q: Which four additions? Recommended `0000058`, `0000053`, `0000042`,
+P0 exchange, scope additions: Q: Which four additions? Recommended `0000058`, `0000053`, `0000042`,
 `0000026`, with `0000026` scoped hard at P1 to a single deterministic em dash check and the broader
 writing-tells list deferred. / A: Confirmed.
 
-P0 exchange — Playwright MCP: Q: Is Playwright MCP available, and can it be incorporated as a setup flag? /
+P0 exchange, Playwright MCP: Q: Is Playwright MCP available, and can it be incorporated as a setup flag? /
 A: Checked and not available. Absent from this session's tool set, and a connector-registry search for
 `playwright`, `browser automation`, `e2e testing` and `web testing` returned zero results. Filed as backlog
 `0000064` rather than scoped into this feature.
 
-P0 exchange — run mode: Q: Review after each phase, or continuous run? / A: Continuous, with subagents used
+P0 exchange, run mode: Q: Review after each phase, or continuous run? / A: Continuous, with subagents used
 throughout. Recorded in `plan/.run-mode`. The P0 design gate and the Scope Lock per-item accepts are retained,
 since continuous mode waives the P1 to P6 phase gates only.
 
-P0 exchange — scope collapse: Q: Two Scope Lock agents flagged that `0000042` and the phase-hook wiring may
+P0 exchange, scope collapse: Q: Two Scope Lock agents flagged that `0000042` and the phase-hook wiring may
 already be done. Verified both against the repo. `block-bash.mjs` already carries the loopback exemption
 (`LOOPBACK_HOSTS`, line 72), shipped in `7f28593` under feature `0000026`, so `0000042` is fixed but its entry
 still reads `status: open`. `setup.sh:626` `merge_telemetry_hook_settings()` already wires `resolve-phase.mjs`
@@ -136,19 +149,19 @@ to `PreToolUse` and `Stop`, shipped in `0000027`, and `.gitignore:2` ignores `.c
 settings file inspected at P0 is untracked local machine state rather than repo state. Confirm the revised
 scope? / A: Confirmed. `0000042` drops to a closure and the wiring requirement becomes an install refresh.
 
-P0 exchange — em dash scope: Q: Write-time only, write-time plus one-off cleanup, or repo-wide CI scan? The
+P0 exchange, em dash scope: Q: Write-time only, write-time plus one-off cleanup, or repo-wide CI scan? The
 repo already contains em dashes in roughly 870 files. / A: Write-time plus one-off cleanup. The orchestrator
 bounded the cleanup to live artifacts (`plan/current/`, `docs/`, `planifest-framework/`) and excluded
 `plan/_archive/` and `plan/changelog/` as historical record, stated to the human on the loop as a judgement
 call open to reversal.
 
-P0 exchange — telemetry receipts: Q: `plan/.telemetry-receipts/` is not gitignored, unlike its sibling
+P0 exchange, telemetry receipts: Q: `plan/.telemetry-receipts/` is not gitignored, unlike its sibling
 `plan/.telemetry-failures/`, so receipts would appear as untracked files. Gitignore or commit? / A: Gitignore.
 
-P0 exchange — marker write silence: Q: A failing marker write currently produces no marker, no interrupt and
+P0 exchange, marker write silence: Q: A failing marker write currently produces no marker, no interrupt and
 no trace. Address it here or defer? / A: Add a stderr fallback line. Still exits 0, still never blocks.
 
-P0 exchange — design confirmation and push grant: Q: Confirm the design and I run P1 to P9 without stopping? /
+P0 exchange, design confirmation and push grant: Q: Confirm the design and I run P1 to P9 without stopping? /
 A: Confirmed at 08 Aug 2026 @ 01:28 PM BST. The human on the loop additionally granted express authorisation
 to push continually and to raise the pull request at the end.
 
@@ -168,20 +181,20 @@ Four `planifest-scope-lock-agent` instances dispatched in parallel, one per scen
 was presented. All four returned drafts. Presented as a batch; the human on the loop gave a separate explicit
 accept for each of the four.
 
-Scope Lock — happy path: The feature is invisible when it works. Phase transitions emit `phase_start` and
+Scope Lock, happy path: The feature is invisible when it works. Phase transitions emit `phase_start` and
 `phase_end` for the first time in this repo, a backend caught mid-restart receives the event on retry with no
 marker and no interrupt, and artifacts never land containing an em dash. [source: agent-draft-accepted]
 
-Scope Lock — first-run path: `plan/.telemetry-failures/` and `plan/.telemetry-receipts/` are created on demand
+Scope Lock, first-run path: `plan/.telemetry-failures/` and `plan/.telemetry-receipts/` are created on demand
 rather than pre-seeded, phase events have no prior history to reconcile against, and the em dash hook inspects
 only content being written now while the one-off cleanup handles existing live artifacts as a separate bounded
 pass. [source: agent-draft-accepted]
 
-Scope Lock — error path: Mid-restart is retried and invisible. Never-listening, 4xx/5xx and retry exhaustion
+Scope Lock, error path: Mid-restart is retried and invisible. Never-listening, 4xx/5xx and retry exhaustion
 are recorded as exactly one marker and surfaced once. A failing marker write now emits a stderr line rather
 than vanishing silently. [source: agent-draft-accepted]
 
-Scope Lock — cross-session continuity: Markers and `build-log.md` are durable, uncommitted `plan/current/`
+Scope Lock, cross-session continuity: Markers and `build-log.md` are durable, uncommitted `plan/current/`
 work is at risk but recoverable by hand, and the sharp risk is this feature editing the hooks running its own
 build, where a half-applied extraction degrades to a silent no-op because hooks must exit 0. Broken hooks are
 fixed forward and verified live, never assumed working. [source: agent-draft-accepted]
@@ -204,23 +217,23 @@ mechanism needs specifying for a Write/Edit hook since `--no-verify` has no equi
 | `0000057-consolidate-phase-enum-maps` | pull-in |
 | `0000058-verify-resolve-phase-live-hook-firing` | pull-in |
 | `0000053-telemetry-schema-missing-loop-reversal-fields` | pull-in |
-| `0000042-context-mode-hook-false-flags-local-http-url-in-args` | pull-in as closure only — verified already fixed in `0000026` (`7f28593`), entry status never updated |
+| `0000042-context-mode-hook-false-flags-local-http-url-in-args` | pull-in as closure only: verified already fixed in `0000026` (`7f28593`), entry status never updated |
 | `0000026-ai-writing-tells-style-guard` | pull-in (scoped hard at P1) |
 | `0000051-orchestrator-router-decomposition-followup` | pull-in as closure only |
 | `0000052-scope-lock-and-marker-commit-followups` | pull-in as closure only |
-| `0000020-decompose-orchestrator-skill` | leave — explicitly excluded by the human on the loop; warrants a dedicated run |
+| `0000020-decompose-orchestrator-skill` | leave: explicitly excluded by the human on the loop; warrants a dedicated run |
 | `0000060-p7-crossref-check-cannot-detect-relative-link-breakage` | leave |
 | `0000061-component-manifest-path-inconsistent-with-framework-self-manifest` | leave |
 | `0000062-no-lightweight-track-for-projects-without-src-components` | leave |
-| `0000022-add-token-accounting-per-phase` | leave — unblocked by this feature's wiring work; candidate for the next run |
-| `0000056-orchestrator-explicit-phase-completion-signal` | leave — same |
+| `0000022-add-token-accounting-per-phase` | leave: unblocked by this feature's wiring work; candidate for the next run |
+| `0000056-orchestrator-explicit-phase-completion-signal` | leave: same |
 | `0000059-clarify-agent-vs-human-pronouns-in-choice-prompts` | leave |
 | `0000050-verify-setup-flags-marker-live-pwsh` | leave |
 | `0000025-declare-adoption-position-and-stability-policy` | leave |
 | `0000023-publish-baseline-comparison` | leave |
 | `0000026-ai-writing-tells-style-guard` | (listed above) |
-| `0000048-loop-designer-meta-skill` | leave — blocked on loop evidence from two real features |
-| `0000049-cross-vendor-critique-automation-p1-p2` | leave — blocked on per-project model-access configuration |
+| `0000048-loop-designer-meta-skill` | leave: blocked on loop evidence from two real features |
+| `0000049-cross-vendor-critique-automation-p1-p2` | leave: blocked on per-project model-access configuration |
 
 Notes on the two closure-only entries:
 

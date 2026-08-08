@@ -310,8 +310,15 @@ fi
 # The installed tier 1 emit hook must actually run end to end: with an
 # unreachable backend, the shared recordTelemetryFailure writes a marker. That
 # marker can only exist if all five shared imports resolved.
-printf '{"cwd":"%s","session_id":"t1"}' "$WS" \
-  | PLANIFEST_SESSION_ID=t1 PLANIFEST_TELEMETRY_URL=http://127.0.0.1:39499 \
+#
+# getFlagPath keys the phase-start dedup flag on session_id+phase alone, in
+# the shared OS tmpdir, not scoped to this test's workspace (see
+# get-flag-path.mjs). A fixed "t1" session id collides with a flag left by a
+# prior run of this same file and short-circuits emission before a marker is
+# ever written. Use a run-unique session id so this file never self-collides.
+T1_SESSION="t1-$$-$(date +%s%N 2>/dev/null || date +%s)"
+printf '{"cwd":"%s","session_id":"%s"}' "$WS" "$T1_SESSION" \
+  | PLANIFEST_SESSION_ID="$T1_SESSION" PLANIFEST_TELEMETRY_URL=http://127.0.0.1:39499 \
     node "$WS/.cursor/hooks/telemetry/emit-phase-start.mjs" codegen >/dev/null 2>&1
 assert_exit_zero $? "req-002: tier 1 installed emit-phase-start exits 0"
 if ls "$WS/plan/.telemetry-failures"/*.json >/dev/null 2>&1; then
