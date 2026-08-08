@@ -2,7 +2,7 @@
 
 **Feature:** Telemetry hardening and enforcement fixes
 **Pipeline run:** P0 through P9 completed. No phases skipped.
-**PR:** pending
+**PR:** https://github.com/planifest/planifest-framework/pull/55
 
 ## What Was Built
 
