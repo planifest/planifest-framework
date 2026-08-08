@@ -200,6 +200,43 @@ Gate accepted (continuous run, no stop): P2 → P3 — 08 Aug 2026
 
 Gate accepted (continuous run, no stop): P3 → P4 — 08 Aug 2026
 
+### P4 — Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 1 (lint/no-typecheck N/A for bash+mjs; full regression suite run as one batch, per CI's own structure) |
+| Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
+| Notes | Stack is bash + Node ESM, no lint/typecheck tooling declared in this repo's CI (.github/workflows/planifest.yml runs the bash test harness directly) — those two checks are N/A, not skipped; test suite is the applicable CI check. |
+
+**Checks run:**
+1. Library audit — N/A, no dependency manifest added (bash + Node stdlib only, no package.json touched).
+2. Semantic correctness (AC coverage) — req-001/req-002/req-004 covered by dedicated new test files with RED→GREEN evidence from P3 subagent reports; req-006 verified directly (archive-integrity + entry-count checks reported by its P3 subagent); req-003/req-005/req-007/req-008 (doc/workflow-only, no runtime behaviour) covered by a new content-pinning test (`test-0000027-req-003-005-007-008-governance-docs.sh`, 25/25 assertions) written by the orchestrator during P4 after confirming no existing test covered their acceptance criteria — this is new test-writing during P4, scoped strictly to closing the coverage gap the validate-agent's own semantic-correctness rule requires, not a widening of scope.
+3. Self-description check (`self-description-check.mjs`) — pass.
+4. Full test suite (`tests/run-tests.sh`, auto-discovers all `test-*.sh`) — 51 feature suites + 22 regression suites, 0 failures. Includes the 4 new req-specific test files from P3 plus the 1 new P4 coverage test.
+5. Build — N/A, no compiled build step in this stack.
+
+**Coverage table:**
+
+| Req | AC | Covered by | Result |
+|-----|----|-----------|--------|
+| req-001 | hooks registered, idempotent, positive-presence check | test-0000027-req-001-telemetry-hooks-wired.sh, test-0000027-req-001-resolve-phase-resolver.sh | Pass |
+| req-002 | setup.sh cline/all exit 0, regression proves it | test-0000027-req-002-cline-path-collision.sh | Pass |
+| req-003 | dispatch template + phase-skill cross-references | test-0000027-req-003-005-007-008-governance-docs.sh | Pass |
+| req-004 | receipt hook + cross-reference check | test-0000027-req-004-telemetry-compliance-backstop.sh | Pass |
+| req-005 | P0 step + policy doc | test-0000027-req-003-005-007-008-governance-docs.sh | Pass |
+| req-006 | 7 entries filed, archives untouched | verified directly by P3 subagent (git diff empty on plan/_archive/) | Pass |
+| req-007 | ADR-003 exists + referenced | plan/current/adr/ADR-003 (exists), test-0000027-req-003-005-007-008-governance-docs.sh (reference) | Pass |
+| req-008 | feature-pipeline.md and spec-agent agree, README states count | test-0000027-req-003-005-007-008-governance-docs.sh | Pass |
+
+**P4 gate summary:** all checks passed first-attempt, zero self-corrections. Per the Phase Invocation Table exception, proceeding to P5 without a stop.
+
+Gate accepted (zero self-corrections, no stop): P4 → P5 — 08 Aug 2026
+
 ## Summary (filled at P7)
 
 | Metric | Value |
