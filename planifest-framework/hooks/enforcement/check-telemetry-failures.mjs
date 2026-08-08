@@ -35,15 +35,7 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
-    process.stdin.on("end", () => resolve(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
-}
+import { readStdin } from "./read-stdin.mjs";
 
 // Best-effort read of every *.json marker in dir. Malformed/unreadable
 // entries are skipped individually rather than aborting the whole scan —
