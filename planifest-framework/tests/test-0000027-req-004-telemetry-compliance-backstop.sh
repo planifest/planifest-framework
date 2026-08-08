@@ -303,4 +303,32 @@ assert_contains "emit-event-receipt.mjs" "$PS1_CONTENT" "req-004: setup.ps1 refe
 assert_contains "check-telemetry-receipts.mjs" "$PS1_CONTENT" "req-004: setup.ps1 references check-telemetry-receipts.mjs"
 assert_contains "mcp__structured-telemetry-mcp__emit_event" "$PS1_CONTENT" "req-004: setup.ps1 matcher targets the emit_event MCP tool call"
 
+# =============================================================================
+# 9. --backend-url is validated before it can reach shell interpolation in
+#    merge_telemetry_hook_settings() (backlog 0000055, found/fixed during
+#    this feature's own P5 security review)
+# =============================================================================
+
+echo ""
+echo "=== req-004: --backend-url rejects shell metacharacters, accepts a plain URL ==="
+
+WS_H=$(mktemp -d -t planifest_0000027_req004_h_XXXXXX)
+cp -r "$FRAMEWORK" "$WS_H/planifest-framework"
+
+(cd "$WS_H" && bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp --backend-url 'http://evil.example;touch /tmp/planifest_0000055_pwned' >/tmp/backend_url_bad.log 2>&1)
+BAD_EXIT=$?
+assert_equals "1" "$BAD_EXIT" "req-004: setup.sh exits 1 on a backend-url containing shell metacharacters"
+assert_equals "no" "$([ -f /tmp/planifest_0000055_pwned ] && echo yes || echo no)" \
+  "req-004: the injected command in a rejected backend-url never actually runs"
+rm -f /tmp/planifest_0000055_pwned
+
+(cd "$WS_H" && bash planifest-framework/setup.sh claude-code --structured-telemetry-mcp --backend-url 'http://localhost:9999' >/tmp/backend_url_good.log 2>&1)
+GOOD_EXIT=$?
+assert_equals "0" "$GOOD_EXIT" "req-004: setup.sh still accepts a plain http(s) URL for --backend-url"
+
+rm -rf "$WS_H" /tmp/backend_url_bad.log /tmp/backend_url_good.log
+
+PS1_BACKEND_URL_SECTION="$(cat "$FRAMEWORK/setup.ps1")"
+assert_contains "notmatch '^https?://" "$PS1_BACKEND_URL_SECTION" "req-004: setup.ps1 validates --backend-url with the equivalent regex"
+
 print_summary

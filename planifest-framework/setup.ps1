@@ -44,6 +44,14 @@ while ($i -lt $args.Count) {
         '--backend-url' {
             $i++
             if ($i -ge $args.Count) { Write-Host "Error: --backend-url requires a value"; exit 1 }
+            # Validated here, once, at parse time -- Merge-TelemetryHookSettings
+            # interpolates this value directly into a shell command string
+            # written into the target tool's hook config (backlog 0000055,
+            # found during 0000027's P5 review). Fail loudly (setup-time check).
+            if ($args[$i] -notmatch '^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._/-]*)?$') {
+                Write-Host "Error: --backend-url must be a plain http(s) URL (host[:port][/path]), got: $($args[$i])"
+                exit 1
+            }
             $BackendUrl = $args[$i]; $i++
         }
         default {
