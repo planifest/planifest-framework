@@ -10,7 +10,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 | Field | Value |
 |-------|-------|
-| Feature ID | `pending` — proposed: `0000027-backlog-batch-governance-tooling-fixes` (next unused feature ID after `0000026`, per `plan/_archive/`; not yet confirmed by the human on the loop) |
+| Feature ID | `0000027-backlog-batch-governance-tooling-fixes` — confirmed by the human on the loop at resume (2026-08-08). Branch `feat/0000027-backlog-batch-governance-tooling-fixes` cut from `main`. |
 | Pipeline start | `2026-08-08` (exact time not tracked by this host) |
 | Tool | Claude Code |
 | Primary model | claude-sonnet-5 |
@@ -61,7 +61,31 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 **Feature ID / branch — proposed, not yet confirmed:** `0000027-backlog-batch-governance-tooling-fixes`. Next unused feature ID after `0000026` (confirmed via `plan/_archive/` scan, no gaps or higher IDs found).
 
-**Not yet started:** Feature brief / problem statement, user stories, stack declaration, Scope Lock Challenge, `discovery.md` (Hard Limit 11 — must exist and be complete before the first coaching question; not yet written because coaching has not begun). Resuming this session should re-present the three "proposed, not yet confirmed" items above for a quick confirm, then proceed straight into P0 coaching using the 9-item batch above as the feature's scope input (each backlog entry's Problem/Suggested Action stands in for initial requirements discussion — coaching should still walk the Priority Order checklist per `planifest-orchestrator`, not skip it, but can move fast since the "what" is already well-specified per item).
+**Not yet started (as of prior session):** Feature brief / problem statement, user stories, stack declaration, Scope Lock Challenge, `discovery.md`. All resolved this session — see exchanges below.
+
+---
+
+## P0 Resume — 2026-08-08
+
+Session resumed via `planifest-orchestrator` skill load. Mechanical Resume Detection step 2a (interrupted-P9 heuristic: `plan/.orchestrator-active` present + no `design.md`/`requirements/`/`adr/`) technically matched, but ruled out — no `plan/_archive/` entry for `0000027` exists (last archived is `0000026`), no `.feature-id` marker, no `.run-mode`, no `pause.md`, and `build-log.md` itself (present, non-empty, describing an in-progress P0 pre-coaching state) is not one of the three emptiness markers the heuristic checks. Treated as a genuine mid-P0 resume per the pre-coaching state's own embedded resume note, not an interrupted P9. Cross-checked: `product.yml` still shows `0.26.1`/`0000026`, confirming no archiving occurred for `0000027`.
+
+P0 exchange — Adoption mode: Q: confirm Standard Iterative (signal: docs/about.md v0.26.1 + 26 prior archive runs, no external-versioning.md) / A: confirmed as recommended.
+
+P0 exchange — Version bump: Q: confirm 0.26.1 → 0.27.0 minor bump (Feature Pipeline track, 9-item batch spans orchestrator/hooks/setup.sh/docs) / A: confirmed as recommended.
+
+P0 exchange — Feature ID: Q: confirm `0000027-backlog-batch-governance-tooling-fixes` (next unused after 0000026) / A: confirmed as recommended. Branch cut immediately after.
+
+Scope Lock — deferred: none (Scope Lock Challenge not yet run — feature-brief.md now written, proceeding to Scope Lock next).
+
+P0 exchange — Decomposition: Q: 8 backlog items exceeds the 5-6 wave-grouping rule of thumb — recommend one Feature Pipeline run with 8 requirements (precedent: 0000025 ran 7 similarly-scoped items in one pass) vs. splitting into waves / A: confirmed one run, 8 requirements, no waving.
+
+P0 exchange — Stack: Q: confirm Bash + Node (ESM) + Markdown, no DB/cloud, CI=GitHub Actions, build target=local, testing via existing tests/test-*.sh convention / A: confirmed as recommended.
+
+P0 exchange — Brief content (scope/NFR/security/ops/risk): Q: confirm scope boundaries, NFRs (setup reliability, telemetry completeness), security (N/A auth, no data classification), ops model (N/A, no deployed footprint), and risks as drafted / A: raised a clarifying question — "Should we bring in 0021?" (given 0000021 targets the very over-mandate rule this run would otherwise be subject to). Orchestrator recommended keeping it in scope: already confirmed in the prior-session batch, small and self-contained, no cross-cutting conflict, and the sequencing concern isn't a real blocker (this run's own artifact set was already judgment-called down to the minimum regardless). Human confirmed: keep 0000021 in scope.
+
+Backlog pickup (step 3c) — pull-in executed for all 8 targeted entries (0000043, 0000034, 0000035, 0000044, 0000045, 0000046, 0000024, 0000021): folded into `plan/current/feature-brief.md`, folders deleted, committed together (`feat(0000027): pull in 8 backlog items, write feature brief`). Remaining `plan/backlog/` entries (0000020, 0000022, 0000023, 0000025, 0000026, 0000042) left untouched — not part of this batch.
+
+`discovery.md` written and committed before the first coaching question (`docs(0000027): add P0 discovery findings`), satisfying Hard Limit 11.
 
 ---
 
