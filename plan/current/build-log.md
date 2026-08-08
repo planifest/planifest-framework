@@ -102,6 +102,78 @@ Defects found while specifying, folded into REQ-002 rather than filed separately
 | Telemetry | emitted |
 | Notes | Parallelism constrained by ADR-004: REQ-002's extraction rewires one caller at a time with live verification between steps, because a hook broken mid-edit exits 0 and degrades to a silent no-op. REQ-006 is independent and runs in parallel. |
 
+### P4: Validate
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T17:40:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-validate-agent, planifest-verify-by-execution |
+| Agents spawned | `0` |
+| MCP calls | `4` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | CI green on the first full run after P3's repairs. No self-correction cycles were needed for the suite itself. |
+
+CI result: 56 feature suites and 22 regression tests, all passing, working tree clean.
+
+Semantic traceability found a real gap that raw counts hid. Grepping for `req-001:` through `req-006:`
+returned healthy-looking numbers only because those ids collide with every prior feature's requirement
+numbering. Scoped to this feature's own test files, REQ-004 and REQ-005 had no automated coverage at all.
+
+REQ-005 remains uncovered by automated test, deliberately and on the record. It asserts a live hook firing,
+which no test can reproduce without a real host tool session. That is precisely why backlog `0000058`
+existed, and its evidence is the observed run in `plan/current/verification-report.md` rather than a suite
+result. REQ-004 had genuinely assertable surface, so
+`test-0000028-req-004-install-refresh-registration.sh` was added to close it.
+
+### P5: Security
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T18:05:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | `1` |
+| MCP calls | `2` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | One High finding, fixed and verified live in the same phase. Remaining findings Low or Informational. |
+
+Overall rating High, driven entirely by SEC-001. No exploitable vulnerability was found anywhere in the
+change.
+
+SEC-001: `setup.sh` wired every `hooks/enforcement/` hook into `settings.json` as a bare `.mjs` path,
+relying on the shebang plus an executable bit. That bit is a committed file mode, and 9 of the 10 hook files
+are mode 100644, so the shell could not exec them. The wired command exited 126 and the hook silently never
+ran. Because a PreToolUse hook that fails to start is indistinguishable from one that passed, this was
+invisible. Dead on every bash install: `gate-write`, `em-dash-guard`, `check-design`,
+`check-orchestrator-presence`, `auto-trigger-orchestrator` and both telemetry backstops. `ratchet-check`
+worked only because it happens to be committed executable, and the context-mode hooks worked because they
+were already wired through `node`.
+
+The finding was reproduced before being fixed (exit 126 as wired, exit 0 through `node`). It also explains
+why em dashes kept landing in this very build log unchallenged during the run: REQ-006 was not satisfied in
+the installed state. Fixed by invoking each hook through `node`, matching what `setup.ps1` and the
+context-mode hooks already did. Verified live in both directions after re-running setup: a Write containing
+an em dash is now blocked, and a clean Write still succeeds.
+
+The suite could not have caught this, because every test invokes hooks via `node` directly rather than
+through the command string `setup.sh` writes. Assertions were added against the wiring itself, plus a
+pattern guard so a bare-path wiring cannot be reintroduced for any enforcement hook added later.
+
+Remaining findings, accepted rather than fixed: SEC-002, the new stderr line prints a marker path whose slug
+can contain a fragment of a malformed backend URL, the same content as the already-gitignored filename.
+SEC-003, the true worst-case retry wall time is 9.6s rather than the 600ms stated in R-007, since each of
+the three attempts owns its own 3s abort. SEC-004, `AbortError` is not excluded from the retry predicate, so
+a slow-but-live backend can receive the same envelope up to three times, mitigated by the envelope being
+byte-identical and therefore naturally dedupable. SEC-005, the bypass sentinel matches anywhere in content,
+so a document explaining the rule exempts itself.
+
+The headline check came back clean. The REQ-002 refactor did not weaken the CWE-22 path-traversal guard in
+`emit-event-receipt.mjs`: `PHASE_ENUM` carries the same seven values as the inline set literal it replaced,
+`KNOWN_PHASES` is still consulted, and the reject branch still throws before the `join()`.
+
 ### P6: Documentation
 
 | Field | Value |
