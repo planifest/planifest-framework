@@ -89,6 +89,21 @@ Feature ID finalized: `0000026-context-hook-and-telemetry-backstop-fixes`. Branc
 
 ---
 
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T00:00:00Z` |
+| Model tier | cheaper (haiku, sub-agent) |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | 1 (general-purpose, haiku) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Archive path: `plan/_archive/0000026-context-hook-and-telemetry-backstop-fixes-2026-08-08/`. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
