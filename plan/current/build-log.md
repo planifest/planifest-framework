@@ -248,7 +248,11 @@ Gate accepted (zero self-corrections, no stop): P4 → P5 — 08 Aug 2026
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
-| Notes | One finding (Medium, CWE-22 path traversal in emit-event-receipt.mjs) found and fixed directly during review, with a new regression test locking in the fix, per "immediately fix insecure code you wrote" — not deferred to a backlog entry since it was cheap, clear, and in code this same feature just introduced. Full suite re-run green after the fix (75/75 skill checks, 51 feature suites, 22 regression suites). One Medium finding (backend_url shell interpolation) is a pre-existing pattern from before this feature, now propagated to 2 more hook registrations by req-001 — reported, not fixed (fixing the pre-existing pattern is out of this feature's scope; flagged for a backlog entry). |
+| Notes | 2 Medium findings, both fixed. (1) CWE-22 path traversal in emit-event-receipt.mjs — fixed inline (closed-set validation of phase/event before path construction), regression test added. (2) Pre-existing backend_url shell-interpolation pattern, propagated to 2 more call sites by req-001 — initially filed to backlog 0000055 as out-of-scope, but the human explicitly chose to expand scope and fix it now at the P5 gate confirmation; fixed (CLI-parse-time URL-shape validation in setup.sh/.ps1, all 3 call sites covered, not just this feature's 2 new ones), regression test added, backlog entry withdrawn. Full suite re-verified green after both fixes (75 skill checks, 51 feature suites, 22 regression suites). |
+
+**P5 gate summary:** overall risk Low, zero outstanding findings after both fixes. Per the Phase Invocation Table, this phase always stops regardless of run mode when findings are non-zero — human confirmed proceeding (and expanded scope for finding 2) at the gate.
+
+Gate accepted (human-confirmed, scope expanded for finding 2): P5 → P6 — 08 Aug 2026
 
 ## Summary (filled at P7)
 

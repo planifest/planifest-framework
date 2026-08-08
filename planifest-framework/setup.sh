@@ -1417,6 +1417,17 @@ while [[ $# -gt 0 ]]; do
       if [[ -z "${2:-}" ]] || [[ "${2:-}" == -* ]]; then
         echo "Error: --backend-url requires a value"; exit 1
       fi
+      # Validated here, once, at parse time, rather than at each of its several
+      # downstream uses -- merge_telemetry_hook_settings() interpolates this
+      # value directly into a shell command string written into the target
+      # tool's hook config (backlog 0000055, found during 0000027's P5 review).
+      # Reject anything outside a plain http(s) URL shape before it can reach
+      # that interpolation; fail loudly (setup-time check, not a runtime hook --
+      # ADR-005's fail-open precedent does not apply here).
+      if ! [[ "$2" =~ ^https?://[A-Za-z0-9.-]+(:[0-9]+)?(/[A-Za-z0-9._/-]*)?$ ]]; then
+        echo "Error: --backend-url must be a plain http(s) URL (host[:port][/path]), got: $2"
+        exit 1
+      fi
       BACKEND_URL="$2"; shift 2 ;;
     -*) echo "Unknown flag: $1"; exit 1 ;;
     *) TOOL="$1"; shift ;;
