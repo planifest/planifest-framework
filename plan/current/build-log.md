@@ -115,14 +115,14 @@ Gate accepted: P0 → P1 — 08 Aug 2026 @ 08:42 AM BST
 
 | Item | One-liner | Status |
 |------|-----------|--------|
-| 0000043 | Wire phase_start/phase_end hooks into setup.sh/ps1 | not-started |
-| 0000034 | Fix cline.sh/cline.ps1 boot-file/skills-dir collision | not-started |
-| 0000035 | Subagents file discoveries to plan/backlog/, not spawn_task | not-started |
-| 0000044 | Deterministic telemetry-compliance backstop | not-started |
-| 0000045 | Backfill historical recommendations.md into plan/backlog/ | not-started |
-| 0000046 | Explicit P0 framework-dependency-update flow | not-started |
-| 0000024 | Record skill-scope-principle ADR | not-started |
-| 0000021 | Define minimal Phase 1 artifact set | not-started |
+| 0000043 (req-001) | Wire phase_start/phase_end hooks into setup.sh/ps1 | done |
+| 0000034 (req-002) | Fix cline.sh/cline.ps1 boot-file/skills-dir collision | done |
+| 0000035 (req-003) | Subagents file discoveries to plan/backlog/, not spawn_task | done |
+| 0000044 (req-004) | Deterministic telemetry-compliance backstop | done |
+| 0000045 (req-006) | Backfill historical recommendations.md into plan/backlog/ | done |
+| 0000046 (req-005) | Explicit P0 framework-dependency-update flow | done |
+| 0000024 (req-007) | Record skill-scope-principle ADR | done (ADR-003, P2) |
+| 0000021 (req-008) | Define minimal Phase 1 artifact set | done |
 
 ---
 
@@ -195,6 +195,10 @@ Gate accepted (continuous run, no stop): P2 → P3 — 08 Aug 2026
 | Parallel task batches | 1 |
 | Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
 | Notes | File-isolation groups per the human's explicit direction (avoid clashes, target isolated fixes): G1=req-002 (cline.sh/.ps1, own files); G2=req-006 (plan/backlog/ backfill, own files); G3=req-001+req-004 (both touch setup.sh/.ps1's telemetry hook-config writer — combined into one agent to avoid a same-file clash between two parallel agents); G4=req-003+req-005+req-007-pointer+req-008 (all touch planifest-orchestrator/SKILL.md and/or planifest-spec-agent/SKILL.md — combined for the same reason). **Documented deviation from the strict TDD Inner Loop Protocol:** each dispatched group agent runs the RED→GREEN→REFACTOR discipline itself inline (write failing test, confirm RED via actual execution, implement, confirm GREEN, refactor) rather than spawning nested test-writer/implementer/refactor sub-subagents — justified by task size (mechanical shell/hook fixes and doc edits, not application logic) per codegen-agent's own Deviation & Escalation Protocol; flagged here rather than silently skipped. Neither `planifest-framework/component.yml` nor `src/setup-hook-integration/component.yml` was touched by any subagent — both are single-writer, updated by the orchestrator after all 4 groups return, to avoid a multi-agent version-bump clash (same rationale as P1). Subagents did not commit — the orchestrator commits once per group after integration, to avoid concurrent git index contention across parallel dispatches. |
+
+**P3 gate summary:** all 8 requirements implemented across 4 parallel groups with zero file-write clashes (verified: `git status --porcelain` after all 4 dispatches returned showed clean, non-overlapping paths per group). 2 small out-of-scope findings surfaced by subagents and fixed directly by the orchestrator (not delegated, to avoid further dispatch overhead for single-line fixes): a stale unconditional-artifact-list line in `planifest-docs-agent/SKILL.md` (req-008 follow-through) and a stale "blocked by unrelated bug" comment in `test-0000023-req-003-copilot-setup-self-copy.sh` now that req-002 fixed the referenced bug. Both `component.yml` manifests updated centrally by the orchestrator (setup-hook-integration 0.4.0→0.5.0, planifest-framework 0.26.1→0.27.0). One documented deviation from the strict TDD Inner Loop Protocol (inline RED/GREEN/REFACTOR instead of nested sub-subagents) — recorded above, justified by task size. `continuous_run: true` — proceeding to P4 without a stop, per the P0-confirmed exception.
+
+Gate accepted (continuous run, no stop): P3 → P4 — 08 Aug 2026
 
 ## Summary (filled at P7)
 
