@@ -1,8 +1,8 @@
 # Planifest Component Manifest
 id: "setup-hook-integration"
 name: "Setup Hook Integration"
-feature: "0000003-hook-based-enforcement"
-version: "0.4.0"
+feature: "0000027-backlog-batch-governance-tooling-fixes"
+version: "0.5.0"
 status: "active"
 type: "component-pack"
 domain: "developer-tooling"
@@ -88,12 +88,12 @@ risk:
     - "Bash shebang on Windows — chmod/path handling differs (R-004)"
     - "settings.json hook schema assumption may be wrong (R-002)"
     - "setup.sh/setup.ps1 marker-write addition could drift out of parity between the two scripts (0000020-setup-refresh-skill, R-003)"
-    - "Static hook command strings can't supply the positional <phase> argument the way context-pressure.mjs's phase-agnostic command does — wiring mechanism resolved at P3 codegen, not assumed at P1 (0000027-req-001)"
+    - "Resolved at P3 codegen: a resolve-phase.mjs interposing hook infers the phase from the Skill tool call and re-execs emit-phase-start.mjs/emit-phase-end.mjs with the argument supplied (0000027-req-001, ADR-001) — see planifest-framework/component.yml for the hook's own quirks/risks"
 
 quality:
   testCoverage:
     unit: 0
-    integration: 0
+    integration: 52
     e2e: 0
   techDebt:
     - "setup.ps1 ConvertTo-Json depth: PowerShell default depth is 2; using -Depth 10 workaround. If settings.json nesting exceeds depth 10, content will be truncated to string."
@@ -101,6 +101,7 @@ quality:
     - "setup.ps1 hook entries use forward-slash paths in command values — this matches Claude Code hook config expectations even on Windows"
     - "Write-SetupFlagsMarker (0000020) verified statically only in this environment, no pwsh available (Q-006)"
     - "OpenCode's setup.ps1 tool config lacks a SkillsDir property, marker write silently skips for OpenCode on Windows, pre-existing gap (Q-007)"
+    - "cline.ps1's boot-file relocation (0000027-req-002) verified statically only, no pwsh available in this environment, same constraint as Q-006"
 
 pipeline:
   templateVersion: "1.0.0"
@@ -114,6 +115,15 @@ metadata:
   # responsibilities/scope/risk entries for the phase_start/phase_end
   # telemetry hook wiring gap (req-001) and the cline.sh/.ps1 boot-file
   # path collision fix (req-002) ahead of P3 codegen.
+  # Updated by 0000027 (codegen-agent) P3: implemented both. cline.sh/.ps1
+  # boot file relocated to .clinerules/00-planifest-boot.md (req-002),
+  # verified via a new regression test (RED before fix, GREEN after) that
+  # also confirmed test-0000023-req-003's previously-failing "setup.sh all"
+  # assertion now passes. setup.sh/.ps1's merge_telemetry_hook_settings()
+  # extended to register emit-phase-start.mjs/emit-phase-end.mjs alongside
+  # context-pressure.mjs, plus a new positive-presence check
+  # (verify-telemetry-hooks.mjs) that fails loudly on a partial install
+  # (req-001).
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"
