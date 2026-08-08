@@ -18,7 +18,7 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Single-file read with no synthesis | Cheaper | Mechanical retrieval |
 | Formatting / spelling / lint checks | Cheaper | Pattern matching, no reasoning |
 | Validation (lint, typecheck, test runner) | Cheaper | Tool execution, not reasoning |
-| Web research — fetching a single known reference doc | Cheaper | Retrieval, minimal synthesis |
+| Web research: fetching a single known reference doc | Cheaper | Retrieval, minimal synthesis |
 | Documentation writing (no novel decisions) | Cheaper | Structured output from known inputs |
 | Web research with synthesis across multiple sources | Primary | Reasoning across conflicting sources |
 | Code generation | Primary | Multi-file reasoning, correctness required |
@@ -52,7 +52,7 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 | Pattern | Example |
 |---------|---------|
 | Multiple independent codebase searches | Grepping for hook files + scanning skill dirs simultaneously |
-| Web research across independent tools/sources | Hook support for Windsurf + Hook support for Cline — same request, different sources |
+| Web research across independent tools/sources | Hook support for Windsurf + Hook support for Cline, same request, different sources |
 | Independent document reads | Reading 3 skill files that do not reference each other |
 | Background test runner while writing docs | Run `run-tests.sh` in background while docs-agent produces output |
 | Multi-component security reviews (no shared state) | Reviewing component A and component B in parallel |
@@ -76,24 +76,24 @@ Canonical home for model tier selection and parallelism/dispatch mechanics, shar
 
 ## Agent Dispatch Template
 
-Agent spawning is level-2 parallelism (the Agent tool for independent sub-tasks that each need their own tool access and context) — level-1 (multiple native tool calls in one message) is covered by Parallelism Rules above. Spawn when a task is self-contained enough to brief to a colleague in one paragraph; stay inline when it needs ongoing dialogue, shared mutable state, or is too small to justify the overhead.
+Agent spawning is level-2 parallelism (the Agent tool for independent sub-tasks that each need their own tool access and context); level-1 (multiple native tool calls in one message) is covered by Parallelism Rules above. Spawn when a task is self-contained enough to brief to a colleague in one paragraph; stay inline when it needs ongoing dialogue, shared mutable state, or is too small to justify the overhead.
 
 **Concrete parallel dispatch skeleton** (send both `Agent()` calls in a single message so they execute concurrently):
 
 ```
 Agent({ description: "Implement REQ-001: {one-liner}", subagent_type: "general-purpose", model: "claude-haiku-4-5",
-  prompt: "Requirement: plan/current/requirements/req-001-{slug}.md. ADR: plan/current/adr/ADR-00N-{slug}.md. Stack: {constraint}. Task: {what to build}. If you discover an out-of-scope bug/gap, file it at plan/backlog/{backlog-id-1}-{slug}/entry.md per templates/backlog-entry.template.md — do not report it back for me to relay. Confirm: files modified, what changed." })
+  prompt: "Requirement: plan/current/requirements/req-001-{slug}.md. ADR: plan/current/adr/ADR-00N-{slug}.md. Stack: {constraint}. Task: {what to build}. If you discover an out-of-scope bug/gap, file it at plan/backlog/{backlog-id-1}-{slug}/entry.md per templates/backlog-entry.template.md; do not report it back for me to relay. Confirm: files modified, what changed." })
 
 Agent({ description: "Implement REQ-002: {one-liner}", subagent_type: "general-purpose", model: "claude-haiku-4-5",
-  prompt: "Requirement: plan/current/requirements/req-002-{slug}.md. ADR: plan/current/adr/ADR-00N-{slug}.md. Stack: {constraint}. Task: {what to build}. If you discover an out-of-scope bug/gap, file it at plan/backlog/{backlog-id-2}-{slug}/entry.md per templates/backlog-entry.template.md — do not report it back for me to relay. Confirm: files modified, what changed." })
+  prompt: "Requirement: plan/current/requirements/req-002-{slug}.md. ADR: plan/current/adr/ADR-00N-{slug}.md. Stack: {constraint}. Task: {what to build}. If you discover an out-of-scope bug/gap, file it at plan/backlog/{backlog-id-2}-{slug}/entry.md per templates/backlog-entry.template.md; do not report it back for me to relay. Confirm: files modified, what changed." })
 ```
 
-**Self-contained prompt rule:** include the requirement file path, relevant ADR paths, stack declaration or relevant constraint, the backlog ID to use if filing an out-of-scope discovery, and what "done" looks like. Do NOT rely on shared conversation history — the spawned agent has no memory of this session.
+**Self-contained prompt rule:** include the requirement file path, relevant ADR paths, stack declaration or relevant constraint, the backlog ID to use if filing an out-of-scope discovery, and what "done" looks like. Do NOT rely on shared conversation history: the spawned agent has no memory of this session.
 
 **Model tier for spawned agents:** see the Model Tier Decision Table above.
 
 **Out-of-scope discovery filing (0000027-req-003):** if a dispatched subagent discovers an out-of-scope bug or gap while doing its task, it MUST file `plan/backlog/{id}-{slug}/entry.md` directly, per `templates/backlog-entry.template.md`, with `Deferral source: discovered mid-flight`, `Source feature` set to the active feature ID, and `Source phase` set to the phase active at discovery. It must NOT report the discovery back for the dispatching agent to relay through a host-tool side channel (e.g. a task-spawning tool), and must NOT silently drop it.
 
-The **dispatching agent** (orchestrator or phase skill placing the `Agent()` call) pre-computes the next available backlog ID before dispatch — per the Backlog ID sequence convention (`planifest-orchestrator/SKILL.md` Phase 0 Start Actions, backlog pickup step: highest ID ever allocated, including picked-up and discarded entries, plus one) — and passes it explicitly in the subagent's prompt as the ID to use if a discovery needs filing. Subagent self-lookup of `plan/backlog/` at file-time is rejected: picked-up entries are deleted from `plan/backlog/` once folded into a design, so a subagent scanning only that directory would systematically undercount the true high-water mark and risk reusing a retired ID.
+The **dispatching agent** (orchestrator or phase skill placing the `Agent()` call) pre-computes the next available backlog ID before dispatch, per the Backlog ID sequence convention (`planifest-orchestrator/SKILL.md` Phase 0 Start Actions, backlog pickup step: highest ID ever allocated, including picked-up and discarded entries, plus one), and passes it explicitly in the subagent's prompt as the ID to use if a discovery needs filing. Subagent self-lookup of `plan/backlog/` at file-time is rejected: picked-up entries are deleted from `plan/backlog/` once folded into a design, so a subagent scanning only that directory would systematically undercount the true high-water mark and risk reusing a retired ID.
 
-When dispatching multiple subagents in a single parallel batch, each MUST receive a distinct pre-assigned backlog ID (or a reserved contiguous block, one per subagent) — no two subagents may independently file under the same ID.
+When dispatching multiple subagents in a single parallel batch, each MUST receive a distinct pre-assigned backlog ID (or a reserved contiguous block, one per subagent); no two subagents may independently file under the same ID.
