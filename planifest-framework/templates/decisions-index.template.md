@@ -1,7 +1,7 @@
 # Decisions Index
 
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
-> Do not archive this file — update it in place.
+> Do not archive this file; update it in place.
 
 Last updated: {feature-id}
 

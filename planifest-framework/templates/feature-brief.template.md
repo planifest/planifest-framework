@@ -124,7 +124,7 @@ Before writing acceptance criteria, consider the paths your feature must handle.
 
 > {{first-run-path}}
 
-**Error / sad path:** What are the most likely failure modes? What should happen when they occur — fail silently, surface an error, retry, or degrade gracefully?
+**Error / sad path:** What are the most likely failure modes? What should happen when they occur: fail silently, surface an error, retry, or degrade gracefully?
 
 > {{error-sad-path}}
 

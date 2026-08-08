@@ -1,4 +1,4 @@
-# Test Report — {{feature-id}} — {{YYYY-MM-DD}}
+# Test Report ({{feature-id}}, {{YYYY-MM-DD}})
 
 **Feature:** {{feature-name}}
 **Plan date:** {{YYYY-MM-DD}}
@@ -11,7 +11,7 @@ Every functional requirement must appear here.
 |-----------|-------------------|--------|
 | {{test-file-name}} | {{req-id}} | pass / fail / skipped |
 
-**Summary:** {{n}} tests run — {{n}} passed, {{n}} failed, {{n}} skipped.
+**Summary:** {{n}} tests run: {{n}} passed, {{n}} failed, {{n}} skipped.
 
 > ⚠ If any requirement from `plan/current/requirements/` is absent from this table, the report is incomplete.
 
@@ -45,4 +45,4 @@ Promoted during Step R of this P7 run.
 
 ## 4. Summary
 
-**Overall test health:** ✅ Healthy / ⚠ Failures present — see sections above.
+**Overall test health:** ✅ Healthy / ⚠ Failures present; see sections above.

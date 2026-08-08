@@ -20,7 +20,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 ## Phase Log
 
-### P0 — Assess & Coach
+### P0: Assess & Coach
 
 | Field | Value |
 |-------|-------|
@@ -37,7 +37,7 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 
 <!-- Copy and fill in this block at each phase boundary:
 
-### Px — {Phase Name}
+### Px: {Phase Name}
 
 | Field | Value |
 |-------|-------|
@@ -66,4 +66,4 @@ summary: "Working telemetry file maintained by the orchestrator throughout the p
 | Cheaper tier agent calls | `{{count}}` |
 | Self-corrections | `{{count}}` |
 | Phases skipped | `{{list or "none"}}` |
-| Phases with a recorded telemetry gap | `{{count — phases where Telemetry was failed-with-recorded-choice, or "0"}}` |
+| Phases with a recorded telemetry gap | `{{count, phases where Telemetry was failed-with-recorded-choice, or "0"}}` |

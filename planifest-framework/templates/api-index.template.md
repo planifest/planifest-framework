@@ -2,7 +2,7 @@
 
 > Living document. Index of all public API endpoints across all components.
 > Omit this file if no component exposes a public API.
-> Updated after every pipeline run — do not archive.
+> Updated after every pipeline run; do not archive.
 
 Last updated: {feature-id}
 
@@ -14,7 +14,7 @@ Last updated: {feature-id}
 
 ## Versioning Strategy
 
-{e.g. URI versioning — /api/v1/ prefix}
+{e.g. URI versioning, /api/v1/ prefix}
 
 ## Full Specifications
 
