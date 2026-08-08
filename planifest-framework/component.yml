@@ -152,7 +152,7 @@ risk:
   level: "low"
   items:
     - "Path translation on Windows/Git Bash requires cygpath guards in tests"
-    - "Telemetry backend URL is env-var controlled — misconfiguration sends events to wrong endpoint"
+    - "Telemetry backend URL is env-var controlled — misconfiguration sends events to wrong endpoint. --backend-url is now validated at CLI-parse time against a plain http(s)-URL shape before it can reach shell-command interpolation in merge_telemetry_hook_settings() (0000027-req-004, P5 security fix, CWE-22-adjacent)"
     - "Aggressive skill/instruction trimming can leave technically-complete but ambiguous wording that increases future agent confusion or retries even without losing enforcement content — mitigated by the regression-pack baseline comparison introduced in 0000021"
     - "Only 4 of 22 regression tests pin orchestrator-specific content; a lost rule in an untested area would not fail the pack — mitigated by the P4 diff review named as a second detector in 0000022, resolving identically to a failed test (restore, never rationalise)"
     - "resolve-phase.mjs's Skill-tool PreToolUse matcher and tool_input.skill field name are modeled on this repo's existing hook precedent but were not verified against a live Claude Code hook firing (no live orchestrator session available during P3) (0000027-req-001)"
