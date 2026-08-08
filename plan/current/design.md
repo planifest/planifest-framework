@@ -103,4 +103,4 @@ From `planifest-overrides/instructions/`:
 Session directive from the human on the loop: use subagents throughout, run continuously, and leave no loose or untracked files by the end of the run.
 
 ## Confirmation
-Human confirmed this design before proceeding: pending // Date and Time confirmed: {pending}
+Human confirmed this design before proceeding: yes // Date and Time confirmed: 08 Aug 2026 @ 01:28 PM BST
