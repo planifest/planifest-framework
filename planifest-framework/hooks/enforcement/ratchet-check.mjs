@@ -48,22 +48,14 @@ import {
 } from "node:fs";
 import { join, normalize, relative, resolve } from "node:path";
 
+import { readStdin } from "./read-stdin.mjs";
+
 const AUDIT_LOG_REL = join("plan", "ratchet-audit-log.md");
 const MAX_REASON_LEN = 500;
 const TRUNCATE_MARKER = " …[truncated]";
 
 function realpathSafe(p) {
   try { return realpathSync(p); } catch { return resolve(p); }
-}
-
-function readStdin() {
-  return new Promise((res) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (c) => { data += c; });
-    process.stdin.on("end", () => res(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
 }
 
 function norm(p) {
