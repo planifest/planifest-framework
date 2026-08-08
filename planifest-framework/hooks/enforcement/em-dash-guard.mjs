@@ -37,6 +37,8 @@
 
 import { normalize, resolve } from "node:path";
 
+import { readStdin } from "./read-stdin.mjs";
+
 const EM_DASH = "—";
 const SENTINEL = "<!-- planifest-em-dash-allow -->";
 
@@ -48,16 +50,6 @@ const SCOPED_PREFIXES = [
   "planifest-framework/templates/",
   "planifest-framework/standards/",
 ];
-
-function readStdin() {
-  return new Promise((res) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (c) => { data += c; });
-    process.stdin.on("end", () => res(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
-}
 
 function norm(p) {
   return normalize(p).replace(/\\/g, "/").toLowerCase();

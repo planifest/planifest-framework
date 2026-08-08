@@ -32,18 +32,27 @@ HOOKS="$FRAMEWORK_SRC/hooks"
 ENF="$HOOKS/enforcement"
 TEL="$HOOKS/telemetry"
 
-# Callers named by req-002. readStdin has 12 (7 enforcement + 5 telemetry).
+# readStdin callers: the 12 req-002 named (7 enforcement + 5 telemetry), plus
+# em-dash-guard.mjs, which req-006 added to hooks/enforcement/ during this same
+# feature with its own local copy. It is folded in here rather than left as a
+# 13th copy, since req-002's acceptance criterion is one definition in
+# hooks/, not one definition among the files that existed when it was written.
 READSTDIN_CALLERS=(
   "$ENF/auto-trigger-orchestrator.mjs" "$ENF/check-design.mjs"
   "$ENF/check-orchestrator-presence.mjs" "$ENF/check-telemetry-failures.mjs"
-  "$ENF/check-telemetry-receipts.mjs" "$ENF/gate-write.mjs" "$ENF/ratchet-check.mjs"
+  "$ENF/check-telemetry-receipts.mjs" "$ENF/em-dash-guard.mjs"
+  "$ENF/gate-write.mjs" "$ENF/ratchet-check.mjs"
   "$TEL/context-pressure.mjs" "$TEL/emit-event-receipt.mjs" "$TEL/emit-phase-end.mjs"
   "$TEL/emit-phase-start.mjs" "$TEL/resolve-phase.mjs"
 )
 
 count_defs() {
-  # count_defs <dir> <pattern> — definitions of a helper across a hooks subtree
-  grep -rl "$2" "$1" 2>/dev/null | wc -l | tr -d ' '
+  # count_defs <pattern> <dir>... — files matching a pattern across hooks subtrees.
+  # The pattern comes first so multiple directories can be passed as separate
+  # arguments; collapsing them into one word makes grep -rl take an invalid
+  # path, return no matches, and the assertion pass vacuously.
+  local pattern="$1"; shift
+  grep -rl "$pattern" "$@" 2>/dev/null | wc -l | tr -d ' '
 }
 
 make_workspace() {
@@ -63,29 +72,29 @@ make_workspace() {
 echo ""
 echo "=== req-002: each extracted helper has exactly one definition ==="
 
-assert_equals "1" "$(count_defs "$HOOKS" '^export function readStdin')" \
-  "req-002: readStdin is defined exactly once across hooks/"
-assert_equals "0" "$(count_defs "$HOOKS/enforcement $HOOKS/telemetry" '^function readStdin')" \
+assert_equals "1" "$(count_defs '^export function readStdin' "$ENF" "$TEL")" \
+  "req-002: readStdin is defined exactly once across the hook trees"
+assert_equals "0" "$(count_defs '^function readStdin' "$ENF" "$TEL")" \
   "req-002: no enforcement or telemetry hook declares a local readStdin"
-assert_equals "1" "$(count_defs "$HOOKS" '^export function readProductId')" \
+assert_equals "1" "$(count_defs '^export function readProductId' "$ENF" "$TEL")" \
   "req-002: readProductId is defined exactly once"
-assert_equals "0" "$(count_defs "$HOOKS" '^function readProductId')" \
+assert_equals "0" "$(count_defs '^function readProductId' "$ENF" "$TEL")" \
   "req-002: no local readProductId copies remain"
-assert_equals "1" "$(count_defs "$HOOKS" '^export function recordTelemetryFailure')" \
+assert_equals "1" "$(count_defs '^export function recordTelemetryFailure' "$ENF" "$TEL")" \
   "req-002: recordTelemetryFailure is defined exactly once"
-assert_equals "0" "$(count_defs "$HOOKS" '^function recordTelemetryFailure')" \
+assert_equals "0" "$(count_defs '^function recordTelemetryFailure' "$ENF" "$TEL")" \
   "req-002: no local recordTelemetryFailure copies remain"
-assert_equals "1" "$(count_defs "$HOOKS" '^export function getFlagPath')" \
+assert_equals "1" "$(count_defs '^export function getFlagPath' "$ENF" "$TEL")" \
   "req-002: getFlagPath is defined exactly once"
-assert_equals "0" "$(count_defs "$HOOKS" '^function getFlagPath')" \
+assert_equals "0" "$(count_defs '^function getFlagPath' "$ENF" "$TEL")" \
   "req-002: no local getFlagPath copies remain"
-assert_equals "1" "$(count_defs "$HOOKS" '^export async function postEvent')" \
+assert_equals "1" "$(count_defs '^export async function postEvent' "$ENF" "$TEL")" \
   "req-002: the emit fetch helper is defined exactly once"
 
 # The AbortController/fetch block must exist only in the shared module now.
-assert_equals "1" "$(count_defs "$HOOKS" 'new AbortController')" \
+assert_equals "1" "$(count_defs 'new AbortController' "$ENF" "$TEL")" \
   "req-002: the AbortController emit block survives in exactly one file"
-ABORT_FILE="$(grep -rl 'new AbortController' "$HOOKS" 2>/dev/null)"
+ABORT_FILE="$(grep -rl 'new AbortController' "$ENF" "$TEL" 2>/dev/null)"
 assert_equals "$TEL/emit-event.mjs" "$ABORT_FILE" \
   "req-002: that one file is hooks/telemetry/emit-event.mjs"
 
@@ -249,11 +258,11 @@ DERIVE_CHECK=$(node --input-type=module -e "
 assert_equals "OK" "$DERIVE_CHECK" "req-002: every phase lookup covers exactly the shared enum"
 
 # No hook may re-declare the enum locally.
-assert_equals "1" "$(count_defs "$HOOKS" 'PHASE_NUMBER_TO_ENUM = ')" \
+assert_equals "1" "$(count_defs 'PHASE_NUMBER_TO_ENUM = ' "$ENF" "$TEL")" \
   "req-002: PHASE_NUMBER_TO_ENUM is assigned in exactly one file"
-assert_equals "1" "$(count_defs "$HOOKS" 'PHASE_SKILLS = ')" \
+assert_equals "1" "$(count_defs 'PHASE_SKILLS = ' "$ENF" "$TEL")" \
   "req-002: PHASE_SKILLS is assigned in exactly one file"
-assert_equals "1" "$(count_defs "$HOOKS" 'KNOWN_PHASES = ')" \
+assert_equals "1" "$(count_defs 'KNOWN_PHASES = ' "$ENF" "$TEL")" \
   "req-002: KNOWN_PHASES is assigned in exactly one file"
 
 # =============================================================================
@@ -354,7 +363,7 @@ assert_contains "Get-ChildItem -Path \$telemSrc -Filter '*.mjs'" "$PS1_CONTENT" 
 echo ""
 echo "=== req-002: getSessionId is deliberately left un-consolidated ==="
 
-assert_equals "4" "$(count_defs "$HOOKS/telemetry" '^function getSessionId')" \
+assert_equals "4" "$(count_defs '^function getSessionId' "$TEL")" \
   "req-002: all 4 getSessionId copies remain (3 distinct behaviour profiles)"
 assert_contains "creates" "$(cat "$TEL/emit-phase-start.mjs")" \
   "req-002: emit-phase-start documents why its getSessionId stays local"
