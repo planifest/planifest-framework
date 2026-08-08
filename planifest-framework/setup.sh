@@ -572,15 +572,30 @@ install_enforcement_hooks() {
     echo "  + $hooks_dir_rel/$script_name"
   done
 
-  # Wire into settings.json (requires node; jq fallback not needed — node is always available)
-  local gate_cmd="$hooks_dir_rel/gate-write.mjs"
-  local ratchet_cmd="$hooks_dir_rel/ratchet-check.mjs"
-  local em_dash_cmd="$hooks_dir_rel/em-dash-guard.mjs"
-  local trigger_cmd="$hooks_dir_rel/auto-trigger-orchestrator.mjs"
-  local presence_cmd="$hooks_dir_rel/check-orchestrator-presence.mjs"
-  local design_cmd="$hooks_dir_rel/check-design.mjs"
-  local telemetry_failures_cmd="$hooks_dir_rel/check-telemetry-failures.mjs"
-  local telemetry_receipts_cmd="$hooks_dir_rel/check-telemetry-receipts.mjs"
+  # Wire into settings.json (requires node; jq fallback not needed, node is always available)
+  #
+  # 0000028 (P5, SEC-001): every command below is prefixed with `node`. These
+  # were previously wired as bare .mjs paths relying on the shebang plus an
+  # executable bit. The bit is a committed file mode, and 9 of the 10 hook
+  # files are mode 100644, so the shell could not exec them: the wired command
+  # exited 126 (permission denied) and the hook silently never ran. Because a
+  # PreToolUse hook that fails to start is indistinguishable from one that
+  # passed, gate-write, em-dash-guard, check-design, both telemetry backstops,
+  # auto-trigger-orchestrator and check-orchestrator-presence were all dead on
+  # every bash install, while ratchet-check worked purely because it happened
+  # to be committed executable.
+  #
+  # Invoking through `node` removes the dependency on file mode entirely. This
+  # matches what setup.ps1 already did and what the context-mode hooks in this
+  # same file already did, which is why those kept working throughout.
+  local gate_cmd="node \"$hooks_dir_rel/gate-write.mjs\""
+  local ratchet_cmd="node \"$hooks_dir_rel/ratchet-check.mjs\""
+  local em_dash_cmd="node \"$hooks_dir_rel/em-dash-guard.mjs\""
+  local trigger_cmd="node \"$hooks_dir_rel/auto-trigger-orchestrator.mjs\""
+  local presence_cmd="node \"$hooks_dir_rel/check-orchestrator-presence.mjs\""
+  local design_cmd="node \"$hooks_dir_rel/check-design.mjs\""
+  local telemetry_failures_cmd="node \"$hooks_dir_rel/check-telemetry-failures.mjs\""
+  local telemetry_receipts_cmd="node \"$hooks_dir_rel/check-telemetry-receipts.mjs\""
 
   if command -v node >/dev/null 2>&1; then
     PLANIFEST_GATE="$gate_cmd" PLANIFEST_RATCHET="$ratchet_cmd" PLANIFEST_EM_DASH="$em_dash_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_TELEMETRY_FAILURES="$telemetry_failures_cmd" PLANIFEST_TELEMETRY_RECEIPTS="$telemetry_receipts_cmd" PLANIFEST_SETTINGS="$settings" node -e '
