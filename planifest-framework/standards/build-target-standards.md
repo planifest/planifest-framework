@@ -4,7 +4,7 @@ version: "1.0.0"
 ---
 # Build Target Standards
 
-Agents read `Build target` from the confirmed design stack declaration and adjust all environment assumptions accordingly. Never infer the build target from `compute` or `iac` fields — always read the explicit declaration.
+Agents read `Build target` from the confirmed design stack declaration and adjust all environment assumptions accordingly. Never infer the build target from `compute` or `iac` fields; always read the explicit declaration.
 
 ---
 
@@ -23,9 +23,9 @@ Agents read `Build target` from the confirmed design stack declaration and adjus
 
 **Agent behaviour:**
 - **Never** check host-installed runtimes or tools. Do not run `node`, `dotnet`, `python`, `go`, `ruby`, `java`, `mvn`, `gradle`, or equivalent CLI commands directly against the host
-- **Never** fail or warn because a runtime is absent on the host — it is expected to be absent
+- **Never** fail or warn because a runtime is absent on the host; it is expected to be absent
 - Scaffold Dockerfile-first: a working `Dockerfile` is the primary build artifact, not a host-runnable project
-- Run all validation checks via `docker build` and `docker run` — not via host toolchain
+- Run all validation checks via `docker build` and `docker run`, not via host toolchain
 - Codegen: generate `Dockerfile` and `docker-compose.yml` (or equivalent) before any source code
 - Infrastructure: any IaC referencing the container image must use the Dockerfile as the source of truth
 
