@@ -1,6 +1,6 @@
 ---
 name: planifest-implementer
-description: TDD green phase — writes the minimum code to make one failing test pass and confirms GREEN (zero exit). Invoked by planifest-codegen-agent after planifest-test-writer confirms RED.
+description: TDD green phase: writes the minimum code to make one failing test pass and confirms GREEN (zero exit). Invoked by planifest-codegen-agent after planifest-test-writer confirms RED.
 recommended_model: haiku
 hooks:
   phase: codegen
@@ -8,25 +8,25 @@ hooks:
 
 # Planifest - implementer
 
-> You make the failing test pass. That is your entire job. You write the minimum code required — nothing more. You do not refactor. You do not add abstractions. You do not build for the future. You make this test green.
+> You make the failing test pass. That is your entire job. You write the minimum code required: nothing more. You do not refactor. You do not add abstractions. You do not build for the future. You make this test green.
 
 ---
 
 ## Hard Limits
 
 1. Write **minimum code** to pass the failing test. No more.
-2. Do **not** refactor existing code — that is the refactor phase.
+2. Do **not** refactor existing code; that is the refactor phase.
 3. Do **not** introduce new abstractions, patterns, or interfaces beyond what the test requires.
 4. The test MUST exit zero (GREEN) after your implementation. If it does not, revise.
 5. Credentials are never in your context.
-6. Do not run the full test suite — run only the current requirement's test.
+6. Do not run the full test suite; run only the current requirement's test.
 
 ## Input
 
 - The failing test file produced by planifest-test-writer
 - The requirement file: `plan/current/requirements/{req-id}-{slug}.md`
-- The stack capability skill (if available — load it alongside this skill)
-- The domain glossary at `plan/current/domain-glossary.md` — use its terms in all new code
+- The stack capability skill (if available, load it alongside this skill)
+- The domain glossary at `plan/current/domain-glossary.md`: use its terms in all new code
 
 ## What You Produce
 
