@@ -3,7 +3,7 @@
 > Living document. Index of all ADRs across all features. Updated after every pipeline run.
 > Do not archive this file; update it in place.
 
-Last updated: 0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes
+Last updated: 0000028-telemetry-hardening-and-enforcement-fixes
 
 > **Note:** ADR titles for features 0000001–0000010 were inferred from filenames at bootstrap time. Human review recommended for accuracy.
 
@@ -245,6 +245,17 @@ ADR files: [plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08
 | ADR-002 | Framework Update Policy as a New P0 Step | accepted | Adds a dedicated P0 Start Actions step (Resume Detection 1a) detecting a `planifest-framework/` dependency update and gating on human confirmation of both the update and its provenance, documented in `standards/framework-update-policy.md`: deliberately not an extension of `planifest-migrator` (different I/O shape) nor a new standalone skill (disproportionate to the mechanism's actual complexity) |
 | ADR-003 | Skill-Scope Principle: Does This Skill Earn Its Place | accepted | Records the governance test (does this skill provide governance or traceability the host tool cannot) with `planifest-test-writer`/`implementer`/`refactor`/`verify-by-execution` as worked examples (three retain, one retain-marginal); referenced from the orchestrator's Capability Skills guidance for future skill additions |
 | ADR-004 | Minimal Default Phase 1 Artifact Set | accepted | Names execution plan, requirements, scope, risk register, and domain glossary as the always-produced Phase 1 set; OpenAPI/Operational Model/SLO Definitions/Cost Model each gated by an explicit, checkable trigger condition: reflected identically in `feature-pipeline.md` and `planifest-spec-agent`, closing the "documentation theatre" gap from backlog 0000021 |
+
+### Feature 0000028: telemetry-hardening-and-enforcement-fixes
+
+ADR files: [plan/_archive/0000028-telemetry-hardening-and-enforcement-fixes-2026-08-08/adr/](../plan/_archive/0000028-telemetry-hardening-and-enforcement-fixes-2026-08-08/adr/)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Network-Level Retry Semantics for Telemetry Emission | accepted | A telemetry emission failure is retried only when it is network-level, identified by `!err.name.startsWith("http_")`; an HTTP 4xx or 5xx means a listener answered and rejected the event and is never retried. Budget: 2 retries, 3 attempts total, fixed 300ms gaps, on top of the unchanged 3s per-attempt abort. Retry exhaustion writes the durable marker exactly as before, so a genuinely-down backend still surfaces. Narrows the definition of failure rather than adding a queue, which NFR-002 forbids |
+| ADR-002 | Shared Module Placement and Install Topology | accepted | Each duplicated helper becomes one module inside the existing `hooks/enforcement/` and `hooks/telemetry/` trees, never a new top-level `shared/` directory that would need its own install glob in all three `setup.sh` paths. Placement follows install condition: `enforcement/` installs unconditionally, `telemetry/` only under `--structured-telemetry-mcp`, so any helper with an enforcement caller lives in `enforcement/` and is imported cross-directory. `read-stdin.mjs` was moved to `enforcement/` mid-implementation for exactly this reason, and its copy count was 13, not the 7 first recorded. Tier 1's telemetry glob widened from `emit-phase-*.mjs` to `*.mjs` in both `setup.sh` and `setup.ps1`, a latent bug independent of the extraction. No commit may contain a caller importing a module absent from that same commit |
+| ADR-003 | Em Dash Guard Attachment Point and Bypass | accepted | The guard is a `PreToolUse(Write, Edit)` hook, `hooks/enforcement/em-dash-guard.mjs`, sibling to `gate-write.mjs` rather than a modification of it, so a defect in one cannot disable the other. A git hook was rejected because the character would already be on disk by commit time. Scoped to five prefixes: `plan/current/`, `docs/`, and `planifest-framework/` skills, templates and standards. Since Claude Code offers no per-call skip flag, the bypass is an in-content sentinel comment, visible in the artifact's own diff, reusable and writable by either party, deliberately unlike `.ratchet-approve`, which guards a commitment being weakened rather than a single character of punctuation |
+| ADR-004 | Self-Modification Sequencing for Hook Extraction and Reinstall | accepted | When a feature rewrites the hooks executing its own build, rewire one caller at a time: edit, commit, re-run `setup.sh` for that edit alone, then assert a real side effect (event received, marker written, process spawned), never merely that the process returned. Exit 0 is uninformative by design (NFR-001), so a hook broken mid-edit degrades to a silent no-op, and an ESM import of a missing module fails before the hook's own try/catch runs. One `setup.sh` re-run at the end was rejected because it collapses good straight to multiply-broken with no way to bisect. A separate worktree was rejected outright by repo instruction |
 
 ---
 
