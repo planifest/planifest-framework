@@ -380,3 +380,16 @@ this feature's own deliberate changes rather than accidental breakage, and one w
 defect. In every case the assertion was corrected to match intended behaviour rather than bypassed.
 
 Verification detail for REQ-004 and REQ-005 is in `plan/current/verification-report.md`.
+
+### P7: Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T19:05:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | `0` |
+| MCP calls | `1` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Cross-reference check passed: no markdown links point into `plan/current/`, and `decisions-index.md` already references the post-archive ADR path. No `.skips` file. No `REGRESSION-CANDIDATE` tags, so nothing was presented for promotion. |
