@@ -15,6 +15,9 @@ responsibilities:
   - "Make installed hook scripts executable (chmod +x) on Unix"
   - "Write PreToolUse hook entries for Grep, Bash, and WebFetch into .claude/settings.json using additive merge"
   - "Leave settings.json unchanged and skip script copying when --context-mode-mcp is absent"
+  - "Register emit-phase-start.mjs (PreToolUse) and emit-phase-end.mjs (Stop) hook entries in .claude/settings.json when --structured-telemetry-mcp is passed, alongside the existing context-pressure.mjs registration (0000027-req-001)"
+  - "Verify positive presence of all 3 telemetry hook entries after setup completes, failing loudly if any is missing rather than passing silently on a partial install (0000027-req-001)"
+  - "Relocate cline.sh/cline.ps1's boot file into .clinerules/00-planifest-boot.md so it no longer collides with the .clinerules/skills directory (0000027-req-002)"
 
 exceptions:
   - "Must NOT remove previously installed hooks when flag is absent on re-run (no uninstall in v1)"
@@ -69,6 +72,8 @@ scope:
     - "setup/claude-code.sh and setup/claude-code.ps1 hook path declarations"
     - "Claude Code only"
     - "setup.sh/setup.ps1 write .claude/.planifest-setup-flags at install time, in parity (0000020-setup-refresh-skill, REQ-008)"
+    - "setup.sh/setup.ps1 telemetry hook-config writer changes to register emit-phase-start.mjs/emit-phase-end.mjs (0000027-req-001)"
+    - "cline.sh/cline.ps1 boot-file/skills-dir path collision fix (0000027-req-002)"
   outOfScope:
     - "Hook wiring for Cursor, Windsurf, Cline, Antigravity"
     - "Hook uninstall / removal logic"
@@ -83,6 +88,7 @@ risk:
     - "Bash shebang on Windows — chmod/path handling differs (R-004)"
     - "settings.json hook schema assumption may be wrong (R-002)"
     - "setup.sh/setup.ps1 marker-write addition could drift out of parity between the two scripts (0000020-setup-refresh-skill, R-003)"
+    - "Static hook command strings can't supply the positional <phase> argument the way context-pressure.mjs's phase-agnostic command does — wiring mechanism resolved at P3 codegen, not assumed at P1 (0000027-req-001)"
 
 quality:
   testCoverage:
@@ -103,7 +109,11 @@ pipeline:
 
 metadata:
   createdAt: "2026-04-12"
-  updatedAt: "2026-08-01"
+  updatedAt: "2026-08-08"
+  # Updated by 0000027 (spec-agent) P1: seeded requirements-derived
+  # responsibilities/scope/risk entries for the phase_start/phase_end
+  # telemetry hook wiring gap (req-001) and the cline.sh/.ps1 boot-file
+  # path collision fix (req-002) ahead of P3 codegen.
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"

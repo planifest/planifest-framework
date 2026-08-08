@@ -57,6 +57,12 @@ responsibilities:
   - "Check continuous_run/plan/.run-mode before docs-agent's Gate B stops for confirmation"
   - "Default the Scope Lock Challenge to always-drafted, batch-presented answers via parallel planifest-scope-lock-agent dispatch, scoped narrowly against 0000014-ADR-008's one-question-at-a-time convention"
   - "Backstop the orchestrator's ADR-002 telemetry-failure-marker phase-start check with a deterministic check-telemetry-failures UserPromptSubmit hook (read-only; injects a reminder, never deletes markers or decides block-or-proceed)"
+  - "Instruct dispatched subagents to file out-of-scope discoveries directly to plan/backlog/ per templates/backlog-entry.template.md, with the dispatching agent pre-computing the next backlog ID, rather than reaching for a host-tool mechanism like spawn_task (0000027-req-003)"
+  - "Provide a deterministic backstop (mechanism resolved by a P2 ADR) verifying plan/.telemetry-failures/ is checked at every phase boundary and that agent-driven emit_event calls specified per phase skill actually occurred, not resting on prose/memory alone (0000027-req-004)"
+  - "Surface a planifest-framework/ dependency update at P0 as a decision distinct from ordinary feature-brief coaching, requiring human confirmation of both the update and its provenance, documented as this repo's canonical Framework Update Policy (0000027-req-005, mechanism resolved by a P2 ADR)"
+  - "One-time backfill of the 7 Deferred Items/Tech Debt rows found across 4 pre-0000025 archived features' recommendations.md into tagged plan/backlog/ entries, never modifying the source files (0000027-req-006)"
+  - "Record an ADR for the skill-scope-principle test (does this skill provide governance or traceability the host tool cannot) with planifest-test-writer/implementer/refactor/verify-by-execution as worked examples (0000027-req-007)"
+  - "Name a minimal default Phase 1 artifact set (execution plan, requirements, scope, risk register, domain glossary) with explicit trigger conditions for OpenAPI/cost model/SLO definitions/operational model, reflected consistently in feature-pipeline.md and planifest-spec-agent, with the default artifact count stated in the README (0000027-req-008)"
 
 exceptions:
   - "Does not write to planifest-overrides/ — that directory is user-owned"
@@ -128,6 +134,12 @@ scope:
     - "product.yml id field as the canonical declared product_id for telemetry, for single- and multi-component projects alike"
     - "Correct emit_event MCP tool argument documentation (envelope, not event) in telemetry-standards.md and all phase skills"
     - "check-telemetry-failures.mjs enforcement hook: always installed alongside gate-write/check-design (not gated behind --context-mode-mcp or --structured-telemetry-mcp) because it is UserPromptSubmit-shaped like those hooks, not PostToolUse like context-pressure.mjs, and only reads plan/.telemetry-failures/ rather than depending on the telemetry hooks being active"
+    - "agent-dispatch-standards.md's Agent Dispatch Template: out-of-scope-discovery filing clause (0000027-req-003)"
+    - "Deterministic telemetry-compliance backstop mechanism, to be named by a P2 ADR (0000027-req-004)"
+    - "Framework Update Policy document and its P0 flow, mechanism to be named by a P2 ADR (0000027-req-005)"
+    - "Historical plan/backlog/ backfill for pre-0000025 recommendations.md content (0000027-req-006)"
+    - "Skill-scope-principle ADR (0000027-req-007)"
+    - "Minimal Phase 1 artifact set definition in feature-pipeline.md, planifest-spec-agent, and README (0000027-req-008)"
   outOfScope:
     - "Application-level code generation (handled by planifest-codegen-agent)"
     - "CI pipeline configuration for consumer projects"
@@ -142,6 +154,7 @@ risk:
     - "Telemetry backend URL is env-var controlled — misconfiguration sends events to wrong endpoint"
     - "Aggressive skill/instruction trimming can leave technically-complete but ambiguous wording that increases future agent confusion or retries even without losing enforcement content — mitigated by the regression-pack baseline comparison introduced in 0000021"
     - "Only 4 of 22 regression tests pin orchestrator-specific content; a lost rule in an untested area would not fail the pack — mitigated by the P4 diff review named as a second detector in 0000022, resolving identically to a failed test (restore, never rationalise)"
+    - "0000027-req-004 and req-005 mechanisms are explicitly undecided pending their P2 ADRs — implementation is blocked on those ADRs, not assumed at P1 (see execution-plan.md Open Questions Q-001/Q-002)"
 
 quality:
   testCoverage:
@@ -201,6 +214,12 @@ metadata:
   # installed, not gated behind --context-mode-mcp or
   # --structured-telemetry-mcp). Updated the orchestrator SKILL.md's
   # Telemetry section to note the new backstop.
+  # Updated by 0000027 (spec-agent) P1: seeded requirements-derived
+  # responsibilities/scope/risk entries for the 6 planifest-framework-owned
+  # items in this feature's 8-item batch (req-003 subagent backlog filing,
+  # req-004 telemetry-compliance backstop, req-005 framework-update P0 flow,
+  # req-006 historical backlog backfill, req-007 skill-scope ADR, req-008
+  # minimal artifact set) ahead of P2 ADRs and P3 codegen.
   createdBy: "agent"
   lastModifiedBy: "agent"
   skill: "planifest-codegen-agent"
