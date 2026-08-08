@@ -237,6 +237,19 @@ Gate accepted (continuous run, no stop): P3 → P4 — 08 Aug 2026
 
 Gate accepted (zero self-corrections, no stop): P4 → P5 — 08 Aug 2026
 
+### P5 — Security
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | primary |
+| Skills loaded | planifest-security-agent |
+| Agents spawned | 0 (direct review — 4 new hook files, small enough to review inline) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
+| Notes | One finding (Medium, CWE-22 path traversal in emit-event-receipt.mjs) found and fixed directly during review, with a new regression test locking in the fix, per "immediately fix insecure code you wrote" — not deferred to a backlog entry since it was cheap, clear, and in code this same feature just introduced. Full suite re-run green after the fix (75/75 skill checks, 51 feature suites, 22 regression suites). One Medium finding (backend_url shell interpolation) is a pre-existing pattern from before this feature, now propagated to 2 more hook registrations by req-001 — reported, not fixed (fixing the pre-existing pattern is out of this feature's scope; flagged for a backlog entry). |
+
 ## Summary (filled at P7)
 
 | Metric | Value |

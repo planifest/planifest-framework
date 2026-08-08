@@ -135,6 +135,42 @@ assert_equals "yes" "$([ -n "$FAILURE_C" ] && echo yes || echo no)" \
 rm -rf "$WS_C" /tmp/receipt_out_c.txt
 
 # =============================================================================
+# 3b. Path-traversal via envelope.phase/event is rejected, not written (CWE-22,
+#     found and fixed during this feature's own P5 security review)
+# =============================================================================
+
+echo ""
+echo "=== req-004: envelope.phase/event outside the known enum is rejected (path-traversal guard) ==="
+
+WS_D=$(mktemp -d -t planifest_0000027_req004_d_XXXXXX)
+INPUT_D=$(cat << 'EOF'
+{
+  "cwd": "__WS_D__",
+  "tool_name": "mcp__structured-telemetry-mcp__emit_event",
+  "tool_input": { "envelope": { "schema_version": "1.0", "event": "../../../../tmp/evil", "phase": "../../etc" } },
+  "tool_response": { "ok": true }
+}
+EOF
+)
+INPUT_D="${INPUT_D//__WS_D__/$WS_D}"
+printf '%s' "$INPUT_D" | node "$RECEIPT_HOOK" >/tmp/receipt_out_d.txt 2>&1
+EXIT_D=$?
+assert_exit_zero "$EXIT_D" "req-004: emit-event-receipt.mjs exits 0 on an out-of-enum phase/event (fail-open, ADR-005)"
+
+RECEIPT_D_COUNT=$(find "$WS_D" -name "*.marker" 2>/dev/null | wc -l | tr -d ' ')
+assert_equals "0" "$RECEIPT_D_COUNT" "req-004: no receipt written anywhere under the workspace for an out-of-enum phase/event"
+
+OUTSIDE_TMP_FILE=$(find /tmp -maxdepth 1 -newer "$WS_D" -name "evil*" 2>/dev/null | head -1)
+assert_equals "yes" "$([ -z "$OUTSIDE_TMP_FILE" ] && echo yes || echo no)" \
+  "req-004: no file written outside the workspace via a crafted event/phase value"
+
+FAILURE_D=$(find "$WS_D/plan/.telemetry-failures" -name "emit-event-receipt*.json" 2>/dev/null | head -1)
+assert_equals "yes" "$([ -n "$FAILURE_D" ] && echo yes || echo no)" \
+  "req-004: rejected phase/event routes through plan/.telemetry-failures/ like any other malformed input"
+
+rm -rf "$WS_D" /tmp/receipt_out_d.txt
+
+# =============================================================================
 # 4. check-telemetry-receipts.mjs: emitted claim with zero receipts is flagged
 # =============================================================================
 
