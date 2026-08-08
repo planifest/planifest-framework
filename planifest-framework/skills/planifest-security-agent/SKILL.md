@@ -22,7 +22,7 @@ hooks:
 - OpenAPI Specification at `plan/current/openapi-spec.yaml` (if applicable)
 - Risk Register at `plan/current/risk-register.md`
 
-## Report Structure — written to `plan/current/security-report.md`
+## Report Structure: written to `plan/current/security-report.md`
 
 ```markdown
 # Security Report - {feature-id}
@@ -82,33 +82,33 @@ Top actions before production:
 | Multi-component security reviews (components do not share secrets or auth logic) | IaC review before the component's network policy is understood |
 | Secrets scan + input validation scan (independent grep patterns) | Summary risk rating before all section findings are complete |
 
-**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly — see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
+**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly; see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
 
 ## Telemetry
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership. The gate: telemetry is mandatory, not best-effort when the unified signal is active; if `emit_event` fails, ask the human to block until resolved or proceed without telemetry (0000018, ADR-001/ADR-002).
 
-**`security_finding`** — for each vulnerability or risk identified:
+**`security_finding`**: for each vulnerability or risk identified:
 ```json
 { "component_id": "<component>", "title": "<short description>", "severity": "low" | "medium" | "high" | "critical", "cwe": "<CWE-NNN>" }
 ```
-`cwe` is optional — omit if not applicable.
+`cwe` is optional, omit if not applicable.
 
-**`deviation`** — if output diverges from the confirmed design (non-security divergence):
+**`deviation`**: if output diverges from the confirmed design (non-security divergence):
 ```json
 { "component_id": "<component>", "description": "<deviation>", "severity": "low" | "medium" | "high" }
 ```
 
-**`self_correction`** — when retrying a failed check or analysis:
+**`self_correction`**: when retrying a failed check or analysis:
 ```json
 { "phase_name": "security", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
 ```
 
-**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+**`retry_limit_exceeded`**: when the 5-attempt escalation ceiling is hit:
 ```json
 { "phase_name": "security", "action_id": "<action>", "attempt_count": 5 }
 ```
 
 ## Commit Cadence (Hard Limit 7)
 
-Commit after every meaningful artifact write, not batched to the phase gate — see orchestrator Hard Limit 7.
+Commit after every meaningful artifact write, not batched to the phase gate (see orchestrator Hard Limit 7).
