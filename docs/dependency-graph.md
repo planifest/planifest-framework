@@ -1,6 +1,6 @@
 # Dependency Graph
 
-**Last updated:** 0000020-setup-refresh-skill (01 Aug 2026, added planifest-refresh-setup skill and its dependency on setup-hook-integration's flags-used marker file)
+**Last updated:** 0000027-backlog-batch-governance-tooling-fixes (08 Aug 2026, `setup-hook-integration`'s `SH` node now also wires `resolve-phase.mjs` — an interposing hook resolving the active pipeline phase before re-invoking `emit-phase-start.mjs`/`emit-phase-end.mjs` — and `emit-event-receipt.mjs`; both live inside `planifest-framework`'s existing hooks/ tree, so no new cross-component dependency edge was added, only new hook types under the existing `SH --> ENFORCE`-style relationship)
 **Maintained by:** planifest-docs-agent
 
 ---
