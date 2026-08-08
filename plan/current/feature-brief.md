@@ -54,6 +54,10 @@ The agent implements within these constraints - it does not choose the architect
 |------|-----|--------|----------|
 | setup-hook-integration (`setup.sh`/`.ps1`) | planifest-framework (`hooks/telemetry/*.mjs`) | filesystem copy + tool hook-config registration | Existing contract, unchanged — this feature fixes wiring gaps, not the contract itself. |
 
+### Dependency Order
+
+No hard dependency order between the 8 items — each is independently implementable and testable. Suggested sequencing for P3 clarity only (not a blocking dependency): `0000043` and `0000034` (mechanical setup-script fixes) before `0000044` (telemetry backstop — logically follows from `0000043` wiring the hooks it backstops, though not required). `0000024` and `0000021` (doc/ADR/workflow-only) can run in parallel with any of the above.
+
 ## Stack
 
 | Concern | Decision |
