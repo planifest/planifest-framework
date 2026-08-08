@@ -693,12 +693,17 @@ function Install-Tier1Hooks {
         }
     }
 
-    # Copy telemetry scripts (emit-phase-start, emit-phase-end)
+    # Copy telemetry scripts. The filter is *.mjs, matching setup.sh's
+    # install_tier1_hooks() (0000028 req-002, ADR-002). It was previously
+    # emit-phase-*.mjs, narrower than its own callers need: emit-phase-start.mjs
+    # and emit-phase-end.mjs import shared modules from this directory, and an
+    # ESM import of a file the install never copied fails at module-load time,
+    # before the hook's own try/catch can run.
     $telemSrc  = Join-Path $ScriptDir 'hooks\telemetry'
     $telemDest = Join-Path $hooksDir 'telemetry'
     if (Test-Path $telemSrc) {
         New-Item -ItemType Directory -Path $telemDest -Force | Out-Null
-        Get-ChildItem -Path $telemSrc -Filter 'emit-phase-*.mjs' | ForEach-Object {
+        Get-ChildItem -Path $telemSrc -Filter '*.mjs' | ForEach-Object {
             Copy-Item -Path $_.FullName -Destination (Join-Path $telemDest $_.Name) -Force
             Write-Host "  + $HooksInstallDir\telemetry\$($_.Name)"
         }

@@ -439,12 +439,20 @@ install_tier1_hooks() {
     done
   fi
 
-  # Copy telemetry scripts (emit-phase-start, emit-phase-end)
+  # Copy telemetry scripts. The glob is *.mjs, matching install_enforcement_hooks()
+  # and install_telemetry_hooks() (0000028 req-002, ADR-002). It was previously
+  # emit-phase-*.mjs, narrower than its own callers need: emit-phase-start.mjs and
+  # emit-phase-end.mjs import shared modules from this directory
+  # (read-product-id.mjs, record-telemetry-failure.mjs, get-flag-path.mjs,
+  # emit-event.mjs), and an ESM import of a file the install never copied fails at
+  # module-load time, before the hook's own try/catch can run. Any future file
+  # added to hooks/telemetry/ is now installed for Cursor, Windsurf and Cline
+  # without a further setup.sh change.
   local telem_src="$SCRIPT_DIR/hooks/telemetry"
   local telem_dest="$hooks_install_dir/telemetry"
   if [ -d "$telem_src" ]; then
     mkdir -p "$telem_dest"
-    for script in "$telem_src"/emit-phase-*.mjs; do
+    for script in "$telem_src"/*.mjs; do
       [ -f "$script" ] || continue
       local script_name
       script_name="$(basename "$script")"
