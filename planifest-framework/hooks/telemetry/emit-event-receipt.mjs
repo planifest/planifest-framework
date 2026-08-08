@@ -36,6 +36,20 @@
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
+// Closed sets from telemetry-standards.md — the envelope's `phase`/`event`
+// fields are agent-supplied tool-call arguments, not validated by the MCP
+// tool itself before this hook sees them. Constructing a file path from an
+// unvalidated string (e.g. "../../../etc/whatever") is a path-traversal risk
+// (CWE-22) even via node:path's `join`, which does not sandbox `..` segments.
+// Found and fixed during this feature's own P5 security review.
+const KNOWN_PHASES = new Set(["spec", "adr", "codegen", "validate", "security", "docs", "ship"]);
+const KNOWN_EVENT_TYPES = new Set([
+  "phase_start", "phase_end", "phase_skip",
+  "spec_gap", "validation_failure", "self_correction", "deviation",
+  "migration_proposal", "context_pressure", "mcp_impact",
+  "adr_decision", "security_finding", "retry_limit_exceeded", "doc_gap",
+]);
+
 function readStdin() {
   return new Promise((resolve) => {
     let data = "";
@@ -131,6 +145,12 @@ try {
     // contract changed) — record as a failure per ADR-001's own risk note,
     // rather than silently writing nothing with no trace at all.
     throw new Error("emit_event tool_input missing envelope.event or envelope.phase");
+  }
+
+  if (!KNOWN_PHASES.has(phase) || !KNOWN_EVENT_TYPES.has(eventType)) {
+    // Reject anything outside the closed sets before it reaches path
+    // construction — never build a filename from an unvalidated string.
+    throw new Error(`emit_event envelope has unrecognised phase="${phase}" or event="${eventType}"`);
   }
 
   const receiptDir = join(cwd, "plan", ".telemetry-receipts");
