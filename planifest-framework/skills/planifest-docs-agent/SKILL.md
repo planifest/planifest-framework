@@ -105,7 +105,7 @@ System-wide artifacts (Component Registry, Dependency Graph) are covered by the 
 
 ### Feature-level completeness
 
-Confirm the following exist at `plan/` and are consistent: Execution Plan, OpenAPI Specification (if applicable), Scope, Risk Register, Domain Glossary, Operational Model, SLO Definitions, Cost Model, ADRs at `plan/current/adr/`, Security Report, and Recommendations (`plan/current/recommendations.md` - produce this now if it doesn't exist).
+Confirm the following exist at `plan/` and are consistent: the minimal Phase 1 set (Execution Plan, Requirements, Scope, Risk Register, Domain Glossary — always produced) plus OpenAPI Specification, Operational Model, SLO Definitions, and Cost Model wherever each one's trigger condition applied (0000027-ADR-004), ADRs at `plan/current/adr/`, Security Report, and Recommendations (`plan/current/recommendations.md` - produce this now if it doesn't exist).
 
 ### Audit trail
 
@@ -156,6 +156,8 @@ Do not flag legitimate absences as drift. Do flag missing artifacts that should 
 | Drift checks across independent areas (API endpoints, domain terms, data ownership) | Component registry before all component purpose.md files exist |
 | Recommendations + iteration log (independent documents) | Consistency check before individual artifacts are written |
 | 2+ independent living-doc updates (no shared content dependency) — e.g. `component-registry.md`, `decisions-index.md`, `architecture-overview.md` edited in a single parallel batch instead of serially | A living doc that reads another living doc's newly-written content in the same run |
+
+**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly — see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
 
 ## Telemetry
 

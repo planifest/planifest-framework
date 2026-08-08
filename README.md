@@ -48,6 +48,12 @@ repo/
 │                            scope docs. Organised by feature. Everything that
 │                            describes WHAT to build and WHY.
 │                            See plan/feature-structure.md for the canonical layout.
+│                            A typical feature produces five Phase 1 artifacts by
+│                            default (execution plan, requirements, scope, risk
+│                            register, domain glossary); OpenAPI spec, cost model,
+│                            SLO definitions, and operational model are added only
+│                            when their trigger condition applies (see
+│                            planifest-framework/workflows/feature-pipeline.md).
 │
 ├── src/                   ← Code (organised by component). Implementation, tests,
 │                            config, manifests. Each component has a component.yml.

@@ -3,7 +3,7 @@
 > Living document. Reflects current system state. Updated after every pipeline run.
 > Do not archive this file — update it in place.
 
-Last updated: 0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes
+Last updated: 0000027-backlog-batch-governance-tooling-fixes
 
 ---
 
