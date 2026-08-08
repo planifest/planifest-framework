@@ -1,12 +1,12 @@
-# product.yml — product-level version manifest (ADR-002, feature 0000016;
+# product.yml: product-level version manifest (ADR-002, feature 0000016;
 # components[] revised 2026-08-08 to store paths instead of cached versions
-# — see docs/decisions-index.md's Feature 0000016 ADR-002 entry)
+# see docs/decisions-index.md's Feature 0000016 ADR-002 entry)
 #
 # WHEN THIS FILE APPLIES: projects with 2 or more components. It aggregates one
 # release version across all component.yml files so the ship-agent can tag a
 # single product version at P9.
 #
-# WHEN IT DOES NOT: projects with exactly one component need no product.yml —
+# WHEN IT DOES NOT: projects with exactly one component need no product.yml;
 # the ship-agent falls back to the single component.yml version unchanged.
 #
 # The ship-agent creates this file automatically on first multi-component P9
@@ -19,11 +19,11 @@ version: "0.1.0"                    # last version tagged; authoritative only un
 feature: "{{feature-id of the release that last set this version}}"
 
 # How the release version is derived at P9:
-#   max-component-version — read live from each components[].path's component.yml,
-#                           take the highest (default). Nothing to keep in sync here —
+#   max-component-version : read live from each components[].path's component.yml,
+#                           take the highest (default). Nothing to keep in sync here;
 #                           components[] only changes when a component is added/removed.
-#   explicit              — the human sets `version` above directly; ship-agent validates only
-#   external              — an external anchor dictates the version; see
+#   explicit              : the human sets `version` above directly; ship-agent validates only
+#   external              : an external anchor dictates the version; see
 #                           planifest-overrides/instructions/external-versioning.md
 versionPolicy: "max-component-version"
 

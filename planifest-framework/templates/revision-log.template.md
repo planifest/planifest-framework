@@ -1,6 +1,6 @@
 ---
 title: "Revision Log - {{feature-id}}"
-summary: "One entry per artifact rev-bumped by a granted reversal — the audit trail that makes reversals reconstructable."
+summary: "One entry per artifact rev-bumped by a granted reversal: the audit trail that makes reversals reconstructable."
 ---
 # Revision Log - {{feature-id}}
 
@@ -15,10 +15,10 @@ summary: "One entry per artifact rev-bumped by a granted reversal — the audit 
 
 ## Cascade Records
 
-One block per granted reversal — written *before* any re-work starts (ADR-005).
+One block per granted reversal, written *before* any re-work starts (ADR-005).
 
-### Reversal {{seq}} — {{date}}
+### Reversal {{seq}} ({{date}})
 - **Revised artifact(s):** {{paths}}
 - **Invalidation cascade ({{n}} artifacts{{; >3 = human gate}}):**
-  - {{path — why invalidated (traceability link)}}
+  - {{path, why invalidated (traceability link)}}
 - **Human gate:** {{not required (additive, ≤3 cascade, continuous run) | approved by human {{date}}}}

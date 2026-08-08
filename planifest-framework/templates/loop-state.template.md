@@ -1,6 +1,6 @@
 ---
 title: "Loop State: {{loop-id}}"
-summary: "Persisted state for one loop instance — survives context resets and session interrupts."
+summary: "Persisted state for one loop instance; survives context resets and session interrupts."
 status: "active | done | escalated"
 ---
 # Loop State: {{loop-id}}
@@ -15,7 +15,7 @@ status: "active | done | escalated"
 | Loop id | `{{p0_completeness \| design_critic \| reversal_protocol \| verify_by_execution \| cross_model_review}}` |
 | Owning phase | `{{P0–P6}}` |
 | Toggle level | `{{report-only \| on}}` |
-| Iteration | `{{n}}` of cap `{{3 (default) — P4 validate keeps 5}}` |
+| Iteration | `{{n}}` of cap `{{3 (default); P4 validate keeps 5}}` |
 | Reversal budget remaining | `{{2 − grants this feature}}` (shared across all loops; feature-wide) |
 | Last decision | `{{continue \| done \| escalate}}` |
 | Last updated | `{{ISO-8601 UTC}}` |
@@ -24,12 +24,12 @@ status: "active | done | escalated"
 
 ## Run Log
 
-Append-only — one record per iteration. Never rewrite a prior record.
+Append-only: one record per iteration. Never rewrite a prior record.
 
-### Iteration {{n}} — {{ISO-8601 UTC}}
+### Iteration {{n}} ({{ISO-8601 UTC}})
 - **Action:** {{what the loop did this iteration}}
-- **Observation:** {{what was found/measured — findings, check results, evidence}}
-- **Decision:** {{continue | done | escalate}} — {{one-line reason}}
+- **Observation:** {{what was found/measured, findings, check results, evidence}}
+- **Decision:** {{continue | done | escalate}}: {{one-line reason}}
 
 ---
 

@@ -1,11 +1,11 @@
 ---
 title: "Discovery - {{feature-id}}"
-summary: "Raw P0 discovery-pass findings — what the orchestrator knew before coaching began."
+summary: "Raw P0 discovery-pass findings: what the orchestrator knew before coaching began."
 ---
 # Discovery - {{feature-id}}
 
 > Created at the start of P0, before the first coaching question, in every adoption mode.
-> Raw findings only — decisions belong in `design.md`, the Q&A audit trail in `build-log.md`.
+> Raw findings only; decisions belong in `design.md`, the Q&A audit trail in `build-log.md`.
 > Unreadable signal: say so; coaching proceeds.
 
 ## Header (all modes)
@@ -37,7 +37,7 @@ summary: "Raw P0 discovery-pass findings — what the orchestrator knew before c
 
 ### Retrofit
 
-- Suggested version and source markers: {{version — package.json / go.mod / git tags / README}}
+- Suggested version and source markers: {{version, package.json / go.mod / git tags / README}}
 - Entry points / stack: {{findings}}
 - Candidate components: {{findings}}
 - Data ownership: {{findings}}
@@ -48,4 +48,4 @@ summary: "Raw P0 discovery-pass findings — what the orchestrator knew before c
 ### External Anchor
 
 - `external-versioning.md` constraints: {{full constraints}}
-- Underlying mode content: append whichever underlying mode's findings apply to what else is present in the repo — archive present → also the Standard-Iterative content; source only → also the Retrofit scan; neither → the Greenfield baseline. {{Standard-Iterative / Retrofit / Greenfield findings per the rule above}}
+- Underlying mode content: append whichever underlying mode's findings apply to what else is present in the repo: archive present → also the Standard-Iterative content; source only → also the Retrofit scan; neither → the Greenfield baseline. {{Standard-Iterative / Retrofit / Greenfield findings per the rule above}}

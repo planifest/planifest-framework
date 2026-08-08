@@ -6,7 +6,7 @@ version: "0.1.0"
 ---
 # Iteration Log - {{feature-id}}
 
-> **Audience:** Build-assessment-agent (P8) and post-run technical review. This is NOT the PR changelog — the PR changelog (written by ship-agent Step 1) is the human-readable audit trail for PR reviewers.
+> **Audience:** Build-assessment-agent (P8) and post-run technical review. This is NOT the PR changelog: the PR changelog (written by ship-agent Step 1) is the human-readable audit trail for PR reviewers.
 
 **Skill:** [docs-agent](../skills/planifest-docs-agent/SKILL.md) (or whichever agent completes the final iteration step)
 **Date:** {{ISO-8601}}

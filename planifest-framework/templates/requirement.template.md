@@ -8,7 +8,7 @@ version: "0.1.0"
 
 **Skill:** [spec-agent](../skills/planifest-spec-agent/SKILL.md)
 **Feature:** {{feature-id}}
-**Source:** {{user story ID from design.md — e.g. US-001}}
+**Source:** {{user story ID from design.md, e.g. US-001}}
 **Priority:** must-have | should-have
 
 ## User Story
@@ -33,8 +33,8 @@ As a [role], I [action], so that [outcome].
 <!-- conditional: only include when this requirement reads untrusted external content into displayed or injected output. Delete if not applicable. -->
 
 - [ ] Input source: {{filesystem path | hook stdin field | env var name | other}}
-- [ ] Allowed character pattern: `{{e.g. [a-zA-Z0-9\-_.]}}` — all other characters stripped before use
-- [ ] maximum length: {{N}} characters — content beyond this limit is truncated
+- [ ] Allowed character pattern: `{{e.g. [a-zA-Z0-9\-_.]}}`, all other characters stripped before use
+- [ ] maximum length: {{N}} characters, content beyond this limit is truncated
 - [ ] Failure behaviour: {{e.g. substitute default value "unknown" and continue | exit with code 0 | throw error}}
 - [ ] Logging policy: {{raw value not logged | raw value logged at debug level only | sanitised value only in output}}
 

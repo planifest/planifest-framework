@@ -16,7 +16,7 @@
 
 ## Functional Requirements Directory
 
-Functional requirements are split into individual files — one user story per file — at `plan/current/requirements/`.
+Functional requirements are split into individual files, one user story per file, at `plan/current/requirements/`.
 
 Each file follows the naming convention `req-{NNN}-{kebab-slug}.md` and the [Requirement Template](../templates/requirement.template.md).
 
