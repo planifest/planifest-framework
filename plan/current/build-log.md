@@ -105,6 +105,12 @@ P0 exchange — Continuity flag resolution: Q: add an explicit per-item status t
 
 Scope Lock complete. All four scenario paths captured.
 
+P0 exchange — Run mode: Q: check in after each phase gate, or continuous run for this session? / A: continuous run confirmed. `plan/.run-mode` written (`continuous`). P5 security and any altering-classification reversal still hard-stop regardless.
+
+design.md written (Feature/Product/Architecture/Engineering/Scope/Assumptions/Risks/Dependencies/Active Skills/Skill Map/Repo Instructions/Confirmation), presented to the human, confirmed as written.
+
+Gate accepted: P0 → P1 — 08 Aug 2026 @ 08:42 AM BST
+
 ## Item Status (added at P0 per Scope Lock continuity-flag resolution; maintained through P3)
 
 | Item | One-liner | Status |
