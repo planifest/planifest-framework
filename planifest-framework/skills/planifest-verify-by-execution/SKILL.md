@@ -1,6 +1,6 @@
 ---
 name: planifest-verify-by-execution
-description: Verifies acceptance criteria by actually running the software — browser click-throughs, real API calls, CLI invocations, log/DB checks — never by reading test output alone. Loaded by the P4 validate-agent after CI passes.
+description: Verifies acceptance criteria by actually running the software (browser click-throughs, real API calls, CLI invocations, log/DB checks), never by reading test output alone. Loaded by the P4 validate-agent after CI passes.
 bundle_templates: [loop-state.template.md]
 bundle_standards: [testing-standards.md, telemetry-standards.md, build-target-standards.md]
 hooks:
@@ -15,7 +15,7 @@ hooks:
 
 ## The One Rule
 
-**Reading test output alone never counts as verification.** Every criterion you verify must be backed by an observation you made of the running software. If you cannot run it, the criterion is `not-verifiable` with a reason — never silently passed.
+**Reading test output alone never counts as verification.** Every criterion you verify must be backed by an observation you made of the running software. If you cannot run it, the criterion is `not-verifiable` with a reason; never silently passed.
 
 ## Method Selection
 
@@ -24,7 +24,7 @@ For each acceptance criterion in `plan/current/requirements/`, pick the observat
 | Target | Method | Observation evidence |
 |--------|--------|---------------------|
 | Web UI | Browser MCP click-through of the criterion's flow | What was clicked, what rendered (accessibility-tree/read-page output beats screenshots for text) |
-| HTTP API | Real request against the running service (respecting Build target: docker — run in-container) | Request sent, status + body received |
+| HTTP API | Real request against the running service (respecting Build target: docker, run in-container) | Request sent, status + body received |
 | CLI / script | Invoke it with the criterion's inputs | Command, exit code, output |
 | Side effects (files, DB, logs) | Inspect the artifact the behaviour should have produced | Path/query + found state |
 | Hook / gate behaviour | Trigger the guarded action and observe pass/block | Trigger, exit code, message |
@@ -35,9 +35,9 @@ Start whatever the software needs (dev server, container) per the project's run 
 
 | Outcome | Meaning | Consequence |
 |---------|---------|-------------|
-| `verified` | Observed behaviour matches the criterion | — |
-| `failed` | Ran it; behaviour contradicts the criterion | Feeds P4's existing self-correction loop (cap 5, unchanged) — a behavioural failure is a validation failure even with green tests |
-| `not-verifiable` | Cannot be executed here (needs prod credentials, external hardware, human judgement) | Recorded with the reason; surfaced in the P4 gate summary — never silently passed |
+| `verified` | Observed behaviour matches the criterion | N/A |
+| `failed` | Ran it; behaviour contradicts the criterion | Feeds P4's existing self-correction loop (cap 5, unchanged): a behavioural failure is a validation failure even with green tests |
+| `not-verifiable` | Cannot be executed here (needs prod credentials, external hardware, human judgement) | Recorded with the reason; surfaced in the P4 gate summary, never silently passed |
 
 ## Report
 
