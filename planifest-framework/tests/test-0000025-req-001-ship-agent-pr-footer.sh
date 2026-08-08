@@ -20,7 +20,7 @@ FOOTER='🤖 Generated with [Planifest](https://github.com/planifest/framework) 
 grep_has() { grep -qF "$1" "$2" 2>/dev/null && echo "yes" || echo "no"; }
 
 # Isolate Step 10 (from its heading to the next "### " heading).
-STEP10=$(sed -n '/^### Step 10 — Push\/PR decision/,/^### Step 11/p' "$SHIP_SKILL")
+STEP10=$(sed -n '/^### Step 10: Push\/PR decision/,/^### Step 11/p' "$SHIP_SKILL")
 
 # ── AC: preamble scans planifest-overrides/instructions/ for the ADR-001
 #        keyword, mirroring the existing local-git-only scan ──────────────
@@ -58,8 +58,8 @@ assert_contains "$FOOTER" "$OPT2_BLOCK" \
 echo ""
 echo "=== req-001: Option [1] shares the (now conditional) template ==="
 
-OPT1_BLOCK=$(printf '%s\n' "$STEP10" | sed -n '/Option \[1\] — Agent pushes/,/Option \[2\] — Human pushes/p')
-assert_contains "PR description — see template below" "$OPT1_BLOCK" \
+OPT1_BLOCK=$(printf '%s\n' "$STEP10" | sed -n '/Option \[1\] (Agent pushes)/,/Option \[2\] (Human pushes)/p')
+assert_contains "PR description, see template below" "$OPT1_BLOCK" \
   "req-001: Option [1]'s gh pr create --body still defers to the shared template"
 assert_equals "no" "$(grep_has "$FOOTER" <(echo "$OPT1_BLOCK"))" \
   "req-001: Option [1]'s own code block does not hardcode the footer separately"

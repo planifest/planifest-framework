@@ -1,4 +1,4 @@
-# loop-toggles.yml — per-loop enablement (ADR-003, feature 0000016)
+# loop-toggles.yml: per-loop enablement (ADR-003, feature 0000016)
 #
 # COPY THIS FILE to planifest-overrides/loop-toggles.yml to enable loops.
 # planifest-overrides/ is user-owned: the framework and its agents never write
@@ -9,10 +9,10 @@
 # pipeline without loop support.
 #
 # Levels:
-#   off         — loop machinery does not activate at all
-#   report-only — loop runs and files findings/verdicts, but blocks nothing and
+#   off         : loop machinery does not activate at all
+#   report-only : loop runs and files findings/verdicts, but blocks nothing and
 #                 mutates nothing (mandatory first rollout level for every loop)
-#   on          — loop verdicts gate progression per their skill's rules
+#   on          : loop verdicts gate progression per their skill's rules
 
 p0_completeness: off      # P0 exits only when the gap checklist passes (cap: 2 rounds/gap)
 design_critic: off        # fresh-context critique of P1/P2 artifacts before the human gate (cap 3)

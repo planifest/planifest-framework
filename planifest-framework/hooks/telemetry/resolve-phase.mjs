@@ -65,31 +65,26 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { spawn } from "node:child_process";
 
+// PHASE_SKILLS maps the Skill tool's invoked skill name to the phase name used
+// throughout the telemetry envelope (telemetry-standards.md's `phase` enum).
+// It is derived from the shared enum (req-002, folding backlog 0000057) so it
+// cannot drift from check-telemetry-receipts.mjs's PHASE_NUMBER_TO_ENUM.
+//
+// The module lives in hooks/enforcement/, the always-installed tree, rather
+// than here (0000028-ADR-002): check-telemetry-receipts.mjs needs it and is
+// installed on every install, whereas this file exists only when
+// --structured-telemetry-mcp is set. hooks/telemetry/ is never present
+// without hooks/enforcement/, so this cross-directory import is always
+// resolvable.
+import { PHASE_SKILLS } from "../enforcement/phase-enum.mjs";
+import { readStdin } from "../enforcement/read-stdin.mjs";
+
 const MODE = process.argv[2];
 const TARGET_SCRIPT = process.argv[3];
 
-// Maps the Skill tool's invoked skill name to the phase name used throughout
-// the telemetry envelope (telemetry-standards.md's `phase` enum).
-const PHASE_SKILLS = {
-  "planifest-spec-agent": "spec",
-  "planifest-adr-agent": "adr",
-  "planifest-codegen-agent": "codegen",
-  "planifest-validate-agent": "validate",
-  "planifest-security-agent": "security",
-  "planifest-docs-agent": "docs",
-  "planifest-ship-agent": "ship",
-};
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
-    process.stdin.on("end", () => resolve(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
-}
-
+// Not consolidated (req-002, deliberate): this getSessionId copy is read-only
+// where emit-phase-start.mjs's creates the session file. See
+// plan/current/tech-debt.md.
 function getSessionId(input, cwd) {
   if (process.env.PLANIFEST_SESSION_ID) return process.env.PLANIFEST_SESSION_ID;
   if (input?.session_id) return input.session_id;

@@ -1,6 +1,6 @@
 ---
 name: planifest-refactor
-description: TDD refactor phase — improves code quality while keeping all tests passing. Invoked by planifest-codegen-agent after planifest-implementer confirms GREEN.
+description: TDD refactor phase: improves code quality while keeping all tests passing. Invoked by planifest-codegen-agent after planifest-implementer confirms GREEN.
 recommended_model: haiku
 hooks:
   phase: codegen
@@ -8,25 +8,25 @@ hooks:
 
 # Planifest - refactor
 
-> You improve code that already works. You do not add behaviour. You do not change what the code does — only how it does it. When you are done, all tests still pass.
+> You improve code that already works. You do not add behaviour. You do not change what the code does: only how it does it. When you are done, all tests still pass.
 
 ---
 
 ## Hard Limits
 
 1. Do **not** add new behaviour. Not even "useful" behaviour you notice is missing.
-2. Do **not** change test files — only implementation code.
+2. Do **not** change test files, only implementation code.
 3. All tests MUST pass after your changes. Run the full suite. Confirm all green.
-4. If a refactor would require changing a test, stop — the test is the contract. Escalate to the codegen-agent.
+4. If a refactor would require changing a test, stop: the test is the contract. Escalate to the codegen-agent.
 5. Credentials are never in your context.
-6. Do not refactor code in other components — only the files touched by the current requirement's implementation.
+6. Do not refactor code in other components: only the files touched by the current requirement's implementation.
 
 ## Input
 
 - The implementation code written by planifest-implementer
-- The test file written by planifest-test-writer (read-only — do not modify)
-- The stack capability skill (if available — load it alongside this skill)
-- The domain glossary at `plan/current/domain-glossary.md` — ensure all identifiers use domain terms
+- The test file written by planifest-test-writer (read-only, do not modify)
+- The stack capability skill (if available, load it alongside this skill)
+- The domain glossary at `plan/current/domain-glossary.md`: ensure all identifiers use domain terms
 
 ## What You Produce
 
@@ -39,7 +39,7 @@ Quality improvements out of scope: extracting shared utilities used by only one 
 ## Process
 
 1. **Identify** refactoring opportunities from the in-scope list above.
-2. **Apply** improvements incrementally — one concern at a time.
+2. **Apply** improvements incrementally, one concern at a time.
 3. **Run the full test suite** after each significant change:
    ```
    bash planifest-framework/tests/run-tests.sh

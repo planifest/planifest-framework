@@ -1,6 +1,6 @@
-# TypeScript — Library Standards
+# TypeScript: Library Standards
 
-> See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/typescript/prefer-avoid.md` first — overrides take precedence.
+> See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/typescript/prefer-avoid.md` first; overrides take precedence.
 
 ---
 
@@ -52,6 +52,6 @@ React form validation pairing (`zod` + `react-hook-form`) is covered in `javascr
 | Concern | Rule |
 |---------|------|
 | `strict` | Must be `true` |
-| `noUncheckedIndexedAccess` | Enable — prevents silent `undefined` from array access |
+| `noUncheckedIndexedAccess` | Enable: prevents silent `undefined` from array access |
 | `exactOptionalPropertyTypes` | Enable for new projects |
-| `any` | Never use `any` — use `unknown` and narrow |
+| `any` | Never use `any`; use `unknown` and narrow |

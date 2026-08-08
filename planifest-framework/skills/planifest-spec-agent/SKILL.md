@@ -23,7 +23,7 @@ hooks:
 
 Write each spec artifact to `plan/` as you complete it. Write the component manifest to `src/{component-id}/component.yml`. Do not accumulate artifacts in memory.
 
-**Minimal default set (ADR-004, req-008):** the first five rows below are always produced, regardless of feature size. Each remaining row is produced only when its stated trigger condition holds — declared explicitly in the feature brief, or inferred from a stated property already present in the confirmed design (never from feature size or user-story count alone). Absent a trigger, omit the artifact entirely; do not generate an empty or N/A placeholder file in its place.
+**Minimal default set (ADR-004, req-008):** the first five rows below are always produced, regardless of feature size. Each remaining row is produced only when its stated trigger condition holds: declared explicitly in the feature brief, or inferred from a stated property already present in the confirmed design (never from feature size or user-story count alone). Absent a trigger, omit the artifact entirely; do not generate an empty or N/A placeholder file in its place.
 
 | Artifact | Path | Purpose |
 |---|---|---|
@@ -32,10 +32,10 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 | Scope | `plan/current/scope.md` | In / out / deferred - all three stated explicitly |
 | Risk Register | `plan/current/risk-register.md` | Technical, operational, security, compliance risks with likelihood and impact |
 | Domain Glossary | `plan/current/domain-glossary.md` | Ubiquitous language for this feature - agents and humans use these terms |
-| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract — produced when the component acts as an API provider |
-| Operational Model | `plan/current/operational-model.md` | Runbook triggers, on-call expectations, alerting thresholds — produced when the feature introduces or modifies a deployed runtime service |
-| SLO Definitions | `plan/current/slo-definitions.md` | Error budgets, SLIs/SLOs — produced when the feature introduces or modifies a deployed runtime service with a latency/availability/throughput target stated in the confirmed design's Architecture Layer |
-| Cost Model | `plan/current/cost-model.md` | Compute, storage, egress, third-party cost estimates — produced when the feature introduces new compute, storage, or third-party service spend, or materially changes existing spend |
+| OpenAPI Specification | `plan/current/openapi-spec.yaml` | Language-agnostic API contract: produced when the component acts as an API provider |
+| Operational Model | `plan/current/operational-model.md` | Runbook triggers, on-call expectations, alerting thresholds: produced when the feature introduces or modifies a deployed runtime service |
+| SLO Definitions | `plan/current/slo-definitions.md` | Error budgets, SLIs/SLOs: produced when the feature introduces or modifies a deployed runtime service with a latency/availability/throughput target stated in the confirmed design's Architecture Layer |
+| Cost Model | `plan/current/cost-model.md` | Compute, storage, egress, third-party cost estimates: produced when the feature introduces new compute, storage, or third-party service spend, or materially changes existing spend |
 | Component Manifest | `src/{component-id}/component.yml` | Draft manifest - purpose, scope, risk seeded from the brief. Follow the [Component Template](../templates/component.template.yml) and its [guide](../templates/component-guide.md). The `stack` section will already be pre-seeded by the human or orchestrator; populate `purpose`, `scope`, `risk`, and `contract` based on your requirements set. Do not modify the `stack` section. |
 | Data Contract (per component) | `src/{component-id}/docs/data-contract.md` | Schema ownership, table definitions, invariants, relationships. Follow the [Data Contract Template](../templates/data-contract.template.md) and its [guide](../templates/data-contract-guide.md). One per data-owning component. |
 
@@ -43,7 +43,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 **One question at a time.**
 
-**Retrofit mode:** if `adoption_mode: retrofit`, follow the structured scan in `planifest-framework/workflows/retrofit.md`; the execution plan must describe the system as it exists and what is changing — not just the change in isolation.
+**Retrofit mode:** if `adoption_mode: retrofit`, follow the structured scan in `planifest-framework/workflows/retrofit.md`; the execution plan must describe the system as it exists and what is changing, not just the change in isolation.
 
 **Functional requirements:**
 - Derive directly from user stories in the brief. Do not invent requirements not stated or implied.
@@ -51,7 +51,7 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 - Do NOT output a monolithic list in the Execution Plan. Use discrete files.
 
 **Non-functional requirements:**
-- Must include specific, measurable targets — not vague qualifiers.
+- Must include specific, measurable targets, not vague qualifiers.
 - If the confirmed design records a deferred NFR, note it in the scope document and do not fabricate a target.
 
 **OpenAPI specification (if applicable):**
@@ -64,9 +64,9 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 - If the feature is a retrofit, read the existing codebase for terms already in use and include them.
 - Never invent domain language. If a concept has no clear name, flag it for the human.
 
-**Operational Model, SLO Definitions, Cost Model (conditional — ADR-004, req-008):**
-- Produce only when the trigger condition stated in the table above is declared in the feature brief or inferable from a stated property already present in the confirmed design — never from feature size or user-story count alone.
-- Absent a stated or inferable trigger, do not produce these three artifacts and do not generate empty/N/A placeholder files in their place — omission is the correct, expected behaviour, not a gap.
+**Operational Model, SLO Definitions, Cost Model (conditional, ADR-004, req-008):**
+- Produce only when the trigger condition stated in the table above is declared in the feature brief or inferable from a stated property already present in the confirmed design: never from feature size or user-story count alone.
+- Absent a stated or inferable trigger, do not produce these three artifacts and do not generate empty/N/A placeholder files in their place: omission is the correct, expected behaviour, not a gap.
 
 **Scope:**
 - Deferred items must note what is blocked until they are resolved.
@@ -87,12 +87,12 @@ Write each spec artifact to `plan/` as you complete it. Write the component mani
 
 ## Waved Features
 
-When the confirmed design indicates a waved feature (features grouped into waves — the decomposition grouping formerly called "phases", renamed to avoid collision with the P0–P9 pipeline phases):
+When the confirmed design indicates a waved feature (features grouped into waves: the decomposition grouping formerly called "phases", renamed to avoid collision with the P0–P9 pipeline phases):
 
 - **Produce spec artifacts for the current wave only.** Do not spec features in later waves - they may change based on what Wave 1 reveals.
 - **Name wave-specific artifacts with the wave suffix:** `execution-plan-wave-2.md`, `scope-wave-2.md`, etc. The confirmed design itself is updated per wave, not duplicated.
 - **Reference prior wave artifacts.** Wave 2's design requirements should reference Wave 1's component manifests and data contracts as existing context, not re-specify them.
-- **Carry forward the domain glossary and risk register.** Both are cumulative — add new terms/risks from each wave; never remove prior-wave entries (risks remain unless explicitly mitigated).
+- **Carry forward the domain glossary and risk register.** Both are cumulative: add new terms/risks from each wave; never remove prior-wave entries (risks remain unless explicitly mitigated).
 
 ## Parallelism Directive
 
@@ -102,17 +102,17 @@ When the confirmed design indicates a waved feature (features grouped into waves
 | Scope, Risk Register, and Domain Glossary (all independent) | Execution Plan summary before requirements are drafted |
 | Multiple component manifest drafts | Data contract before data ownership is confirmed |
 
-**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly — see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
+**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly; see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
 
 ## Telemetry
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership. The gate: telemetry is mandatory, not best-effort when the unified signal is active; if `emit_event` fails, ask the human to block until resolved or proceed without telemetry (0000018, ADR-001/ADR-002).
 
-**`spec_gap`** — when the spec cannot proceed without human input:
+**`spec_gap`**: when the spec cannot proceed without human input:
 ```json
 { "question": "<blocking question>", "phase_name": "spec" }
 ```
 
 ## Commit Cadence (Hard Limit 7)
 
-Commit after every meaningful artifact write, not batched to the phase gate — see orchestrator Hard Limit 7.
+Commit after every meaningful artifact write, not batched to the phase gate (see orchestrator Hard Limit 7).

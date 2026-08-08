@@ -1,4 +1,4 @@
-# Python — Test Framework Standards
+# Python: Test Framework Standards
 
 > See `testing-standards.md` for how to write tests.
 
@@ -19,10 +19,10 @@
 | `pytest-asyncio` | Required for async FastAPI / sqlalchemy tests |
 | `pytest-cov` | Coverage reporting |
 | `pytest-mock` | `mocker` fixture wrapping `unittest.mock` |
-| `factory-boy` | Test data factories — avoid hardcoded fixtures |
+| `factory-boy` | Test data factories, avoid hardcoded fixtures |
 
 ## Notes
 
 - Use `anyio` backend for `pytest-asyncio` when testing with multiple async backends
 - `testcontainers-python` for tests requiring a real database
-- Do not mock `httpx` calls at the module level — use `respx` for network mocking
+- Do not mock `httpx` calls at the module level; use `respx` for network mocking

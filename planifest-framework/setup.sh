@@ -439,12 +439,20 @@ install_tier1_hooks() {
     done
   fi
 
-  # Copy telemetry scripts (emit-phase-start, emit-phase-end)
+  # Copy telemetry scripts. The glob is *.mjs, matching install_enforcement_hooks()
+  # and install_telemetry_hooks() (0000028 req-002, ADR-002). It was previously
+  # emit-phase-*.mjs, narrower than its own callers need: emit-phase-start.mjs and
+  # emit-phase-end.mjs import shared modules from this directory
+  # (read-product-id.mjs, record-telemetry-failure.mjs, get-flag-path.mjs,
+  # emit-event.mjs), and an ESM import of a file the install never copied fails at
+  # module-load time, before the hook's own try/catch can run. Any future file
+  # added to hooks/telemetry/ is now installed for Cursor, Windsurf and Cline
+  # without a further setup.sh change.
   local telem_src="$SCRIPT_DIR/hooks/telemetry"
   local telem_dest="$hooks_install_dir/telemetry"
   if [ -d "$telem_src" ]; then
     mkdir -p "$telem_dest"
-    for script in "$telem_src"/emit-phase-*.mjs; do
+    for script in "$telem_src"/*.mjs; do
       [ -f "$script" ] || continue
       local script_name
       script_name="$(basename "$script")"
@@ -528,9 +536,11 @@ install_enforcement_hooks() {
   # Copy enforcement hooks and wire PreToolUse/UserPromptSubmit (REQ-002, REQ-006, REQ-008).
   # Includes auto-trigger-orchestrator.mjs (REQ-002), gate-write.mjs, check-design.mjs,
   # check-telemetry-failures.mjs (0000026, backlog 0000044 — deterministic backstop for
-  # the orchestrator's ADR-002 phase-start telemetry-failure-marker check), and
+  # the orchestrator's ADR-002 phase-start telemetry-failure-marker check),
   # check-telemetry-receipts.mjs (req-004, feature 0000027, ADR-001 — cross-references
-  # build-log.md's per-phase Telemetry claims against plan/.telemetry-receipts/).
+  # build-log.md's per-phase Telemetry claims against plan/.telemetry-receipts/), and
+  # em-dash-guard.mjs (req-006, feature 0000028, ADR-003 — rejects U+2014 in scoped
+  # Planifest prose paths at write time, sibling to gate-write.mjs and ratchet-check.mjs).
   # Always installed, regardless of MCP flags — both telemetry checks are
   # UserPromptSubmit-shaped like the other enforcement hooks, not PostToolUse like
   # context-pressure.mjs, and read plan/ state rather than requiring the telemetry
@@ -562,20 +572,37 @@ install_enforcement_hooks() {
     echo "  + $hooks_dir_rel/$script_name"
   done
 
-  # Wire into settings.json (requires node; jq fallback not needed — node is always available)
-  local gate_cmd="$hooks_dir_rel/gate-write.mjs"
-  local ratchet_cmd="$hooks_dir_rel/ratchet-check.mjs"
-  local trigger_cmd="$hooks_dir_rel/auto-trigger-orchestrator.mjs"
-  local presence_cmd="$hooks_dir_rel/check-orchestrator-presence.mjs"
-  local design_cmd="$hooks_dir_rel/check-design.mjs"
-  local telemetry_failures_cmd="$hooks_dir_rel/check-telemetry-failures.mjs"
-  local telemetry_receipts_cmd="$hooks_dir_rel/check-telemetry-receipts.mjs"
+  # Wire into settings.json (requires node; jq fallback not needed, node is always available)
+  #
+  # 0000028 (P5, SEC-001): every command below is prefixed with `node`. These
+  # were previously wired as bare .mjs paths relying on the shebang plus an
+  # executable bit. The bit is a committed file mode, and 9 of the 10 hook
+  # files are mode 100644, so the shell could not exec them: the wired command
+  # exited 126 (permission denied) and the hook silently never ran. Because a
+  # PreToolUse hook that fails to start is indistinguishable from one that
+  # passed, gate-write, em-dash-guard, check-design, both telemetry backstops,
+  # auto-trigger-orchestrator and check-orchestrator-presence were all dead on
+  # every bash install, while ratchet-check worked purely because it happened
+  # to be committed executable.
+  #
+  # Invoking through `node` removes the dependency on file mode entirely. This
+  # matches what setup.ps1 already did and what the context-mode hooks in this
+  # same file already did, which is why those kept working throughout.
+  local gate_cmd="node \"$hooks_dir_rel/gate-write.mjs\""
+  local ratchet_cmd="node \"$hooks_dir_rel/ratchet-check.mjs\""
+  local em_dash_cmd="node \"$hooks_dir_rel/em-dash-guard.mjs\""
+  local trigger_cmd="node \"$hooks_dir_rel/auto-trigger-orchestrator.mjs\""
+  local presence_cmd="node \"$hooks_dir_rel/check-orchestrator-presence.mjs\""
+  local design_cmd="node \"$hooks_dir_rel/check-design.mjs\""
+  local telemetry_failures_cmd="node \"$hooks_dir_rel/check-telemetry-failures.mjs\""
+  local telemetry_receipts_cmd="node \"$hooks_dir_rel/check-telemetry-receipts.mjs\""
 
   if command -v node >/dev/null 2>&1; then
-    PLANIFEST_GATE="$gate_cmd" PLANIFEST_RATCHET="$ratchet_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_TELEMETRY_FAILURES="$telemetry_failures_cmd" PLANIFEST_TELEMETRY_RECEIPTS="$telemetry_receipts_cmd" PLANIFEST_SETTINGS="$settings" node -e '
+    PLANIFEST_GATE="$gate_cmd" PLANIFEST_RATCHET="$ratchet_cmd" PLANIFEST_EM_DASH="$em_dash_cmd" PLANIFEST_TRIGGER="$trigger_cmd" PLANIFEST_PRESENCE="$presence_cmd" PLANIFEST_DESIGN="$design_cmd" PLANIFEST_TELEMETRY_FAILURES="$telemetry_failures_cmd" PLANIFEST_TELEMETRY_RECEIPTS="$telemetry_receipts_cmd" PLANIFEST_SETTINGS="$settings" node -e '
       const fs = require("fs"), path = require("path");
       const gate     = process.env.PLANIFEST_GATE;
       const ratchet  = process.env.PLANIFEST_RATCHET;
+      const emDash   = process.env.PLANIFEST_EM_DASH;
       const trigger  = process.env.PLANIFEST_TRIGGER;
       const presence = process.env.PLANIFEST_PRESENCE;
       const design   = process.env.PLANIFEST_DESIGN;
@@ -585,16 +612,20 @@ install_enforcement_hooks() {
       let s = {};
       if (fs.existsSync(sf)) s = JSON.parse(fs.readFileSync(sf,"utf8").replace(/^\uFEFF/,""));
       s.hooks = s.hooks || {};
-      // PreToolUse: gate-write + ratchet-check for Write and Edit (idempotent: remove then re-add)
+      // PreToolUse: gate-write + ratchet-check + em-dash-guard for Write and Edit
+      // (idempotent: remove then re-add)
       s.hooks.PreToolUse = (s.hooks.PreToolUse || [])
         .filter(h => !["Write","Edit"].includes(h.matcher) ||
                      !(h.hooks||[]).some(e => (e.command||"").includes("gate-write") ||
-                                              (e.command||"").includes("ratchet-check")));
+                                              (e.command||"").includes("ratchet-check") ||
+                                              (e.command||"").includes("em-dash-guard")));
       s.hooks.PreToolUse.push(
         {matcher:"Write", hooks:[{type:"command",command:gate}]},
         {matcher:"Edit",  hooks:[{type:"command",command:gate}]},
         {matcher:"Write", hooks:[{type:"command",command:ratchet}]},
-        {matcher:"Edit",  hooks:[{type:"command",command:ratchet}]}
+        {matcher:"Edit",  hooks:[{type:"command",command:ratchet}]},
+        {matcher:"Write", hooks:[{type:"command",command:emDash}]},
+        {matcher:"Edit",  hooks:[{type:"command",command:emDash}]}
       );
       // UserPromptSubmit: auto-trigger first, then presence check, then check-design,
       // then check-telemetry-failures, then check-telemetry-receipts
@@ -619,7 +650,7 @@ install_enforcement_hooks() {
     echo "  ~ $settings_rel (enforcement hooks wired)"
   else
     echo "  ! Warning: node not found — skipping settings.json enforcement hook wiring"
-    echo "  ! Manually add gate-write (Write/Edit PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence, check-design, check-telemetry-failures and check-telemetry-receipts (UserPromptSubmit) to $settings_rel"
+    echo "  ! Manually add gate-write, ratchet-check, em-dash-guard (Write/Edit PreToolUse), auto-trigger-orchestrator, check-orchestrator-presence, check-design, check-telemetry-failures and check-telemetry-receipts (UserPromptSubmit) to $settings_rel"
   fi
 }
 

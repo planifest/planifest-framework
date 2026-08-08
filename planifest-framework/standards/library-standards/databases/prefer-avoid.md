@@ -29,7 +29,7 @@
 | Language | Prefer | Avoid | Notes |
 |----------|--------|-------|-------|
 | TypeScript/Node.js | `better-sqlite3` (sync), `drizzle` | `sqlite3` (callbacks) | better-sqlite3 is synchronous and faster |
-| Python | `stdlib sqlite3` | — | stdlib is sufficient |
+| Python | `stdlib sqlite3` | N/A | stdlib is sufficient |
 | Go | `modernc.org/sqlite` (pure Go) | `mattn/go-sqlite3` (requires CGo) | pure Go avoids CGo compilation |
 
 ---
@@ -42,7 +42,7 @@
 |----------|--------|-------|-------|
 | TypeScript/Node.js | MongoDB Node.js driver v6 | `mongoose` (unless justified) | Mongoose adds ODM magic that can obscure query behaviour |
 | Python | `motor` (async) or `pymongo` | `mongoengine` | motor for FastAPI/asyncio |
-| Go | `mongo-driver` v2 | — | |
+| Go | `mongo-driver` v2 | N/A | |
 
 ### Redis
 
@@ -107,5 +107,5 @@ Official driver per language: `neo4j-driver` (Node.js), `neo4j` driver (Python),
 | Language | Prefer | Avoid | Notes |
 |----------|--------|-------|-------|
 | TypeScript/Node.js | `@elastic/elasticsearch` v8 or `@opensearch-project/opensearch` | `elasticsearch` v7 and older | Use the versioned client matching your server |
-| Python | `elasticsearch-py` v8 or `opensearch-py` | — | |
-| Go | `go-elasticsearch` v8 or `opensearch-go` | — | |
+| Python | `elasticsearch-py` v8 or `opensearch-py` | N/A | |
+| Go | `go-elasticsearch` v8 or `opensearch-go` | N/A | |

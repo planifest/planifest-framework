@@ -15,18 +15,10 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { readStdin } from "./read-stdin.mjs";
+
 // Headings that introduce the scope section in design.md
 const SCOPE_SECTION_RE = /^##\s+(Component Paths|Scope)\s*$/im;
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
-    process.stdin.on("end", () => resolve(data.replace(/^\uFEFF/, "")));
-    process.stdin.resume();
-  });
-}
 
 function extractScope(content) {
   const match = SCOPE_SECTION_RE.exec(content);

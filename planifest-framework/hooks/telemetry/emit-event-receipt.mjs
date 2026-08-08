@@ -33,8 +33,15 @@
  * Always exits 0 — a PostToolUse hook must never block a turn (ADR-005).
  */
 
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
+// readStdin and the phase enum live in hooks/enforcement/, the always-installed
+// tree, not here (0000028-ADR-002). hooks/telemetry/ is never present without
+// hooks/enforcement/, so these cross-directory imports are always resolvable.
+import { KNOWN_PHASES } from "../enforcement/phase-enum.mjs";
+import { readStdin } from "../enforcement/read-stdin.mjs";
+import { recordTelemetryFailure } from "./record-telemetry-failure.mjs";
 
 // Closed sets from telemetry-standards.md — the envelope's `phase`/`event`
 // fields are agent-supplied tool-call arguments, not validated by the MCP
@@ -42,79 +49,15 @@ import { join } from "node:path";
 // unvalidated string (e.g. "../../../etc/whatever") is a path-traversal risk
 // (CWE-22) even via node:path's `join`, which does not sandbox `..` segments.
 // Found and fixed during this feature's own P5 security review.
-const KNOWN_PHASES = new Set(["spec", "adr", "codegen", "validate", "security", "docs", "ship"]);
+// KNOWN_PHASES is imported from the shared phase enum (req-002, folding
+// backlog 0000057) so this guard cannot fall out of step with
+// check-telemetry-receipts.mjs or resolve-phase.mjs.
 const KNOWN_EVENT_TYPES = new Set([
   "phase_start", "phase_end", "phase_skip",
   "spec_gap", "validation_failure", "self_correction", "deviation",
   "migration_proposal", "context_pressure", "mcp_impact",
   "adr_decision", "security_finding", "retry_limit_exceeded", "doc_gap",
 ]);
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
-    process.stdin.on("end", () => resolve(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
-}
-
-// Best-effort durable failure marker — mirrors recordTelemetryFailure() in
-// emit-phase-start.mjs/emit-phase-end.mjs/context-pressure.mjs exactly (same
-// marker JSON shape, same plan/.telemetry-failures/ location, same
-// never-throws contract) so this hook's failures surface through the one
-// mechanism check-telemetry-failures.mjs already knows how to read.
-function recordTelemetryFailure(hookName, err, context = {}) {
-  try {
-    const cwd = context.cwd ?? process.cwd();
-    const errorType = context.errorType ?? err?.name ?? err?.constructor?.name ?? "Error";
-    const errorMessage = String(err?.message ?? err ?? "unknown error");
-    const slug =
-      errorMessage.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) ||
-      "unknown";
-    const rootCauseKey = `${hookName}::${errorType}::${slug}`;
-    const dir = join(cwd, "plan", ".telemetry-failures");
-    const fileSlug = rootCauseKey
-      .split("::")
-      .map((seg) => seg.replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "unknown")
-      .join("--");
-    const markerPath = join(dir, `${fileSlug}.json`);
-
-    mkdirSync(dir, { recursive: true });
-
-    const now = new Date().toISOString();
-    let occurrences = 1;
-    let firstSeen = now;
-    if (existsSync(markerPath)) {
-      try {
-        const prev = JSON.parse(readFileSync(markerPath, "utf-8"));
-        if (typeof prev.occurrences === "number") occurrences = prev.occurrences + 1;
-        if (prev.first_seen) firstSeen = prev.first_seen;
-      } catch {
-        // Corrupt/unreadable prior marker — overwrite fresh below.
-      }
-    }
-
-    const marker = {
-      hook: hookName,
-      root_cause_key: rootCauseKey,
-      error_type: errorType,
-      error_message: errorMessage,
-      phase: context.phase ?? null,
-      session_id: context.sessionId ?? null,
-      first_seen: firstSeen,
-      last_seen: now,
-      occurrences,
-    };
-
-    const tmpMarkerPath = `${markerPath}.tmp`;
-    writeFileSync(tmpMarkerPath, JSON.stringify(marker, null, 2));
-    renameSync(tmpMarkerPath, markerPath);
-  } catch {
-    // Marker write is best-effort — never let this throw (ADR-005).
-  }
-}
 
 function isToolCallError(toolResponse) {
   if (!toolResponse || typeof toolResponse !== "object") return false;

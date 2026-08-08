@@ -5,17 +5,17 @@ version: "1.0.0"
 ---
 # Language Quirks: en-GB
 
-This file documents deliberate exceptions — cases where a different convention is used, and why. Agents and humans consult this file before writing or correcting framework content.
+This file documents deliberate exceptions: cases where a different convention is used, and why. Agents and humans consult this file before writing or correcting framework content.
 
 ---
 
-## Category 1 — Code is never corrected
+## Category 1: Code is never corrected
 
 Code and identifiers (fenced blocks, inline spans, file paths, URLs, variable/function/class names, endpoint strings, config keys, CLI flags) are never spelling-corrected. This precedence applies throughout the categories below: where a term appears in code rather than prose, Category 1 wins.
 
 ---
 
-## Category 2 — American spelling exceptions (always, even in prose)
+## Category 2: American spelling exceptions (always, even in prose)
 
 These terms use American spelling in all contexts because they are the established industry standard in technical documentation.
 
@@ -29,7 +29,7 @@ These terms use American spelling in all contexts because they are the establish
 
 ---
 
-## Category 3 — American spelling in code and named technical concepts only
+## Category 3: American spelling in code and named technical concepts only
 
 In prose, use British spelling. In code (Category 1) or when referring to a named technical concept, the American form may appear.
 
@@ -41,7 +41,7 @@ In prose, use British spelling. In code (Category 1) or when referring to a name
 
 ---
 
-## Category 4 — British noun/verb distinction preserved
+## Category 4: British noun/verb distinction preserved
 
 | Form | Usage | Example |
 |------|-------|---------|
@@ -50,7 +50,7 @@ In prose, use British spelling. In code (Category 1) or when referring to a name
 
 ---
 
-## Category 5 — Capitalisation in prose
+## Category 5: Capitalisation in prose
 
 Always uppercase in running prose, regardless of surrounding text:
 
@@ -58,7 +58,7 @@ Always uppercase in running prose, regardless of surrounding text:
 
 ---
 
-## Category 6 — Countability
+## Category 6: Countability
 
 `data` and `metadata` are uncountable in this framework.
 
@@ -67,9 +67,9 @@ Always uppercase in running prose, regardless of surrounding text:
 
 ---
 
-## Category 7 — Prohibited punctuation
+## Category 7: Prohibited punctuation
 
-**Em dashes (`—`) must not be used** in any framework prose, headings, or documentation unless the syntax of the output format strictly requires one. They carry no meaning that a colon, comma, or full stop cannot convey more cleanly, and are strongly associated with AI-generated text.
+**Em dashes (U+2014) must not be used** in any framework prose, headings, or documentation unless the syntax of the output format strictly requires one. They carry no meaning that a colon, comma, or full stop cannot convey more cleanly, and are strongly associated with AI-generated text. Enforced at write time by `em-dash-guard.mjs`; see `formatting-standards.md` Section 4.
 
 - ✓ "Build Assessment: results and findings"
-- ✗ "Build Assessment — results and findings"
+- ✗ "Build Assessment" joined to "results and findings" by U+2014

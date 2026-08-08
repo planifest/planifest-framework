@@ -7,7 +7,7 @@ status: "filed | assessing | granted | denied"
 
 > Path: `plan/current/defect-reports/{seq}-{slug}.md`. Filing halts the reporting
 > agent's current task and hands control to the orchestrator (ADR-006). All five
-> sections are required — an incomplete report is returned to the filer, not
+> sections are required; an incomplete report is returned to the filer, not
 > assessed. Valid only from P3–P6 against live P0–P6 artifacts; nothing archived
 > at P7 can be the subject of a report. A re-filed report for a previously denied
 > defect escalates straight to the human.
@@ -24,7 +24,7 @@ status: "filed | assessing | granted | denied"
 
 ## Binding Upstream Artifact
 
-{{The exact artifact that causes the block: criterion, ADR, or spec section —
+{{The exact artifact that causes the block: criterion, ADR, or spec section,
 path + section/line reference. This is what a granted reversal would revise.}}
 
 ## Attempts Made
@@ -34,7 +34,7 @@ attempt cannot satisfy the requirement as specified.}}
 
 ## Evidence
 
-{{Test output, error text, or the concrete contradiction — verbatim where
+{{Test output, error text, or the concrete contradiction, verbatim where
 possible. The assessor judges on this, not on the narrative.}}
 
 ## Proposed Correction Scope

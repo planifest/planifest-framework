@@ -31,6 +31,10 @@
  * telemetry-standards.md) and is skipped; P7/P8/P9 all map to "ship" (the
  * ship-agent owns all three sub-phases).
  *
+ * PHASE_NUMBER_TO_ENUM is imported from ./phase-enum.mjs (req-002, folding
+ * backlog 0000057) rather than declared here, so it cannot drift from
+ * resolve-phase.mjs's PHASE_SKILLS or emit-event-receipt.mjs's KNOWN_PHASES.
+ *
  * Deliberately read-only and advisory, like check-telemetry-failures.mjs:
  * never blocks, never decides, only surfaces (ADR-005/ADR-001). Always
  * exits 0.
@@ -42,27 +46,8 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-const PHASE_NUMBER_TO_ENUM = {
-  1: "spec",
-  2: "adr",
-  3: "codegen",
-  4: "validate",
-  5: "security",
-  6: "docs",
-  7: "ship",
-  8: "ship",
-  9: "ship",
-};
-
-function readStdin() {
-  return new Promise((resolve) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
-    process.stdin.on("end", () => resolve(data.replace(/^﻿/, "")));
-    process.stdin.resume();
-  });
-}
+import { PHASE_NUMBER_TO_ENUM } from "./phase-enum.mjs";
+import { readStdin } from "./read-stdin.mjs";
 
 // Parse build-log.md's phase blocks: heading "### P<n> — ..." followed
 // (somewhere before the next "###" heading) by a "| Telemetry | <state> |"

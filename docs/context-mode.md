@@ -1,4 +1,4 @@
-# context-mode MCP — How It Works
+# context-mode MCP: How It Works
 
 [context-mode](https://github.com/mksglu/context-mode) is an MCP plugin that protects your agent's context window from flooding. Instead of piping large outputs directly into context, the agent routes them through a sandboxed knowledge base and retrieves only what it needs.
 
@@ -23,28 +23,28 @@ context-mode provides MCP tools that run operations in a sandbox and index the o
 | Native tool | context-mode equivalent | What happens |
 |-------------|------------------------|-------------|
 | `Grep` | `ctx_execute(language:"shell", code:"grep ...")` | Output indexed; agent searches the index |
-| `Bash` (search/fetch) | `ctx_execute` or `ctx_fetch_and_index` | Same — output stays in sandbox |
+| `Bash` (search/fetch) | `ctx_execute` or `ctx_fetch_and_index` | Same: output stays in sandbox |
 | `WebFetch` | `ctx_fetch_and_index(url:"...")` + `ctx_search(queries:["..."])` | Page fetched, chunked, indexed; agent queries |
 
-Only the agent's search results — typically a few hundred words — enter the context window.
+Only the agent's search results, typically a few hundred words, enter the context window.
 
 ---
 
 ## What `--context-mode-mcp` Installs
 
-Running setup with `--context-mode-mcp` installs enforcement hooks for Claude Code. Routing rules are provided automatically by the context-mode plugin's system prompt when the plugin is installed — no separate file is needed.
+Running setup with `--context-mode-mcp` installs enforcement hooks for Claude Code. Routing rules are provided automatically by the context-mode plugin's system prompt when the plugin is installed; no separate file is needed.
 
 ### Enforcement hooks (Claude Code only)
 
-For Claude Code, three `PreToolUse` hook scripts are installed to `.claude/hooks/context-mode/` and registered in `.claude/settings.json`. These fire synchronously before each tool call and block native tool use at the platform level — the agent cannot bypass them even accidentally.
+For Claude Code, three `PreToolUse` hook scripts are installed to `.claude/hooks/context-mode/` and registered in `.claude/settings.json`. These fire synchronously before each tool call and block native tool use at the platform level; the agent cannot bypass them even accidentally.
 
 | Hook | Intercepts | Redirects to |
 |------|-----------|-------------|
-| `block-grep.sh` | `Grep` — any use | `ctx_execute(language:"shell", code:"grep ...")` |
-| `block-bash.sh` | `Bash` — commands containing `grep`, `rg`, `curl`, `wget` | `ctx_execute` or `ctx_fetch_and_index` |
-| `block-webfetch.sh` | `WebFetch` — any use | `ctx_fetch_and_index` + `ctx_search` |
+| `block-grep.sh` | `Grep`: any use | `ctx_execute(language:"shell", code:"grep ...")` |
+| `block-bash.sh` | `Bash`: commands containing `grep`, `rg`, `curl`, `wget` | `ctx_execute` or `ctx_fetch_and_index` |
+| `block-webfetch.sh` | `WebFetch`: any use | `ctx_fetch_and_index` + `ctx_search` |
 
-**Bash allowlist** — these commands are always permitted through without inspection:
+**Bash allowlist**: these commands are always permitted through without inspection:
 `git`, `mkdir`, `rm`, `mv`, `cd`, `ls`, `npm install`, `pip install`
 
 When a hook blocks a call, it returns the exact `ctx_*` invocation the agent should use instead. The agent retries immediately with the correct tool.
@@ -106,9 +106,9 @@ sudo apt install jq      # Ubuntu / Debian
 | Tool | Routing rules (plugin) | Enforcement hooks |
 |------|:---:|:---:|
 | Claude Code | ✅ | ✅ |
-| Cursor | ✅ | — |
-| Windsurf | ✅ | — |
-| Copilot | ✅ | — |
-| Cline | ✅ | — |
+| Cursor | ✅ | N/A |
+| Windsurf | ✅ | N/A |
+| Copilot | ✅ | N/A |
+| Cline | ✅ | N/A |
 
-Routing rules are injected by the context-mode plugin's system prompt — available to any tool that supports the plugin. Enforcement hooks are a Claude Code-specific feature (PreToolUse hooks).
+Routing rules are injected by the context-mode plugin's system prompt, available to any tool that supports the plugin. Enforcement hooks are a Claude Code-specific feature (PreToolUse hooks).

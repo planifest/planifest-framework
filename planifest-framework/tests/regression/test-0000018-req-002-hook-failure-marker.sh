@@ -329,7 +329,16 @@ INPUT_E="{\"session_id\":\"sess-e-$RUN_ID\",\"cwd\":\"$SCRATCH_E\",\"hook_event_
 output=$(printf '%s' "$INPUT_E" | PLANIFEST_TELEMETRY_URL=$DEAD_URL node "$PHASE_START" req002-e 2>&1)
 exit_code=$?
 assert_exit_zero "$exit_code" "emit-phase-start: exits 0 even when the marker write itself cannot succeed"
-assert_equals "" "$output" "emit-phase-start: no output even when the marker write itself fails"
+# 0000028 req-003: a marker-write failure is no longer fully silent, by a
+# deliberate, ADR-backed decision. It now emits exactly one stderr line
+# naming the hook and the write error, so a genuinely-down backend combined
+# with an unwritable plan/ never produces zero signal. This regression-pack
+# copy is updated alongside the live test at tests/ to match, since the old
+# expectation was superseded on purpose, not broken by accident.
+assert_equals "1" "$(printf '%s' "$output" | awk 'END{print NR}')" \
+  "emit-phase-start: exactly one line of output when the marker write itself fails"
+assert_contains "emit-phase-start" "$output" \
+  "emit-phase-start: marker-write-failure line names the hook"
 
 rm -rf "$SCRATCH_E"
 

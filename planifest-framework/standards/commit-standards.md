@@ -8,9 +8,9 @@
 type(scope): short description
 ```
 
-- **type** — one of: `feat` `fix` `docs` `chore` `refactor` `test` `perf`
-- **scope** — feature ID (e.g. `0000003`) or component ID (e.g. `auth-service`)
-- **short description** — imperative mood, present tense, ≤72 characters total subject line
+- **type**: one of: `feat` `fix` `docs` `chore` `refactor` `test` `perf`
+- **scope**: feature ID (e.g. `0000003`) or component ID (e.g. `auth-service`)
+- **short description**: imperative mood, present tense, ≤72 characters total subject line
 
 ### Examples
 
@@ -25,7 +25,7 @@ fix(auth-service): correct token expiry calculation
 
 ### 1. Subject line ≤72 characters, entire `type(scope): description` line.
 
-### 2. Imperative mood, present tense: "add X", "fix Y", "remove Z" — not "added X", "fixed Y", "removes Z".
+### 2. Imperative mood, present tense: "add X", "fix Y", "remove Z"; not "added X", "fixed Y", "removes Z".
 
 ### 3. No AI attribution
 

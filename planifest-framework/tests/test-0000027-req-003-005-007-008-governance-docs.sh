@@ -50,8 +50,15 @@ echo "=== req-007: skill-scope ADR referenced from the process that adds a skill
 assert_contains "0000027-ADR-003" "$orch_content" "req-007: orchestrator references ADR-003 by ID"
 assert_contains "skill-scope test" "$orch_content" "req-007: orchestrator names the skill-scope test"
 
-assert_equals "yes" "$([ -f "$SCRIPT_DIR/../../plan/current/adr/ADR-003-skill-scope-principle.md" ] && echo yes || echo no)" \
-  "req-007: ADR-003 exists at plan/current/adr/"
+# 0000028: this asserted plan/current/adr/, which only ever holds the in-flight
+# feature's artifacts. 0000027's own P7 archived this ADR, so the assertion could
+# only pass during 0000027's run and has been red ever since. Point it at the
+# archive, where the artifact actually lives, and accept either location so the
+# test stays green both during a feature and after it ships.
+adr_003_live="$SCRIPT_DIR/../../plan/current/adr/ADR-003-skill-scope-principle.md"
+adr_003_archived=$(ls "$SCRIPT_DIR"/../../plan/_archive/0000027-*/adr/ADR-003-skill-scope-principle.md 2>/dev/null | head -1)
+assert_equals "yes" "$([ -f "$adr_003_live" ] || [ -n "$adr_003_archived" ] && echo yes || echo no)" \
+  "req-007: ADR-003 exists at plan/current/adr/ or in the 0000027 archive"
 
 echo ""
 echo "=== req-008: minimal Phase 1 artifact set agrees between workflow and spec-agent ==="

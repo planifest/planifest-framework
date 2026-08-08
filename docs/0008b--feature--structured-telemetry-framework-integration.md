@@ -1,6 +1,6 @@
 # Roadmap Item: Structured Telemetry Framework Integration (0008b)
 
-> **Status: resolved (2026-07-11).** Every deliverable below shipped, incrementally, across several features rather than as this single roadmap item — which is why this file sat unactioned since April while the work happened anyway. Verified live in the current framework: `--structured-telemetry-mcp` / `--backend-url` flags in `planifest-framework/setup.sh`; `hooks/telemetry/context-pressure.mjs`; the event envelope and emission gate in `standards/telemetry-standards.md`; a `## Telemetry` section in every phase skill (orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, docs-agent, ship-agent). Field names and the emission-gate mechanism diverged slightly from this spec (the shipped gate combines tool-presence *and* a `.claude/telemetry-enabled` sentinel, stronger than the tool-presence-only design here) — treat this file as historical context, not the current contract; `standards/telemetry-standards.md` is the source of truth. Filed via `plan/backlog/0000007-migrate-roadmap-docs-to-backlog/`.
+> **Status: resolved (2026-07-11).** Every deliverable below shipped, incrementally, across several features rather than as this single roadmap item, which is why this file sat unactioned since April while the work happened anyway. Verified live in the current framework: `--structured-telemetry-mcp` / `--backend-url` flags in `planifest-framework/setup.sh`; `hooks/telemetry/context-pressure.mjs`; the event envelope and emission gate in `standards/telemetry-standards.md`; a `## Telemetry` section in every phase skill (orchestrator, spec-agent, adr-agent, codegen-agent, validate-agent, security-agent, docs-agent, ship-agent). Field names and the emission-gate mechanism diverged slightly from this spec (the shipped gate combines tool-presence *and* a `.claude/telemetry-enabled` sentinel, stronger than the tool-presence-only design here). Treat this file as historical context, not the current contract; `standards/telemetry-standards.md` is the source of truth. Filed via `plan/backlog/0000007-migrate-roadmap-docs-to-backlog/`.
 
 ## Source
 Planifest Framework Review (April 2026) → Section 4: The Tooling Ecosystem & Observability
@@ -31,12 +31,12 @@ Wire the Planifest framework to the telemetry service via an explicit `--structu
 The HTTP backend service must be running before setup is executed. The service owns the single DuckDB connection that all MCP stdio sessions write through.
 
 ```powershell
-# Windows — run once as administrator
+# Windows: run once as administrator
 .\scripts\deploy.ps1          # builds, installs globally, registers Windows service
 ```
 
 ```bash
-# macOS / Linux — run once
+# macOS / Linux: run once
 ./scripts/deploy.sh
 ```
 
@@ -112,7 +112,7 @@ Every event shares this envelope. Fields are resolved as follows:
 | `model` | Model identifier, e.g. `claude-sonnet-4-6` |
 | `mcp_mode` | Determined at session start from active setup flags: `none`, `workspace`, `context`, or `workspace+context` |
 | `timestamp` | ISO 8601 at point of emission |
-| `data` | Typed payload — see per-event schemas below |
+| `data` | Typed payload, see per-event schemas below |
 
 ### Determining `mcp_mode`
 
@@ -129,7 +129,7 @@ The agent stamps this value on every event. It is the primary dimension for MCP 
 
 ## Skill Telemetry Sections
 
-Each affected `SKILL.md` gains a **Telemetry** section. The data fields shown are the exact required fields — the server rejects additional properties.
+Each affected `SKILL.md` gains a **Telemetry** section. The data fields shown are the exact required fields; the server rejects additional properties.
 
 ### planifest-orchestrator
 
@@ -137,17 +137,17 @@ Each affected `SKILL.md` gains a **Telemetry** section. The data fields shown ar
 ## Telemetry
 If `emit_event` is available:
 
-**phase_start** — emit before delegating to any phase skill:
+**phase_start**: emit before delegating to any phase skill:
 ```json
 { "phase_name": "<current phase name>" }
 ```
 
-**phase_end** — emit after each phase skill returns:
+**phase_end**: emit after each phase skill returns:
 ```json
 { "phase_name": "<phase>", "status": "pass" | "fail", "duration_ms": <elapsed> }
 ```
 
-**spec_gap** — emit when human clarification is required before proceeding:
+**spec_gap**: emit when human clarification is required before proceeding:
 ```json
 { "question": "<the question being asked>", "phase_name": "<current phase>" }
 ```
@@ -255,7 +255,7 @@ The hook is installed at:
 |---|---|
 | `planifest-framework/setup.sh` | Add `--structured-telemetry-mcp` flag; call `structured-telemetry-mcp setup --non-interactive --tool <tool>` |
 | `planifest-framework/setup.ps1` | Same as above (PowerShell) |
-| `planifest-framework/hooks/telemetry/context-pressure.mjs` | New hook — emits `context_pressure` when fill % exceeds threshold |
+| `planifest-framework/hooks/telemetry/context-pressure.mjs` | New hook: emits `context_pressure` when fill % exceeds threshold |
 | `skills/planifest-orchestrator/SKILL.md` | Add Telemetry section: `phase_start`, `phase_end`, `spec_gap` |
 | `skills/planifest-spec-agent/SKILL.md` | Add Telemetry section: `phase_start`, `phase_end`, `spec_gap` |
 | `skills/planifest-adr-agent/SKILL.md` | Add Telemetry section: `phase_start`, `phase_end` |
@@ -271,8 +271,8 @@ The hook is installed at:
 
 | Dependency | Required for |
 |---|---|
-| **0008a** — Structured Telemetry MCP Server | The ingestion backend. Must be deployed and running before setup. |
-| **0006c** — context-mode | Automated `context_pressure` events via `PostToolUse` hook. Without it, pressure data requires manual emission. |
+| **0008a**: Structured Telemetry MCP Server | The ingestion backend. Must be deployed and running before setup. |
+| **0006c**: context-mode | Automated `context_pressure` events via `PostToolUse` hook. Without it, pressure data requires manual emission. |
 
 ---
 

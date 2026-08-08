@@ -1,4 +1,4 @@
-# swift — Test Framework Standards
+# swift: Test Framework Standards
 
-> TODO: populate — content not yet added for this language.
+> TODO: populate, content not yet added for this language.
 > Override at `planifest-overrides/library-standards/swift/test-frameworks.md`.
