@@ -271,6 +271,19 @@ Gate accepted (human-confirmed, scope expanded for finding 2): P5 → P6 — 08 
 
 Gate accepted (zero drift, no stop): P6 → P7 — 08 Aug 2026
 
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 (P7 itself) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
+| Notes | Cross-reference check: only one live link found pointing at this feature's `plan/current/...` (`docs/decisions-index.md`'s new Feature 0000027 ADR-files line) — updated to the post-archive path before this block was written. Step 1 changelog was already written during P6 (this repo's established precedent, per `0000025`'s own changelog, is that docs-agent writes it at P6 — ship-agent's Step 1 target path is identical, so no duplicate write). No `.skips` file exists (no phases skipped). No `# REGRESSION-CANDIDATE:` tags found in any P3/P4 test file — no promotion candidates this run. |
+
 ## Summary (filled at P7)
 
 | Metric | Value |
