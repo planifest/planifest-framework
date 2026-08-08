@@ -235,6 +235,17 @@ ADR files: [plan/_archive/0000026-context-hook-and-telemetry-backstop-fixes-2026
 |-----|-------|--------|---------|
 | ADR-001 | product.yml components[] as Path Pointers, Not Cached Versions | accepted | Amends 0000016-ADR-002: under `versionPolicy: max-component-version`, `components[]` holds `{id, path}` pointers to each component's own `component.yml` instead of a cached `{id, version}`; `product-version.mjs` reads the live version at derivation time, closing the sync-drift gap that surfaced during this feature's own ship review |
 
+### Feature 0000027 — backlog-batch-governance-tooling-fixes
+
+ADR files: [plan/current/adr/](../plan/current/adr/) (archived to `plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/adr/` at P7)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | Telemetry emit_event Receipt Backstop | accepted | Extends the `check-telemetry-failures.mjs` hook family with a new `emit-event-receipt.mjs` (PostToolUse, matched on the `emit_event` MCP tool call) writing a durable receipt per successful call, and `check-telemetry-receipts.mjs` (sibling hook) cross-referencing build-log's per-phase "Telemetry: emitted" claims against those receipts — closes the remaining half of backlog 0000044 not already covered by 0000026 |
+| ADR-002 | Framework Update Policy as a New P0 Step | accepted | Adds a dedicated P0 Start Actions step (Resume Detection 1a) detecting a `planifest-framework/` dependency update and gating on human confirmation of both the update and its provenance, documented in `standards/framework-update-policy.md` — deliberately not an extension of `planifest-migrator` (different I/O shape) nor a new standalone skill (disproportionate to the mechanism's actual complexity) |
+| ADR-003 | Skill-Scope Principle — Does This Skill Earn Its Place | accepted | Records the governance test (does this skill provide governance or traceability the host tool cannot) with `planifest-test-writer`/`implementer`/`refactor`/`verify-by-execution` as worked examples (three retain, one retain-marginal); referenced from the orchestrator's Capability Skills guidance for future skill additions |
+| ADR-004 | Minimal Default Phase 1 Artifact Set | accepted | Names execution plan, requirements, scope, risk register, and domain glossary as the always-produced Phase 1 set; OpenAPI/Operational Model/SLO Definitions/Cost Model each gated by an explicit, checkable trigger condition — reflected identically in `feature-pipeline.md` and `planifest-spec-agent`, closing the "documentation theatre" gap from backlog 0000021 |
+
 ---
 
 *Template: decisions-index.template.md*

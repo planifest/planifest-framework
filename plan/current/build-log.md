@@ -254,6 +254,23 @@ Gate accepted (zero self-corrections, no stop): P4 → P5 — 08 Aug 2026
 
 Gate accepted (human-confirmed, scope expanded for finding 2): P5 → P6 — 08 Aug 2026
 
+### P6 — Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | 0 (small, targeted living-doc edits — no subagent overhead justified) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
+| Notes | Gate A: `docs/` exists — pass. Gate B (continuous run, auto-accepted): this run touched 2 existing components (`planifest-framework`, `setup-hook-integration`), no new components, no API surface, no data-ownership change — updating `component-registry.md`, `decisions-index.md` (4 new ADRs), `dependency-graph.md`, and `architecture-overview.md` (Last-updated bumps + one dependency-graph note on the new resolve-phase.mjs interposer, no new cross-component edge). `docs/api-index.md` remains N/A (no component exposes an API). Per-component docs: `src/setup-hook-integration/docs/quirks.md` gained Q-008 (cline.ps1 static-only verification); no other component-local doc changes needed (data contracts, interface contracts unchanged). Drift check: `docs/component-registry.md`'s Notes section still misstates that every component lives under `src/` (pre-existing, already flagged as unfixed REC-002 in `0000025`'s recommendations.md) — re-flagged as REC-001 here rather than silently fixed, per the drift-handling rule. `recommendations.md` produced with 5 recommendations, 1 deferred item, 2 tech debt rows; all 3 Deferred Items/Tech Debt rows filed to `plan/backlog/` (`0000056`–`0000058`) per the going-forward routing this same feature's req-003/backlog-0000045 precedent established. Audit trail written to `plan/changelog/0000027-backlog-batch-governance-tooling-fixes-2026-08-08.md`. |
+
+**P6 gate summary:** all living docs updated and consistent, zero unresolved drift beyond the pre-existing, already-flagged REC-001. Per the Phase Invocation Table exception (zero drift, all expected artifacts present), proceeding to P7 without a stop.
+
+Gate accepted (zero drift, no stop): P6 → P7 — 08 Aug 2026
+
 ## Summary (filled at P7)
 
 | Metric | Value |
