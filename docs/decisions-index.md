@@ -237,7 +237,7 @@ ADR files: [plan/_archive/0000026-context-hook-and-telemetry-backstop-fixes-2026
 
 ### Feature 0000027 — backlog-batch-governance-tooling-fixes
 
-ADR files: [plan/current/adr/](../plan/current/adr/) (archived to `plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/adr/` at P7)
+ADR files: [plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/adr/](../plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/adr/)
 
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|
