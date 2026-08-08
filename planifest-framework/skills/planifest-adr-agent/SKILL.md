@@ -33,7 +33,7 @@ A decision requires an ADR if it meets **any** of these criteria:
 | **Involves a security trade-off** - convenience vs security, performance vs isolation | Session storage strategy, token expiry policy, CORS configuration |
 | **Data ownership assignment** - which component owns which data | Every data ownership mapping gets an ADR |
 
-A decision does **not** require an ADR if it is already documented in the design requirements as a requirement (e.g., "support OAuth2" when the requirements mandate it) — direct consequences of the stack declaration and single-component implementation details don't either.
+A decision does **not** require an ADR if it is already documented in the design requirements as a requirement (e.g., "support OAuth2" when the requirements mandate it): direct consequences of the stack declaration and single-component implementation details don't either.
 
 ## Rules
 
@@ -56,11 +56,11 @@ A decision does **not** require an ADR if it is already documented in the design
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership. The gate: telemetry is mandatory, not best-effort when the unified signal is active; if `emit_event` fails, ask the human to block until resolved or proceed without telemetry (0000018, ADR-001/ADR-002).
 
-**`adr_decision`** — after each ADR is written to disk:
+**`adr_decision`**: after each ADR is written to disk:
 ```json
 { "adr_id": "ADR-001", "title": "<decision title>", "chosen_option": "<option selected>" }
 ```
 
 ## Commit Cadence (Hard Limit 7)
 
-Commit after every meaningful artifact write, not batched to the phase gate — see orchestrator Hard Limit 7.
+Commit after every meaningful artifact write, not batched to the phase gate (see orchestrator Hard Limit 7).
