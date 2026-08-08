@@ -1,4 +1,4 @@
-# Java — Library Standards
+# Java: Library Standards
 
 > See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/java/prefer-avoid.md` first.
 

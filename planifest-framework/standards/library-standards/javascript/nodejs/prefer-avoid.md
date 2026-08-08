@@ -1,4 +1,4 @@
-# JavaScript — Node.js — Library Standards
+# JavaScript, Node.js: Library Standards
 
 > See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/javascript/nodejs/prefer-avoid.md` first.
 > TypeScript Node.js projects should additionally follow `typescript/prefer-avoid.md`.
@@ -10,7 +10,7 @@
 | Concern | Prefer | Avoid | Reason |
 |---------|--------|-------|--------|
 | HTTP framework | `fastify` or `hono` | `express` (unless legacy), `koa`, `restify` | Fastify: fastest Node.js framework, schema validation built-in. Hono: edge-ready, ultralight |
-| Framework choice guide | `fastify` for complex APIs with plugins; `hono` for edge/serverless/simple APIs | — | Both are acceptable; record choice in ADR |
+| Framework choice guide | `fastify` for complex APIs with plugins; `hono` for edge/serverless/simple APIs | N/A | Both are acceptable; record choice in ADR |
 
 ## Database / ORM
 
@@ -18,7 +18,7 @@
 |---------|--------|-------|--------|
 | ORM | `drizzle` or `prisma` | `sequelize`, `typeorm`, `objection` | Sequelize/TypeORM have poor TS support and leaky abstractions |
 | Query builder | `drizzle` or `kysely` | `knex` | Knex lacks type safety; drizzle/kysely are TS-first |
-| Raw SQL (PostgreSQL) | `postgres` (porsager) or `pg` | — | For cases where ORM is overkill |
+| Raw SQL (PostgreSQL) | `postgres` (porsager) or `pg` | N/A | For cases where ORM is overkill |
 
 ## HTTP Client
 

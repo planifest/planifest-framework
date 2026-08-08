@@ -1,4 +1,4 @@
-# Go — Library Standards
+# Go: Library Standards
 
 > See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/go/prefer-avoid.md` first.
 
@@ -9,14 +9,14 @@
 | Concern | Prefer | Avoid | Reason |
 |---------|--------|-------|--------|
 | HTTP router | `chi` or `echo` | `gorilla/mux` (archived), `gin` (acceptable) | gorilla/mux is archived; chi is idiomatic stdlib-compatible; echo has good middleware |
-| Framework choice guide | `chi` for stdlib-compatible minimal routing; `echo` for middleware-rich APIs | — | Record choice in ADR |
+| Framework choice guide | `chi` for stdlib-compatible minimal routing; `echo` for middleware-rich APIs | N/A | Record choice in ADR |
 
 ## Database
 
 | Concern | Prefer | Avoid | Reason |
 |---------|--------|-------|--------|
 | PostgreSQL client | `pgx` v5 | `database/sql` + `lib/pq` alone, `gorm` | pgx is the most capable PostgreSQL driver; gorm's magic causes subtle bugs |
-| Query generation | `sqlc` | `gorm`, `ent` | sqlc generates type-safe Go from SQL — no runtime ORM magic |
+| Query generation | `sqlc` | `gorm`, `ent` | sqlc generates type-safe Go from SQL; no runtime ORM magic |
 | Migrations | `golang-migrate` | `goose` (acceptable) | golang-migrate is the most widely used |
 
 ## HTTP Client, Validation, Logging & Configuration
@@ -32,5 +32,5 @@
 
 | Rule | Detail |
 |------|--------|
-| Use `errgroup` for concurrent goroutines | `golang.org/x/sync/errgroup` — never fire-and-forget goroutines without error collection |
+| Use `errgroup` for concurrent goroutines | `golang.org/x/sync/errgroup`; never fire-and-forget goroutines without error collection |
 | Use `context` for cancellation | Always pass context through the call stack |

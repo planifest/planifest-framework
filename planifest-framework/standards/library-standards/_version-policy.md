@@ -10,7 +10,7 @@
 
 Use the latest stable version of each library at the time of scaffolding. Do not pin to an old major unless a specific compatibility constraint is documented in `quirks.md`.
 
-### 2. Exact or tilde pinning — no `^latest` or floating ranges
+### 2. Exact or tilde pinning: no `^latest` or floating ranges
 
 | Ecosystem | Correct | Incorrect |
 |-----------|---------|-----------|

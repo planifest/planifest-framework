@@ -1,4 +1,4 @@
-# JavaScript — Node.js — Test Framework Standards
+# JavaScript, Node.js: Test Framework Standards
 
 > See `testing-standards.md` for how to write tests.
 
@@ -14,5 +14,5 @@
 
 ## Notes
 
-- Use `testcontainers` for integration tests that need a real database — do not mock the DB
+- Use `testcontainers` for integration tests that need a real database; do not mock the DB
 - Vitest over Jest for new projects: Jest requires Babel or ts-jest for ESM; Vitest is native

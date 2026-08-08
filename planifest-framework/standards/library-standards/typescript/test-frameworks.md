@@ -1,4 +1,4 @@
-# TypeScript — Test Framework Standards
+# TypeScript: Test Framework Standards
 
 > See `testing-standards.md` for how to write tests. This file covers which framework to use.
 
@@ -14,9 +14,9 @@
 
 ## Coverage
 
-Use `vitest` built-in coverage (`@vitest/coverage-v8`). Avoid `istanbul` or `nyc` standalone — they are redundant when vitest coverage is configured.
+Use `vitest` built-in coverage (`@vitest/coverage-v8`). Avoid `istanbul` or `nyc` standalone; they are redundant when vitest coverage is configured.
 
 ## Notes
 
-- If the project predates Vitest and Jest is already deeply integrated, jest is acceptable — record in `quirks.md`
+- If the project predates Vitest and Jest is already deeply integrated, jest is acceptable; record in `quirks.md`
 - Playwright over Cypress for new projects: Playwright's auto-wait model reduces flakiness

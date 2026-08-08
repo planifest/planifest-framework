@@ -1,4 +1,4 @@
-# JavaScript — React — Test Framework Standards
+# JavaScript, React: Test Framework Standards
 
 > See `testing-standards.md` for how to write tests.
 
@@ -15,5 +15,5 @@
 ## Notes
 
 - `@testing-library/user-event` v14+ over `fireEvent` for simulating user interactions
-- Avoid snapshot tests for component HTML — they are brittle and don't test behaviour
+- Avoid snapshot tests for component HTML; they are brittle and don't test behaviour
 - Mock at the network layer (`msw`) not at the module level for integration tests
