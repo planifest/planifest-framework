@@ -102,6 +102,31 @@ Defects found while specifying, folded into REQ-002 rather than filed separately
 | Telemetry | emitted |
 | Notes | Parallelism constrained by ADR-004: REQ-002's extraction rewires one caller at a time with live verification between steps, because a hook broken mid-edit exits 0 and degrades to a silent no-op. REQ-006 is independent and runs in parallel. |
 
+### P6: Documentation
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T18:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-docs-agent |
+| Agents spawned | `0` |
+| MCP calls | `0` |
+| Parallel task batches | `0` |
+| Telemetry | emitted |
+| Notes | Gate A passed. Gate B auto-accepted under continuous run. Version set to 0.28.0 across `planifest-framework/component.yml`, `product.yml` and `docs/about.md`, confirmed by `product-version.mjs` deriving 0.28.0. Four living docs updated, `recommendations.md` produced, 8 backlog entries filed, 9 closed. Four drift findings flagged rather than silently fixed. |
+
+**P6 Gate B: docs update assessment (continuous run, auto-accepted).**
+This run changed the hook module topology (first intra-component module dependency, including two cross-directory edges), added a new enforcement hook, narrowed the definition of a telemetry emission failure, and fixed a wiring defect that had left seven enforcement hooks inert.
+Auto-accepted: updating `docs/component-registry.md`, `docs/dependency-graph.md`, `docs/architecture-overview.md` and `docs/decisions-index.md`. No update needed for `docs/api-index.md`, which does not exist and should not: no component exposes an API, and `design.md`'s Engineering Layer declares no frontend, no database, no cloud and no IaC.
+
+Drift found and flagged rather than fixed, recorded in `recommendations.md`:
+- `scope.md`'s first In Scope bullet still reads "all five telemetry hooks" for REQ-001 and names `emit-event-receipt.mjs` and `resolve-phase.mjs` among them. P1 corrected this to three everywhere else, including `design.md`'s own Corrections section, which records the fix as applied "in Scope above" (its own section) while `scope.md` went untouched. REC-010.
+- This build log has no P4 and no P5 phase block, though both phases ran and produced `verification-report.md`, `security-report.md`, three test repairs and the SEC-001 fix. Hard Limit 8 requires a block at every phase. REC-009, and it should be reconstructed before P7 archives this file.
+- `docs/decisions-index.md`'s "Last updated" read `0000025`, three features stale, while entries for `0000026` and `0000027` were present in the body. Advanced to this feature.
+- `src/setup-hook-integration/docs/interface-contract.md`'s outputs table named the context-mode hooks as `.sh` (they became `.mjs` at 0000017) and described telemetry installation as requiring both flags (0000018-ADR-001 removed the AND-condition). Corrected in place with the corrections marked inline, since the table also had to be updated for this feature's shared modules.
+
+Artifact completeness check against 0000027-ADR-004's minimal Phase 1 set: execution plan, requirements, scope, risk register and domain glossary all present. Operational Model, SLO Definitions and Cost Model are present too, above the minimum. No OpenAPI specification, correctly: no component exposes an API. No per-component `docs/` directory exists for `planifest-framework`, which is the component this feature actually changed, because it sits at the repo root rather than under `src/`; its documentation lives in `component.yml` and the living docs instead. Noted rather than left as a silent gap; backlog `0000061` and `0000062` govern that structural question and both were deliberately left at P0.
+
 Gate accepted: P0 at 2026-08-08T12:28:00Z
 
 ---
