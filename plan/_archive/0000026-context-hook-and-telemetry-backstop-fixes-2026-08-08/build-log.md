@@ -104,6 +104,21 @@ Feature ID finalized: `0000026-context-hook-and-telemetry-backstop-fixes`. Branc
 
 ---
 
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T00:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Version derived via `product-version.mjs` → `0.26.0` (max-component-version, planifest-framework dominant after human's minor-bump call). **Fast-follow, same session:** human asked whether the product.yml fix (item 3) had a documented requirements/ADR trail — it didn't, only changelog/build-log narrative. Wrote `0000026-ADR-001` (amends `0000016-ADR-002`) into this archive's `adr/` folder, added `docs/decisions-index.md` Feature 0000026 section, updated the 0000016 ADR-002 row to "amended by 0000026 ADR-001". Human also flagged no migration existed for adopter projects with an old-shape `product.yml` — added `planifest-framework/migrations/migrate-product-yml-component-paths.md` (this repo's own `product.yml` already hand-migrated, so it's a no-op here). Human chose to re-tag as `0.26.1` (patch) rather than amend `0.26.0` in place, since documentation completeness for an already-decided design change is patch-sized. `planifest-framework/component.yml`, `product.yml`, `docs/about.md` bumped to `0.26.1`; `product-version.mjs` reverified to derive `0.26.1` live. Full suite re-run clean (same pre-existing `cline.sh` failure only). `v0.26.0` tag deleted and replaced with `v0.26.1`, still local-only. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
