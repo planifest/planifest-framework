@@ -322,4 +322,8 @@ Gate accepted (zero drift, no stop): P6 → P7 — 08 Aug 2026
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Telemetry | confirmed-disabled |
-| Notes | Mid-P9, the human flagged a pronoun-clarity issue in Step 10's push/PR option phrasing (filed as backlog 0000059) — using corrected phrasing for the actual question asked below. |
+| Notes | Mid-P9, the human flagged a pronoun-clarity issue in Step 10's push/PR option phrasing (filed as backlog 0000059). `local-git-only` override active (`planifest-overrides/instructions/custom-001-local-git-only.md`) — Step 10's interactive prompt was skipped per protocol; proceeded directly to Option [2] (PR title/description output to the human). `restore-pr-attribution` override not present — AI-attribution footer omitted from the PR description, per default. Tag `v0.27.0` created locally. Marker pre-flight check (Step 9b): `git ls-files` on all 3 sentinels returned empty — correctly untracked. |
+
+**P9 gate summary:** ship complete. Tag `v0.27.0` created locally (not pushed, per `local-git-only`). PR description output to the human on the loop.
+
+Gate accepted (P9 complete): P9 — 08 Aug 2026
