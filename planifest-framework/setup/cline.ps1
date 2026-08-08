@@ -3,12 +3,12 @@
 #
 # Skills:    .clinerules/skills/{name}/SKILL.md     (loaded via .clinerules context)
 # Workflows: (none - Cline uses .clinerules for persistent instructions)
-# Boot file: .clinerules                            (project root - always-on rules file)
+# Boot file: .clinerules\00-planifest-boot.md        (sibling of skills\ - always-on rules file)
 
 @{
     SkillsDir        = '.clinerules\skills'
     WorkflowsDir     = ''
-    BootFile         = '.clinerules'
+    BootFile         = '.clinerules\00-planifest-boot.md'
     BootTemplate     = 'planifest-framework/templates/standard-boot.md'
 
     # Enforcement — Tier 1: native hooks adapter (REQ-009)
