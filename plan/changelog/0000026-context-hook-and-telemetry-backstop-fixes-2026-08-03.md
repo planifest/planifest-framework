@@ -2,7 +2,7 @@
 
 **Feature:** Context-mode hook false-positive fix and telemetry-failure-marker backstop hook
 **Pipeline run:** Change Pipeline (PC) — two independent bug fixes to existing components, picked up from `plan/backlog/` at P0
-**PR:** not yet raised — pending human review
+**PR:** https://github.com/planifest/planifest-framework/pull/53
 
 ## What Was Built
 
