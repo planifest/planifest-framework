@@ -106,20 +106,18 @@ rm -rf "$WS"
 
 # ── (e): setup.sh all (which includes the copilot target) also exits 0 ──────
 #
-# NOTE: as of this fix, "setup.sh all" is still blocked from reaching exit 0
-# by a separate, pre-existing, unrelated bug in setup/cline.sh: it sets
+# NOTE: as of this fix, "setup.sh all" was still blocked from reaching exit 0
+# by a separate, pre-existing, unrelated bug in setup/cline.sh: it set
 # TOOL_SKILLS_DIR=".clinerules/skills" (which creates ".clinerules" as a
 # directory via mkdir -p) and TOOL_BOOT_FILE=".clinerules" (the *same* path,
 # written as a plain file by write_boot_file's `echo "$content" > "$path"`),
-# so writing the boot file fails with "Is a directory". Previously this was
+# so writing the boot file failed with "Is a directory". Previously this was
 # masked because "all" crashed at the copilot step first (VALID_TOOLS
 # processes copilot before cline) — the self-copy fix in this requirement
-# unmasks it rather than causing it. Fixing cline.sh is out of scope for
-# req-003 (setup/cline.sh is not one of the files this requirement touches),
-# so the assertions below verify req-003's own fix in isolation (no self-copy
-# crash, copilot's own artifacts install correctly during "all") separately
-# from the full-suite exit code, which is left asserted (and expected to
-# still fail) so this gap stays visible rather than being silently dropped.
+# unmasked it rather than causing it. Fixing cline.sh was out of scope for
+# req-003 (setup/cline.sh is not one of the files that requirement touched);
+# it was fixed separately by 0000027-req-002 (boot file relocated to
+# .clinerules/00-planifest-boot.md), so the assertion below now passes.
 
 echo ""
 echo "=== (e): setup.sh all — req-003's fix holds even inside the 'all' run ==="
@@ -134,10 +132,8 @@ assert_equals "no" "$(grep_has 'identical (not copied)' /tmp/planifest_0000023_r
 assert_equals "yes" "$(file_exists ".github/hooks/adapters/copilot.mjs")" \
   "(e): setup.sh all still installs .github/hooks/adapters/copilot.mjs correctly"
 
-# Known pre-existing, unrelated blocker (see NOTE above) — left asserted so the
-# gap is visible rather than silently dropped. Expected to fail until
-# setup/cline.sh's boot-file/skills-dir path collision is fixed separately.
-assert_exit_zero "$ALL_EXIT" "(e): setup.sh all exits 0 (blocked by unrelated pre-existing cline.sh bug, see NOTE above — not a req-003 regression)"
+# Previously-known blocker (see NOTE above), fixed by 0000027-req-002.
+assert_exit_zero "$ALL_EXIT" "(e): setup.sh all exits 0 (cline.sh bug fixed by 0000027-req-002)"
 
 cd "$SCRIPT_DIR"
 rm -rf "$WS"
