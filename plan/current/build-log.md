@@ -102,6 +102,18 @@ P0 exchange — telemetry receipts: Q: `plan/.telemetry-receipts/` is not gitign
 P0 exchange — marker write silence: Q: A failing marker write currently produces no marker, no interrupt and
 no trace. Address it here or defer? / A: Add a stderr fallback line. Still exits 0, still never blocks.
 
+P0 exchange — design confirmation and push grant: Q: Confirm the design and I run P1 to P9 without stopping? /
+A: Confirmed at 08 Aug 2026 @ 01:28 PM BST. The human on the loop additionally granted express authorisation
+to push continually and to raise the pull request at the end.
+
+**Remote push grant (Hard Limit 7, per-session):** granted expressly by the human on the loop on
+2026-08-08. This is the stated exception to `planifest-overrides/instructions/custom-001-local-git-only.md`,
+which otherwise forbids fetch, pull and push. Scope of the grant: push the feature branch
+`feat/0000028-telemetry-hardening-and-enforcement-fixes` after each phase-gate commit, and raise the pull
+request at P9. Not in scope: pushing `main`, which is currently one commit ahead of `origin/main` at
+`2e32f31` from the human's own work and is theirs to push. A failed push is reported once and never blocks
+the pipeline.
+
 ---
 
 ## Scope Lock Challenge (P0, ADR-003 default parallel dispatch)
