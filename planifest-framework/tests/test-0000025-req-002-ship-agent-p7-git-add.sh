@@ -17,7 +17,7 @@ FRAMEWORK="$(cd "$SCRIPT_DIR/.." && pwd)"
 SHIP_SKILL="$FRAMEWORK/skills/planifest-ship-agent/SKILL.md"
 
 # Isolate Step 7 (from its heading to the next "## " heading).
-STEP7=$(sed -n '/^### Step 7 — Commit archive/,/^## P8/p' "$SHIP_SKILL")
+STEP7=$(sed -n '/^### Step 7: Commit archive/,/^## P8/p' "$SHIP_SKILL")
 
 # The documented git add command line itself.
 GIT_ADD_LINE=$(printf '%s\n' "$STEP7" | grep '^git add ')
@@ -51,7 +51,7 @@ assert_equals "7" "$PATH_COUNT" \
 echo ""
 echo "=== req-002: Step 6 archive mechanics untouched ==="
 
-STEP6=$(sed -n '/^### Step 6 — Archive plan\/current\//,/^### Step 6b/p' "$SHIP_SKILL")
+STEP6=$(sed -n '/^### Step 6: Archive plan\/current\//,/^### Step 6b/p' "$SHIP_SKILL")
 assert_contains "Copy-then-delete" "$STEP6" \
   "req-002: Step 6 still documents copy-then-delete archive mechanics"
 

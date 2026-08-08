@@ -47,7 +47,7 @@ assert_contains "same commit" "$CA_ARCHIVE" \
 echo ""
 echo "=== req-007: ship-agent cross-reference check ==="
 
-SA_STEP6=$(sed -n '/### Step 6 — Archive/,/### Step 6b/p' "$SHIP_AGENT")
+SA_STEP6=$(sed -n '/### Step 6: Archive/,/### Step 6b/p' "$SHIP_AGENT")
 assert_contains "Cross-reference check" "$SA_STEP6" \
   "req-007: ship-agent Step 6 has cross-reference check"
 assert_contains "decisions-index.md" "$SA_STEP6" \
