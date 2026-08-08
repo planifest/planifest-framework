@@ -43,8 +43,9 @@
 
 ## Scope
 - In:
-  - Bounded retry on network-level emission failures only, across all five telemetry hooks (`context-pressure`, `emit-phase-start`, `emit-phase-end`, `emit-event-receipt`, `resolve-phase`). Backlog `0000063` names three; discovery found five.
-  - Extraction of the duplicated emit-and-record logic, `readProductId()` (`0000054`), and the phase-enum maps (`0000057`) into shared modules.
+  - Bounded retry on network-level emission failures, in the three hooks that call `fetch` directly: `context-pressure`, `emit-phase-start`, `emit-phase-end`. `resolve-phase.mjs` makes no fetch call and delegates by spawning the emit hooks, so it inherits the fix transitively. `emit-event-receipt.mjs` writes a local file and has nothing to retry. Backlog `0000063`'s count of three was correct; the P0 discovery claim of five was an orchestrator error, corrected at P1 (see Corrections below).
+  - Extraction of the duplicated logic into shared modules, wider than the two backlog entries describe: `readProductId()` in 3 hooks (`0000054`), the phase-enum maps (`0000057`), `recordTelemetryFailure()` in 4 hooks, the emit-and-record block in 3, `getFlagPath()` in 2, and `readStdin()` across 12 hooks. Consolidating `readStdin()` also fixes a latent NFR-001 violation: only `context-pressure.mjs` and `resolve-phase.mjs` wire `stdin.on("error")`, so the other ten hang on a stdin stream error instead of exiting 0.
+  - Correction to `setup.sh:447`, where the tier-1 telemetry install globs `emit-phase-*.mjs` and would silently drop any new shared module, breaking the extraction for Cursor, Windsurf and Cline installs.
   - A stderr fallback line when a marker write itself fails, so the failure is never fully silent.
   - Gitignore entry for `plan/.telemetry-receipts/`, matching the existing `plan/.telemetry-failures/` treatment.
   - Refresh of this repo's stale install so the phase telemetry hooks are registered, then live verification of `resolve-phase.mjs` (`0000058`) and of the telemetry schema's `loop_iteration` and `phase_reversal_*` fields (`0000053`).
@@ -64,8 +65,16 @@
   - The broader AI writing-tells list from `0000026` beyond the em dash. Needs its own decision on which artifacts are in scope. Nothing here is blocked by it.
   - Whether `0000042`'s loopback approach should generalise to `block-grep.mjs` and `block-webfetch.mjs`. To be assessed at P1; the other two hooks may not share the pattern.
 
+## Corrections (P1)
+
+Recorded per the framework's requirement that documentation match reality after any deviation.
+
+- **Hook count for REQ-001.** P0 discovery asserted that five telemetry hooks carry the unretried-fetch defect and that backlog `0000063` understated it at three. That was wrong. The P0 check grepped for the absence of `RETRY_DELAYS_MS`, which establishes that no retry exists but says nothing about whether a `fetch` call exists. Direct inspection at P1 found `fetch` in exactly three hooks. `0000063`'s original count stands. Corrected in Scope above and in `feature-brief.md`.
+- **Em dash cleanup volume.** P0 cited roughly 870 files from an unscoped repo-wide count. Scoped to live artifacts only, excluding `plan/_archive/` and `plan/changelog/`, the real figure is 99 files and 772 occurrences. The unscoped whole-repo count is 1,010 files. Corrected in REQ-006.
+- **Duplication extent for REQ-002.** Backlog `0000054` and `0000057` together describe two duplicated helpers. P1 inspection found six, plus a latent NFR-001 violation in `readStdin()`. Scope widened accordingly, and `getSessionId()` was found to have three genuinely different behaviour profiles across its four copies, so it is explicitly excluded from consolidation as unsafe.
+
 ## Assumptions
-- The `--structured-telemetry-mcp` flag was passed for this install, inferred from the backend URL being hard-coded into the one registered hook - impact if wrong: the install refresh would not register the phase hooks at all, and US-004, US-005 plus `0000053` become unverifiable this run.
+- ~~The `--structured-telemetry-mcp` flag was passed for this install~~ **Resolved at P1, no longer an assumption.** `.claude/.planifest-setup-flags` records `["--context-mode-mcp","--structured-telemetry-mcp","--strict-orchestrator"]` with `backendUrl: http://localhost:3741`. REQ-004's precondition holds as verified fact.
 - `resolve-phase.mjs`'s `PreToolUse(Skill)` matcher and `tool_input.skill` field assumption may be wrong, since neither has ever been observed firing - impact if wrong: US-005 becomes a fix rather than a verification, expanding P3.
 - The downstream retry fix in `0000063` is a sound starting point, verified there against a controllable backend - impact if wrong: the 2 attempts at 300ms budget needs re-derivation, though the network-versus-HTTP distinction holds regardless.
 - The one-off em dash cleanup can be applied mechanically to live artifacts without changing meaning - impact if wrong: a replacement alters the sense of a sentence, which P4 and P5 review must catch.
