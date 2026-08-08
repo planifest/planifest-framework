@@ -52,11 +52,42 @@ the remainder of this run and will not be re-asked.
 | Start | `2026-08-08T12:30:00Z` |
 | Model tier | primary, with cheaper-tier subagents for per-requirement drafting |
 | Skills loaded | planifest-spec-agent |
+| Agents spawned | `6` |
+| MCP calls | `3` |
+| Parallel task batches | `1` |
+| Telemetry | confirmed-disabled |
+| Notes | Six requirements plus supporting artifacts, drafted across one batch of six parallel subagents. Three P0 corrections and two newly found defects, detailed below. |
+
+Telemetry: the unified signal is active per `.claude/.planifest-setup-flags`, but the phase hooks are not
+registered in this install, which is precisely what REQ-004 fixes. No `phase_start` or `phase_end` could be
+emitted for P1. Recorded as `confirmed-disabled` rather than `emitted`, since claiming emission that did not
+happen is the failure mode `check-telemetry-receipts.mjs` exists to catch. Expected to become `emitted` from
+the phase following REQ-004.
+
+P1 corrections to P0 (documentation must match reality):
+- REQ-001 covers three hooks, not five. The P0 check grepped for the absence of `RETRY_DELAYS_MS`, which
+  proves no retry exists but says nothing about whether a `fetch` does. Backlog `0000063` was right.
+- Em dash cleanup is 99 live files and 772 occurrences, not the roughly 870 from an unscoped count.
+- REQ-002 duplication is six helpers, not the two named by backlog `0000054` and `0000057`.
+
+Defects found while specifying, folded into REQ-002 rather than filed separately:
+- `readStdin()` has no stdin error handler in 10 of 12 hooks, so they hang rather than exit 0 on a stdin
+  stream error. This violates NFR-001 in the code today.
+- `setup.sh:447` globs `emit-phase-*.mjs` for tier-1 telemetry installs and would silently drop a shared
+  module for Cursor, Windsurf and Cline.
+
+### P2 — Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T12:45:00Z` |
+| Model tier | primary, with cheaper-tier subagents per ADR |
+| Skills loaded | planifest-adr-agent |
 | Agents spawned | `{{count}}` |
 | MCP calls | `{{count}}` |
 | Parallel task batches | `{{count}}` |
 | Telemetry | `{{pending}}` |
-| Notes | Six requirements plus three closures. Decomposed across parallel subagents per the standing subagent-decomposition override. |
+| Notes | Four architectural decisions identified at P1. |
 
 Gate accepted: P0 — 2026-08-08T12:28:00Z
 
