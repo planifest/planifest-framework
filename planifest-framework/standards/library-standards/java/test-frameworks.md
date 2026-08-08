@@ -1,4 +1,4 @@
-# Java — Test Framework Standards
+# Java: Test Framework Standards
 
 > See `testing-standards.md` for how to write tests.
 

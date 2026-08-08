@@ -1,4 +1,4 @@
-# JavaScript — React — Library Standards
+# JavaScript, React: Library Standards
 
 > See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/javascript/react/prefer-avoid.md` first.
 > Also applies to TypeScript React projects. TypeScript projects should additionally follow `typescript/prefer-avoid.md`.

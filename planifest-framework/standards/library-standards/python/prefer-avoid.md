@@ -1,4 +1,4 @@
-# Python — Library Standards
+# Python: Library Standards
 
 > See `_version-policy.md` for pinning rules. Check `planifest-overrides/library-standards/python/prefer-avoid.md` first.
 
