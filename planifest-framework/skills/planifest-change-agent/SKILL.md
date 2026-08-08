@@ -1,6 +1,6 @@
 ---
 name: planifest-change-agent
-description: Handles targeted modifications to existing features — loads domain context, implements the minimum change, validates, and updates documentation. Invoked via the Change Pipeline route.
+description: Handles targeted modifications to existing features: loads domain context, implements the minimum change, validates, and updates documentation. Invoked via the Change Pipeline route.
 bundle_templates: [component.template.yml, change-summary.template.md]
 bundle_standards: [code-quality-standards.md, telemetry-standards.md]
 ---
@@ -38,7 +38,7 @@ Do not exhaust token limits by loading all files. Read top-down selectively:
 **Blast radius analysis:**
 
 1. Read `docs/dependency-graph.md` to find all components that consume or are consumed by the affected component(s)
-2. Classify each dependency's coupling (API consumer, data reader, event subscriber, shared type consumer) and impact level (Direct / Indirect — internal behaviour changes, interface unchanged / None)
+2. Classify each dependency's coupling (API consumer, data reader, event subscriber, shared type consumer) and impact level (Direct / Indirect: internal behaviour changes, interface unchanged / None)
 3. Only components with **Direct** impact require contract test updates and consumer notification
 4. Record the full blast radius in the Change Summary (Phase 2 output header)
 
@@ -47,7 +47,7 @@ Do not exhaust token limits by loading all files. Read top-down selectively:
 Implement the minimum necessary change.
 
 **Rules:**
-- **One question at a time.** When you need human input — to resolve an ambiguity, confirm a migration proposal, or clarify scope — ask one question.
+- **One question at a time.** When you need human input (to resolve an ambiguity, confirm a migration proposal, or clarify scope), ask one question.
 - Do not refactor code outside the scope of the change request.
 - If the change request is ambiguous, implement the narrowest interpretation and document your reasoning.
 - If you discover tech debt or quirks while working, write them to `src/{component-id}/docs/quirks.md` or `src/{component-id}/docs/tech-debt.md` - do not fix them as part of this change.
@@ -94,9 +94,9 @@ Write `plan/changelog/{feature-id}-<YYYY-MM-DD>.md` as the audit trail for this 
 
 ### Phase 6 - Archive
 
-The Change Pipeline has no ship-agent hand-off — this phase is the change-agent's own close-out. Do not skip it: leaving `plan/current/` in place misleads future adoption-mode detection (Standard Iterative mode is detected by scanning `plan/_archive/`).
+The Change Pipeline has no ship-agent hand-off: this phase is the change-agent's own close-out. Do not skip it: leaving `plan/current/` in place misleads future adoption-mode detection (Standard Iterative mode is detected by scanning `plan/_archive/`).
 
-**Copy-then-delete** (never use atomic move — mirrors the ship-agent's P7 Step 6):
+**Copy-then-delete** (never use atomic move; mirrors the ship-agent's P7 Step 6):
 
 1. Determine archive path: `plan/_archive/{feature-id}-{YYYY-MM-DD}/` (today's date).
 2. If the path exists, use `{feature-id}-{YYYY-MM-DD}-2/`, `-3/`, etc.
@@ -106,7 +106,7 @@ The Change Pipeline has no ship-agent hand-off — this phase is the change-agen
 
 **Cross-reference check (before moving, not after):**
 
-Search the repo for links pointing at the pre-move path — `docs/*.md`, `src/*/docs/*.md`, `plan/changelog/*.md`, and any other living doc that might reference `plan/current/adr/`, `plan/current/...`, or the feature's slug directly. Update every found reference to the new archive path in the **same commit** as the move.
+Search the repo for links pointing at the pre-move path: `docs/*.md`, `src/*/docs/*.md`, `plan/changelog/*.md`, and any other living doc that might reference `plan/current/adr/`, `plan/current/...`, or the feature's slug directly. Update every found reference to the new archive path in the **same commit** as the move.
 
 ## New Component Handoff
 
@@ -135,22 +135,22 @@ Blast radius: {list of components in the dependency chain}
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership. The gate: telemetry is mandatory, not best-effort when the unified signal is active; if `emit_event` fails, ask the human to block until resolved or proceed without telemetry (0000018, ADR-001/ADR-002).
 
-**`deviation`** — when implementation diverges from the confirmed design:
+**`deviation`**: when implementation diverges from the confirmed design:
 ```json
 { "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }
 ```
 
-**`migration_proposal`** — before writing a migration proposal file:
+**`migration_proposal`**: before writing a migration proposal file:
 ```json
 { "component_id": "<component>", "proposal_path": "src/<id>/docs/migrations/proposed-<desc>.md", "destructive": true | false }
 ```
 
-**`self_correction`** — when retrying a failed action:
+**`self_correction`**: when retrying a failed action:
 ```json
 { "phase_name": "change", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
 ```
 
-**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+**`retry_limit_exceeded`**: when the 5-attempt escalation ceiling is hit:
 ```json
 { "phase_name": "change", "action_id": "<action>", "attempt_count": 5 }
 ```

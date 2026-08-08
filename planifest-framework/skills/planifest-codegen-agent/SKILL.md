@@ -17,7 +17,7 @@ hooks:
 
 When `Build target: docker` is declared in `plan/current/design.md`:
 - **Never** check host-installed runtimes or tools (do not run `node`, `dotnet`, `python`, `go`, `ruby`, `java`, or equivalent CLI commands against the host)
-- **Never** fail or warn because a runtime is absent on the host — it is expected to be absent
+- **Never** fail or warn because a runtime is absent on the host; it is expected to be absent
 - Scaffold Dockerfile-first: a working `Dockerfile` (multi-stage where applicable) is the primary build artifact
 - Generate `Dockerfile` and `docker-compose.yml` (or equivalent) before any source code
 - All validation runs via `docker build` and `docker run`, not via host toolchain
@@ -26,7 +26,7 @@ When `Build target: docker` is declared in `plan/current/design.md`:
 
 ## Input
 
-**Precision Reading Protocol:** scope your context by navigating precisely — do not read the entire `plan/` directory unconditionally.
+**Precision Reading Protocol:** scope your context by navigating precisely: do not read the entire `plan/` directory unconditionally.
 
 > **Context-Mode Protocol:** when available, use `ctx_execute_file` for analysis-only reads and `ctx_execute(language:"shell")` for grepping across `src/`; use `Read` only when editing.
 
@@ -60,7 +60,7 @@ When the feature defines multiple components, build them in dependency order: sh
 
 If two components have a circular dependency, halt and escalate - this indicates a design flaw that the spec-agent should resolve.
 
-## Library Standards — Pre-Scaffold Check
+## Library Standards: Pre-Scaffold Check
 
 Before writing any dependency manifest (`package.json`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `composer.json`, `pom.xml`, `build.gradle`, `pubspec.yaml`, or equivalent):
 
@@ -68,15 +68,15 @@ Before writing any dependency manifest (`package.json`, `pyproject.toml`, `go.mo
 2. Check `planifest-overrides/library-standards/{language}/prefer-avoid.md` first (if `planifest-overrides/` exists)
 3. Fall back to `planifest-framework/standards/library-standards/{language}/prefer-avoid.md`
 4. Also check `planifest-framework/standards/library-standards/databases/prefer-avoid.md` if a database client is being added
-5. Cross-reference every dependency against the avoid list — substitute the preferred alternative for any match
+5. Cross-reference every dependency against the avoid list: substitute the preferred alternative for any match
 6. Follow `planifest-framework/standards/library-standards/_version-policy.md` for version pinning
-7. If an avoided library has no alternative for a specific requirement: record an exception in `src/{component-id}/docs/quirks.md` with justification and escalate — do not silently use the avoided library
+7. If an avoided library has no alternative for a specific requirement: record an exception in `src/{component-id}/docs/quirks.md` with justification and escalate; do not silently use the avoided library
 
 If `planifest-overrides/` does not exist or the language subdir is a stub (contains `TODO: populate`), skip the override check and use framework defaults. If the framework subdir is also a stub, skip the library audit for that language and proceed.
 
 ## Rules
 
-**One question at a time.** When you need human input — to resolve a blocker, escalate a TDD failure, or confirm a deviation — ask one question.
+**One question at a time.** When you need human input (to resolve a blocker, escalate a TDD failure, or confirm a deviation), ask one question.
 
 **Implement against the requirements:**
 - If building an API, the OpenAPI spec defines the contract. Implement every endpoint it describes. Do not add or remove endpoints.
@@ -98,7 +98,7 @@ If `planifest-overrides/` does not exist or the language subdir is a stub (conta
 
 **TDD Inner Loop Protocol:**
 
-For each functional requirement, orchestrate three sub-agents in sequence before moving to the next requirement. This is the mandatory implementation discipline — not optional.
+For each functional requirement, orchestrate three sub-agents in sequence before moving to the next requirement. This is the mandatory implementation discipline, not optional.
 
 ```
 for each requirement in plan/current/requirements/:
@@ -114,7 +114,7 @@ for each requirement in plan/current/requirements/:
          → wait for all-suite GREEN confirmation
       break
     else if attempt >= 3:
-      ESCALATE to human — do not proceed to next requirement
+      ESCALATE to human: do not proceed to next requirement
       wait for human direction before continuing
 ```
 
@@ -122,7 +122,7 @@ for each requirement in plan/current/requirements/:
 
 **Escalation format** (after 3 failed red→green attempts on one requirement):
 ```
-TDD LOOP BLOCKED — human intervention required
+TDD LOOP BLOCKED: human intervention required
 
 Requirement: {req-id} ({slug})
 Test file: {path}
@@ -164,7 +164,7 @@ Recommended action: {what the human should do}
   - Increment the minor version (e.g. `0.12.0` → `0.13.0`)
   - Set the `feature` field to the current feature ID (e.g. `0000013-codegen-component-version-bump`)
 - Include `planifest-framework/component.yml` in the P3 commit so the ship-agent reads the correct version when creating the git tag.
-- This applies to all framework-modifying features — docs-only, SKILL.md, template, migration, and code changes alike.
+- This applies to all framework-modifying features: docs-only, SKILL.md, template, migration, and code changes alike.
 
 **Quirks and tech debt:**
 - If something doesn't fit cleanly, write it to `src/{component-id}/docs/quirks.md` and add it to the `quality.quirks` array in `component.yml`. Do not silently work around it.
@@ -175,8 +175,8 @@ Recommended action: {what the human should do}
 Follows the canonical Parallelism Directive (Parallelism Rules) in `planifest-framework/standards/agent-dispatch-standards.md`. Independent implementation work MUST be parallelised. Run this checklist **before writing any implementation code**:
 
 1. **List all requirements** for this phase from `plan/current/requirements/`.
-2. **Map dependencies** — a requirement depends on another only if it imports types from it, reads files it produces, or builds on a contract it defines.
-3. **Dispatch all leaf requirements** (no dependencies on siblings) **in a single parallel batch** — one Agent call per requirement in a single message; wait for them to complete, then dispatch dependent requirements in the next batch.
+2. **Map dependencies**: a requirement depends on another only if it imports types from it, reads files it produces, or builds on a contract it defines.
+3. **Dispatch all leaf requirements** (no dependencies on siblings) **in a single parallel batch**: one Agent call per requirement in a single message; wait for them to complete, then dispatch dependent requirements in the next batch.
 4. **Record batch count in build log.**
 
 | MUST parallelise | Cannot parallelise |
@@ -187,32 +187,32 @@ Follows the canonical Parallelism Directive (Parallelism Rules) in `planifest-fr
 
 If you cannot identify any parallelism opportunity, state the dependency reason explicitly in the build log before proceeding sequentially.
 
-**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly — see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
+**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly; see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
 
 ## Telemetry
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership. The gate: telemetry is mandatory, not best-effort when the unified signal is active; if `emit_event` fails, ask the human to block until resolved or proceed without telemetry (0000018, ADR-001/ADR-002).
 
-**`deviation`** — when implementation diverges from the confirmed design:
+**`deviation`**: when implementation diverges from the confirmed design:
 ```json
 { "component_id": "<component>", "description": "<what changed and why>", "severity": "low" | "medium" | "high" }
 ```
 
-**`migration_proposal`** — before writing a migration proposal file:
+**`migration_proposal`**: before writing a migration proposal file:
 ```json
 { "component_id": "<component>", "proposal_path": "src/<id>/docs/migrations/proposed-<desc>.md", "destructive": true | false }
 ```
 
-**`self_correction`** — when retrying a failed action:
+**`self_correction`**: when retrying a failed action:
 ```json
 { "phase_name": "codegen", "attempt_number": <n>, "action_id": "<action>", "correction_type": "<type>" }
 ```
 
-**`retry_limit_exceeded`** — when the 5-attempt escalation ceiling is hit:
+**`retry_limit_exceeded`**: when the 5-attempt escalation ceiling is hit:
 ```json
 { "phase_name": "codegen", "action_id": "<action>", "attempt_count": 5 }
 ```
 
 ## Commit Cadence (Hard Limit 7)
 
-Commit after every meaningful artifact write, not batched to the phase gate — see orchestrator Hard Limit 7.
+Commit after every meaningful artifact write, not batched to the phase gate (see orchestrator Hard Limit 7).
