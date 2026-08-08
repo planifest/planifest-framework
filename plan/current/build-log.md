@@ -96,10 +96,10 @@ Defects found while specifying, folded into REQ-002 rather than filed separately
 | Start | `2026-08-08T12:55:00Z` |
 | Model tier | primary for the sequential extraction, cheaper-tier subagents for independent work |
 | Skills loaded | planifest-codegen-agent, planifest-test-writer, planifest-implementer, planifest-refactor |
-| Agents spawned | `{{count}}` |
-| MCP calls | `{{count}}` |
-| Parallel task batches | `{{count}}` |
-| Telemetry | `{{pending}}` |
+| Agents spawned | `4` |
+| MCP calls | `6` |
+| Parallel task batches | `2` |
+| Telemetry | emitted |
 | Notes | Parallelism constrained by ADR-004: REQ-002's extraction rewires one caller at a time with live verification between steps, because a hook broken mid-edit exits 0 and degrades to a silent no-op. REQ-006 is independent and runs in parallel. |
 
 Gate accepted: P0 at 2026-08-08T12:28:00Z
@@ -259,3 +259,24 @@ Notes on the two closure-only entries:
 | Self-corrections | `{{count}}` |
 | Phases skipped | `{{list or "none"}}` |
 | Phases with a recorded telemetry gap | `{{count}}` |
+
+## P3 Outcomes
+
+REQ-001, REQ-002, REQ-003 and REQ-006 delivered in two parallel subagent batches. REQ-004 and REQ-005 ran
+sequentially, since REQ-005 cannot observe anything until REQ-004 registers the hooks.
+
+Telemetry became live during this phase. REQ-004's install refresh registered the phase hooks for the first
+time in this repo, and a real Skill invocation was then observed firing the full chain through to the
+backend (`phase_start (1)` for session `e905cb67-eee1-4e4b-b889-baa96ab4996a`). This phase block is the
+first in this run that can honestly record `emitted` rather than `confirmed-disabled`.
+
+Interrupted-run recovery was exercised for real, not simulated. The session ended between
+`refresh-delete-boot-files.sh` and the `setup.sh` re-invocation, leaving `CLAUDE.md` deleted and
+`attemptStatus: "pending"` on disk. On resume, `planifest-refresh-setup` Step 2's recovery path identified
+the state and replayed the recorded `attemptedCommand` without re-running detection. It worked as designed.
+
+Three test repairs were needed, all recorded in commit `6d4baf3`. Two were stale expectations superseded by
+this feature's own deliberate changes rather than accidental breakage, and one was a genuine test-isolation
+defect. In every case the assertion was corrected to match intended behaviour rather than bypassed.
+
+Verification detail for REQ-004 and REQ-005 is in `plan/current/verification-report.md`.
