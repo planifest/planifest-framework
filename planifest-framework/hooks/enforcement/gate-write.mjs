@@ -17,6 +17,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { basename, join, normalize, resolve } from "node:path";
 
+import { readStdin } from "./read-stdin.mjs";
+
 // Always-permitted: planning/doc artefacts and Planifest internal files
 const ALWAYS_PERMITTED_PREFIXES = ["plan/", "plan\\", "docs/", "docs\\"];
 const ALWAYS_PERMITTED_FILES = [
@@ -28,16 +30,6 @@ const ALWAYS_PERMITTED_FILES = [
 
 // Headings that introduce the component paths list in design.md (ADR-004)
 const PATHS_SECTION_RE = /^##\s+(Component Paths|Scope)\s*$/im;
-
-function readStdin() {
-  return new Promise((res) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (c) => { data += c; });
-    process.stdin.on("end", () => res(data.replace(/^\uFEFF/, "")));
-    process.stdin.resume();
-  });
-}
 
 function norm(p) {
   return normalize(p).replace(/\\/g, "/").toLowerCase();
