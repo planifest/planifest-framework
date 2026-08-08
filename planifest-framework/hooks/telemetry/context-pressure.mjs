@@ -45,8 +45,15 @@
  *     }
  */
 
-import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { statSync } from "node:fs";
+
+// readStdin lives in hooks/enforcement/, the always-installed tree, not here
+// (0000028-ADR-002). hooks/telemetry/ is never present without
+// hooks/enforcement/, so this cross-directory import is always resolvable.
+import { readStdin } from "../enforcement/read-stdin.mjs";
+import { postEvent } from "./emit-event.mjs";
+import { readProductId } from "./read-product-id.mjs";
+import { recordTelemetryFailure } from "./record-telemetry-failure.mjs";
 
 const THRESHOLD_PCT = 70;
 // Rough estimate: ~900 KB of JSONL transcript ≈ full 200K token context window.
@@ -54,17 +61,12 @@ const THRESHOLD_PCT = 70;
 const ESTIMATED_MAX_BYTES = 900_000;
 const BACKEND_URL = process.env.PLANIFEST_TELEMETRY_URL ?? "http://localhost:3741";
 
-function readStdin() {
-  return new Promise((resolve, reject) => {
-    let data = "";
-    process.stdin.setEncoding("utf-8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
-    process.stdin.on("end", () => resolve(data.replace(/^\uFEFF/, "")));
-    process.stdin.on("error", reject);
-    process.stdin.resume();
-  });
-}
-
+// Not consolidated (req-002, deliberate): getSessionId has 3 genuinely
+// different behaviour profiles across its 4 copies. This one uses a
+// 2-priority check (transcript path, then input.session_id) with a ppid
+// fallback and never creates a session file, unlike emit-phase-start.mjs's
+// 4-priority create-if-absent variant. Merging them would be a behaviour
+// change, not a refactor. See plan/current/tech-debt.md.
 function getSessionId(input) {
   if (input.transcript_path) {
     const match = input.transcript_path.match(/([a-f0-9-]{36})\.jsonl$/i);
@@ -72,88 +74,6 @@ function getSessionId(input) {
   }
   if (input.session_id) return input.session_id;
   return `pid-${process.ppid}`;
-}
-
-// Declared product_id source (req-001): product.yml's top-level `id` field,
-// resolved relative to the hook's own `cwd`. No git-derived or path-shaped
-// fallback — an absent/unparseable/`id`-less product.yml is a hard failure
-// that propagates to the caller's top-level try/catch and is routed through
-// recordTelemetryFailure() below (never a silent path-shaped fallback).
-function readProductId(cwd) {
-  const text = readFileSync(join(cwd, "product.yml"), "utf-8");
-  for (const raw of text.split(/\r?\n/)) {
-    const noComment = raw.replace(/#.*$/, "");
-    const m = noComment.match(/^id:\s*(.*)$/);
-    if (!m) continue;
-    let value = m[1].trim();
-    if (/^"[^"]*"$/.test(value) || /^'[^']*'$/.test(value)) {
-      value = value.slice(1, -1).trim();
-    } else if (/["']/.test(value)) {
-      throw new Error("product.yml id field is malformed (unbalanced quoting)");
-    }
-    if (!value || /^(null|~)$/i.test(value)) {
-      throw new Error("product.yml id field is empty");
-    }
-    return value;
-  }
-  throw new Error("product.yml has no top-level id field");
-}
-
-// Best-effort durable failure marker (req-002, ADR-002) — see file header for
-// the format contract. Never throws; a failure here is swallowed so it can
-// never affect the hook's exit-zero/never-block behaviour (NFR-001).
-function recordTelemetryFailure(hookName, err, context = {}) {
-  try {
-    const cwd = context.cwd ?? process.cwd();
-    const errorType = context.errorType ?? err?.name ?? err?.constructor?.name ?? "Error";
-    const errorMessage = String(err?.message ?? err ?? "unknown error");
-    const slug =
-      errorMessage.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 60) ||
-      "unknown";
-    const rootCauseKey = `${hookName}::${errorType}::${slug}`;
-    const dir = join(cwd, "plan", ".telemetry-failures");
-    // Colon-free filename (Windows-safe) — "::" separators collapse to "--".
-    // "::" segment separators are preserved as "--"; unsafe characters within
-    // each segment collapse to a single "-" (Windows-safe filename).
-    const fileSlug = rootCauseKey
-      .split("::")
-      .map((seg) => seg.replace(/[^a-zA-Z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "unknown")
-      .join("--");
-    const markerPath = join(dir, `${fileSlug}.json`);
-
-    mkdirSync(dir, { recursive: true });
-
-    const now = new Date().toISOString();
-    let occurrences = 1;
-    let firstSeen = now;
-    if (existsSync(markerPath)) {
-      try {
-        const prev = JSON.parse(readFileSync(markerPath, "utf-8"));
-        if (typeof prev.occurrences === "number") occurrences = prev.occurrences + 1;
-        if (prev.first_seen) firstSeen = prev.first_seen;
-      } catch {
-        // Corrupt/unreadable prior marker — overwrite fresh below.
-      }
-    }
-
-    const marker = {
-      hook: hookName,
-      root_cause_key: rootCauseKey,
-      error_type: errorType,
-      error_message: errorMessage,
-      phase: context.phase ?? null,
-      session_id: context.sessionId ?? null,
-      first_seen: firstSeen,
-      last_seen: now,
-      occurrences,
-    };
-
-    const tmpMarkerPath = `${markerPath}.tmp`;
-    writeFileSync(tmpMarkerPath, JSON.stringify(marker, null, 2));
-    renameSync(tmpMarkerPath, markerPath);
-  } catch {
-    // Marker write is best-effort — never let this throw (NFR-001).
-  }
 }
 
 let cwd;
@@ -205,24 +125,8 @@ try {
     },
   };
 
-  // Fire-and-forget: abort after 3 s to keep the hook fast.
-  const ac = new AbortController();
-  const timer = setTimeout(() => ac.abort(), 3_000);
-  try {
-    const res = await fetch(`${BACKEND_URL}/emit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(event),
-      signal: ac.signal,
-    });
-    if (!res.ok) {
-      const httpErr = new Error(`emission POST failed: HTTP ${res.status}`);
-      httpErr.name = `http_${res.status}`;
-      throw httpErr;
-    }
-  } finally {
-    clearTimeout(timer);
-  }
+  // Fire-and-forget POST with a 3 s abort, shared with the emit-phase hooks.
+  await postEvent(BACKEND_URL, event);
 } catch (err) {
   // PostToolUse must never block the session — silent fallback (NFR-001).
   recordTelemetryFailure("context-pressure", err, { cwd, phase: "monitoring", sessionId });
