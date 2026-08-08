@@ -26,5 +26,9 @@ _temp/*
 # strings verbatim; never intended to be committed
 plan/.telemetry-failures/
 
+# Local-only working files - anything named *.local-only.* stays on this
+# machine (helper scripts, scratch notes) and is never committed
+*.local-only.*
+
 # OS
 .DS_Store
