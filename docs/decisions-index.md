@@ -167,7 +167,7 @@ ADR files: [plan/_archive/0000023-framework-pipeline-fixes-2026-08-02/adr/](../p
 | ADR | Title | Status | Summary |
 |-----|-------|--------|---------|
 | ADR-001 | Backlog Folder Instead of Editable Post-Archive Lifecycle | accepted | Deferred work lives in `plan/backlog/{id}-{slug}/`, surfaced at the next P0; P7 stays the lock line — bug-bounty-hunter PR #4's editable-P7–P9 design rejected |
-| ADR-002 | product.yml with versionPolicy | accepted | Root `product.yml` aggregates one release version across components (`max-component-version` \| `explicit` \| `external`); single-component projects keep component.yml behaviour |
+| ADR-002 | product.yml with versionPolicy | amended by 0000026 ADR-001 | Root `product.yml` aggregates one release version across components (`max-component-version` \| `explicit` \| `external`); single-component projects keep component.yml behaviour. **Amended:** 0000026 ADR-001 changes `components[]` under `max-component-version` from a cached `{id, version}` to a `{id, path}` pointer, read live by `product-version.mjs` at derivation time — eliminates the P9 sync-drift risk the cached copy created |
 | ADR-003 | Loop Toggles in planifest-overrides/loop-toggles.yml | accepted | Per-loop `off \| report-only \| on`; user-owned directory so agents cannot self-enable; absent = all off |
 | ADR-004 | Single-Use Marker File for Approved Weakening | amended by 0000017 ADR-001 | Human-created `plan/current/.ratchet-approve` (path per line, consumed on use) is the only path past the ratchet; agents prohibited from writing it. **Amended:** 0000017 ADR-001 permits the agent to write the marker on explicit in-the-moment human instruction, extends the format to `path \| reason \| timestamp`, and keeps the same-changeset backstop with an explicit approver message. |
 | ADR-005 | Cascade Threshold of 3 Artifacts | accepted | A reversal invalidating >3 downstream artifacts always stops for the human, regardless of run mode |
@@ -226,6 +226,14 @@ ADR files: [plan/_archive/0000020-setup-refresh-skill-2026-08-01/adr/](../plan/_
 | ADR-001 | Ship-agent PR Footer Default-Off with Opt-In Toggle | accepted | The hardcoded AI-attribution footer is removed from the P9 PR description template by default (both `gh pr create` and human-push paths); restorable only via a `planifest-overrides/instructions/` opt-in file, consistent with the existing `local-git-only` override pattern |
 | ADR-002 | Setup-Config Overrides Precedence | accepted | The new tracked `planifest-overrides/setup-config/{tool}.md` file is source of truth for setup flags/backend-url; the existing gitignored `.planifest-setup-flags` marker becomes a local cache reconciled to match it on setup/refresh; `.orchestrator-strict` explicitly out of scope (separate concern) |
 | ADR-003 | Scope Lock Default Drafted, Batch-Presented | accepted | Scope Lock Challenge now dispatches `planifest-scope-lock-agent` for all four scenario-path questions in parallel by default and presents them together for one batch accept/edit/reject pass — supersedes 0000017-ADR-003's opt-in-per-question default; explicitly scoped against 0000014-ADR-008's one-question-at-a-time convention, which is unchanged everywhere else |
+
+### Feature 0000026 — context-hook-and-telemetry-backstop-fixes
+
+ADR files: [plan/_archive/0000026-context-hook-and-telemetry-backstop-fixes-2026-08-08/adr/](../plan/_archive/0000026-context-hook-and-telemetry-backstop-fixes-2026-08-08/adr/)
+
+| ADR | Title | Status | Summary |
+|-----|-------|--------|---------|
+| ADR-001 | product.yml components[] as Path Pointers, Not Cached Versions | accepted | Amends 0000016-ADR-002: under `versionPolicy: max-component-version`, `components[]` holds `{id, path}` pointers to each component's own `component.yml` instead of a cached `{id, version}`; `product-version.mjs` reads the live version at derivation time, closing the sync-drift gap that surfaced during this feature's own ship review |
 
 ---
 

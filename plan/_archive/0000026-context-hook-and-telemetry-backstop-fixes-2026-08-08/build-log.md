@@ -74,6 +74,51 @@ Feature ID finalized: `0000026-context-hook-and-telemetry-backstop-fixes`. Branc
 
 ---
 
+### P7 — Archive
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-07T00:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Human confirmed shipping this feature before starting the next (backlog 0000043). Changelog (`plan/changelog/0000026-context-hook-and-telemetry-backstop-fixes-2026-08-03.md`) was already written and committed in `7f28593` at PC stop-for-review; updated during this P7 to add a third item. No `.skips` file present — Change Pipeline route skips P1/P2/P4/P5/P6 by design, not by exception. Cross-reference check: no living-doc links point at this feature's specific `plan/current/` artifacts (only generic architectural mentions of the `plan/current/` pattern in ADR docs, unaffected by this archive). Regression-candidate scan: no `# REGRESSION-CANDIDATE:` tags in `test-block-bash.sh` or `test-0000026-telemetry-failure-hook.sh` — none to promote. Full suite re-run before archive: `Feature suites: 45 passed, 1 failed` (the known pre-existing `cline.sh`/backlog-0000034 failure), `Regression suite: 22 passed, 0 failed`. **Third item folded in at ship review (human's explicit instruction, per this feature's own preference to fold incidental fixes into the next feature commit rather than ship them standalone):** while resolving 0000026's version-bump question, discovered `product.yml`'s `components[]` cached each component's version rather than pointing at its `component.yml`, causing exactly the sync-drift this ship hit (context-mode-hooks bumped to 0.2.1 mid-PC, `product.yml` never updated). Fixed by changing `components[]` to `{id, path}` pointers read live by `product-version.mjs`; updated `product.template.yml`, `planifest-ship-agent/SKILL.md` Step 9 text, `docs/decisions-index.md`'s ADR-002 entry, and `test-0000016-pipeline-governance.sh` (+ its promoted regression copy) to match, with new fixture coverage for the missing-path failure case. Initially committed directly to `main` in error (caught by the human — this repo's own `CLAUDE.md` requires all work on a `feat/` branch); corrected by moving the commit to its own branch, resetting `main` to `origin/main`, then fast-forwarding it into `feat/0000026-context-hook-and-telemetry-backstop-fixes` per the human's follow-up instruction to fold it into this feature rather than keep it separate. Human then chose a minor version bump (0.25.0 → 0.26.0) over the patch bump originally planned at PC, given this addition. `planifest-framework/component.yml` and `product.yml`'s top-level `version`/`feature` fields updated accordingly; `product-version.mjs` reverified to derive `0.26.0` live from the real repo files. |
+
+---
+
+### P8 — Build Assessment
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T00:00:00Z` |
+| Model tier | cheaper (haiku, sub-agent) |
+| Skills loaded | planifest-build-assessment-agent |
+| Agents spawned | 1 (general-purpose, haiku) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Archive path: `plan/_archive/0000026-context-hook-and-telemetry-backstop-fixes-2026-08-08/`. |
+
+---
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `2026-08-08T00:00:00Z` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | emitted |
+| Notes | Version derived via `product-version.mjs` → `0.26.0` (max-component-version, planifest-framework dominant after human's minor-bump call). **Fast-follow, same session:** human asked whether the product.yml fix (item 3) had a documented requirements/ADR trail — it didn't, only changelog/build-log narrative. Wrote `0000026-ADR-001` (amends `0000016-ADR-002`) into this archive's `adr/` folder, added `docs/decisions-index.md` Feature 0000026 section, updated the 0000016 ADR-002 row to "amended by 0000026 ADR-001". Human also flagged no migration existed for adopter projects with an old-shape `product.yml` — added `planifest-framework/migrations/migrate-product-yml-component-paths.md` (this repo's own `product.yml` already hand-migrated, so it's a no-op here). Human chose to re-tag as `0.26.1` (patch) rather than amend `0.26.0` in place, since documentation completeness for an already-decided design change is patch-sized. `planifest-framework/component.yml`, `product.yml`, `docs/about.md` bumped to `0.26.1`; `product-version.mjs` reverified to derive `0.26.1` live. Full suite re-run clean (same pre-existing `cline.sh` failure only). `v0.26.0` tag deleted and replaced with `v0.26.1`, still local-only. |
+
+---
+
 <!-- Copy and fill in this block at each phase boundary:
 
 ### Px — {Phase Name}
