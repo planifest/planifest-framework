@@ -13,7 +13,13 @@ version: "0.1.0"
 
 ## In Scope
 
-- Bounded retry on network-level emission failures only, across all five telemetry hooks: `context-pressure.mjs`, `emit-phase-start.mjs`, `emit-phase-end.mjs`, `emit-event-receipt.mjs`, `resolve-phase.mjs`. Backlog `0000063` named three; discovery found five. Retry never fires on an HTTP error status.
+- Bounded retry on network-level emission failures only, in the three telemetry hooks that call `fetch`
+  directly: `context-pressure.mjs`, `emit-phase-start.mjs`, `emit-phase-end.mjs`. `resolve-phase.mjs` makes
+  no fetch call and delegates by spawning the emit hooks, so it inherits the fix transitively.
+  `emit-event-receipt.mjs` writes a local file and has nothing to retry. Retry never fires on an HTTP error
+  status. Backlog `0000063`'s count of three was correct; the P0 discovery claim of five was an orchestrator
+  error, corrected at P1. Delivered in the shared `emit-event.mjs` module, so all three callers inherit it
+  from one implementation.
 - Extraction of the duplicated emit-and-record logic, `readProductId()` (`0000054`), and the phase-enum maps (`0000057`) into shared modules, created before any caller is rewired.
 - A stderr fallback line when a marker write itself fails, so a failing marker write is never fully silent.
 - A `.gitignore` entry for `plan/.telemetry-receipts/`, matching the existing `plan/.telemetry-failures/` treatment.
