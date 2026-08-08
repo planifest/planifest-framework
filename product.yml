@@ -13,8 +13,8 @@
 
 id: "planifest-framework"
 name: "Planifest Framework"
-version: "0.25.0"
-feature: "0000025-pipeline-gate-and-config-fixes-and-ship-agent-fixes"
+version: "0.26.0"
+feature: "0000026-context-hook-and-telemetry-backstop-fixes"
 
 versionPolicy: "max-component-version"
 
