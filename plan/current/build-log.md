@@ -145,6 +145,19 @@ Gate accepted: P0 → P1 — 08 Aug 2026 @ 08:42 AM BST
 
 ---
 
+### P1 — Requirements
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026 @ 08:45 AM BST` |
+| Model tier | primary |
+| Skills loaded | planifest-spec-agent |
+| Agents spawned | 4 (parallel, one per requirement-file group — see Notes) |
+| MCP calls | 0 |
+| Parallel task batches | 1 |
+| Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session (no `--structured-telemetry-mcp` install detected); proceeding without telemetry per the genuinely-absent case. |
+| Notes | 8 requirement files (req-001..req-008) dispatched across 4 parallel subagents grouped by owning component to respect the human's file-isolation direction (G1: setup-hook-integration items 0000043/0000034; G2: orchestrator-conduct items 0000035/0000044; G3: framework-process items 0000046/0000045; G4: docs/workflow items 0000024/0000021). Component.yml edits deliberately NOT delegated to subagents — both `planifest-framework/component.yml` and `src/setup-hook-integration/component.yml` are single-writer, merged by the orchestrator after all 4 return, to avoid a multi-agent write clash on the same file. execution-plan.md, scope.md, risk-register.md, domain-glossary.md written directly by the orchestrator (small, content already synthesised in feature-brief.md/design.md — subagent dispatch overhead not justified per CLAUDE.md's own exception clause). OpenAPI spec omitted (no API in this feature). Cost model/SLO definitions/operational model omitted per the confirmed design's own N/A determination (zero deployed runtime footprint) — same minimal-artifact judgment call `0000021` itself targets. |
+
 ## Summary (filled at P7)
 
 | Metric | Value |
