@@ -53,7 +53,7 @@ If either assumption is wrong, `phase_start` silently fails to fire for that tra
 
 ## Dependencies
 
-- req-004 (install refresh and phase hook registration) — hard precondition, nothing here is observable until the phase hooks are registered.
+- req-004 (install refresh and phase hook registration): hard precondition, nothing here is observable until the phase hooks are registered.
 - `planifest-verify-by-execution` skill, loaded by the P4 validate-agent.
 - `planifest-loop-runner`, for the loop/reversal event trigger candidate under 0000053.
 - Live telemetry backend on `PLANIFEST_TELEMETRY_URL`, confirmed healthy at P0.
