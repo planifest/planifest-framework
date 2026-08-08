@@ -187,6 +187,8 @@ Follows the canonical Parallelism Directive (Parallelism Rules) in `planifest-fr
 
 If you cannot identify any parallelism opportunity, state the dependency reason explicitly in the build log before proceeding sequentially.
 
+**Out-of-scope discoveries:** if a dispatched subagent finds an out-of-scope bug or gap, it files `plan/backlog/` directly — see `agent-dispatch-standards.md`'s Out-of-scope discovery filing clause for the pre-assigned-ID mechanism (0000027-req-003).
+
 ## Telemetry
 
 See `planifest-framework/standards/telemetry-standards.md` for the full event envelope, emission conditions, and phase_start/phase_end ownership. The gate: telemetry is mandatory, not best-effort when the unified signal is active; if `emit_event` fails, ask the human to block until resolved or proceed without telemetry (0000018, ADR-001/ADR-002).

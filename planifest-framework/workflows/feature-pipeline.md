@@ -22,9 +22,15 @@ Execute the full Planifest pipeline for a new feature.
    - Produce the validated design at `plan/current/design.md`
    - **Gate:** Human confirms the design before proceeding
 3. **Phase 1 - Requirements** (invoke spec-agent)
-   - Produce: execution plan, OpenAPI spec (if applicable), scope, risk register, domain glossary, operational model, SLO definitions, cost model
+   - Produce, always (the minimal default Phase 1 artifact set — ADR-004): execution plan, functional requirements (`plan/current/requirements/`), scope, risk register, domain glossary
+   - Produce, conditionally, each gated on an explicit, checkable trigger declared in the feature brief or inferred from a stated property in the confirmed design — never from feature size or user-story count alone:
+     - OpenAPI Specification — the component acts as an API provider
+     - Operational Model — the feature introduces or modifies a deployed runtime service
+     - SLO Definitions — the feature introduces or modifies a deployed runtime service with a latency/availability/throughput target stated in the confirmed design's Architecture Layer
+     - Cost Model — the feature introduces new compute, storage, or third-party service spend, or materially changes existing spend
+   - Absent a stated or inferable trigger, produce only the minimal five — do not generate empty/N/A placeholder files for the conditional three
    - Write to `plan/`
-   - **Gate:** All artifacts produced, OpenAPI spec (if applicable) covers every endpoint
+   - **Gate:** All always-produced artifacts exist; each conditional artifact is present iff its trigger condition holds; OpenAPI spec (if applicable) covers every endpoint
 4. **Phase 2 - Architecture Decisions** (invoke adr-agent)
    - Produce ADRs for every significant decision
    - Write to `plan/current/adr/`
