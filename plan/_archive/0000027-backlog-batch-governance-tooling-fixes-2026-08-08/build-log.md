@@ -309,4 +309,17 @@ Gate accepted (zero drift, no stop): P6 → P7 — 08 Aug 2026
 | MCP calls | 0 |
 | Parallel task batches | 0 |
 | Telemetry | confirmed-disabled |
-| Notes | Archive path confirmed to exist before dispatch: `plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/`. |
+| Notes | Archive path confirmed to exist before dispatch: `plan/_archive/0000027-backlog-batch-governance-tooling-fixes-2026-08-08/`. Build report filed; P8: Complete. |
+
+### P9 — Ship
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | primary |
+| Skills loaded | planifest-ship-agent |
+| Agents spawned | 0 |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled |
+| Notes | Mid-P9, the human flagged a pronoun-clarity issue in Step 10's push/PR option phrasing (filed as backlog 0000059) — using corrected phrasing for the actual question asked below. |
