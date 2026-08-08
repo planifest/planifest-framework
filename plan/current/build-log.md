@@ -162,6 +162,27 @@ Gate accepted: P0 → P1 — 08 Aug 2026 @ 08:42 AM BST
 
 Gate accepted (continuous run, no stop): P1 → P2 — 08 Aug 2026
 
+### P2 — Architecture Decisions
+
+| Field | Value |
+|-------|-------|
+| Start | `08 Aug 2026` |
+| Model tier | primary |
+| Skills loaded | planifest-adr-agent |
+| Agents spawned | 0 (ADRs written directly — analysis already surfaced during skill load; no subagent overhead justified) |
+| MCP calls | 0 |
+| Parallel task batches | 0 |
+| Telemetry | confirmed-disabled — unified telemetry signal not active in this local dev session |
+| Notes | Discovered while loading this phase: `planifest-framework/component.yml`'s own changelog shows feature `0000026` already implemented half of `0000044`/req-004's problem (the failure-marker-check hook). Flagged to the human before writing ADR-001 so the ADR only covers the remaining gap (emit_event receipt verification), not the already-solved half. 4 ADRs written: ADR-001 (telemetry emit_event receipt backstop — extends check-telemetry-failures.mjs, human-confirmed), ADR-002 (Framework Update Policy as a new P0 step, not a migrator extension — human-confirmed), ADR-003 (skill-scope principle, req-007's actual deliverable), ADR-004 (minimal Phase 1 artifact set, req-008's actual deliverable). req-001, req-002, req-003, req-006 did not warrant an ADR — single-component implementation details or already-decided-in-the-requirement, per the adr-agent's own criteria. |
+
+**P2 exchange — req-004 mechanism:** Q: extend check-telemetry-failures.mjs with a new emit_event receipt hook, or something else? / A: confirmed as recommended.
+
+**P2 exchange — req-005 mechanism:** Q: new P0 step + own policy doc, or extend planifest-migrator / new standalone skill? / A: confirmed as recommended (new P0 step).
+
+**P2 gate summary:** 4 ADRs produced, all accepted. `continuous_run: true` — proceeding to P3 without a stop, per the P0-confirmed exception.
+
+Gate accepted (continuous run, no stop): P2 → P3 — 08 Aug 2026
+
 ## Summary (filled at P7)
 
 | Metric | Value |
